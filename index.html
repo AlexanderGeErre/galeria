@@ -1,15 +1,397 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-tema="claro">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mi galería</title>
-  <style>
-    body { margin:0; height:100vh; display:grid; place-items:center;
-           background:#111; color:#f5f0e8; font-family:Georgia, serif; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Alexander Ge Erre · Galería privada</title>
+<meta name="description" content="Galería privada de Alexander Ge Erre, fotografía y videografía profesional.">
+<meta name="theme-color" content="#FAF8F5">
+<meta property="og:title" content="Alexander Ge Erre">
+<meta property="og:description" content="Fotografía y videografía profesional">
+<meta property="og:image" content="https://alexandergeerre.github.io/galeria/imagenes/compartir.png.jpg">
+<link rel="icon" href="imagenes/logo-icono.png.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --marfil:#FAF8F5;--arena:#E6DFD6;--taupe:#CFC3B4;--bronce:#B08968;--carbon:#2B2623;--noche:#151413;--champagne:#C9A27A;
+  --fondo:var(--marfil);--texto:var(--carbon);--suave:#6f665e;--linea:var(--arena);--acento:var(--bronce);
+  --campo:#9a8f84;--error:#A32D2D;--t1:#E6DFD6;--t2:#D9CFC3;--t3:#CFC3B4;
+  --cor-bg:rgba(250,248,245,.9);--cor-fg:#2B2623;
+  color-scheme:light;
+}
+html[data-tema="oscuro"]{
+  --fondo:var(--noche);--texto:#F1ECE4;--suave:#a39a91;--linea:#2c2926;--acento:var(--champagne);
+  --campo:#6b635b;--error:#E58C8C;--t1:#2a2724;--t2:#34302c;--t3:#3d3833;
+  --cor-bg:rgba(21,20,19,.78);--cor-fg:#F1ECE4;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+body{background:var(--fondo);color:var(--texto);font-family:'Jost',system-ui,-apple-system,'Segoe UI',sans-serif;font-weight:400;line-height:1.6;min-height:100vh}
+h1,h2{font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;font-weight:500;line-height:1.1}
+button{font:inherit;color:inherit;cursor:pointer}
+img{max-width:100%}
+:focus-visible{outline:2px solid var(--acento);outline-offset:3px}
+.btn{background:var(--texto);color:var(--fondo);border:1px solid var(--texto);padding:.8rem 1.6rem;border-radius:2px;font-weight:500;letter-spacing:.02em}
+.btn-sec{background:transparent;color:var(--texto)}
+.enlace{background:none;border:0;color:var(--suave);padding:.5rem;text-decoration:underline;text-underline-offset:3px}
+
+#acceso{min-height:100vh;display:grid;grid-template-columns:1fr}
+.acceso-img{background:var(--marfil);height:34vh;display:flex;align-items:center;justify-content:center}
+.acceso-img img{height:100%;width:100%;object-fit:contain;mix-blend-mode:multiply}
+.acceso-form{display:flex;flex-direction:column;justify-content:center;gap:1rem;padding:2rem 1.5rem 3rem;max-width:30rem;margin:0 auto;width:100%}
+.acceso-form h1{font-size:clamp(2.2rem,5vw,3rem)}
+.acceso-form input{width:100%;padding:.85rem 1rem;border:1px solid var(--campo);background:transparent;color:inherit;font:inherit;border-radius:2px;letter-spacing:.06em}
+.error{color:var(--error);font-size:.95rem}
+.nota{color:var(--suave);font-size:.9rem}
+@media(min-width:820px){#acceso{grid-template-columns:1fr 1fr}.acceso-img{height:auto}}
+
+.top{position:sticky;top:0;z-index:5;background:var(--fondo);border-bottom:1px solid var(--linea);display:flex;align-items:center;justify-content:space-between;padding:.4rem 1.25rem;padding-top:calc(.4rem + env(safe-area-inset-top))}
+.marca-top{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.3rem;font-weight:500}
+.hero{text-align:center;padding:1.5rem 1.25rem 2rem;background-color:var(--fondo)}
+.logo{display:block;margin:0 auto;width:min(520px,92%);aspect-ratio:2.2/1;object-fit:cover}
+.logo-claro{mix-blend-mode:multiply}
+.logo-oscuro{display:none;mix-blend-mode:screen}
+html[data-tema="oscuro"] .logo-claro{display:none}
+html[data-tema="oscuro"] .logo-oscuro{display:block}
+.hero h1{font-size:clamp(2.2rem,6vw,3.6rem);margin-top:.75rem}
+.fecha{color:var(--suave);margin-top:.5rem}
+.guia{max-width:34rem;margin:1rem auto 0}
+@media(min-width:900px){
+  html:not([data-tema="oscuro"]) .hero{background-image:url('imagenes/portada-detalle.png.jpg');background-repeat:no-repeat;background-position:right center;background-size:auto 100%;background-blend-mode:multiply}
+}
+
+.tabs{display:flex;justify-content:center;gap:1.75rem;border-bottom:1px solid var(--linea);padding:0 1rem}
+.tab{background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:.9rem .1rem;color:var(--suave)}
+.tab[aria-selected="true"]{color:var(--texto);border-bottom-color:var(--acento)}
+.tab span{margin-left:.35rem;font-size:.9rem}
+
+.rejilla{columns:2;column-gap:10px;padding:1.25rem 10px 7rem;max-width:1200px;margin:0 auto}
+@media(min-width:700px){.rejilla{columns:3;column-gap:14px;padding-inline:1.25rem}}
+@media(min-width:1100px){.rejilla{columns:4}}
+.foto{position:relative;break-inside:avoid;margin:0 0 10px;border-radius:3px;overflow:hidden}
+@media(min-width:700px){.foto{margin-bottom:14px}}
+.abrir{display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in}
+.ph{display:block;position:relative;width:100%}
+.ph span{position:absolute;inset:0;display:grid;place-items:center;font-size:.85rem;color:var(--suave)}
+.corazon{position:absolute;top:8px;right:8px;width:40px;height:40px;border-radius:50%;border:0;background:var(--cor-bg);color:var(--cor-fg);display:grid;place-items:center;transition:transform .15s}
+.corazon:active{transform:scale(.9)}
+.corazon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.corazon[aria-pressed="true"]{background:var(--bronce);color:#fff}
+.corazon[aria-pressed="true"] svg{fill:currentColor}
+
+.estado{text-align:center;padding:2.5rem 1.25rem 7rem;max-width:34rem;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:.75rem}
+.estado h2{font-size:2rem}
+.estado p{color:var(--suave)}
+.ilu{width:min(360px,88%);mix-blend-mode:multiply;margin-bottom:.5rem}
+html[data-tema="oscuro"] .ilu{mix-blend-mode:normal;border-radius:6px}
+
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--fondo);border-top:1px solid var(--linea);display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.8rem 1.25rem calc(.8rem + env(safe-area-inset-bottom))}
+.pie{text-align:center;padding:2rem 1rem 8rem;color:var(--suave);font-size:.9rem}
+.pie .marca{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.2rem;color:var(--texto)}
+
+dialog{border:1px solid var(--linea);background:var(--fondo);color:var(--texto);border-radius:4px;padding:1.75rem;max-width:min(26rem,92vw);margin:auto}
+dialog::backdrop{background:rgba(21,20,19,.6)}
+dialog h2{font-size:1.8rem;margin-bottom:.6rem}
+.acciones{display:flex;gap:.75rem;margin-top:1.4rem;flex-wrap:wrap}
+#visor{width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;border:0;border-radius:0;padding:0;background:#151413;color:#F1ECE4}
+#visor[open]{display:flex;flex-direction:column}
+#visor::backdrop{background:#151413}
+.v-top,.v-pie{display:flex;justify-content:space-between;align-items:center;padding:.75rem 1rem}
+.v-medio{flex:1;display:flex;align-items:center;min-height:0}
+.vi{flex:1;height:100%;min-width:0;display:flex;align-items:center;justify-content:center;padding:.5rem}
+.vi .ph{height:100%;width:auto;max-width:100%}
+.v-flecha,.v-cerrar{background:none;border:0;color:#F1ECE4;line-height:1}
+.v-flecha{font-size:2.4rem;padding:0 .75rem}
+.v-cerrar{font-size:1rem;padding:.5rem}
+.v-pie .corazon{position:static}
+@media(prefers-reduced-motion:reduce){.corazon{transition:none}}
+</style>
 </head>
 <body>
-  <h1>Mi galería está en camino ✦</h1>
+
+<main id="acceso">
+  <div class="acceso-img"><img id="imgAcceso" alt=""></div>
+  <form class="acceso-form" id="formAcceso" novalidate>
+    <h1>Entra a tu galería</h1>
+    <p>Escribe el código que te envié para ver tus fotos.</p>
+    <label for="codigo" class="nota">Código de acceso</label>
+    <input id="codigo" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Tu código">
+    <p class="error" id="errAcceso" role="alert" hidden></p>
+    <button class="btn" type="submit">Entrar a mi galería</button>
+    <p class="nota" id="notaPrueba" hidden>Modo de prueba: escribe cualquier código para entrar.</p>
+  </form>
+</main>
+
+<div id="galeria" hidden>
+  <header class="top">
+    <span class="marca-top">Alexander Ge Erre</span>
+    <div>
+      <button class="enlace" id="btnTema" type="button"></button>
+      <button class="enlace" id="btnSalir" type="button">Salir</button>
+    </div>
+  </header>
+
+  <section class="hero">
+    <img class="logo logo-claro" src="imagenes/logo-claro.png.jpg" alt="Alexander Ge Erre, fotografía y videografía profesional">
+    <img class="logo logo-oscuro" src="imagenes/logo-oscuro.png.jpg" alt="Alexander Ge Erre, fotografía y videografía profesional">
+    <h1 id="titulo"></h1>
+    <p class="fecha" id="fecha"></p>
+    <p class="guia">Toca el corazón en las fotos que más te gusten. Yo las edito y las subo aquí, en la pestaña Finales.</p>
+  </section>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Secciones de la galería">
+    <button class="tab" id="t-todas" role="tab" aria-selected="true" data-tab="todas">Todas<span id="cTodas"></span></button>
+    <button class="tab" id="t-favoritas" role="tab" aria-selected="false" tabindex="-1" data-tab="favoritas">Mis favoritas<span id="cFav"></span></button>
+    <button class="tab" id="t-finales" role="tab" aria-selected="false" tabindex="-1" data-tab="finales">Finales</button>
+  </nav>
+
+  <section id="p-todas" role="tabpanel" aria-labelledby="t-todas">
+    <div class="rejilla" id="rejTodas"></div>
+  </section>
+
+  <section id="p-favoritas" role="tabpanel" aria-labelledby="t-favoritas" hidden>
+    <div class="rejilla" id="rejFav"></div>
+    <div class="estado" id="vacioFav">
+      <img class="ilu" src="imagenes/favoritas-vacio.png.jpg" alt="">
+      <h2>Aún no marcas favoritas</h2>
+      <p>Toca el corazón en cualquier foto para guardarla aquí.</p>
+      <button class="btn btn-sec" type="button" data-tab="todas">Ver todas las fotos</button>
+    </div>
+  </section>
+
+  <section id="p-finales" role="tabpanel" aria-labelledby="t-finales" hidden>
+    <div class="estado">
+      <img class="ilu" src="imagenes/finales.png.jpg" alt="">
+      <h2>Tus fotos finales llegarán aquí</h2>
+      <p>Cuando termine de editar tu selección, podrás descargar cada foto en su tamaño original.</p>
+    </div>
+  </section>
+
+  <footer class="pie">
+    <p class="marca">Alexander Ge Erre</p>
+    <p>Fotografía y videografía profesional</p>
+  </footer>
+
+  <div class="barra" id="barra" hidden>
+    <span id="nBarra"></span>
+    <button class="btn" id="btnEnviar" type="button">Enviar selección</button>
+  </div>
+</div>
+
+<main id="gracias" hidden>
+  <div class="estado">
+    <img class="ilu" src="imagenes/gracias.png.jpg" alt="">
+    <h2>Gracias, recibí tu selección</h2>
+    <p id="txtGracias"></p>
+    <button class="btn btn-sec" id="btnVolver" type="button">Volver a la galería</button>
+  </div>
+</main>
+
+<dialog id="confirmar" aria-labelledby="confTitulo">
+  <h2 id="confTitulo">¿Enviar tu selección?</h2>
+  <p id="txtConf"></p>
+  <div class="acciones">
+    <button class="btn" id="okEnviar" type="button">Enviar selección</button>
+    <button class="btn btn-sec" id="seguir" type="button">Seguir eligiendo</button>
+  </div>
+</dialog>
+
+<dialog id="visor" aria-label="Visor de fotos">
+  <div class="v-top"><span id="vCont"></span><button class="v-cerrar" id="vCerrar" type="button" aria-label="Cerrar visor">Cerrar</button></div>
+  <div class="v-medio">
+    <button class="v-flecha" id="vPrev" type="button" aria-label="Foto anterior">‹</button>
+    <div class="vi"><span class="ph" id="vPh"></span></div>
+    <button class="v-flecha" id="vNext" type="button" aria-label="Foto siguiente">›</button>
+  </div>
+  <div class="v-pie"><span id="vNombre"></span><button class="corazon" id="vFav" type="button" aria-pressed="false" aria-label="Marcar como favorita"></button></div>
+</dialog>
+
+<script>
+(function(){
+  var CONFIG = {
+    titulo: 'Boda Ana y Luis',
+    fecha: '12 de octubre de 2026',
+    modoPrueba: true,
+    apiUrl: '',
+    imagenAcceso: 'imagenes/acceso-1.png.jpg'
+  };
+
+  var CORAZON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+  var TONOS = ['var(--t1)','var(--t2)','var(--t3)','var(--t1)'];
+  var RATIOS = ['3 / 4','4 / 3','1 / 1','2 / 3','3 / 2','4 / 5'];
+  var FOTOS = [];
+  for (var i = 0; i < 24; i++) {
+    FOTOS.push({
+      id: 'f' + (i + 1),
+      nombre: 'Foto ' + String(i + 1).padStart(2, '0'),
+      ratio: RATIOS[(i * 7 + 3) % RATIOS.length],
+      tono: TONOS[i % TONOS.length]
+    });
+  }
+
+  function $(s){ return document.querySelector(s); }
+  function leer(k){ try { return localStorage.getItem(k); } catch(e) { return null; } }
+  function escribir(k, v){ try { localStorage.setItem(k, v); } catch(e) {} }
+
+  var favoritas = new Set();
+  try { favoritas = new Set(JSON.parse(leer('age-favoritas') || '[]')); } catch(e) {}
+  var tabActual = 'todas';
+  var visorLista = [], visorI = 0;
+
+  function aplicarTema(t){
+    document.documentElement.setAttribute('data-tema', t);
+    var b = $('#btnTema');
+    b.textContent = t === 'oscuro' ? 'Modo claro' : 'Modo oscuro';
+    b.setAttribute('aria-label', t === 'oscuro' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', t === 'oscuro' ? '#151413' : '#FAF8F5');
+  }
+  aplicarTema(leer('age-tema') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro'));
+  $('#btnTema').addEventListener('click', function(){
+    var t = document.documentElement.getAttribute('data-tema') === 'oscuro' ? 'claro' : 'oscuro';
+    aplicarTema(t); escribir('age-tema', t);
+  });
+
+  function mostrar(p){
+    ['acceso','galeria','gracias'].forEach(function(n){ $('#' + n).hidden = n !== p; });
+    window.scrollTo(0, 0);
+  }
+
+  function tarjeta(f){
+    return '<figure class="foto">' +
+      '<button class="abrir" type="button" data-abrir="' + f.id + '" aria-label="Abrir ' + f.nombre + '">' +
+      '<span class="ph" style="aspect-ratio:' + f.ratio + ';background:' + f.tono + '"><span>' + f.nombre + '</span></span></button>' +
+      '<button class="corazon" type="button" data-fav="' + f.id + '" aria-pressed="' + favoritas.has(f.id) + '" aria-label="Marcar ' + f.nombre + ' como favorita">' + CORAZON + '</button>' +
+      '</figure>';
+  }
+
+  function pintarFavoritas(){
+    var lista = FOTOS.filter(function(f){ return favoritas.has(f.id); });
+    $('#rejFav').innerHTML = lista.map(tarjeta).join('');
+    $('#rejFav').hidden = lista.length === 0;
+    $('#vacioFav').hidden = lista.length > 0;
+  }
+
+  function contar(){
+    var n = favoritas.size;
+    $('#cTodas').textContent = FOTOS.length;
+    $('#cFav').textContent = n;
+    $('#nBarra').textContent = n + (n === 1 ? ' favorita' : ' favoritas');
+    $('#barra').hidden = !(n > 0 && tabActual !== 'finales');
+  }
+
+  function irTab(t){
+    tabActual = t;
+    ['todas','favoritas','finales'].forEach(function(n){
+      $('#p-' + n).hidden = n !== t;
+      var b = $('#t-' + n);
+      b.setAttribute('aria-selected', n === t);
+      b.tabIndex = n === t ? 0 : -1;
+    });
+    if (t === 'favoritas') pintarFavoritas();
+    contar();
+    var y = $('#tabs').getBoundingClientRect().top;
+    if (y < 0) window.scrollBy(0, y);
+  }
+
+  function alternar(id){
+    if (favoritas.has(id)) favoritas.delete(id); else favoritas.add(id);
+    escribir('age-favoritas', JSON.stringify(Array.from(favoritas)));
+    document.querySelectorAll('[data-fav="' + id + '"]').forEach(function(b){
+      b.setAttribute('aria-pressed', favoritas.has(id));
+    });
+    if (tabActual !== 'favoritas') pintarFavoritas();
+    contar();
+    if (CONFIG.apiUrl) {
+      try { fetch(CONFIG.apiUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ accion: 'favorita', id: id, activa: favoritas.has(id) }) }); } catch(e) {}
+    }
+  }
+
+  function actualizarVisor(){
+    var f = visorLista[visorI];
+    if (!f) return;
+    var ph = $('#vPh');
+    ph.style.aspectRatio = f.ratio;
+    ph.style.background = f.tono;
+    ph.innerHTML = '<span>' + f.nombre + '</span>';
+    $('#vCont').textContent = (visorI + 1) + ' de ' + visorLista.length;
+    $('#vNombre').textContent = f.nombre;
+    var b = $('#vFav');
+    b.setAttribute('data-fav', f.id);
+    b.setAttribute('aria-pressed', favoritas.has(f.id));
+    b.setAttribute('aria-label', 'Marcar ' + f.nombre + ' como favorita');
+  }
+  function moverVisor(d){
+    visorI = (visorI + d + visorLista.length) % visorLista.length;
+    actualizarVisor();
+  }
+  function abrirVisor(id){
+    visorLista = tabActual === 'favoritas' ? FOTOS.filter(function(f){ return favoritas.has(f.id); }) : FOTOS;
+    visorI = visorLista.findIndex(function(f){ return f.id === id; });
+    if (visorI < 0) return;
+    actualizarVisor();
+    $('#visor').showModal();
+  }
+
+  document.addEventListener('click', function(e){
+    var fav = e.target.closest('[data-fav]');
+    if (fav) { alternar(fav.getAttribute('data-fav')); return; }
+    var ab = e.target.closest('[data-abrir]');
+    if (ab) { abrirVisor(ab.getAttribute('data-abrir')); return; }
+    var tb = e.target.closest('[data-tab]');
+    if (tb) irTab(tb.getAttribute('data-tab'));
+  });
+  document.addEventListener('keydown', function(e){
+    if (!$('#visor').open) return;
+    if (e.key === 'ArrowLeft') moverVisor(-1);
+    if (e.key === 'ArrowRight') moverVisor(1);
+  });
+  $('#vPrev').addEventListener('click', function(){ moverVisor(-1); });
+  $('#vNext').addEventListener('click', function(){ moverVisor(1); });
+  $('#vCerrar').addEventListener('click', function(){ $('#visor').close(); });
+  $('#vFav').innerHTML = CORAZON;
+
+  $('#btnEnviar').addEventListener('click', function(){
+    var n = favoritas.size;
+    $('#txtConf').textContent = 'Voy a editar las ' + n + (n === 1 ? ' foto' : ' fotos') + ' que marcaste. Podrás cambiar tu selección hasta que te avise.';
+    $('#confirmar').showModal();
+  });
+  $('#seguir').addEventListener('click', function(){ $('#confirmar').close(); });
+  $('#okEnviar').addEventListener('click', function(){
+    var n = favoritas.size;
+    $('#confirmar').close();
+    if (CONFIG.apiUrl) {
+      try { fetch(CONFIG.apiUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ accion: 'enviar', favoritas: Array.from(favoritas) }) }); } catch(e) {}
+    }
+    $('#txtGracias').textContent = 'Voy a editar tus ' + n + (n === 1 ? ' foto' : ' fotos') + ' y te aviso cuando estén listas en la pestaña Finales.';
+    mostrar('gracias');
+  });
+  $('#btnVolver').addEventListener('click', function(){ mostrar('galeria'); });
+  $('#btnSalir').addEventListener('click', function(){ mostrar('acceso'); });
+
+  $('#formAcceso').addEventListener('submit', function(e){
+    e.preventDefault();
+    var c = $('#codigo').value.trim();
+    var err = $('#errAcceso');
+    if (!c) { err.textContent = 'Escribe el código que te envié.'; err.hidden = false; $('#codigo').focus(); return; }
+    if (!CONFIG.modoPrueba) { err.textContent = 'Este acceso aún no está conectado. Inténtalo más tarde.'; err.hidden = false; return; }
+    err.hidden = true;
+    mostrar('galeria');
+  });
+  $('#codigo').addEventListener('input', function(){ $('#errAcceso').hidden = true; });
+
+  $('#imgAcceso').src = CONFIG.imagenAcceso;
+  $('#notaPrueba').hidden = !CONFIG.modoPrueba;
+  $('#titulo').textContent = CONFIG.titulo;
+  $('#fecha').textContent = CONFIG.fecha;
+  document.title = 'Alexander Ge Erre · ' + CONFIG.titulo;
+  $('#rejTodas').innerHTML = FOTOS.map(tarjeta).join('');
+  pintarFavoritas();
+  contar();
+})();
+</script>
 </body>
 </html>
