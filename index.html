@@ -40,7 +40,7 @@ img{max-width:100%}
 
 #acceso{min-height:100vh;display:grid;grid-template-columns:1fr}
 .acceso-img{background:var(--marfil);height:34vh;display:flex;align-items:center;justify-content:center}
-.acceso-img img{height:100%;width:100%;object-fit:contain;mix-blend-mode:multiply}
+.acceso-img img{height:100%;width:100%;object-fit:cover;object-position:50% 62%;mix-blend-mode:multiply;filter:url(#aBlanco)}
 .acceso-form{display:flex;flex-direction:column;justify-content:center;gap:1rem;padding:2rem 1.5rem 3rem;max-width:30rem;margin:0 auto;width:100%}
 .acceso-form h1{font-size:clamp(2.2rem,5vw,3rem)}
 .acceso-form input{width:100%;padding:.85rem 1rem;border:1px solid var(--campo);background:transparent;color:inherit;font:inherit;border-radius:2px;letter-spacing:.06em}
@@ -48,20 +48,42 @@ img{max-width:100%}
 .nota{color:var(--suave);font-size:.9rem}
 @media(min-width:820px){#acceso{grid-template-columns:1fr 1fr}.acceso-img{height:auto}}
 
-.top{position:sticky;top:0;z-index:5;background:var(--fondo);border-bottom:1px solid var(--linea);display:flex;align-items:center;justify-content:space-between;padding:.4rem 1.25rem;padding-top:calc(.4rem + env(safe-area-inset-top))}
-.marca-top{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.3rem;font-weight:500}
-.hero{text-align:center;padding:1.5rem 1.25rem 2rem;background-color:var(--fondo)}
-.logo{display:block;margin:0 auto;width:min(520px,92%);aspect-ratio:2.2/1;object-fit:cover}
-.logo-claro{mix-blend-mode:multiply}
-.logo-oscuro{display:none;mix-blend-mode:screen}
+.logo{display:block;margin:0 auto;width:min(520px,78%);aspect-ratio:2.2/1;object-fit:cover}
+.logo-claro{mix-blend-mode:multiply;filter:url(#aBlanco)}
+.logo-oscuro{display:none;filter:url(#logoOscuro)}
 html[data-tema="oscuro"] .logo-claro{display:none}
 html[data-tema="oscuro"] .logo-oscuro{display:block}
-.hero h1{font-size:clamp(2.2rem,6vw,3.6rem);margin-top:.75rem}
-.fecha{color:var(--suave);margin-top:.5rem}
-.guia{max-width:34rem;margin:1rem auto 0}
+
+.bienvenida{position:relative;isolation:isolate;min-height:100vh;min-height:100dvh;display:grid;place-items:center;text-align:center;padding:2rem 1.25rem;background:var(--fondo)}
+.bv-contenido{display:flex;flex-direction:column;align-items:center;gap:.5rem;width:100%}
+.bienvenida .logo{width:min(560px,88%);margin-bottom:.5rem}
+.bienvenida h1{font-size:clamp(2.6rem,8vw,5rem)}
+.bv-fecha{color:var(--suave);margin-bottom:1.2rem}
+.bv-marca{display:none;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.3rem;letter-spacing:.06em}
+.bv-fondo{position:absolute;inset:0;z-index:-1;background-size:cover;background-position:center}
+.bv-fondo::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(21,20,19,.3),rgba(21,20,19,.6))}
+.bienvenida.con-foto{color:#fff}
+.bienvenida.con-foto .logo{display:none}
+.bienvenida.con-foto .bv-marca{display:block}
+.bienvenida.con-foto .bv-fecha{color:rgba(255,255,255,.85)}
+.bienvenida.con-foto .btn{background:transparent;color:#fff;border-color:#fff}
 @media(min-width:900px){
-  html:not([data-tema="oscuro"]) .hero{background-image:url('imagenes/portada-detalle.png.jpg');background-repeat:no-repeat;background-position:right center;background-size:auto 100%;background-blend-mode:multiply}
+  html:not([data-tema="oscuro"]) .bienvenida:not(.con-foto)::before{content:"";position:absolute;inset:0;z-index:-1;background:url('imagenes/portada-detalle.png.jpg') right center/auto 70% no-repeat;mix-blend-mode:multiply;filter:url(#aBlanco);pointer-events:none}
 }
+
+.top{position:sticky;top:0;z-index:5;background:var(--fondo);border-bottom:1px solid var(--linea);display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.4rem 1.25rem;padding-top:calc(.4rem + env(safe-area-inset-top))}
+.marca-top{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.3rem;font-weight:500}
+.top-acc{display:flex;align-items:center;gap:.25rem}
+.contador{display:flex;align-items:center;gap:.4rem;background:none;border:1px solid var(--campo);border-radius:999px;padding:.25rem .8rem .25rem .6rem;margin-right:.4rem}
+.contador svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.contador.lleno svg{fill:var(--acento);stroke:var(--acento)}
+.demo-bar{background:var(--t1);text-align:center;padding:.45rem 1rem;font-size:.85rem;color:var(--suave);display:flex;gap:.5rem;justify-content:center;align-items:center;flex-wrap:wrap}
+.demo-bar button{border:1px solid var(--campo);background:transparent;border-radius:999px;padding:.1rem .8rem;font-size:.85rem}
+.demo-bar button[aria-pressed="true"]{background:var(--texto);color:var(--fondo);border-color:var(--texto)}
+.hero-g{text-align:center;padding:1.75rem 1.25rem 1.5rem}
+.hero-g h1{font-size:clamp(2rem,5vw,3rem)}
+.fecha{color:var(--suave);margin-top:.35rem}
+.guia{max-width:34rem;margin:.75rem auto 0}
 
 .tabs{display:flex;justify-content:center;gap:1.75rem;border-bottom:1px solid var(--linea);padding:0 1rem}
 .tab{background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:.9rem .1rem;color:var(--suave)}
@@ -74,23 +96,36 @@ html[data-tema="oscuro"] .logo-oscuro{display:block}
 .foto{position:relative;break-inside:avoid;margin:0 0 10px;border-radius:3px;overflow:hidden}
 @media(min-width:700px){.foto{margin-bottom:14px}}
 .abrir{display:block;width:100%;padding:0;border:0;background:none;cursor:zoom-in}
-.ph{display:block;position:relative;width:100%}
-.ph span{position:absolute;inset:0;display:grid;place-items:center;font-size:.85rem;color:var(--suave)}
-.corazon{position:absolute;top:8px;right:8px;width:40px;height:40px;border-radius:50%;border:0;background:var(--cor-bg);color:var(--cor-fg);display:grid;place-items:center;transition:transform .15s}
+.ph{display:block;position:relative;width:100%;overflow:hidden}
+.ph span{position:absolute;inset:0;display:grid;place-items:end center;padding-bottom:.6rem;font-size:.85rem;color:var(--suave)}
+.mw::after{content:"Alexander Ge Erre";position:absolute;inset:0;display:grid;place-items:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:1.1rem;letter-spacing:.08em;white-space:nowrap;color:var(--texto);opacity:.22;transform:rotate(-24deg);pointer-events:none}
+.corazon{position:absolute;top:8px;right:8px;width:40px;height:40px;border-radius:50%;border:0;background:var(--cor-bg);color:var(--cor-fg);display:grid;place-items:center;transition:transform .15s,opacity .15s}
 .corazon:active{transform:scale(.9)}
 .corazon svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .corazon[aria-pressed="true"]{background:var(--bronce);color:#fff}
 .corazon[aria-pressed="true"] svg{fill:currentColor}
+.corazon.descarga svg{fill:none}
+@media(hover:hover){
+  .foto .corazon:not([aria-pressed="true"]){opacity:0}
+  .foto:hover .corazon,.foto:focus-within .corazon{opacity:1}
+}
+
+.finales-barra{display:flex;flex-wrap:wrap;gap:1rem 1.5rem;justify-content:space-between;align-items:center;max-width:1200px;margin:0 auto;padding:1.25rem 1.25rem 0}
+.res{border:0;padding:0;display:flex;flex-wrap:wrap;gap:.4rem 1.25rem;align-items:center}
+.res legend{float:left;margin-right:1rem;color:var(--suave);font-size:.95rem}
+.res label{display:flex;align-items:center;gap:.4rem;cursor:pointer}
+.res input{accent-color:var(--bronce);width:1.1rem;height:1.1rem}
 
 .estado{text-align:center;padding:2.5rem 1.25rem 7rem;max-width:34rem;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:.75rem}
 .estado h2{font-size:2rem}
 .estado p{color:var(--suave)}
-.ilu{width:min(360px,88%);mix-blend-mode:multiply;margin-bottom:.5rem}
-html[data-tema="oscuro"] .ilu{mix-blend-mode:normal;border-radius:6px}
+.ilu{width:min(360px,88%);mix-blend-mode:multiply;filter:url(#aBlanco);margin-bottom:.5rem}
+html[data-tema="oscuro"] .ilu{mix-blend-mode:normal;filter:none;border-radius:6px}
 
 .barra{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--fondo);border-top:1px solid var(--linea);display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.8rem 1.25rem calc(.8rem + env(safe-area-inset-bottom))}
 .pie{text-align:center;padding:2rem 1rem 8rem;color:var(--suave);font-size:.9rem}
 .pie .marca{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.2rem;color:var(--texto)}
+.aviso{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(5.5rem + env(safe-area-inset-bottom));z-index:20;background:var(--texto);color:var(--fondo);padding:.7rem 1.1rem;border-radius:2px;max-width:90vw;text-align:center;font-size:.95rem}
 
 dialog{border:1px solid var(--linea);background:var(--fondo);color:var(--texto);border-radius:4px;padding:1.75rem;max-width:min(26rem,92vw);margin:auto}
 dialog::backdrop{background:rgba(21,20,19,.6)}
@@ -106,11 +141,13 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
 .v-flecha,.v-cerrar{background:none;border:0;color:#F1ECE4;line-height:1}
 .v-flecha{font-size:2.4rem;padding:0 .75rem}
 .v-cerrar{font-size:1rem;padding:.5rem}
-.v-pie .corazon{position:static}
+.v-pie .corazon{position:static;opacity:1}
 @media(prefers-reduced-motion:reduce){.corazon{transition:none}}
 </style>
 </head>
 <body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><filter id="logoOscuro" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0 0 0 0 0.788  0 0 0 0 0.635  0 0 0 0 0.478  0.8 0.8 0.8 0 -0.4"/></filter><filter id="aBlanco" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncR type="linear" slope="1.045"/><feFuncG type="linear" slope="1.05"/><feFuncB type="linear" slope="1.075"/></feComponentTransfer></filter></defs></svg>
 
 <main id="acceso">
   <div class="acceso-img"><img id="imgAcceso" alt=""></div>
@@ -125,21 +162,38 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
   </form>
 </main>
 
+<main id="bienvenida" class="bienvenida" hidden>
+  <div class="bv-fondo" id="bvFondo" hidden></div>
+  <div class="bv-contenido">
+    <img class="logo logo-claro" src="imagenes/logo-claro.png.jpg" alt="Alexander Ge Erre, fotografía y videografía profesional">
+    <img class="logo logo-oscuro" src="imagenes/logo-oscuro.png.jpg" alt="Alexander Ge Erre, fotografía y videografía profesional">
+    <p class="bv-marca">Alexander Ge Erre</p>
+    <h1 id="bvTitulo"></h1>
+    <p class="bv-fecha" id="bvFecha"></p>
+    <button class="btn" id="btnEntrar" type="button">Entrar a la galería</button>
+  </div>
+</main>
+
 <div id="galeria" hidden>
   <header class="top">
     <span class="marca-top">Alexander Ge Erre</span>
-    <div>
+    <div class="top-acc">
+      <button class="contador" id="btnContador" type="button" aria-label="Ver mis favoritas"><span id="icoCont"></span><span id="nCont">0</span></button>
       <button class="enlace" id="btnTema" type="button"></button>
       <button class="enlace" id="btnSalir" type="button">Salir</button>
     </div>
   </header>
 
-  <section class="hero">
-    <img class="logo logo-claro" src="imagenes/logo-claro.png.jpg" alt="Alexander Ge Erre, fotografía y videografía profesional">
-    <img class="logo logo-oscuro" src="imagenes/logo-oscuro.png.jpg" alt="Alexander Ge Erre, fotografía y videografía profesional">
+  <div class="demo-bar" id="demoBar" hidden>
+    <span>Vista de prueba:</span>
+    <button type="button" data-estado="seleccion" aria-pressed="true">En selección</button>
+    <button type="button" data-estado="entregada" aria-pressed="false">Entregada</button>
+  </div>
+
+  <section class="hero-g">
     <h1 id="titulo"></h1>
     <p class="fecha" id="fecha"></p>
-    <p class="guia">Toca el corazón en las fotos que más te gusten. Yo las edito y las subo aquí, en la pestaña Finales.</p>
+    <p class="guia" id="guia"></p>
   </section>
 
   <nav class="tabs" id="tabs" role="tablist" aria-label="Secciones de la galería">
@@ -163,10 +217,17 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
   </section>
 
   <section id="p-finales" role="tabpanel" aria-labelledby="t-finales" hidden>
-    <div class="estado">
+    <div class="estado" id="finVacio">
       <img class="ilu" src="imagenes/finales.png.jpg" alt="">
       <h2>Tus fotos finales llegarán aquí</h2>
       <p>Cuando termine de editar tu selección, podrás descargar cada foto en su tamaño original.</p>
+    </div>
+    <div id="finListo" hidden>
+      <div class="finales-barra" id="finBarra">
+        <fieldset class="res" id="resCampo"><legend>Tamaño de descarga</legend></fieldset>
+        <button class="btn" id="btnTodo" type="button">Descargar toda la galería</button>
+      </div>
+      <div class="rejilla" id="rejFin"></div>
     </div>
   </section>
 
@@ -190,6 +251,8 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
   </div>
 </main>
 
+<p class="aviso" id="aviso" role="status" hidden></p>
+
 <dialog id="confirmar" aria-labelledby="confTitulo">
   <h2 id="confTitulo">¿Enviar tu selección?</h2>
   <p id="txtConf"></p>
@@ -206,7 +269,11 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
     <div class="vi"><span class="ph" id="vPh"></span></div>
     <button class="v-flecha" id="vNext" type="button" aria-label="Foto siguiente">›</button>
   </div>
-  <div class="v-pie"><span id="vNombre"></span><button class="corazon" id="vFav" type="button" aria-pressed="false" aria-label="Marcar como favorita"></button></div>
+  <div class="v-pie">
+    <span id="vNombre"></span>
+    <button class="corazon" id="vFav" type="button" aria-pressed="false" aria-label="Marcar como favorita"></button>
+    <button class="corazon descarga" id="vDesc" type="button" aria-label="Descargar esta foto" hidden></button>
+  </div>
 </dialog>
 
 <script>
@@ -214,23 +281,36 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
   var CONFIG = {
     titulo: 'Boda Ana y Luis',
     fecha: '12 de octubre de 2026',
+    portada: '',
     modoPrueba: true,
     apiUrl: '',
-    imagenAcceso: 'imagenes/acceso-1.png.jpg'
+    imagenesAcceso: ['imagenes/acceso-1.png.jpg', 'imagenes/acceso-2.png.jpg'],
+    estado: 'seleccion',
+    marcaAgua: true,
+    descargasActivas: true,
+    resoluciones: ['original', 'alta', 'web']
   };
+  var ETIQ = { original: 'Original', alta: 'Alta resolución', web: 'Tamaño web' };
 
   var CORAZON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+  var DESCARGA = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
   var TONOS = ['var(--t1)','var(--t2)','var(--t3)','var(--t1)'];
   var RATIOS = ['3 / 4','4 / 3','1 / 1','2 / 3','3 / 2','4 / 5'];
-  var FOTOS = [];
-  for (var i = 0; i < 24; i++) {
-    FOTOS.push({
-      id: 'f' + (i + 1),
-      nombre: 'Foto ' + String(i + 1).padStart(2, '0'),
-      ratio: RATIOS[(i * 7 + 3) % RATIOS.length],
-      tono: TONOS[i % TONOS.length]
-    });
+
+  function crear(prefijo, rotulo, n, salto){
+    var lista = [];
+    for (var i = 0; i < n; i++) {
+      lista.push({
+        id: prefijo + (i + 1),
+        nombre: rotulo + ' ' + String(i + 1).padStart(2, '0'),
+        ratio: RATIOS[(i * salto + 3) % RATIOS.length],
+        tono: TONOS[i % TONOS.length]
+      });
+    }
+    return lista;
   }
+  var FOTOS = crear('f', 'Foto', 24, 7);
+  var FINALES = crear('x', 'Final', 8, 5);
 
   function $(s){ return document.querySelector(s); }
   function leer(k){ try { return localStorage.getItem(k); } catch(e) { return null; } }
@@ -238,8 +318,10 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
 
   var favoritas = new Set();
   try { favoritas = new Set(JSON.parse(leer('age-favoritas') || '[]')); } catch(e) {}
+  var estado = CONFIG.estado;
   var tabActual = 'todas';
-  var visorLista = [], visorI = 0;
+  var resSel = CONFIG.resoluciones[0];
+  var visorLista = [], visorI = 0, visorModo = 'sel';
 
   function aplicarTema(t){
     document.documentElement.setAttribute('data-tema', t);
@@ -256,31 +338,68 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
   });
 
   function mostrar(p){
-    ['acceso','galeria','gracias'].forEach(function(n){ $('#' + n).hidden = n !== p; });
+    ['acceso','bienvenida','galeria','gracias'].forEach(function(n){ $('#' + n).hidden = n !== p; });
     window.scrollTo(0, 0);
   }
 
-  function tarjeta(f){
-    return '<figure class="foto">' +
-      '<button class="abrir" type="button" data-abrir="' + f.id + '" aria-label="Abrir ' + f.nombre + '">' +
-      '<span class="ph" style="aspect-ratio:' + f.ratio + ';background:' + f.tono + '"><span>' + f.nombre + '</span></span></button>' +
-      '<button class="corazon" type="button" data-fav="' + f.id + '" aria-pressed="' + favoritas.has(f.id) + '" aria-label="Marcar ' + f.nombre + ' como favorita">' + CORAZON + '</button>' +
-      '</figure>';
+  var avisoT;
+  function aviso(t){
+    var a = $('#aviso');
+    a.textContent = t;
+    a.hidden = false;
+    clearTimeout(avisoT);
+    avisoT = setTimeout(function(){ a.hidden = true; }, 3200);
   }
 
+  function marcaAguaActiva(){ return CONFIG.marcaAgua && estado === 'seleccion'; }
+
+  function tarjeta(f, modo){
+    var mw = (modo === 'sel' && marcaAguaActiva()) ? ' mw' : '';
+    var accion = '';
+    if (modo === 'sel') {
+      accion = '<button class="corazon" type="button" data-fav="' + f.id + '" aria-pressed="' + favoritas.has(f.id) + '" aria-label="Marcar ' + f.nombre + ' como favorita">' + CORAZON + '</button>';
+    } else if (CONFIG.descargasActivas) {
+      accion = '<button class="corazon descarga" type="button" data-desc="' + f.id + '" aria-label="Descargar ' + f.nombre + '">' + DESCARGA + '</button>';
+    }
+    return '<figure class="foto">' +
+      '<button class="abrir" type="button" data-abrir="' + f.id + '" aria-label="Abrir ' + f.nombre + '">' +
+      '<span class="ph' + mw + '" style="aspect-ratio:' + f.ratio + ';background:' + f.tono + '"><span>' + f.nombre + '</span></span></button>' +
+      accion + '</figure>';
+  }
+
+  function favs(){ return FOTOS.filter(function(f){ return favoritas.has(f.id); }); }
+
+  function pintarTodas(){ $('#rejTodas').innerHTML = FOTOS.map(function(f){ return tarjeta(f, 'sel'); }).join(''); }
   function pintarFavoritas(){
-    var lista = FOTOS.filter(function(f){ return favoritas.has(f.id); });
-    $('#rejFav').innerHTML = lista.map(tarjeta).join('');
+    var lista = favs();
+    $('#rejFav').innerHTML = lista.map(function(f){ return tarjeta(f, 'sel'); }).join('');
     $('#rejFav').hidden = lista.length === 0;
     $('#vacioFav').hidden = lista.length > 0;
+  }
+  function pintarFinales(){
+    var listo = estado === 'entregada';
+    $('#finVacio').hidden = listo;
+    $('#finListo').hidden = !listo;
+    $('#finBarra').hidden = !CONFIG.descargasActivas;
+    $('#rejFin').innerHTML = listo ? FINALES.map(function(f){ return tarjeta(f, 'fin'); }).join('') : '';
   }
 
   function contar(){
     var n = favoritas.size;
     $('#cTodas').textContent = FOTOS.length;
     $('#cFav').textContent = n;
+    $('#nCont').textContent = n;
+    $('#btnContador').classList.toggle('lleno', n > 0);
+    $('#btnContador').setAttribute('aria-label', 'Ver mis favoritas, ' + n);
+    $('#btnContador').hidden = estado !== 'seleccion';
     $('#nBarra').textContent = n + (n === 1 ? ' favorita' : ' favoritas');
-    $('#barra').hidden = !(n > 0 && tabActual !== 'finales');
+    $('#barra').hidden = !(estado === 'seleccion' && n > 0 && tabActual !== 'finales');
+  }
+
+  function textoGuia(){
+    $('#guia').textContent = estado === 'entregada'
+      ? 'Tus fotos finales ya están listas. Descárgalas en la pestaña Finales.'
+      : 'Toca el corazón en las fotos que más te gusten. Yo las edito y las subo aquí, en la pestaña Finales.';
   }
 
   function irTab(t){
@@ -297,6 +416,18 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
     if (y < 0) window.scrollBy(0, y);
   }
 
+  function setEstado(e){
+    estado = e;
+    document.querySelectorAll('[data-estado]').forEach(function(b){
+      b.setAttribute('aria-pressed', b.getAttribute('data-estado') === e);
+    });
+    textoGuia();
+    pintarTodas();
+    pintarFavoritas();
+    pintarFinales();
+    irTab(e === 'entregada' ? 'finales' : 'todas');
+  }
+
   function alternar(id){
     if (favoritas.has(id)) favoritas.delete(id); else favoritas.add(id);
     escribir('age-favoritas', JSON.stringify(Array.from(favoritas)));
@@ -310,26 +441,47 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
     }
   }
 
+  function descargar(id){
+    if (!CONFIG.descargasActivas) return;
+    aviso('Modo de prueba: aquí se descargaría la foto en tamaño ' + ETIQ[resSel].toLowerCase() + '.');
+  }
+
+  function construirResoluciones(){
+    var campo = $('#resCampo');
+    CONFIG.resoluciones.forEach(function(r, i){
+      var l = document.createElement('label');
+      l.innerHTML = '<input type="radio" name="res" value="' + r + '"' + (i === 0 ? ' checked' : '') + '> ' + ETIQ[r];
+      l.firstChild.addEventListener('change', function(){ resSel = r; });
+      campo.appendChild(l);
+    });
+    campo.hidden = CONFIG.resoluciones.length < 2;
+  }
+
   function actualizarVisor(){
     var f = visorLista[visorI];
     if (!f) return;
     var ph = $('#vPh');
+    ph.className = 'ph' + ((visorModo === 'sel' && marcaAguaActiva()) ? ' mw' : '');
     ph.style.aspectRatio = f.ratio;
     ph.style.background = f.tono;
     ph.innerHTML = '<span>' + f.nombre + '</span>';
     $('#vCont').textContent = (visorI + 1) + ' de ' + visorLista.length;
     $('#vNombre').textContent = f.nombre;
-    var b = $('#vFav');
-    b.setAttribute('data-fav', f.id);
-    b.setAttribute('aria-pressed', favoritas.has(f.id));
-    b.setAttribute('aria-label', 'Marcar ' + f.nombre + ' como favorita');
+    var fav = $('#vFav'), des = $('#vDesc');
+    fav.hidden = visorModo !== 'sel';
+    des.hidden = visorModo !== 'fin' || !CONFIG.descargasActivas;
+    fav.setAttribute('data-fav', f.id);
+    fav.setAttribute('aria-pressed', favoritas.has(f.id));
+    fav.setAttribute('aria-label', 'Marcar ' + f.nombre + ' como favorita');
+    des.setAttribute('data-desc', f.id);
   }
   function moverVisor(d){
     visorI = (visorI + d + visorLista.length) % visorLista.length;
     actualizarVisor();
   }
   function abrirVisor(id){
-    visorLista = tabActual === 'favoritas' ? FOTOS.filter(function(f){ return favoritas.has(f.id); }) : FOTOS;
+    if (tabActual === 'finales') { visorLista = FINALES; visorModo = 'fin'; }
+    else { visorLista = tabActual === 'favoritas' ? favs() : FOTOS; visorModo = 'sel'; }
     visorI = visorLista.findIndex(function(f){ return f.id === id; });
     if (visorI < 0) return;
     actualizarVisor();
@@ -339,10 +491,14 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
   document.addEventListener('click', function(e){
     var fav = e.target.closest('[data-fav]');
     if (fav) { alternar(fav.getAttribute('data-fav')); return; }
+    var des = e.target.closest('[data-desc]');
+    if (des) { descargar(des.getAttribute('data-desc')); return; }
     var ab = e.target.closest('[data-abrir]');
     if (ab) { abrirVisor(ab.getAttribute('data-abrir')); return; }
     var tb = e.target.closest('[data-tab]');
-    if (tb) irTab(tb.getAttribute('data-tab'));
+    if (tb) { irTab(tb.getAttribute('data-tab')); return; }
+    var es = e.target.closest('[data-estado]');
+    if (es) setEstado(es.getAttribute('data-estado'));
   });
   document.addEventListener('keydown', function(e){
     if (!$('#visor').open) return;
@@ -353,6 +509,12 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
   $('#vNext').addEventListener('click', function(){ moverVisor(1); });
   $('#vCerrar').addEventListener('click', function(){ $('#visor').close(); });
   $('#vFav').innerHTML = CORAZON;
+  $('#vDesc').innerHTML = DESCARGA;
+  $('#icoCont').innerHTML = CORAZON;
+  $('#btnContador').addEventListener('click', function(){ irTab('favoritas'); });
+  $('#btnTodo').addEventListener('click', function(){
+    aviso('Modo de prueba: aquí se abriría la carpeta final para descargar todo.');
+  });
 
   $('#btnEnviar').addEventListener('click', function(){
     var n = favoritas.size;
@@ -371,6 +533,10 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
   });
   $('#btnVolver').addEventListener('click', function(){ mostrar('galeria'); });
   $('#btnSalir').addEventListener('click', function(){ mostrar('acceso'); });
+  $('#btnEntrar').addEventListener('click', function(){
+    mostrar('galeria');
+    irTab(estado === 'entregada' ? 'finales' : 'todas');
+  });
 
   $('#formAcceso').addEventListener('submit', function(e){
     e.preventDefault();
@@ -379,18 +545,31 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
     if (!c) { err.textContent = 'Escribe el código que te envié.'; err.hidden = false; $('#codigo').focus(); return; }
     if (!CONFIG.modoPrueba) { err.textContent = 'Este acceso aún no está conectado. Inténtalo más tarde.'; err.hidden = false; return; }
     err.hidden = true;
-    mostrar('galeria');
+    mostrar('bienvenida');
   });
   $('#codigo').addEventListener('input', function(){ $('#errAcceso').hidden = true; });
 
-  $('#imgAcceso').src = CONFIG.imagenAcceso;
+  var imgAcceso = $('#imgAcceso'), kAcceso = 0;
+  imgAcceso.addEventListener('error', function(){
+    kAcceso++;
+    if (kAcceso < CONFIG.imagenesAcceso.length) imgAcceso.src = CONFIG.imagenesAcceso[kAcceso];
+  });
+  imgAcceso.src = CONFIG.imagenesAcceso[0];
+
   $('#notaPrueba').hidden = !CONFIG.modoPrueba;
+  $('#demoBar').hidden = !CONFIG.modoPrueba;
   $('#titulo').textContent = CONFIG.titulo;
   $('#fecha').textContent = CONFIG.fecha;
+  $('#bvTitulo').textContent = CONFIG.titulo;
+  $('#bvFecha').textContent = CONFIG.fecha;
   document.title = 'Alexander Ge Erre · ' + CONFIG.titulo;
-  $('#rejTodas').innerHTML = FOTOS.map(tarjeta).join('');
-  pintarFavoritas();
-  contar();
+  if (CONFIG.portada) {
+    $('#bvFondo').style.backgroundImage = 'url("' + CONFIG.portada + '")';
+    $('#bvFondo').hidden = false;
+    $('#bienvenida').classList.add('con-foto');
+  }
+  construirResoluciones();
+  setEstado(CONFIG.estado);
 })();
 </script>
 </body>
