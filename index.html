@@ -38,15 +38,15 @@ img{max-width:100%}
 .btn-sec{background:transparent;color:var(--texto)}
 .enlace{background:none;border:0;color:var(--suave);padding:.5rem;text-decoration:underline;text-underline-offset:3px}
 
-#acceso{min-height:100vh;display:grid;grid-template-columns:1fr}
-.acceso-img{background:var(--marfil);height:34vh;display:flex;align-items:center;justify-content:center}
-.acceso-img img{height:100%;width:100%;object-fit:cover;object-position:50% 62%;mix-blend-mode:multiply;filter:url(#aBlanco)}
+#acceso{min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:1fr}
+.acceso-img{position:relative;overflow:hidden;background:var(--marfil);height:34vh}
+.acceso-img img{position:absolute;inset:0;height:100%;width:100%;max-width:none;object-fit:cover;object-position:50% 62%;mix-blend-mode:multiply;filter:url(#aBlanco)}
 .acceso-form{display:flex;flex-direction:column;justify-content:center;gap:1rem;padding:2rem 1.5rem 3rem;max-width:30rem;margin:0 auto;width:100%}
 .acceso-form h1{font-size:clamp(2.2rem,5vw,3rem)}
 .acceso-form input{width:100%;padding:.85rem 1rem;border:1px solid var(--campo);background:transparent;color:inherit;font:inherit;border-radius:2px;letter-spacing:.06em}
 .error{color:var(--error);font-size:.95rem}
 .nota{color:var(--suave);font-size:.9rem}
-@media(min-width:820px){#acceso{grid-template-columns:1fr 1fr}.acceso-img{height:auto}}
+@media(min-width:820px){#acceso{grid-template-columns:1fr 1fr}.acceso-img{height:auto;min-height:100%}}
 
 .logo{display:block;margin:0 auto;width:min(520px,78%);aspect-ratio:2.2/1;object-fit:cover}
 .logo-claro{mix-blend-mode:multiply;filter:url(#aBlanco)}
@@ -288,7 +288,9 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
     estado: 'seleccion',
     marcaAgua: true,
     descargasActivas: true,
-    resoluciones: ['original', 'alta', 'web']
+    resoluciones: ['original', 'alta', 'web'],
+    fotosPrueba: ['imagenes/prueba-1.jpg', 'imagenes/prueba-2.jpg', 'imagenes/prueba-3.jpg', 'imagenes/prueba-4.jpg'],
+    portadaPrueba: 'imagenes/portada-prueba.jpg'
   };
   var ETIQ = { original: 'Original', alta: 'Alta resolución', web: 'Tamaño web' };
 
@@ -311,6 +313,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
   }
   var FOTOS = crear('f', 'Foto', 24, 7);
   var FINALES = crear('x', 'Final', 8, 5);
+  CONFIG.fotosPrueba.forEach(function(r, i){ if (FOTOS[i]) FOTOS[i].src = r; if (FINALES[i]) FINALES[i].src = r; });
 
   function $(s){ return document.querySelector(s); }
   function leer(k){ try { return localStorage.getItem(k); } catch(e) { return null; } }
@@ -353,6 +356,11 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
 
   function marcaAguaActiva(){ return CONFIG.marcaAgua && estado === 'seleccion'; }
 
+  function ph(f, mw){
+    if (f.src) return '<span class="ph' + mw + '" style="aspect-ratio:' + f.ratio + ';background:' + f.tono + '"><img src="' + f.src + '" alt="" loading="lazy" style="display:block;width:100%;height:auto" onload="this.parentNode.style.aspectRatio=\'auto\'" onerror="this.remove()"></span>';
+    return '<span class="ph' + mw + '" style="aspect-ratio:' + f.ratio + ';background:' + f.tono + '"><span>' + f.nombre + '</span></span>';
+  }
+
   function tarjeta(f, modo){
     var mw = (modo === 'sel' && marcaAguaActiva()) ? ' mw' : '';
     var accion = '';
@@ -363,7 +371,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
     }
     return '<figure class="foto">' +
       '<button class="abrir" type="button" data-abrir="' + f.id + '" aria-label="Abrir ' + f.nombre + '">' +
-      '<span class="ph' + mw + '" style="aspect-ratio:' + f.ratio + ';background:' + f.tono + '"><span>' + f.nombre + '</span></span></button>' +
+      ph(f, mw) + '</button>' +
       accion + '</figure>';
   }
 
@@ -462,9 +470,14 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
     if (!f) return;
     var ph = $('#vPh');
     ph.className = 'ph' + ((visorModo === 'sel' && marcaAguaActiva()) ? ' mw' : '');
-    ph.style.aspectRatio = f.ratio;
     ph.style.background = f.tono;
-    ph.innerHTML = '<span>' + f.nombre + '</span>';
+    if (f.src) {
+      ph.style.aspectRatio = 'auto';
+      ph.innerHTML = '<img src="' + f.src + '" alt="" style="display:block;height:100%;width:auto;max-width:100%;object-fit:contain">';
+    } else {
+      ph.style.aspectRatio = f.ratio;
+      ph.innerHTML = '<span>' + f.nombre + '</span>';
+    }
     $('#vCont').textContent = (visorI + 1) + ' de ' + visorLista.length;
     $('#vNombre').textContent = f.nombre;
     var fav = $('#vFav'), des = $('#vDesc');
@@ -563,10 +576,15 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
   $('#bvTitulo').textContent = CONFIG.titulo;
   $('#bvFecha').textContent = CONFIG.fecha;
   document.title = 'Alexander Ge Erre · ' + CONFIG.titulo;
-  if (CONFIG.portada) {
-    $('#bvFondo').style.backgroundImage = 'url("' + CONFIG.portada + '")';
-    $('#bvFondo').hidden = false;
-    $('#bienvenida').classList.add('con-foto');
+  var rutaPortada = CONFIG.portada || CONFIG.portadaPrueba;
+  if (rutaPortada) {
+    var pi = new Image();
+    pi.onload = function(){
+      $('#bvFondo').style.backgroundImage = 'url("' + rutaPortada + '")';
+      $('#bvFondo').hidden = false;
+      $('#bienvenida').classList.add('con-foto');
+    };
+    pi.src = rutaPortada;
   }
   construirResoluciones();
   setEstado(CONFIG.estado);
