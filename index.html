@@ -279,11 +279,12 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
 <script>
 (function(){
   var CONFIG = {
-    titulo: 'Boda Ana y Luis',
-    fecha: '12 de octubre de 2026',
+    titulo: '',
+    fecha: '',
     portada: '',
-    modoPrueba: true,
-    apiUrl: '',
+    modoPrueba: false,
+    apiUrl: 'https://script.google.com/macros/s/AKfycby23djlrjkanNYq62DS3HKVv9PCfFoU32mojjjcThKr00AK7EHKQuWE5mVQoMHBdBbA/exec',
+    carpetaFinales: '',
     imagenesAcceso: ['imagenes/acceso-1.png.jpg', 'imagenes/acceso-2.png.jpg'],
     estado: 'seleccion',
     marcaAgua: true,
@@ -311,16 +312,20 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
     }
     return lista;
   }
-  var FOTOS = crear('f', 'Foto', 24, 7);
-  var FINALES = crear('x', 'Final', 8, 5);
-  CONFIG.fotosPrueba.forEach(function(r, i){ if (FOTOS[i]) FOTOS[i].src = r; if (FINALES[i]) FINALES[i].src = r; });
+  var FOTOS = [], FINALES = [];
+  if (CONFIG.modoPrueba) {
+    FOTOS = crear('f', 'Foto', 24, 7);
+    FINALES = crear('x', 'Final', 8, 5);
+    CONFIG.fotosPrueba.forEach(function(r, i){ if (FOTOS[i]) FOTOS[i].src = r; if (FINALES[i]) FINALES[i].src = r; });
+  }
 
   function $(s){ return document.querySelector(s); }
   function leer(k){ try { return localStorage.getItem(k); } catch(e) { return null; } }
   function escribir(k, v){ try { localStorage.setItem(k, v); } catch(e) {} }
 
   var favoritas = new Set();
-  try { favoritas = new Set(JSON.parse(leer('age-favoritas') || '[]')); } catch(e) {}
+  if (CONFIG.modoPrueba) { try { favoritas = new Set(JSON.parse(leer('age-favoritas') || '[]')); } catch(e) {} }
+  var codigoActual = '';
   var estado = CONFIG.estado;
   var tabActual = 'todas';
   var resSel = CONFIG.resoluciones[0];
@@ -389,6 +394,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
     $('#finVacio').hidden = listo;
     $('#finListo').hidden = !listo;
     $('#finBarra').hidden = !CONFIG.descargasActivas;
+    $('#btnTodo').hidden = !CONFIG.modoPrueba && !CONFIG.carpetaFinales;
     $('#rejFin').innerHTML = listo ? FINALES.map(function(f){ return tarjeta(f, 'fin'); }).join('') : '';
   }
 
@@ -436,22 +442,96 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
     irTab(e === 'entregada' ? 'finales' : 'todas');
   }
 
-  function alternar(id){
-    if (favoritas.has(id)) favoritas.delete(id); else favoritas.add(id);
-    escribir('age-favoritas', JSON.stringify(Array.from(favoritas)));
+  function api(p){
+    var q = Object.keys(p).map(function(k){ return k + '=' + encodeURIComponent(p[k]); }).join('&');
+    return fetch(CONFIG.apiUrl + '?' + q).then(function(r){ return r.json(); });
+  }
+
+  function fechaLarga(s){
+    var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || '');
+    if (!m) return s || '';
+    var meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    return parseInt(m[3], 10) + ' de ' + meses[parseInt(m[2], 10) - 1] + ' de ' + m[1];
+  }
+
+  function convertir(f){
+    return { id: f.id, nombre: f.nombre.replace(/\.[^.]+$/, ''), src: f.thumb, grande: f.grande, descarga: f.descarga, ratio: '3 / 2', tono: 'var(--t1)' };
+  }
+
+  function aplicarTitulo(){
+    $('#titulo').textContent = CONFIG.titulo;
+    $('#fecha').textContent = CONFIG.fecha;
+    $('#bvTitulo').textContent = CONFIG.titulo;
+    $('#bvFecha').textContent = CONFIG.fecha;
+    document.title = 'Alexander Ge Erre' + (CONFIG.titulo ? ' · ' + CONFIG.titulo : ' · Galería privada');
+  }
+
+  function aplicarPortada(){
+    var ruta = CONFIG.portada || (CONFIG.modoPrueba ? CONFIG.portadaPrueba : '');
+    $('#bienvenida').classList.remove('con-foto');
+    $('#bvFondo').hidden = true;
+    if (!ruta) return;
+    var pi = new Image();
+    pi.onload = function(){
+      $('#bvFondo').style.backgroundImage = 'url("' + ruta + '")';
+      $('#bvFondo').hidden = false;
+      $('#bienvenida').classList.add('con-foto');
+    };
+    pi.src = ruta;
+  }
+
+  function cargarGaleria(d, codigo){
+    codigoActual = codigo;
+    CONFIG.titulo = d.titulo || '';
+    CONFIG.fecha = fechaLarga(d.fecha);
+    CONFIG.marcaAgua = !!d.marcaAgua;
+    CONFIG.descargasActivas = !!d.descargas;
+    CONFIG.carpetaFinales = d.carpetaFinales || '';
+    FOTOS = (d.fotos || []).map(convertir);
+    FINALES = (d.finales || []).map(convertir);
+    favoritas = new Set(d.favoritas || []);
+    aplicarTitulo();
+    aplicarPortada();
+    setEstado(d.estado === 'Entregada' ? 'entregada' : 'seleccion');
+  }
+
+  function poner(id, activa){
+    if (activa) favoritas.add(id); else favoritas.delete(id);
     document.querySelectorAll('[data-fav="' + id + '"]').forEach(function(b){
       b.setAttribute('aria-pressed', favoritas.has(id));
     });
     if (tabActual !== 'favoritas') pintarFavoritas();
     contar();
-    if (CONFIG.apiUrl) {
-      try { fetch(CONFIG.apiUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ accion: 'favorita', id: id, activa: favoritas.has(id) }) }); } catch(e) {}
+  }
+
+  function alternar(id){
+    var activa = !favoritas.has(id);
+    poner(id, activa);
+    if (CONFIG.modoPrueba) {
+      escribir('age-favoritas', JSON.stringify(Array.from(favoritas)));
+      return;
     }
+    if (!CONFIG.apiUrl) return;
+    api({ action: 'fav', code: codigoActual, id: id, on: activa ? '1' : '0' }).then(function(d){
+      if (!d.ok) throw new Error(d.error);
+    }).catch(function(){
+      poner(id, !activa);
+      aviso('No se pudo guardar tu favorita. Revisa tu conexión e inténtalo de nuevo.');
+    });
   }
 
   function descargar(id){
     if (!CONFIG.descargasActivas) return;
-    aviso('Modo de prueba: aquí se descargaría la foto en tamaño ' + ETIQ[resSel].toLowerCase() + '.');
+    if (CONFIG.modoPrueba) {
+      aviso('Modo de prueba: aquí se descargaría la foto en tamaño ' + ETIQ[resSel].toLowerCase() + '.');
+      return;
+    }
+    var f = FINALES.filter(function(x){ return x.id === id; })[0];
+    if (!f) return;
+    var url = resSel === 'original'
+      ? f.descarga
+      : 'https://drive.google.com/thumbnail?id=' + f.id + '&sz=w' + (resSel === 'alta' ? 2500 : 1200);
+    window.open(url, '_blank', 'noopener');
   }
 
   function construirResoluciones(){
@@ -473,7 +553,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
     ph.style.background = f.tono;
     if (f.src) {
       ph.style.aspectRatio = 'auto';
-      ph.innerHTML = '<img src="' + f.src + '" alt="" style="display:block;height:100%;width:auto;max-width:100%;object-fit:contain">';
+      ph.innerHTML = '<img src="' + (f.grande || f.src) + '" alt="" style="display:block;height:100%;width:auto;max-width:100%;object-fit:contain">';
     } else {
       ph.style.aspectRatio = f.ratio;
       ph.innerHTML = '<span>' + f.nombre + '</span>';
@@ -526,7 +606,8 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
   $('#icoCont').innerHTML = CORAZON;
   $('#btnContador').addEventListener('click', function(){ irTab('favoritas'); });
   $('#btnTodo').addEventListener('click', function(){
-    aviso('Modo de prueba: aquí se abriría la carpeta final para descargar todo.');
+    if (CONFIG.modoPrueba) { aviso('Modo de prueba: aquí se abriría la carpeta final para descargar todo.'); return; }
+    if (CONFIG.carpetaFinales) window.open(CONFIG.carpetaFinales, '_blank', 'noopener');
   });
 
   $('#btnEnviar').addEventListener('click', function(){
@@ -535,17 +616,30 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
     $('#confirmar').showModal();
   });
   $('#seguir').addEventListener('click', function(){ $('#confirmar').close(); });
+  function irGracias(n){
+    $('#txtGracias').textContent = 'Voy a editar tus ' + n + (n === 1 ? ' foto' : ' fotos') + ' y te aviso cuando estén listas en la pestaña Finales.';
+    mostrar('gracias');
+  }
   $('#okEnviar').addEventListener('click', function(){
     var n = favoritas.size;
     $('#confirmar').close();
-    if (CONFIG.apiUrl) {
-      try { fetch(CONFIG.apiUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify({ accion: 'enviar', favoritas: Array.from(favoritas) }) }); } catch(e) {}
-    }
-    $('#txtGracias').textContent = 'Voy a editar tus ' + n + (n === 1 ? ' foto' : ' fotos') + ' y te aviso cuando estén listas en la pestaña Finales.';
-    mostrar('gracias');
+    if (CONFIG.modoPrueba || !CONFIG.apiUrl) { irGracias(n); return; }
+    api({ action: 'enviar', code: codigoActual }).then(function(d){
+      if (!d.ok) throw new Error(d.error);
+      irGracias(n);
+    }).catch(function(){
+      aviso('No se pudo enviar tu selección. Revisa tu conexión e inténtalo de nuevo.');
+    });
   });
   $('#btnVolver').addEventListener('click', function(){ mostrar('galeria'); });
-  $('#btnSalir').addEventListener('click', function(){ mostrar('acceso'); });
+  $('#btnSalir').addEventListener('click', function(){
+    if (!CONFIG.modoPrueba) {
+      codigoActual = '';
+      $('#codigo').value = '';
+      FOTOS = []; FINALES = []; favoritas = new Set();
+    }
+    mostrar('acceso');
+  });
   $('#btnEntrar').addEventListener('click', function(){
     mostrar('galeria');
     irTab(estado === 'entregada' ? 'finales' : 'todas');
@@ -556,9 +650,29 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
     var c = $('#codigo').value.trim();
     var err = $('#errAcceso');
     if (!c) { err.textContent = 'Escribe el código que te envié.'; err.hidden = false; $('#codigo').focus(); return; }
-    if (!CONFIG.modoPrueba) { err.textContent = 'Este acceso aún no está conectado. Inténtalo más tarde.'; err.hidden = false; return; }
+    if (CONFIG.modoPrueba) { err.hidden = true; mostrar('bienvenida'); return; }
+    if (!CONFIG.apiUrl) { err.textContent = 'Este acceso aún no está conectado. Inténtalo más tarde.'; err.hidden = false; return; }
+    var btn = $('#formAcceso').querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Entrando…';
     err.hidden = true;
-    mostrar('bienvenida');
+    api({ action: 'galeria', code: c }).then(function(d){
+      if (!d.ok) {
+        err.textContent = d.error === 'expirada'
+          ? 'Esta galería ya expiró. Escríbeme y la reactivo.'
+          : 'El código no es correcto. Revisa que esté escrito igual que te lo envié.';
+        err.hidden = false;
+        return;
+      }
+      cargarGaleria(d, c);
+      mostrar('bienvenida');
+    }).catch(function(){
+      err.textContent = 'No pude conectar con tu galería. Revisa tu conexión e inténtalo de nuevo.';
+      err.hidden = false;
+    }).then(function(){
+      btn.disabled = false;
+      btn.textContent = 'Entrar a mi galería';
+    });
   });
   $('#codigo').addEventListener('input', function(){ $('#errAcceso').hidden = true; });
 
@@ -571,21 +685,8 @@ dialog h2{font-size:1.8rem;margin-bottom:.6rem}
 
   $('#notaPrueba').hidden = !CONFIG.modoPrueba;
   $('#demoBar').hidden = !CONFIG.modoPrueba;
-  $('#titulo').textContent = CONFIG.titulo;
-  $('#fecha').textContent = CONFIG.fecha;
-  $('#bvTitulo').textContent = CONFIG.titulo;
-  $('#bvFecha').textContent = CONFIG.fecha;
-  document.title = 'Alexander Ge Erre · ' + CONFIG.titulo;
-  var rutaPortada = CONFIG.portada || CONFIG.portadaPrueba;
-  if (rutaPortada) {
-    var pi = new Image();
-    pi.onload = function(){
-      $('#bvFondo').style.backgroundImage = 'url("' + rutaPortada + '")';
-      $('#bvFondo').hidden = false;
-      $('#bienvenida').classList.add('con-foto');
-    };
-    pi.src = rutaPortada;
-  }
+  aplicarTitulo();
+  aplicarPortada();
   construirResoluciones();
   setEstado(CONFIG.estado);
 })();
