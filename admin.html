@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel · Alexander Ge Erre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--f:#FAF8F5;--tx:#2B2623;--su:#6f665e;--ln:#E6DFD6;--ac:#B08968;--cp:#9a8f84;--t1:#E6DFD6;--t2:#D9CFC3;--t3:#CFC3B4;--side:#F3EFE9;--err:#A32D2D;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--f:#151413;--tx:#F1ECE4;--su:#a39a91;--ln:#2c2926;--ac:#C9A27A;--cp:#6b635b;--t1:#2a2724;--t2:#34302c;--t3:#3d3833;--side:#1c1a18;--err:#E58C8C;color-scheme:dark}}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+body{background:var(--f);color:var(--tx);font-family:'Jost',system-ui,sans-serif;line-height:1.55}
+h1,h2,h3{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;line-height:1.15}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.side{background:var(--side);border-right:1px solid var(--ln);padding:1.5rem 1rem;display:flex;flex-direction:column;gap:1.5rem}
+.marca{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.4rem;padding:0 .5rem}
+.side nav{display:flex;flex-direction:column;gap:.15rem}
+.side nav button{background:none;border:0;text-align:left;padding:.55rem .75rem;border-radius:3px;color:var(--su)}
+.side nav button[aria-current="page"]{background:var(--ln);color:var(--tx);font-weight:500}
+.yo{margin-top:auto;font-size:.9rem;padding:.75rem;border-top:1px solid var(--ln)}
+.yo small{display:block;color:var(--su)}
+main{padding:1.75rem clamp(1rem,4vw,3rem) 4rem;max-width:1200px;width:100%}
+.demo{background:var(--t1);font-size:.85rem;color:var(--su);padding:.4rem .9rem;border-radius:3px;margin-bottom:1.25rem;display:inline-block}
+.cab{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem}
+.cab h1{font-size:2.2rem}
+.btn{background:var(--tx);color:var(--f);border:1px solid var(--tx);padding:.6rem 1.2rem;border-radius:2px;font-weight:500}
+.btn.sec{background:transparent;color:var(--tx)}
+.btn.peli{background:var(--err);border-color:var(--err);color:#fff}
+.lnk{background:none;border:0;color:var(--su);text-decoration:underline;text-underline-offset:3px;padding:.3rem 0}
+.filtros{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.filtros input,.filtros select,dialog input,dialog select,.campo{padding:.55rem .8rem;border:1px solid var(--cp);background:transparent;border-radius:2px}
+.filtros input{min-width:14rem;flex:1}
+.rej{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1.5rem 1.25rem}
+.card{position:relative}
+.port{display:block;width:100%;aspect-ratio:3/2;border:0;border-radius:3px;position:relative;text-align:left}
+.nueva{background:transparent;border:1px dashed var(--cp);display:grid;place-items:center;font-size:2rem;color:var(--su)}
+.card h3{font-size:1.25rem;margin-top:.55rem}
+.meta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;font-size:.85rem;color:var(--su)}
+.chip{border:1px solid var(--cp);border-radius:999px;padding:0 .6rem;font-size:.78rem;color:var(--tx)}
+.chip.entregada{background:var(--tx);color:var(--f);border-color:var(--tx)}
+.chip.seleccion{border-color:var(--ac)}
+.chip.offline,.chip.expirada{color:var(--su);border-style:dashed}
+.mas{position:absolute;top:.5rem;right:.5rem;display:flex;gap:.3rem}
+.mas button{background:rgba(250,248,245,.92);color:#2B2623;border:0;border-radius:2px;padding:.15rem .55rem;font-size:.82rem}
+.tabs{display:flex;gap:1.5rem;border-bottom:1px solid var(--ln);margin:1rem 0 1.5rem;overflow-x:auto}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:.6rem 0;color:var(--su);white-space:nowrap;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--tx);border-color:var(--ac)}
+.cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:.6rem;margin:.75rem 0 1.5rem}
+.mini{aspect-ratio:1;border-radius:2px;display:grid;place-items:end center;font-size:.72rem;color:var(--su);padding-bottom:.3rem}
+.bloque{border:1px solid var(--ln);border-radius:4px;padding:1.1rem 1.25rem;margin-bottom:1rem}
+.bloque h2{font-size:1.5rem;margin-bottom:.3rem}
+.bloque p{color:var(--su);font-size:.95rem}
+.fila{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.7rem 0;border-top:1px solid var(--ln)}
+.fila:first-of-type{border-top:0}
+.fila small{display:block;color:var(--su)}
+.sw{width:46px;height:26px;border-radius:999px;border:1px solid var(--cp);background:transparent;position:relative;flex:none}
+.sw i{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--cp);transition:transform .15s}
+.sw[aria-checked="true"]{background:var(--ac);border-color:var(--ac)}
+.sw[aria-checked="true"] i{transform:translateX(20px);background:#fff}
+.chk{display:flex;gap:1rem;flex-wrap:wrap}
+.chk label{display:flex;gap:.4rem;align-items:center}
+.chk input{accent-color:var(--ac);width:1.05rem;height:1.05rem}
+.lista{list-style:none;padding:0;columns:2 12rem;font-variant-numeric:tabular-nums;color:var(--su);margin:.8rem 0}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:.65rem .5rem;border-top:1px solid var(--ln);font-size:.95rem}
+th{border-top:0;color:var(--su);font-weight:400}
+.aviso{position:fixed;left:50%;transform:translateX(-50%);bottom:1.5rem;background:var(--tx);color:var(--f);padding:.7rem 1.1rem;border-radius:2px;z-index:30;max-width:90vw;text-align:center}
+dialog{border:1px solid var(--ln);background:var(--f);color:var(--tx);border-radius:4px;padding:1.5rem;width:min(26rem,92vw);margin:auto}
+dialog::backdrop{background:rgba(21,20,19,.6)}
+dialog h2{font-size:1.7rem;margin-bottom:.5rem}
+dialog label{display:block;margin-top:.8rem;font-size:.9rem;color:var(--su)}
+dialog input,dialog select{width:100%;margin-top:.25rem;color:var(--tx)}
+.acc{display:flex;gap:.6rem;margin-top:1.3rem;flex-wrap:wrap}
+@media(max-width:800px){.app{grid-template-columns:1fr}.side{flex-direction:row;align-items:center;flex-wrap:wrap;padding:.8rem 1rem}.side nav{flex-direction:row}.yo{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="marca">Alexander Ge Erre</div>
+    <nav id="nav" aria-label="Panel">
+      <button data-v="galerias">Galerías</button>
+      <button data-v="colab">Colaboradores</button>
+    </nav>
+    <div class="yo">Alexander Ge Erre<small>Propietario</small><button class="lnk" data-a="salir">Cerrar sesión</button></div>
+  </aside>
+  <main id="main"></main>
+</div>
+<p class="aviso" id="aviso" role="status" hidden></p>
+<dialog id="dlg"></dialog>
+
+<script>
+(function(){
+  var ET={seleccion:'En selección',entregada:'Entregada',expirada:'Expirada',offline:'Sin publicar'};
+  var G=[
+    {id:1,n:'Boda Ana y Luis',f:'28 oct 2026',e:'seleccion',fo:120,fv:14,t:'var(--t1)',mw:true,de:false},
+    {id:2,n:'XV años Valeria',f:'25 oct 2026',e:'entregada',fo:86,fv:22,t:'var(--t2)',mw:false,de:true},
+    {id:3,n:'Graduación Marcos',f:'18 oct 2026',e:'seleccion',fo:64,fv:0,t:'var(--t3)',mw:true,de:false},
+    {id:4,n:'Sesión familiar Pérez',f:'4 oct 2026',e:'offline',fo:0,fv:0,t:'var(--t1)',mw:true,de:false},
+    {id:5,n:'Bautizo de Mateo',f:'12 may 2026',e:'expirada',fo:40,fv:9,t:'var(--t2)',mw:false,de:false},
+    {id:6,n:'Galería de muestra',f:'31 mar 2026',e:'entregada',fo:30,fv:5,t:'var(--t3)',mw:false,de:true}
+  ];
+  var C=[
+    {n:'Alexander Ge Erre',c:'tu-correo@gmail.com',r:'Propietario'},
+    {n:'Colaborador de ejemplo',c:'colaborador@ejemplo.com',r:'Colaborador'},
+    {n:'Asistente de ejemplo',c:'asistente@ejemplo.com',r:'Solo lectura'}
+  ];
+  var ROLES={'Propietario':'Todo, incluida la gestión de colaboradores.','Colaborador':'Ver galerías y favoritas, subir fotos y entregar. No borra galerías ni cambia colaboradores.','Solo lectura':'Ver galerías y favoritas, sin cambiar nada.'};
+  var S={v:'galerias',id:null,tab:'fotos',q:'',est:'todos'};
+  var main=document.getElementById('main'), dlg=document.getElementById('dlg');
+  function $(s){return document.querySelector(s);}
+  function por(id){return G.filter(function(g){return g.id===id;})[0];}
+  function chip(e){return '<span class="chip '+e+'">'+ET[e]+'</span>';}
+  var avT;
+  function aviso(t){var a=$('#aviso');a.textContent=t;a.hidden=false;clearTimeout(avT);avT=setTimeout(function(){a.hidden=true;},3500);}
+  function abrir(h){dlg.innerHTML=h;dlg.showModal();}
+
+  function tarjetas(){
+    var q=S.q.toLowerCase();
+    var l=G.filter(function(g){return (S.est==='todos'||g.e===S.est)&&g.n.toLowerCase().indexOf(q)>=0;});
+    return '<div class="card"><button class="port nueva" data-a="nueva" aria-label="Nueva galería">+</button><h3>Nueva galería</h3><div class="meta">Crea carpetas y código</div></div>'+
+      l.map(function(g){
+        return '<div class="card"><button class="port" style="background:'+g.t+'" data-a="abrir" data-id="'+g.id+'" aria-label="Abrir '+g.n+'"></button>'+
+          '<div class="mas"><button data-a="borrar" data-id="'+g.id+'">Eliminar</button></div>'+
+          '<h3>'+g.n+'</h3><div class="meta">'+chip(g.e)+'<span>'+g.f+'</span></div>'+
+          '<div class="meta">'+g.fo+' fotos · '+g.fv+' favoritas</div></div>';
+      }).join('');
+  }
+  function vGalerias(){
+    return '<span class="demo">Maqueta con datos de prueba</span>'+
+      '<div class="cab"><h1>Galerías</h1><button class="btn" data-a="nueva">Nueva galería</button></div>'+
+      '<div class="filtros"><input id="q" type="search" placeholder="Buscar por nombre del cliente" aria-label="Buscar galería" value="'+S.q+'">'+
+      '<select id="est" aria-label="Filtrar por estado"><option value="todos">Todos los estados</option>'+
+      Object.keys(ET).map(function(k){return '<option value="'+k+'"'+(S.est===k?' selected':'')+'>'+ET[k]+'</option>';}).join('')+'</select></div>'+
+      '<div class="rej" id="rej">'+tarjetas()+'</div>';
+  }
+
+  function sw(k,on,t,d){
+    return '<div class="fila"><div>'+t+'<small>'+d+'</small></div><button class="sw" role="switch" aria-checked="'+on+'" aria-label="'+t+'" data-a="tog" data-k="'+k+'"><i></i></button></div>';
+  }
+  function nombres(g){var a=[];for(var i=0;i<g.fv;i++)a.push('IMG_'+(1200+i*7));return a;}
+  function mini(n,t){var s='';for(var i=1;i<=n;i++)s+='<span class="mini" style="background:var(--t'+((i%3)+1)+')">'+t+' '+i+'</span>';return s;}
+  function vDetalle(){
+    var g=por(S.id), T=[['fotos','Fotos'],['favs','Favoritas del cliente'],['ajustes','Ajustes'],['entrega','Entrega']];
+    var h='<div class="cab"><div><button class="lnk" data-a="volver">‹ Galerías</button><h1>'+g.n+'</h1><div class="meta">'+chip(g.e)+'<span>'+g.f+'</span></div></div>'+
+      '<button class="btn sec" data-a="enlace">Copiar enlace del cliente</button></div>'+
+      '<div class="tabs" role="tablist">'+T.map(function(t){return '<button role="tab" aria-selected="'+(S.tab===t[0])+'" data-a="tab" data-t="'+t[0]+'">'+t[1]+'</button>';}).join('')+'</div>';
+    if(S.tab==='fotos'){
+      h+='<div class="bloque"><h2>Selección</h2><p>Fotos con marca de agua y tamaño reducido para que el cliente elija. Se suben a su carpeta de Drive y aparecen solas en la galería.</p>'+
+        '<div class="cols">'+mini(Math.min(g.fo,8)||0,'Foto')+'</div><button class="btn" data-a="drive">Abrir carpeta en Drive para subir</button> <button class="btn sec" data-a="portada">Elegir portada</button></div>'+
+        '<div class="bloque"><h2>Finales</h2><p>Fotos editadas, sin marca de agua. Para reemplazar, súbelas a esta carpeta.</p>'+
+        '<div class="cols">'+mini(g.de?6:0,'Final')+'</div><button class="btn sec" data-a="drive">Abrir carpeta de finales</button></div>';
+    }else if(S.tab==='favs'){
+      var n=nombres(g);
+      h+='<div class="bloque"><h2>'+g.fv+' favoritas</h2><p>Estas son las fotos que eligió el cliente. Cópialas para buscarlas en Lightroom.</p>'+
+        (n.length?'<ul class="lista">'+n.map(function(x){return '<li>'+x+'.jpg</li>';}).join('')+'</ul><button class="btn" data-a="copiar">Copiar nombres</button> <button class="btn sec" data-a="txt">Descargar lista (.txt)</button>':'<p>Todavía no hay favoritas.</p>')+'</div>';
+    }else if(S.tab==='ajustes'){
+      h+='<div class="bloque"><h2>Ajustes de la galería</h2>'+
+        sw('vis',g.e!=='offline','Galería publicada','Si la apagas, el cliente no puede entrar.')+
+        sw('mw',g.mw,'Marca de agua','Se muestra sobre las fotos de selección.')+
+        sw('de',g.de,'Permitir descargas','Habilita los botones de descarga en Finales.')+
+        '<div class="fila"><div>Tamaños disponibles<small>Qué puede descargar el cliente.</small></div><div class="chk"><label><input type="checkbox" checked> Original</label><label><input type="checkbox" checked> Alta resolución</label><label><input type="checkbox"> Tamaño web</label></div></div>'+
+        '<div class="fila"><div>Código de acceso<small>Se lo envías al cliente junto con el enlace.</small></div><div><strong>'+g.n.slice(0,3).toUpperCase()+'-48'+g.id+'1</strong> <button class="lnk" data-a="codigo">Generar otro</button></div></div>'+
+        '<div class="fila"><div>Fecha de expiración<small>Después de esta fecha la galería deja de estar disponible.</small></div><input class="campo" type="date" aria-label="Fecha de expiración"></div></div>';
+    }else{
+      h+='<div class="bloque"><h2>Entrega final</h2><p>Cuando ya subiste las fotos finales, entrega la galería en un solo paso:</p>'+
+        '<ul class="lista" style="columns:1"><li>1. Sube las fotos finales a la carpeta Finales.</li><li>2. Se apaga la marca de agua.</li><li>3. Se habilitan las descargas.</li><li>4. El estado cambia a Entregada.</li></ul>'+
+        (g.e==='entregada'?'<p>Esta galería ya fue entregada.</p>':'<button class="btn" data-a="entregar">Entregar galería</button>')+'</div>';
+    }
+    return h;
+  }
+
+  function vColab(){
+    return '<span class="demo">Maqueta con datos de prueba</span><div class="cab"><h1>Colaboradores</h1><button class="btn" data-a="invitar">Invitar colaborador</button></div>'+
+      '<div class="bloque"><table><thead><tr><th>Nombre</th><th>Correo de Google</th><th>Rol</th><th><span class="sr">Acciones</span></th></tr></thead><tbody>'+
+      C.map(function(c,i){
+        return '<tr><td>'+c.n+'</td><td>'+c.c+'</td><td>'+(c.r==='Propietario'?c.r:'<select data-a="rol" data-i="'+i+'" aria-label="Rol de '+c.n+'">'+Object.keys(ROLES).slice(1).map(function(r){return '<option'+(r===c.r?' selected':'')+'>'+r+'</option>';}).join('')+'</select>')+'</td>'+
+          '<td>'+(c.r==='Propietario'?'':'<button class="lnk" data-a="quitar" data-i="'+i+'">Quitar acceso</button>')+'</td></tr>';
+      }).join('')+'</tbody></table></div>'+
+      '<div class="bloque"><h2>Qué puede hacer cada rol</h2>'+Object.keys(ROLES).map(function(r){return '<div class="fila"><strong>'+r+'</strong><span style="color:var(--su);text-align:right">'+ROLES[r]+'</span></div>';}).join('')+'</div>';
+  }
+
+  function render(){
+    document.querySelectorAll('#nav button').forEach(function(b){
+      var v=b.getAttribute('data-v');
+      if(v===(S.v==='detalle'?'galerias':S.v))b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
+    });
+    main.innerHTML=S.v==='galerias'?vGalerias():S.v==='detalle'?vDetalle():vColab();
+    window.scrollTo(0,0);
+  }
+
+  function copiar(t,ok){
+    function listo(){aviso(ok);}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(listo,function(){aviso('No pude copiar. Selecciona el texto manualmente.');});}
+    else aviso('Tu navegador no permite copiar automáticamente.');
+  }
+
+  document.addEventListener('input',function(e){
+    if(e.target.id==='q'){S.q=e.target.value;$('#rej').innerHTML=tarjetas();}
+  });
+  document.addEventListener('change',function(e){
+    if(e.target.id==='est'){S.est=e.target.value;$('#rej').innerHTML=tarjetas();}
+    var t=e.target.closest('[data-a="rol"]');
+    if(t){C[+t.getAttribute('data-i')].r=t.value;aviso('Rol actualizado. En la versión real se aplica al instante.');}
+  });
+  document.addEventListener('click',function(e){
+    var v=e.target.closest('[data-v]');
+    if(v){S.v=v.getAttribute('data-v');render();return;}
+    var b=e.target.closest('[data-a]');
+    if(!b||b.tagName==='SELECT')return;
+    var a=b.getAttribute('data-a'), id=+b.getAttribute('data-id'), g=S.id?por(S.id):null;
+    if(a==='cerrar')dlg.close();
+    else if(a==='nueva')abrir('<h2>Nueva galería</h2><label>Nombre del cliente o evento<input id="nn" placeholder="Boda Ana y Luis"></label><label>Fecha del evento<input id="nf" type="date"></label><p style="margin-top:.8rem;color:var(--su);font-size:.9rem">Se crean las carpetas Selección y Finales en Drive y un código de acceso para el cliente.</p><div class="acc"><button class="btn" data-a="crear">Crear galería</button><button class="btn sec" data-a="cerrar">Cancelar</button></div>');
+    else if(a==='crear'){
+      var n=$('#nn').value.trim();
+      if(!n){$('#nn').focus();return;}
+      var nid=G.length?Math.max.apply(null,G.map(function(x){return x.id;}))+1:1;
+      G.unshift({id:nid,n:n,f:'Nueva',e:'offline',fo:0,fv:0,t:'var(--t1)',mw:true,de:false});
+      dlg.close();S.v='galerias';render();aviso('Galería creada sin publicar. Súbele fotos y publícala.');
+    }
+    else if(a==='abrir'){S.v='detalle';S.id=id;S.tab='fotos';render();}
+    else if(a==='volver'){S.v='galerias';render();}
+    else if(a==='tab'){S.tab=b.getAttribute('data-t');render();}
+    else if(a==='borrar'){var x=por(id);abrir('<h2>Eliminar galería</h2><p>Vas a eliminar «'+x.n+'». Sus carpetas pasan a la papelera de Drive y se pueden recuperar durante 30 días.</p><label>Escribe el nombre para confirmar<input id="cn" autocomplete="off"></label><div class="acc"><button class="btn peli" data-a="confBorrar" data-id="'+id+'">Eliminar</button><button class="btn sec" data-a="cerrar">Cancelar</button></div>');}
+    else if(a==='confBorrar'){
+      var y=por(id);
+      if($('#cn').value.trim()!==y.n){aviso('El nombre no coincide.');return;}
+      G=G.filter(function(z){return z.id!==id;});dlg.close();render();aviso('Galería eliminada.');
+    }
+    else if(a==='tog'){
+      var k=b.getAttribute('data-k');
+      if(k==='vis')g.e=g.e==='offline'?(g.de?'entregada':'seleccion'):'offline';else g[k]=!g[k];
+      render();
+    }
+    else if(a==='entregar'){g.e='entregada';g.mw=false;g.de=true;render();aviso('Galería entregada: sin marca de agua y con descargas activas.');}
+    else if(a==='copiar')copiar(nombres(g).map(function(s){return s+'.jpg';}).join('\n'),'Nombres copiados. Pégalos en el filtro de Lightroom.');
+    else if(a==='txt'){
+      var u=URL.createObjectURL(new Blob([nombres(g).map(function(s){return s+'.jpg';}).join('\n')],{type:'text/plain'}));
+      var l=document.createElement('a');l.href=u;l.download='favoritas-'+g.id+'.txt';l.click();URL.revokeObjectURL(u);
+    }
+    else if(a==='enlace')copiar('https://alexandergeerre.github.io/galeria/?g='+g.id,'Enlace copiado.');
+    else if(a==='drive'||a==='portada'||a==='codigo')aviso('Modo de prueba: en la versión conectada esto abre la carpeta de Drive o aplica el cambio.');
+    else if(a==='invitar')abrir('<h2>Invitar colaborador</h2><label>Correo de Google<input id="ic" type="email" placeholder="nombre@gmail.com"></label><label>Rol<select id="ir"><option>Colaborador</option><option>Solo lectura</option></select></label><div class="acc"><button class="btn" data-a="confInvitar">Invitar</button><button class="btn sec" data-a="cerrar">Cancelar</button></div>');
+    else if(a==='confInvitar'){
+      var c=$('#ic').value.trim();
+      if(c.indexOf('@')<1){$('#ic').focus();return;}
+      C.push({n:c.split('@')[0],c:c,r:$('#ir').value});dlg.close();render();aviso('Invitación registrada. En la versión real se comparte la carpeta de Drive con ese correo.');
+    }
+    else if(a==='quitar'){var q=C[+b.getAttribute('data-i')];abrir('<h2>Quitar acceso</h2><p>'+q.c+' dejará de entrar al panel y de ver las carpetas de Drive.</p><div class="acc"><button class="btn peli" data-a="confQuitar" data-i="'+b.getAttribute('data-i')+'">Quitar acceso</button><button class="btn sec" data-a="cerrar">Cancelar</button></div>');}
+    else if(a==='confQuitar'){C.splice(+b.getAttribute('data-i'),1);dlg.close();render();aviso('Acceso retirado.');}
+    else if(a==='salir')aviso('Modo de prueba: aquí se cierra tu sesión de Google.');
+  });
+  render();
+})();
+</script>
+</body>
+</html>
