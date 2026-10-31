@@ -7,59 +7,82 @@
 <title>Panel · Alexander Ge Erre</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Jost:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--f:#FAF8F5;--t:#2B2623;--s:#6f665e;--l:#E6DFD6;--a:#B08968;color-scheme:light}
-@media(prefers-color-scheme:dark){:root{--f:#151413;--t:#F1ECE4;--s:#a39a91;--l:#2c2926;--a:#C9A27A;color-scheme:dark}}
+:root{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--p:#F3EFE9}
 *{box-sizing:border-box;margin:0}
 [hidden]{display:none!important}
-body{background:var(--f);color:var(--t);font-family:'Jost',system-ui,sans-serif;line-height:1.5;padding:1.25rem;padding-top:calc(1.25rem + env(safe-area-inset-top))}
-h1,h2{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;line-height:1.1}
-button,input{font:inherit;color:inherit}
-button{cursor:pointer}
-.btn{background:var(--t);color:var(--f);border:1px solid var(--t);padding:.6rem 1.1rem;border-radius:2px}
-.btn.sec{background:none;color:var(--t)}
-input[type=text],input[type=password]{width:100%;padding:.7rem .9rem;border:1px solid var(--s);background:none;border-radius:2px}
-.cab{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;max-width:1100px;margin:0 auto 1.25rem}
-.cab h1{font-size:2.2rem}
-.rej{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;max-width:1100px;margin:0 auto}
-.tar{border:1px solid var(--l);border-radius:3px;padding:1rem;display:flex;flex-direction:column;gap:.5rem}
-.tar h2{font-size:1.5rem}
+body{background:var(--f);color:var(--t);font-family:'Jost',system-ui,sans-serif;line-height:1.5}
+h1,h2,h3{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;line-height:1.1}
+h1{font-size:2.2rem}h2{font-size:1.5rem}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer}
+.btn{background:var(--t);color:var(--f);border:1px solid var(--t);padding:.55rem 1.1rem;border-radius:2px;text-decoration:none;display:inline-block}
+.btn.sec{background:none;color:var(--t);border-color:var(--l)}
+input[type=text],input[type=password],select{width:100%;padding:.65rem .85rem;border:1px solid var(--l);background:var(--f);border-radius:2px}
 .s{color:var(--s);font-size:.9rem}
-.pill{display:inline-block;border:1px solid var(--a);border-radius:999px;padding:0 .7rem;font-size:.85rem;width:fit-content}
-.acc{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.4rem}
-.acc .btn{padding:.35rem .8rem;font-size:.9rem}
-#login{max-width:22rem;margin:18vh auto 0;display:flex;flex-direction:column;gap:.8rem}
-.err{color:#c0504d;font-size:.95rem}
+.ilus{mix-blend-mode:multiply;filter:contrast(1.04) brightness(1.05);max-width:100%;display:block}
+#login{max-width:22rem;margin:8vh auto 0;padding:1rem;display:flex;flex-direction:column;gap:.8rem;text-align:center}
+#login .ilus{width:11rem;margin:0 auto}
+.err{color:#b5453f;font-size:.95rem}
+#app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+aside{background:var(--p);border-right:1px solid var(--l);padding:1.4rem 1rem;display:flex;flex-direction:column;gap:.3rem;position:sticky;top:0;height:100vh}
+aside .marca{font-family:'Cormorant Garamond',serif;font-size:1.35rem;margin-bottom:1.2rem}
+aside button{background:none;border:0;text-align:left;padding:.55rem .7rem;border-radius:2px;color:var(--s)}
+aside button.on{background:var(--l);color:var(--t)}
+aside .pie{margin-top:auto}
+main{padding:2rem clamp(1rem,4vw,3rem);max-width:1100px;width:100%}
+.fila{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;margin:1rem 0}
+.fila input[type=text]{flex:1;min-width:12rem}.fila select{width:auto}
+.cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border:1px solid var(--l);border-radius:3px;margin:.6rem 0 1.6rem}
+.cifras div{padding:1rem 1.2rem;border-right:1px solid var(--l)}.cifras div:last-child{border:0}
+.cifras b{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;display:block;line-height:1.1}
+.rej{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+.tar{background:none;border:0;text-align:left;padding:0}
+.tar .cv{aspect-ratio:3/2;background:var(--l);border-radius:2px;overflow:hidden;display:grid;place-items:center}
+.tar .cv>img{width:100%;height:100%;object-fit:cover}
+.tar .cv .ilus{width:45%;mix-blend-mode:normal;filter:none}
+.tar.nuevo .cv{border:1px dashed var(--s);background:none;font-size:2rem;color:var(--s)}
+.tar h3{font-size:1.15rem;margin-top:.5rem;text-transform:uppercase;letter-spacing:.06em;font-family:'Jost',sans-serif;font-size:.85rem;font-weight:500}
+.pill{display:inline-block;border:1px solid var(--a);border-radius:999px;padding:0 .65rem;font-size:.8rem;margin-top:.2rem}
+.card{border:1px solid var(--l);border-radius:3px;padding:1.2rem;margin:.6rem 0 1.4rem}
+.vacio{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}.vacio .ilus{width:7rem}
+.tabs{display:flex;gap:1.4rem;border-bottom:1px solid var(--l);margin:1rem 0}
+.tabs button{background:none;border:0;padding:.5rem 0;color:var(--s);border-bottom:2px solid transparent}
+.tabs button.on{color:var(--t);border-color:var(--a)}
+.copia{display:flex;gap:.5rem;margin:.4rem 0 1rem}.copia input{flex:1}
+.lado{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap}.lado .ilus{width:14rem}
 dialog{border:1px solid var(--l);background:var(--f);color:var(--t);border-radius:4px;padding:1.4rem;width:min(30rem,92vw);margin:auto}
-dialog::backdrop{background:rgba(21,20,19,.6)}
-dialog h2{font-size:1.7rem;margin-bottom:.7rem}
-dialog form,.col{display:flex;flex-direction:column;gap:.7rem}
-textarea{width:100%;height:10rem;background:none;border:1px solid var(--s);padding:.6rem;border-radius:2px;color:inherit;font:inherit}
+dialog::backdrop{background:rgba(43,38,35,.5)}
+dialog h2{margin-bottom:.8rem}dialog form,.col{display:flex;flex-direction:column;gap:.7rem}
+textarea{width:100%;height:10rem;background:none;border:1px solid var(--l);padding:.6rem;border-radius:2px;font:inherit}
 #prog{list-style:none;padding:0;max-height:12rem;overflow:auto;font-size:.9rem}
+@media(max-width:760px){#app{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center}aside .marca{margin:0 1rem 0 0}aside .pie{margin:0 0 0 auto}}
 </style>
 </head>
 <body>
 
 <main id="login">
+  <div id="ilAcceso"></div>
   <h1>Panel de galerías</h1>
-  <label class="s" for="clave">Clave de administrador</label>
-  <input id="clave" type="password" autocomplete="current-password">
+  <input id="clave" type="password" placeholder="Clave de administrador" autocomplete="current-password">
   <p class="err" id="errLogin" hidden></p>
   <button class="btn" id="entrar" type="button">Entrar</button>
 </main>
 
-<main id="panel" hidden>
-  <div class="cab">
-    <h1>Galerías</h1>
-    <div><button class="btn" id="nueva" type="button">Nueva galería</button> <button class="btn sec" id="salir" type="button">Salir</button></div>
-  </div>
-  <div class="rej" id="rej"></div>
-</main>
+<div id="app" hidden>
+  <aside>
+    <div class="marca">Alexander Ge Erre</div>
+    <button data-v="inicio" class="on">Inicio</button>
+    <button data-v="galerias">Galerías de clientes</button>
+    <div class="pie"><button id="salir" type="button">Salir</button></div>
+  </aside>
+  <main id="vista"></main>
+</div>
 
 <dialog id="dNueva">
   <h2>Nueva galería</h2>
-  <form class="col" id="fNueva">
+  <form id="fNueva">
     <input id="nCliente" type="text" placeholder="Cliente (ej. Ana y Luis)" required>
-    <input id="nTitulo" type="text" placeholder="Título del evento (ej. Boda Ana y Luis)">
+    <input id="nTitulo" type="text" placeholder="Nombre de la galería (ej. Boda Ana y Luis)">
+    <select id="nOcasion"></select>
     <div><button class="btn" type="submit">Crear</button> <button class="btn sec" type="button" data-cerrar>Cancelar</button></div>
   </form>
 </dialog>
@@ -86,67 +109,114 @@ textarea{width:100%;height:10rem;background:none;border:1px solid var(--s);paddi
 <script>
 (function(){
   var API = 'https://script.google.com/macros/s/AKfycby23djlrjkanNYq62DS3HKVv9PCfFoU32mojjjcThKr00AK7EHKQuWE5mVQoMHBdBbA/exec';
-  var clave = '';
-  try { clave = sessionStorage.getItem('age-clave') || ''; } catch(e) {}
-  var galActual = null, galerias = [];
+  var BASE = 'https://alexandergeerre.github.io/galeria/';
+  var OCASIONES = ['General','Boda','Graduación','Maternidad','Quinceañera','Bautizo','Cumpleaños','Familia'];
+  var ESTADOS = ['En selección','Selección enviada','Entregada'];
+  var EXT = ['png','jpg','jpeg','webp'];
+  var clave = ''; try { clave = localStorage.getItem('age-clave') || ''; } catch(e) {}
+  var galerias = [], vista = 'inicio', galId = null, tab = 'panel', busca = '', fEstado = '', fOcasion = '';
   function $(s){ return document.querySelector(s); }
   function esc(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
-  function llamar(o){
-    o.clave = clave;
-    return fetch(API, { method: 'POST', body: JSON.stringify(o) }).then(function(r){ return r.json(); });
+  function ilus(n){ return '<img class="ilus" data-n="' + n + '" data-i="0" src="imagenes/' + n + '.png" alt="">'; }
+  document.addEventListener('error', function(e){
+    var t = e.target; if (!t || t.tagName !== 'IMG' || !t.dataset.n) return;
+    var i = +t.dataset.i + 1;
+    if (i < EXT.length) { t.dataset.i = i; t.src = 'imagenes/' + t.dataset.n + '.' + EXT[i]; } else t.style.visibility = 'hidden';
+  }, true);
+  function llamar(o){ o.clave = clave; return fetch(API, { method: 'POST', body: JSON.stringify(o) }).then(function(r){ return r.json(); }); }
+  function pegar(sel, h){ $(sel).innerHTML = h; }
+  function gal(id){ return galerias.filter(function(g){ return g.id === id; })[0]; }
+  function copiarTxt(t){ try { navigator.clipboard.writeText(t); } catch(e) {} }
+
+  function tarjeta(g){
+    var cv = g.portada ? '<img src="' + esc(g.portada) + '" alt="">' : ilus('admin-sin-portada');
+    return '<button class="tar" data-abrir="' + esc(g.id) + '"><div class="cv">' + cv + '</div><h3>' + esc(g.titulo) + '</h3><p class="s">' + esc(g.fecha) + '</p><span class="pill">' + esc(g.estado) + '</span></button>';
   }
-  function ver(login){ $('#login').hidden = !login; $('#panel').hidden = login; }
 
   function pintar(){
-    $('#rej').innerHTML = galerias.slice().reverse().map(function(g){
-      return '<article class="tar"><h2>' + esc(g.titulo) + '</h2>' +
-        '<p class="s">' + esc(g.cliente) + ' · ' + esc(g.fecha) + '</p>' +
-        '<span class="pill">' + esc(g.estado) + '</span>' +
-        '<p class="s">Código: <strong>' + esc(g.codigo) + '</strong> · ' + g.favoritas + ' favoritas</p>' +
-        '<div class="acc"><button class="btn" data-subir="' + esc(g.id) + '">Subir fotos</button>' +
-        '<button class="btn sec" data-fav="' + esc(g.id) + '">Favoritas</button>' +
-        '<button class="btn sec" data-entregar="' + esc(g.id) + '">Entregar</button>' +
-        '<a class="btn sec" href="' + esc(g.carpeta) + '" target="_blank" rel="noopener">Abrir en Drive</a></div></article>';
-    }).join('') || '<p class="s">Aún no hay galerías. Crea la primera.</p>';
+    document.querySelectorAll('aside [data-v]').forEach(function(b){ b.classList.toggle('on', b.dataset.v === vista); });
+    if (vista === 'inicio') return pintarInicio();
+    if (vista === 'galerias') return pintarLista();
+    pintarDetalle();
+  }
+
+  function pintarInicio(){
+    var ent = galerias.filter(function(g){ return g.estado === 'Entregada'; }).length;
+    var v = 0, f = 0; galerias.forEach(function(g){ v += g.vistas; f += g.favoritas; });
+    var pend = galerias.filter(function(g){ return g.estado === 'Selección enviada'; });
+    var act = pend.length ? pend.map(function(g){ return '<p><button class="btn sec" data-abrir="' + esc(g.id) + '">' + esc(g.titulo) + '</button> envió ' + g.favoritas + ' favoritas</p>'; }).join('')
+      : '<div class="vacio">' + ilus('admin-al-dia') + '<div><b>Todo al día</b><p class="s">No hay selecciones nuevas por revisar.</p></div></div>';
+    pegar('#vista', '<h1>Bienvenido, Alexander</h1>' +
+      '<div class="fila"><input id="bq" type="text" placeholder="Buscar galerías"><button class="btn" data-nueva>+ Crear galería</button></div>' +
+      '<h2>Resumen</h2><div class="cifras"><div><b>' + galerias.length + '</b><span class="s">Galerías</span></div><div><b>' + ent + '</b><span class="s">Entregadas</span></div><div><b>' + v + '</b><span class="s">Vistas</span></div><div><b>' + f + '</b><span class="s">Favoritas</span></div></div>' +
+      '<h2>Actividad reciente</h2><div class="card">' + act + '</div>' +
+      '<h2>Galerías recientes</h2><div class="rej" style="margin-top:.8rem">' + galerias.slice(-4).reverse().map(tarjeta).join('') + '</div>');
+    $('#bq').addEventListener('keydown', function(e){ if (e.key === 'Enter') { busca = e.target.value; vista = 'galerias'; pintar(); } });
+  }
+
+  function pintarLista(){
+    var l = galerias.filter(function(g){
+      return (!fEstado || g.estado === fEstado) && (!fOcasion || g.ocasion === fOcasion) &&
+        (!busca || (g.titulo + ' ' + g.cliente).toLowerCase().indexOf(busca.toLowerCase()) >= 0);
+    }).reverse();
+    var opt = function(arr, sel, todos){ return '<option value="">' + todos + '</option>' + arr.map(function(x){ return '<option' + (x === sel ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join(''); };
+    pegar('#vista', '<h1>Galerías de clientes</h1><div class="fila"><input id="bq" type="text" placeholder="Buscar por nombre" value="' + esc(busca) + '">' +
+      '<select id="fe">' + opt(ESTADOS, fEstado, 'Todos los estados') + '</select><select id="fo">' + opt(OCASIONES, fOcasion, 'Todas las ocasiones') + '</select></div>' +
+      '<div class="rej"><button class="tar nuevo" data-nueva><div class="cv">+</div><h3>Agregar galería</h3></button>' + l.map(tarjeta).join('') + '</div>' +
+      (galerias.length ? '' : '<div class="vacio card" style="margin-top:1.4rem">' + ilus('admin-vacio') + '<div><b>Aún no hay galerías</b><p class="s">Crea la primera con el botón de arriba.</p></div></div>'));
+    $('#bq').addEventListener('input', function(e){ busca = e.target.value; pintarLista(); var q = $('#bq'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); });
+    $('#fe').addEventListener('change', function(e){ fEstado = e.target.value; pintarLista(); });
+    $('#fo').addEventListener('change', function(e){ fOcasion = e.target.value; pintarLista(); });
+  }
+
+  function pintarDetalle(){
+    var g = gal(galId); if (!g) { vista = 'galerias'; return pintar(); }
+    var cuerpo = '';
+    if (tab === 'panel') {
+      cuerpo = '<div class="cifras"><div><b>' + g.vistas + '</b><span class="s">Vistas</span></div><div><b>' + g.favoritas + '</b><span class="s">Favoritas</span></div><div><b>' + esc(g.ocasion) + '</b><span class="s">Ocasión</span></div><div><b>' + esc(g.expira || 'Sin fecha') + '</b><span class="s">Caducidad</span></div></div>' +
+        '<p class="s">Cliente: ' + esc(g.cliente) + ' · creada el ' + esc(g.fecha) + '</p>' +
+        '<div class="fila"><button class="btn" data-entregar>Marcar como entregada</button><a class="btn sec" href="' + esc(g.carpeta) + '" target="_blank" rel="noopener">Abrir en Drive</a></div>';
+    } else if (tab === 'fotos') {
+      cuerpo = '<div class="lado">' + ilus('admin-subir') + '<div><p class="s">Sube las fotos de selección (se reducen solas) o las finales.</p><div class="fila"><button class="btn" data-subir>Subir fotos</button><button class="btn sec" data-fav>Ver favoritas</button></div></div></div>';
+    } else {
+      cuerpo = '<div class="lado">' + ilus('compartir-enlace') + '<div style="flex:1;min-width:15rem"><p class="s">Enlace de la galería</p><div class="copia"><input type="text" readonly value="' + esc(BASE) + '"><button class="btn sec" data-cp="' + esc(BASE) + '">Copiar</button></div>' +
+        '<p class="s">Código de acceso del cliente</p><div class="copia"><input type="text" readonly value="' + esc(g.codigo) + '"><button class="btn sec" data-cp="' + esc(g.codigo) + '">Copiar</button></div></div></div>';
+    }
+    pegar('#vista', '<button class="btn sec" data-atras>← Galerías</button><h1 style="margin-top:1rem">' + esc(g.titulo) + '</h1><span class="pill">' + esc(g.estado) + '</span>' +
+      '<div class="tabs">' + [['panel','Panel de control'],['fotos','Fotos'],['compartir','Compartir']].map(function(x){ return '<button data-tab="' + x[0] + '"' + (tab === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div>' + cuerpo);
   }
 
   function cargar(){
     return llamar({ accion: 'lista' }).then(function(d){
-      if (!d.ok) { clave = ''; try { sessionStorage.removeItem('age-clave'); } catch(e) {} ver(true); $('#errLogin').textContent = 'La clave no es correcta.'; $('#errLogin').hidden = false; return; }
-      galerias = d.galerias; ver(false); pintar();
-    }).catch(function(){ $('#errLogin').textContent = 'No pude conectar. Revisa tu internet.'; $('#errLogin').hidden = false; ver(true); });
+      if (!d.ok) { clave = ''; try { localStorage.removeItem('age-clave'); } catch(e) {} entrarVista(false); $('#errLogin').textContent = d.error === 'bloqueado' ? 'Demasiados intentos. Espera 15 minutos.' : 'La clave no es correcta.'; $('#errLogin').hidden = false; return; }
+      galerias = d.galerias; entrarVista(true); pintar();
+    }).catch(function(){ entrarVista(false); $('#errLogin').textContent = 'No pude conectar. Revisa tu internet.'; $('#errLogin').hidden = false; });
   }
+  function entrarVista(dentro){ $('#login').hidden = dentro; $('#app').hidden = !dentro; }
 
-  $('#entrar').addEventListener('click', function(){
-    clave = $('#clave').value;
-    try { sessionStorage.setItem('age-clave', clave); } catch(e) {}
-    $('#errLogin').hidden = true;
-    cargar();
-  });
+  $('#ilAcceso').innerHTML = ilus('admin-acceso');
+  $('#nOcasion').innerHTML = OCASIONES.map(function(o){ return '<option>' + o + '</option>'; }).join('');
+  $('#entrar').addEventListener('click', function(){ clave = $('#clave').value; try { localStorage.setItem('age-clave', clave); } catch(e) {} $('#errLogin').hidden = true; cargar(); });
   $('#clave').addEventListener('keydown', function(e){ if (e.key === 'Enter') $('#entrar').click(); });
-  $('#salir').addEventListener('click', function(){ clave = ''; try { sessionStorage.removeItem('age-clave'); } catch(e) {} $('#clave').value = ''; ver(true); });
+  $('#salir').addEventListener('click', function(){ clave = ''; try { localStorage.removeItem('age-clave'); } catch(e) {} $('#clave').value = ''; entrarVista(false); });
 
-  $('#nueva').addEventListener('click', function(){ $('#dNueva').showModal(); });
   $('#fNueva').addEventListener('submit', function(e){
     e.preventDefault();
-    llamar({ accion: 'nueva', cliente: $('#nCliente').value, titulo: $('#nTitulo').value }).then(function(d){
+    llamar({ accion: 'nueva', cliente: $('#nCliente').value, titulo: $('#nTitulo').value, ocasion: $('#nOcasion').value }).then(function(d){
       $('#dNueva').close();
-      if (d.ok) { $('#nCliente').value = ''; $('#nTitulo').value = ''; cargar(); } else alert('No se pudo crear la galería.');
+      if (d.ok) { $('#nCliente').value = ''; $('#nTitulo').value = ''; vista = 'galerias'; cargar(); } else alert('No se pudo crear la galería.');
     });
   });
 
   function reducir(file){
     return createImageBitmap(file).then(function(b){
-      var k = Math.min(1, 1600 / Math.max(b.width, b.height));
-      var c = document.createElement('canvas');
+      var k = Math.min(1, 1600 / Math.max(b.width, b.height)), c = document.createElement('canvas');
       c.width = Math.round(b.width * k); c.height = Math.round(b.height * k);
       c.getContext('2d').drawImage(b, 0, 0, c.width, c.height);
       return new Promise(function(r){ c.toBlob(r, 'image/jpeg', 0.85); });
     });
   }
-  function base64(blob){
-    return new Promise(function(r){ var fr = new FileReader(); fr.onload = function(){ r(fr.result.split(',')[1]); }; fr.readAsDataURL(blob); });
-  }
+  function base64(blob){ return new Promise(function(r){ var fr = new FileReader(); fr.onload = function(){ r(fr.result.split(',')[1]); }; fr.readAsDataURL(blob); }); }
 
   $('#goSubir').addEventListener('click', function(){
     var files = Array.from($('#archivos').files), dest = document.querySelector('input[name=dest]:checked').value;
@@ -162,42 +232,38 @@ textarea{width:100%;height:10rem;background:none;border:1px solid var(--s);paddi
           ? reducir(f).then(function(b){ nombre = f.name.replace(/\.[^.]+$/, '') + '.jpg'; return b; })
           : (f.size > 12e6 ? Promise.reject(new Error('pesa más de 12 MB, súbela directo a Drive')) : Promise.resolve(f));
         return obtener.then(function(blob){
-          return base64(blob).then(function(datos){
-            return llamar({ accion: 'subir', id: galActual, destino: dest, nombre: nombre, tipo: blob.type || 'image/jpeg', datos: datos });
-          });
+          return base64(blob).then(function(datos){ return llamar({ accion: 'subir', id: galId, destino: dest, nombre: nombre, tipo: blob.type || 'image/jpeg', datos: datos }); });
         }).then(function(d){ li.textContent = f.name + (d.ok ? ': lista' : ': error al guardar'); })
           .catch(function(e){ li.textContent = f.name + ': ' + (e.message || 'error'); });
       });
     });
-    cadena.then(function(){ btn.disabled = false; $('#archivos').value = ''; });
+    cadena.then(function(){ btn.disabled = false; $('#archivos').value = ''; cargar(); });
   });
 
   document.addEventListener('click', function(e){
-    var el;
-    if (e.target.closest('[data-cerrar]')) { e.target.closest('dialog').close(); return; }
-    if ((el = e.target.closest('[data-subir]'))) {
-      galActual = el.getAttribute('data-subir');
-      var g = galerias.filter(function(x){ return x.id === galActual; })[0];
-      $('#tSubir').textContent = 'Subir fotos · ' + (g ? g.titulo : '');
-      $('#prog').innerHTML = ''; $('#dSubir').showModal(); return;
-    }
-    if ((el = e.target.closest('[data-fav]'))) {
-      llamar({ accion: 'favoritas', id: el.getAttribute('data-fav') }).then(function(d){
+    var el, t = e.target;
+    if (t.closest('[data-cerrar]')) { t.closest('dialog').close(); return; }
+    if ((el = t.closest('aside [data-v]'))) { vista = el.dataset.v; pintar(); return; }
+    if (t.closest('[data-nueva]')) { $('#dNueva').showModal(); return; }
+    if ((el = t.closest('[data-abrir]'))) { galId = el.dataset.abrir; vista = 'detalle'; tab = 'panel'; pintar(); return; }
+    if (t.closest('[data-atras]')) { vista = 'galerias'; pintar(); return; }
+    if ((el = t.closest('[data-tab]'))) { tab = el.dataset.tab; pintar(); return; }
+    if ((el = t.closest('[data-cp]'))) { copiarTxt(el.dataset.cp); el.textContent = 'Copiado'; return; }
+    if (t.closest('[data-subir]')) { var g = gal(galId); $('#tSubir').textContent = 'Subir fotos · ' + (g ? g.titulo : ''); $('#prog').innerHTML = ''; $('#dSubir').showModal(); return; }
+    if (t.closest('[data-fav]')) {
+      llamar({ accion: 'favoritas', id: galId }).then(function(d){
         $('#txtFav').value = d.ok ? (d.nombres.length ? d.nombres.join(', ') : 'Aún no hay favoritas.') : 'No se pudo leer.';
         $('#dFav').showModal();
       }); return;
     }
-    if ((el = e.target.closest('[data-entregar]'))) {
+    if (t.closest('[data-entregar]')) {
       if (!confirm('¿Marcar como entregada? Se activan las descargas y se quita la marca de agua.')) return;
-      llamar({ accion: 'entregar', id: el.getAttribute('data-entregar') }).then(function(){ cargar(); });
+      llamar({ accion: 'entregar', id: galId }).then(function(){ cargar(); });
     }
   });
-  $('#copiar').addEventListener('click', function(){
-    $('#txtFav').select();
-    try { navigator.clipboard.writeText($('#txtFav').value); } catch(e) { document.execCommand('copy'); }
-  });
+  $('#copiar').addEventListener('click', function(){ $('#txtFav').select(); copiarTxt($('#txtFav').value); });
 
-  if (clave) cargar(); else ver(true);
+  if (clave) cargar();
 })();
 </script>
 </body>
