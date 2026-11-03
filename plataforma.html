@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alexander Ge Erre · Acceso para fotógrafos</title>
+<link rel="icon" href="imagenes/logo-icono.png.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--f:#FAF8F5;--tx:#2B2623;--su:#6f665e;--ln:#E6DFD6;--ac:#B08968;--cp:#9a8f84;--pn:#E6DFD6;--err:#A32D2D;--ok:#2f6b3f;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--f:#151413;--tx:#F1ECE4;--su:#a39a91;--ln:#2c2926;--ac:#C9A27A;--cp:#6b635b;--pn:#1c1a18;--err:#E58C8C;--ok:#8fd19e;color-scheme:dark}}
+*{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
+body{background:var(--f);color:var(--tx);font-family:'Jost',system-ui,sans-serif;line-height:1.55;min-height:100vh}
+h1,h2{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;line-height:1.1}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.vista{min-height:100vh;display:grid;grid-template-columns:1fr}
+.lado{background:var(--pn);display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
+.lado img{width:min(420px,90%);aspect-ratio:2.2/1;object-fit:cover;mix-blend-mode:multiply;filter:url(#aBlanco)}
+@media(prefers-color-scheme:dark){.lado img{mix-blend-mode:normal;filter:none;border-radius:6px}}
+.caja{display:flex;flex-direction:column;justify-content:center;gap:1rem;padding:2rem 1.5rem 3rem;max-width:30rem;width:100%;margin:0 auto}
+.caja h1{font-size:clamp(2.1rem,5vw,2.8rem)}
+.sub{color:var(--su)}
+.tabs{display:flex;gap:1.5rem;border-bottom:1px solid var(--ln)}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:.6rem 0;color:var(--su)}
+.tabs button[aria-selected="true"]{color:var(--tx);border-color:var(--ac)}
+label{display:block;font-size:.9rem;color:var(--su);margin-bottom:.25rem}
+input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:transparent;border-radius:2px}
+.campo{margin-bottom:.9rem}
+.btn{background:var(--tx);color:var(--f);border:1px solid var(--tx);padding:.8rem 1.4rem;border-radius:2px;font-weight:500;width:100%}
+.btn.sec{background:transparent;color:var(--tx);width:auto}
+.btn:disabled{opacity:.6;cursor:wait}
+.msg{font-size:.95rem;min-height:1.4em}
+.msg.err{color:var(--err)}.msg.ok{color:var(--ok)}
+.nota{font-size:.85rem;color:var(--su)}
+.top{display:flex;justify-content:space-between;align-items:center;padding:.8rem 1.5rem;border-bottom:1px solid var(--ln)}
+.top .marca{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.35rem}
+.panel{max-width:960px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.panel h1{font-size:2.4rem;margin-bottom:.3rem}
+.cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin:1.5rem 0}
+.cifra{border:1px solid var(--ln);border-radius:4px;padding:1rem 1.2rem}
+.cifra strong{display:block;font-family:'Cormorant Garamond',Georgia,serif;font-size:2.2rem;font-weight:500}
+@media(min-width:820px){#vAuth{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><filter id="aBlanco" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncR type="linear" slope="1.045"/><feFuncG type="linear" slope="1.05"/><feFuncB type="linear" slope="1.075"/></feComponentTransfer></filter></defs></svg>
+
+<main id="vAuth" class="vista" hidden>
+  <div class="lado"><img src="imagenes/logo-claro.png.jpg" alt="Alexander Ge Erre, fotografía y videografía profesional"></div>
+  <div class="caja">
+    <h1>Tu espacio como fotógrafo</h1>
+    <p class="sub">Entra o crea tu cuenta para administrar tus clientes y galerías.</p>
+    <div class="tabs" role="tablist">
+      <button id="tEntrar" role="tab" aria-selected="true">Entrar</button>
+      <button id="tCrear" role="tab" aria-selected="false">Crear cuenta</button>
+    </div>
+    <form id="fAuth" novalidate>
+      <div class="campo" id="cNombre" hidden><label for="nombre">Tu nombre</label><input id="nombre" autocomplete="name"></div>
+      <div class="campo"><label for="correo">Correo</label><input id="correo" type="email" autocomplete="email"></div>
+      <div class="campo"><label for="clave">Contraseña</label><input id="clave" type="password" autocomplete="current-password"></div>
+      <p class="msg" id="mAuth" role="alert"></p>
+      <button class="btn" id="bAuth" type="submit">Entrar</button>
+    </form>
+  </div>
+</main>
+
+<main id="vEspacio" class="vista" hidden>
+  <div class="lado"><img src="imagenes/logo-claro.png.jpg" alt=""></div>
+  <div class="caja">
+    <h1>Crea tu espacio</h1>
+    <p class="sub">Será el nombre que verán tus clientes en sus galerías.</p>
+    <form id="fEspacio" novalidate>
+      <div class="campo"><label for="estudio">Nombre de tu estudio o marca</label><input id="estudio" autocomplete="organization"></div>
+      <div class="campo"><label for="slug">Dirección corta</label><input id="slug" autocomplete="off"><p class="nota">Solo minúsculas, números y guiones. Por ejemplo: alexander-ge-erre</p></div>
+      <p class="msg" id="mEsp" role="alert"></p>
+      <button class="btn" id="bEsp" type="submit">Crear mi espacio</button>
+    </form>
+  </div>
+</main>
+
+<div id="vPanel" hidden>
+  <header class="top"><span class="marca" id="pMarca"></span><button class="btn sec" id="bSalir" type="button">Cerrar sesión</button></header>
+  <div class="panel">
+    <h1 id="pTitulo"></h1>
+    <p class="sub">Tu espacio está listo. Aquí irán tus clientes, galerías y fotos.</p>
+    <div class="cifras">
+      <div class="cifra"><strong id="nGal">–</strong>Galerías</div>
+      <div class="cifra"><strong id="nCli">–</strong>Clientes</div>
+      <div class="cifra"><strong id="nFot">–</strong>Fotos</div>
+    </div>
+    <p class="msg" id="mPan" role="alert"></p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  var SUPA_URL = 'https://wvinketfnxnfvseaeswz.supabase.co';
+  var SUPA_KEY = 'sb_publishable_U_cdYkMA0OievVpVNoxgSw_mJFAa9ZO';
+  var db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  function $(s){ return document.querySelector(s); }
+  var modo = 'entrar';
+
+  function ver(v){ ['vAuth','vEspacio','vPanel'].forEach(function(n){ $('#' + n).hidden = n !== v; }); window.scrollTo(0, 0); }
+  function msg(id, t, ok){ var e = $(id); e.textContent = t || ''; e.className = 'msg' + (t ? (ok ? ' ok' : ' err') : ''); }
+  function traducir(m){
+    m = String(m || '');
+    if (/invalid login/i.test(m)) return 'Correo o contraseña incorrectos.';
+    if (/already registered/i.test(m)) return 'Ese correo ya tiene cuenta. Entra con tu contraseña.';
+    if (/password/i.test(m) && /least/i.test(m)) return 'La contraseña debe tener al menos 8 caracteres.';
+    if (/rate limit/i.test(m)) return 'Demasiados intentos. Espera unos minutos.';
+    if (/permission denied/i.test(m)) return 'Falta un permiso en Supabase (permission denied). Avísale a Claude.';
+    return m;
+  }
+  function slugify(s){
+    return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  }
+  function ocupado(b, t){ b.disabled = t; }
+
+  function pestana(m){
+    modo = m;
+    $('#tEntrar').setAttribute('aria-selected', m === 'entrar');
+    $('#tCrear').setAttribute('aria-selected', m === 'crear');
+    $('#cNombre').hidden = m !== 'crear';
+    $('#bAuth').textContent = m === 'crear' ? 'Crear cuenta' : 'Entrar';
+    $('#clave').setAttribute('autocomplete', m === 'crear' ? 'new-password' : 'current-password');
+    msg('#mAuth', '');
+  }
+  $('#tEntrar').addEventListener('click', function(){ pestana('entrar'); });
+  $('#tCrear').addEventListener('click', function(){ pestana('crear'); });
+
+  $('#fAuth').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var correo = $('#correo').value.trim(), clave = $('#clave').value;
+    if (!correo || !clave) { msg('#mAuth', 'Escribe tu correo y tu contraseña.'); return; }
+    if (modo === 'crear' && clave.length < 8) { msg('#mAuth', 'La contraseña debe tener al menos 8 caracteres.'); return; }
+    ocupado($('#bAuth'), true); msg('#mAuth', '');
+    var r = modo === 'crear'
+      ? await db.auth.signUp({ email: correo, password: clave, options: { data: { full_name: $('#nombre').value.trim() } } })
+      : await db.auth.signInWithPassword({ email: correo, password: clave });
+    ocupado($('#bAuth'), false);
+    if (r.error) { msg('#mAuth', traducir(r.error.message)); return; }
+    if (!r.data.session) { msg('#mAuth', 'Cuenta creada. Revisa tu correo para confirmarla y luego entra.', true); return; }
+    cargar();
+  });
+
+  async function cargar(){
+    var u = await db.auth.getUser();
+    if (!u.data || !u.data.user) { ver('vAuth'); return; }
+    var r = await db.from('photographers').select('id,studio_name,slug').eq('owner_id', u.data.user.id).maybeSingle();
+    if (r.error) { ver('vAuth'); msg('#mAuth', traducir(r.error.message)); return; }
+    if (!r.data) { ver('vEspacio'); return; }
+    $('#pMarca').textContent = r.data.studio_name;
+    $('#pTitulo').textContent = 'Hola, ' + r.data.studio_name;
+    ver('vPanel');
+    [['galleries', '#nGal'], ['clients', '#nCli'], ['photos', '#nFot']].forEach(async function(t){
+      var c = await db.from(t[0]).select('id', { count: 'exact', head: true });
+      if (c.error) { msg('#mPan', traducir(c.error.message)); return; }
+      $(t[1]).textContent = c.count;
+    });
+  }
+
+  $('#estudio').addEventListener('input', function(){ $('#slug').value = slugify($('#estudio').value); });
+  $('#fEspacio').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var nombre = $('#estudio').value.trim(), slug = slugify($('#slug').value);
+    if (!nombre || !slug) { msg('#mEsp', 'Escribe el nombre de tu estudio.'); return; }
+    var u = await db.auth.getUser();
+    ocupado($('#bEsp'), true); msg('#mEsp', '');
+    var r = await db.from('photographers').insert({ owner_id: u.data.user.id, studio_name: nombre, slug: slug });
+    ocupado($('#bEsp'), false);
+    if (r.error) { msg('#mEsp', r.error.code === '23505' ? 'Esa dirección ya está en uso. Prueba otra.' : traducir(r.error.message)); return; }
+    cargar();
+  });
+
+  $('#bSalir').addEventListener('click', async function(){ await db.auth.signOut(); pestana('entrar'); ver('vAuth'); });
+
+  pestana('entrar');
+  cargar();
+})();
+</script>
+</body>
+</html>
