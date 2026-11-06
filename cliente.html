@@ -36,6 +36,7 @@ header.h{text-align:center;padding:2.2rem 1rem 1rem}header .e{font-family:'Cormo
 header h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.3rem 0}
 .tabs{display:flex;justify-content:center;gap:1.8rem;border-bottom:1px solid var(--l);margin:1.2rem 1rem 1.6rem;flex-wrap:wrap}
 .tabs button{background:none;border:0;padding:.6rem 0;color:var(--s);border-bottom:2px solid transparent}.tabs button.on{color:var(--t);border-color:var(--a)}
+.escs{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:-.6rem 1rem 1.2rem}.escs button{background:none;border:1px solid var(--l);border-radius:999px;padding:.3rem .9rem;color:var(--s)}.escs button.on{background:var(--t);color:var(--f);border-color:var(--t)}
 .rej{columns:260px;column-gap:14px;padding:0 14px 6rem;max-width:1400px;margin:0 auto}
 .f{position:relative;margin:0 0 14px;break-inside:avoid;background:var(--l);border-radius:6px;overflow:hidden}.f img{width:100%;height:100%;display:block;object-fit:cover;cursor:zoom-in}
 .co{position:absolute;top:10px;right:10px;width:42px;height:42px;border-radius:50%;border:1px solid var(--a);background:rgba(250,248,245,.92);display:grid;place-items:center;color:#2B2623}
@@ -82,6 +83,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
 <section id="galeria" hidden>
   <header class="h"><div class="e" id="est"></div><h1 id="tit"></h1><p class="s" id="fec"></p><p id="desc"></p><p id="guia"></p><div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem"><button class="btn sec" id="tema" type="button" style="padding:.3rem 1rem;font-size:.85rem">Tema: automático</button><button class="btn sec" id="salir" style="padding:.3rem 1rem;font-size:.85rem">Salir</button></div></header>
   <nav class="tabs" id="tabs"></nav>
+  <div class="escs" id="escs" hidden></div>
   <div class="rej" id="rej"></div>
   <div class="barra" id="barraI" hidden><span id="cntI"></span><button class="btn" id="enviarI" type="button">Enviar pedido de impresión</button></div>
   <div class="barra" id="barra" hidden><span id="cnt"></span><button class="btn" id="enviar" type="button">Enviar selección</button></div>
@@ -140,7 +142,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     window.scrollTo(0, 0); ajustarPortada();
   }
 
-  var imps = new Set(), acc = { t: '', c: '' }, codigo = '', G = null, E = null, fotos = [], favs = new Set(), tab = 'todas', lista = [], vi = 0;
+  var escSel = '', imps = new Set(), acc = { t: '', c: '', s: '' }, codigo = '', G = null, E = null, fotos = [], favs = new Set(), tab = 'todas', lista = [], vi = 0;
   function sel(){ return fotos.filter(function(f){ return f.tipo === 'selection'; }); }
   function fin(){ return fotos.filter(function(f){ return f.tipo === 'final'; }); }
   function puede(){ return G && G.seleccion; }
@@ -156,9 +158,9 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   aplicarTemaC();
 
   function abrir(c, silencioso){
-    c = (c || '').trim(); if (!c && !acc.t) return;
+    c = (c || '').trim(); if (!c && !acc.t && !acc.s) return;
     var btn = $('#go'); btn.disabled = true; btn.textContent = 'Entrando…'; $('#err').textContent = ''; $('#ilErr').innerHTML = '';
-    post('/api/client/open', { code: c, token: acc.t, visitor: visitor }).then(function(d){
+    post('/api/client/open', { code: c, token: acc.t, scene: acc.s, visitor: visitor }).then(function(d){
       if (!d.ok) {
         if (silencioso) { escribir('age-acceso', ''); escribir('age-codigo-cliente', ''); return; }
         if (d.error === 'pide_codigo') { $('#err').textContent = 'Esta galería está protegida. Escribe el código que te enviaron.'; $('#cod').focus(); return; }
@@ -166,13 +168,13 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
         $('#err').textContent = exp ? 'Esta galería ya expiró. Escríbeme y la reactivo.' : d.error === 'sin_publicar' ? 'Esta galería todavía no está publicada.' : d.error === 'servidor' ? 'La galería tuvo un problema técnico (servidor). Inténtalo en unos minutos.' : 'El código no es correcto. Revisa que esté escrito igual que te lo envié.';
         $('#ilErr').innerHTML = ilus(exp ? 'galeria-expirada' : 'enlace-no-valido'); return;
       }
-      codigo = c; escribir('age-codigo-cliente', ''); escribir('age-acceso', JSON.stringify({ t: acc.t, c: c }));
-      G = d.galeria; E = d.estudio; fotos = d.fotos || []; favs = new Set(d.favoritas || []); imps = new Set(d.impresiones || []); tab = G.estado === 'delivered' && fin().length ? 'finales' : 'todas';
+      codigo = c; escribir('age-codigo-cliente', ''); escribir('age-acceso', JSON.stringify({ t: acc.t, s: acc.s, c: c }));
+      G = d.galeria; E = d.estudio; fotos = d.fotos || []; favs = new Set(d.favoritas || []); imps = new Set(d.impresiones || []); tab = G.estado === 'delivered' && fin().length ? 'finales' : 'todas'; escSel = '';
       document.title = G.titulo;
       $('#est').textContent = E && E.studio_name ? E.studio_name : '';
       $('#tit').textContent = G.titulo; $('#fec').textContent = fechaLarga(G.fecha);
       $('#guia').textContent = G.estado === 'delivered' && G.bloqueada ? 'Tus fotos finales están listas. Las verás con marca de agua y podrás descargarlas sin ella cuando se confirme el pago.' : G.estado === 'delivered' ? 'Tus fotos finales ya están listas. Descárgalas en la pestaña Fotos finales.' : puede() ? 'Toca el corazón en tus fotos favoritas y luego envía tu selección.' : '';
-      $('#desc').textContent = [G.tipo, G.ubicacion, G.descripcion].filter(Boolean).join(' · ');
+      $('#desc').textContent = [G.escenaUnica, G.tipo, G.ubicacion, G.descripcion].filter(Boolean).join(' · ');
       if (G.paleta && G.paleta !== 'auto') document.documentElement.setAttribute('data-pal', G.paleta); else document.documentElement.removeAttribute('data-pal');
       $('#rej').className = 'rej ' + (G.estilo || 'clasico');
       pintar();
@@ -196,11 +198,14 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     var r = f.ancho && f.alto ? f.ancho + ' / ' + f.alto : '3 / 2';
     return '<figure class="f" style="aspect-ratio:' + r + '"><img loading="lazy" data-ver="' + f.id + '" alt="" src="' + esc(url(f.t)) + '">' + (G.descargas ? '<a class="dl" href="' + esc(url(f.t, true)) + '" download aria-label="Descargar">' + DESCARGA + '</a>' : '') + '<button class="pr" data-pr="' + f.id + '" aria-pressed="' + imps.has(f.id) + '" type="button">' + PRINTER + '<span>Imprimir</span></button></figure>';
   }
+  function enEsc(f){ return !escSel || f.escena === escSel; }
   function pintar(){
-    var s = sel(), fn = fin(), mias = s.filter(function(f){ return favs.has(f.id); });
+    var s = sel().filter(enEsc), fn = fin().filter(enEsc), mias = s.filter(function(f){ return favs.has(f.id); });
     var tabs = [['todas', 'Todas ' + s.length]];
     if (puede() || favs.size) tabs.push(['favoritas', 'Mis favoritas ' + mias.length]);
     if (G.estado === 'delivered') tabs.push(['finales', 'Fotos finales ' + fn.length]);
+    var es = G.escenas || [], ce = $('#escs'); ce.hidden = es.length < 2 || !!G.escenaUnica;
+    if (!ce.hidden) ce.innerHTML = [['', 'Todas']].concat(es.map(function(x){ return [x.id, x.nombre]; })).map(function(x){ return '<button data-esc="' + esc(x[0]) + '"' + (escSel === x[0] ? ' class="on"' : '') + '>' + esc(x[1]) + '</button>'; }).join('');
     $('#tabs').innerHTML = tabs.map(function(t){ return '<button data-tab="' + t[0] + '"' + (tab === t[0] ? ' class="on"' : '') + '>' + t[1] + '</button>'; }).join('');
     var h = '';
     if (tab === 'todas') { lista = s; h = s.length ? s.map(tarjeta).join('') : '<p class="vacio">Pronto verás aquí tus fotos.</p>'; }
@@ -219,7 +224,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   function alternarImp(id){
     var on = !imps.has(id); if (on) imps.add(id); else imps.delete(id);
     document.querySelectorAll('[data-pr="' + id + '"]').forEach(function(b){ b.setAttribute('aria-pressed', on); }); contarImp();
-    post('/api/client/print', { code: codigo, token: acc.t, visitor: visitor, photo: id, active: on }).then(function(d){ if (!d.ok) throw new Error(d.error); }).catch(function(){
+    post('/api/client/print', { code: codigo, token: acc.t, scene: acc.s, visitor: visitor, photo: id, active: on }).then(function(d){ if (!d.ok) throw new Error(d.error); }).catch(function(){
       if (on) imps.delete(id); else imps.add(id);
       document.querySelectorAll('[data-pr="' + id + '"]').forEach(function(b){ b.setAttribute('aria-pressed', !on); }); contarImp();
       aviso('No se pudo guardar. Inténtalo de nuevo.');
@@ -235,7 +240,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   }
   function alternar(id){
     var on = !favs.has(id); poner(id, on);
-    post('/api/client/favorite', { code: codigo, token: acc.t, visitor: visitor, photo: id, active: on }).then(function(d){
+    post('/api/client/favorite', { code: codigo, token: acc.t, scene: acc.s, visitor: visitor, photo: id, active: on }).then(function(d){
       if (!d.ok) throw new Error(d.error);
     }).catch(function(e){
       poner(id, !on);
@@ -256,11 +261,12 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     if ((el = t.closest('#visor .co'))) { alternar(lista[vi].id); return; }
     if ((el = t.closest('.co[data-fav]'))) { alternar(el.dataset.fav); return; }
     if ((el = t.closest('.pr[data-pr]'))) { alternarImp(el.dataset.pr); return; }
-    if (t.closest('#enviarI')) { post('/api/client/print-send', { code: codigo, token: acc.t, visitor: visitor }).then(function(d){ if (!d.ok) throw new Error(d.error); aviso('Listo, recibí tu pedido de ' + d.cantidad + (d.cantidad === 1 ? ' foto' : ' fotos') + ' para imprimir. Te escribo para tamaños y precios.'); }).catch(function(){ aviso('No se pudo enviar el pedido. Inténtalo de nuevo.'); }); return; }
+    if (t.closest('#enviarI')) { post('/api/client/print-send', { code: codigo, token: acc.t, scene: acc.s, visitor: visitor }).then(function(d){ if (!d.ok) throw new Error(d.error); aviso('Listo, recibí tu pedido de ' + d.cantidad + (d.cantidad === 1 ? ' foto' : ' fotos') + ' para imprimir. Te escribo para tamaños y precios.'); }).catch(function(){ aviso('No se pudo enviar el pedido. Inténtalo de nuevo.'); }); return; }
     if (t.closest('#dtodas')) {
       fin().forEach(function(f, i){ setTimeout(function(){ var a = document.createElement('a'); a.href = url(f.t, true); a.download = ''; document.body.appendChild(a); a.click(); a.remove(); }, i * 700); });
       aviso('Iniciando las descargas. Si tu navegador pregunta, permite descargas múltiples.'); return;
     }
+    if ((el = t.closest('[data-esc]'))) { escSel = el.dataset.esc; pintar(); return; }
     if ((el = t.closest('[data-tab]'))) { tab = el.dataset.tab; pintar(); return; }
     if ((el = t.closest('.f img'))) { var id = el.dataset.ver; for (var i = 0; i < lista.length; i++) if (lista[i].id === id) { verFoto(i); visor.showModal(); break; } return; }
     if (t.closest('#visor .x')) visor.close();
@@ -279,21 +285,22 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   $('#no').addEventListener('click', function(){ $('#conf').close(); });
   $('#ok').addEventListener('click', function(){
     $('#conf').close();
-    post('/api/client/send', { code: codigo, token: acc.t, visitor: visitor }).then(function(d){
+    post('/api/client/send', { code: codigo, token: acc.t, scene: acc.s, visitor: visitor }).then(function(d){
       if (!d.ok) throw new Error(d.error);
       $('#txtG').textContent = 'Recibí tus ' + d.cantidad + (d.cantidad === 1 ? ' foto' : ' fotos') + '. Voy a editarlas y te aviso cuando estén listas.';
       mostrar('gracias');
     }).catch(function(){ aviso('No se pudo enviar tu selección. Inténtalo de nuevo.'); });
   });
   $('#volver').addEventListener('click', function(){ mostrar('galeria'); });
-  $('#salir').addEventListener('click', function(){ escribir('age-codigo-cliente', ''); escribir('age-acceso', ''); acc = { t: '', c: '' }; codigo = ''; $('#cod').value = ''; history.replaceState(null, '', location.pathname); mostrar('acceso'); });
+  $('#salir').addEventListener('click', function(){ escribir('age-codigo-cliente', ''); escribir('age-acceso', ''); acc = { t: '', c: '', s: '' }; codigo = ''; $('#cod').value = ''; history.replaceState(null, '', location.pathname); mostrar('acceso'); });
   $('#fa').addEventListener('submit', function(e){ e.preventDefault(); abrir($('#cod').value); });
 
-  var qs = new URLSearchParams(location.search), gt = qs.get('g'), gc = qs.get('c'), guardado = null;
+  var qs = new URLSearchParams(location.search), gt = qs.get('g'), gs = qs.get('s'), gc = qs.get('c'), guardado = null;
   try { guardado = JSON.parse(leer('age-acceso') || 'null'); } catch (e) {}
-  if (gt) { acc.t = gt; abrir(guardado && guardado.t === gt ? guardado.c : '', false); }
+  if (gs) { acc.s = gs; abrir(guardado && guardado.s === gs ? guardado.c : '', false); }
+  else if (gt) { acc.t = gt; abrir(guardado && guardado.t === gt ? guardado.c : '', false); }
   else if (gc) { $('#cod').value = gc; abrir(gc, false); }
-  else if (guardado && (guardado.t || guardado.c)) { acc.t = guardado.t || ''; $('#cod').value = guardado.c || ''; abrir(guardado.c || '', true); }
+  else if (guardado && (guardado.t || guardado.s || guardado.c)) { acc.t = guardado.t || ''; acc.s = guardado.s || ''; $('#cod').value = guardado.c || ''; abrir(guardado.c || '', true); }
   else if (leer('age-codigo-cliente')) { $('#cod').value = leer('age-codigo-cliente'); abrir(leer('age-codigo-cliente'), true); }
 })();
 </script>
