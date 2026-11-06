@@ -20,7 +20,7 @@ button{cursor:pointer}
 :focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 .vista{min-height:100vh;display:grid;grid-template-columns:1fr}
 .lado{background:var(--pn);display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
-.lado img{width:min(420px,90%);aspect-ratio:2.2/1;object-fit:cover;mix-blend-mode:multiply;filter:url(#aBlanco)}
+.lado picture{display:contents}.lado img{width:min(420px,90%);aspect-ratio:2.2/1;object-fit:cover;mix-blend-mode:multiply;filter:url(#aBlanco)}
 @media(prefers-color-scheme:dark){.lado img{mix-blend-mode:normal;filter:none;border-radius:6px}}
 .caja{display:flex;flex-direction:column;justify-content:center;gap:1rem;padding:2rem 1.5rem 3rem;max-width:30rem;width:100%;margin:0 auto}
 .caja h1{font-size:clamp(2.1rem,5vw,2.8rem)}
@@ -37,6 +37,7 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
 .msg{font-size:.95rem;min-height:1.4em}
 .msg.err{color:var(--err)}.msg.ok{color:var(--ok)}
 .nota{font-size:.85rem;color:var(--su)}
+.lnk{background:none;border:0;color:var(--su);text-decoration:underline;font-size:.9rem;padding:0;margin:0 0 .9rem}
 .top{display:flex;justify-content:space-between;align-items:center;padding:.8rem 1.5rem;border-bottom:1px solid var(--ln)}
 .top .marca{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.35rem}
 .panel{max-width:960px;margin:0 auto;padding:2rem 1.5rem 4rem}
@@ -51,7 +52,7 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><filter id="aBlanco" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncR type="linear" slope="1.045"/><feFuncG type="linear" slope="1.05"/><feFuncB type="linear" slope="1.075"/></feComponentTransfer></filter></defs></svg>
 
 <main id="vAuth" class="vista" hidden>
-  <div class="lado"><img src="imagenes/logo-claro.png.jpg" alt="Alexander Ge Erre, fotografía y videografía profesional"></div>
+  <div class="lado"><picture><source media="(prefers-color-scheme: dark)" srcset="imagenes/logo-oscuro.png.jpg"><img src="imagenes/logo-claro.png.jpg" alt="Alexander Ge Erre, fotografía y videografía profesional"></picture></div>
   <div class="caja">
     <h1>Tu espacio como fotógrafo</h1>
     <p class="sub">Entra o crea tu cuenta para administrar tus clientes y galerías.</p>
@@ -63,6 +64,7 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
       <div class="campo" id="cNombre" hidden><label for="nombre">Tu nombre</label><input id="nombre" autocomplete="name"></div>
       <div class="campo"><label for="correo">Correo</label><input id="correo" type="email" autocomplete="email"></div>
       <div class="campo"><label for="clave">Contraseña</label><input id="clave" type="password" autocomplete="current-password"></div>
+      <button type="button" class="lnk" id="bOlvide">¿Olvidaste tu contraseña?</button>
       <p class="msg" id="mAuth" role="alert"></p>
       <button class="btn" id="bAuth" type="submit">Entrar</button>
     </form>
@@ -70,7 +72,7 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
 </main>
 
 <main id="vEspacio" class="vista" hidden>
-  <div class="lado"><img src="imagenes/logo-claro.png.jpg" alt=""></div>
+  <div class="lado"><picture><source media="(prefers-color-scheme: dark)" srcset="imagenes/logo-oscuro.png.jpg"><img src="imagenes/logo-claro.png.jpg" alt=""></picture></div>
   <div class="caja">
     <h1>Crea tu espacio</h1>
     <p class="sub">Será el nombre que verán tus clientes en sus galerías.</p>
@@ -83,6 +85,20 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
   </div>
 </main>
 
+<main id="vNueva" class="vista" hidden>
+  <div class="lado"><picture><source media="(prefers-color-scheme: dark)" srcset="imagenes/logo-oscuro.png.jpg"><img src="imagenes/logo-claro.png.jpg" alt=""></picture></div>
+  <div class="caja">
+    <h1>Nueva contraseña</h1>
+    <p class="sub">Escribe la contraseña que usarás de ahora en adelante.</p>
+    <form id="fNueva" novalidate>
+      <div class="campo"><label for="nclave">Nueva contraseña</label><input id="nclave" type="password" autocomplete="new-password"></div>
+      <div class="campo"><label for="nclave2">Repite la contraseña</label><input id="nclave2" type="password" autocomplete="new-password"></div>
+      <p class="msg" id="mNueva" role="alert"></p>
+      <button class="btn" id="bNueva" type="submit">Guardar contraseña</button>
+    </form>
+  </div>
+</main>
+
 <div id="vPanel" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -91,17 +107,20 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
 (function(){
   var SUPA_URL = 'https://wvinketfnxnfvseaeswz.supabase.co';
   var SUPA_KEY = 'sb_publishable_U_cdYkMA0OievVpVNoxgSw_mJFAa9ZO';
-  var db = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+  var db = window.supabase.createClient(SUPA_URL, SUPA_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+  var AQUI = location.origin + location.pathname;
+  var recuperando = /type=recovery/.test(location.hash);
   function $(s){ return document.querySelector(s); }
   var modo = 'entrar';
 
-  function ver(v){ ['vAuth','vEspacio','vPanel'].forEach(function(n){ $('#' + n).hidden = n !== v; }); window.scrollTo(0, 0); }
+  function ver(v){ ['vAuth','vEspacio','vNueva','vPanel'].forEach(function(n){ $('#' + n).hidden = n !== v; }); window.scrollTo(0, 0); }
   function msg(id, t, ok){ var e = $(id); e.textContent = t || ''; e.className = 'msg' + (t ? (ok ? ' ok' : ' err') : ''); }
   function traducir(m){
     m = String(m || '');
     if (/invalid login/i.test(m)) return 'Correo o contraseña incorrectos.';
     if (/already registered/i.test(m)) return 'Ese correo ya tiene cuenta. Entra con tu contraseña.';
     if (/password/i.test(m) && /least/i.test(m)) return 'La contraseña debe tener al menos 8 caracteres.';
+    if (/not confirmed/i.test(m)) return 'Primero confirma tu correo con el enlace que te enviamos.';
     if (/rate limit/i.test(m)) return 'Demasiados intentos. Espera unos minutos.';
     if (/permission denied/i.test(m)) return 'Falta un permiso en Supabase (permission denied). Avísale a Claude.';
     return m;
@@ -118,6 +137,7 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
     $('#cNombre').hidden = m !== 'crear';
     $('#bAuth').textContent = m === 'crear' ? 'Crear cuenta' : 'Entrar';
     $('#clave').setAttribute('autocomplete', m === 'crear' ? 'new-password' : 'current-password');
+    $('#bOlvide').hidden = m === 'crear';
     msg('#mAuth', '');
   }
   $('#tEntrar').addEventListener('click', function(){ pestana('entrar'); });
@@ -130,7 +150,7 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
     if (modo === 'crear' && clave.length < 8) { msg('#mAuth', 'La contraseña debe tener al menos 8 caracteres.'); return; }
     ocupado($('#bAuth'), true); msg('#mAuth', '');
     var r = modo === 'crear'
-      ? await db.auth.signUp({ email: correo, password: clave, options: { data: { full_name: $('#nombre').value.trim() } } })
+      ? await db.auth.signUp({ email: correo, password: clave, options: { emailRedirectTo: AQUI, data: { full_name: $('#nombre').value.trim() } } })
       : await db.auth.signInWithPassword({ email: correo, password: clave });
     ocupado($('#bAuth'), false);
     if (r.error) { msg('#mAuth', traducir(r.error.message)); return; }
@@ -139,9 +159,10 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
   });
 
   async function cargar(){
-    var u = await db.auth.getUser();
-    if (!u.data || !u.data.user) { ver('vAuth'); return; }
-    var r = await db.from('photographers').select('id,studio_name,slug').eq('owner_id', u.data.user.id).maybeSingle();
+    if (recuperando) { ver('vNueva'); return; }
+    var ss = await db.auth.getSession();
+    if (!ss.data || !ss.data.session) { ver('vAuth'); return; }
+    var r = await db.from('photographers').select('id,studio_name,slug').eq('owner_id', ss.data.session.user.id).maybeSingle();
     if (r.error) { ver('vAuth'); msg('#mAuth', traducir(r.error.message)); return; }
     if (!r.data) { ver('vEspacio'); return; }
     ver('vPanel');
@@ -153,7 +174,7 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
     e.preventDefault();
     var nombre = $('#estudio').value.trim(), slug = slugify($('#slug').value);
     if (!nombre || !slug) { msg('#mEsp', 'Escribe el nombre de tu estudio.'); return; }
-    var u = await db.auth.getUser();
+    var u = { data: { user: (await db.auth.getSession()).data.session.user } };
     ocupado($('#bEsp'), true); msg('#mEsp', '');
     var r = await db.from('photographers').insert({ owner_id: u.data.user.id, studio_name: nombre, slug: slug });
     ocupado($('#bEsp'), false);
@@ -162,6 +183,26 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
   });
 
   window.cerrarSesion = async function(){ await db.auth.signOut(); pestana('entrar'); ver('vAuth'); };
+
+  $('#bOlvide').addEventListener('click', async function(){
+    var correo = $('#correo').value.trim();
+    if (!correo) { msg('#mAuth', 'Escribe tu correo arriba y vuelve a pulsar aquí.'); return; }
+    var r = await db.auth.resetPasswordForEmail(correo, { redirectTo: AQUI });
+    if (r.error) { msg('#mAuth', traducir(r.error.message)); return; }
+    msg('#mAuth', 'Listo. Si ese correo tiene cuenta, te enviamos un enlace para crear una nueva contraseña.', true);
+  });
+  db.auth.onAuthStateChange(function(ev){ if (ev === 'PASSWORD_RECOVERY') { recuperando = true; ver('vNueva'); } });
+  $('#fNueva').addEventListener('submit', async function(e){
+    e.preventDefault();
+    var a = $('#nclave').value, b = $('#nclave2').value;
+    if (a.length < 8) { msg('#mNueva', 'La contraseña debe tener al menos 8 caracteres.'); return; }
+    if (a !== b) { msg('#mNueva', 'Las dos contraseñas no coinciden.'); return; }
+    ocupado($('#bNueva'), true);
+    var r = await db.auth.updateUser({ password: a });
+    ocupado($('#bNueva'), false);
+    if (r.error) { msg('#mNueva', traducir(r.error.message)); return; }
+    recuperando = false; history.replaceState(null, '', AQUI); cargar();
+  });
 
   pestana('entrar');
   cargar();
