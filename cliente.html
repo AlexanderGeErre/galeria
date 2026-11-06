@@ -43,6 +43,8 @@ header h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.3rem 0}
 .fin{margin:0 0 14px;break-inside:avoid;border:1px solid var(--l);border-radius:8px;overflow:hidden;background:var(--c)}.fin img{width:100%;display:block}.fin div{padding:.7rem .9rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem;font-size:.85rem}
 .fin a{text-decoration:none}.vacio{text-align:center;color:var(--s);padding:3rem 1rem;column-span:all}
 .dl{position:absolute;right:10px;bottom:10px;width:42px;height:42px;border-radius:50%;background:var(--a);color:#fff;display:grid;place-items:center;text-decoration:none}.dl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pr{position:absolute;left:10px;bottom:10px;height:42px;padding:0 .9rem 0 .7rem;border-radius:999px;border:1px solid var(--a);background:rgba(250,248,245,.94);color:#2B2623;display:flex;align-items:center;gap:.4rem;font-size:.85rem}.pr svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.pr[aria-pressed=true]{background:var(--a);color:#fff}
+#visor .pr{position:absolute;left:50%;transform:translateX(-50%);bottom:1rem}
 .masivo{column-span:all;text-align:center;margin:0 0 1.2rem}#visor .dlv{position:absolute;bottom:1rem;right:1rem;text-decoration:none;padding:.5rem 1.1rem}
 #portada{position:fixed;top:0;left:0;right:0;height:100vh;height:100svh;z-index:20;display:grid;place-items:end center;color:#fff;text-align:center;overflow:hidden;background:#151413}
 #portada>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}#portada:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),rgba(0,0,0,.05) 60%)}
@@ -81,6 +83,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   <header class="h"><div class="e" id="est"></div><h1 id="tit"></h1><p class="s" id="fec"></p><p id="desc"></p><p id="guia"></p><div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem"><button class="btn sec" id="tema" type="button" style="padding:.3rem 1rem;font-size:.85rem">Tema: automático</button><button class="btn sec" id="salir" style="padding:.3rem 1rem;font-size:.85rem">Salir</button></div></header>
   <nav class="tabs" id="tabs"></nav>
   <div class="rej" id="rej"></div>
+  <div class="barra" id="barraI" hidden><span id="cntI"></span><button class="btn" id="enviarI" type="button">Enviar pedido de impresión</button></div>
   <div class="barra" id="barra" hidden><span id="cnt"></span><button class="btn" id="enviar" type="button">Enviar selección</button></div>
 </section>
 
@@ -89,7 +92,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   <h1>¡Gracias!</h1><p class="s" id="txtG"></p><button class="btn sec" id="volver" type="button">Volver a mis fotos</button>
 </main>
 
-<dialog id="visor"><button class="x" aria-label="Cerrar">×</button><button class="p" aria-label="Anterior">‹</button><button class="n" aria-label="Siguiente">›</button><img alt=""><button class="co" id="vco" aria-pressed="false" aria-label="Favorita"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9.1C1.2 8.8 3 5.5 6.2 5.5c2 0 3.2 1.1 3.8 2.2h4c.6-1.1 1.8-2.2 3.8-2.2 3.2 0 5 3.3 3.5 6.4C19 16.4 12 21 12 21z" transform="translate(0 -1)"/></svg></button><span class="nm" id="vnm"></span><a class="btn dlv" id="vdl" href="#" hidden>Descargar</a></dialog>
+<dialog id="visor"><button class="x" aria-label="Cerrar">×</button><button class="p" aria-label="Anterior">‹</button><button class="n" aria-label="Siguiente">›</button><img alt=""><button class="pr" id="vpr" type="button" hidden></button><button class="co" id="vco" aria-pressed="false" aria-label="Favorita"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9.1C1.2 8.8 3 5.5 6.2 5.5c2 0 3.2 1.1 3.8 2.2h4c.6-1.1 1.8-2.2 3.8-2.2 3.2 0 5 3.3 3.5 6.4C19 16.4 12 21 12 21z" transform="translate(0 -1)"/></svg></button><span class="nm" id="vnm"></span><a class="btn dlv" id="vdl" href="#" hidden>Descargar</a></dialog>
 
 <dialog id="conf"><h2>¿Enviar tu selección?</h2><p class="s" id="txtC"></p><div class="fil"><button class="btn" id="ok" type="button">Sí, enviar</button><button class="btn sec" id="no" type="button">Seguir eligiendo</button></div></dialog>
 
@@ -98,6 +101,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   var W = 'https://galerias-api.alexandergeerre.workers.dev';
   var EXTS = ['.png.jpg', '.jpg.jpg', '.jpg', '.png', '.jpeg', '.webp', '.png.png'];
   var DESCARGA = '<svg viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>';
+  var PRINTER = '<svg viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2"/><path d="M7 14h10v6H7z"/></svg>';
   var HEART = '<svg viewBox="0 0 24 24"><path d="M12 20.5s-7-4.4-9.2-8.9C1.3 8.5 3.1 5.3 6.2 5.3c2 0 3.2 1.1 3.8 2.2.6-1.1 1.8-2.2 3.8-2.2 3.1 0 4.9 3.2 3.4 6.3C19 16.1 12 20.5 12 20.5z"/></svg>';
   function $(s){ return document.querySelector(s); }
   function esc(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -136,7 +140,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     window.scrollTo(0, 0); ajustarPortada();
   }
 
-  var acc = { t: '', c: '' }, codigo = '', G = null, E = null, fotos = [], favs = new Set(), tab = 'todas', lista = [], vi = 0;
+  var imps = new Set(), acc = { t: '', c: '' }, codigo = '', G = null, E = null, fotos = [], favs = new Set(), tab = 'todas', lista = [], vi = 0;
   function sel(){ return fotos.filter(function(f){ return f.tipo === 'selection'; }); }
   function fin(){ return fotos.filter(function(f){ return f.tipo === 'final'; }); }
   function puede(){ return G && G.seleccion; }
@@ -163,7 +167,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
         $('#ilErr').innerHTML = ilus(exp ? 'galeria-expirada' : 'enlace-no-valido'); return;
       }
       codigo = c; escribir('age-codigo-cliente', ''); escribir('age-acceso', JSON.stringify({ t: acc.t, c: c }));
-      G = d.galeria; E = d.estudio; fotos = d.fotos || []; favs = new Set(d.favoritas || []); tab = G.estado === 'delivered' && fin().length ? 'finales' : 'todas';
+      G = d.galeria; E = d.estudio; fotos = d.fotos || []; favs = new Set(d.favoritas || []); imps = new Set(d.impresiones || []); tab = G.estado === 'delivered' && fin().length ? 'finales' : 'todas';
       document.title = G.titulo;
       $('#est').textContent = E && E.studio_name ? E.studio_name : '';
       $('#tit').textContent = G.titulo; $('#fec').textContent = fechaLarga(G.fecha);
@@ -190,7 +194,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   }
   function tarjetaFinal(f){
     var r = f.ancho && f.alto ? f.ancho + ' / ' + f.alto : '3 / 2';
-    return '<figure class="f" style="aspect-ratio:' + r + '"><img loading="lazy" data-ver="' + f.id + '" alt="" src="' + esc(url(f.t)) + '">' + (G.descargas ? '<a class="dl" href="' + esc(url(f.t, true)) + '" download aria-label="Descargar">' + DESCARGA + '</a>' : '') + '</figure>';
+    return '<figure class="f" style="aspect-ratio:' + r + '"><img loading="lazy" data-ver="' + f.id + '" alt="" src="' + esc(url(f.t)) + '">' + (G.descargas ? '<a class="dl" href="' + esc(url(f.t, true)) + '" download aria-label="Descargar">' + DESCARGA + '</a>' : '') + '<button class="pr" data-pr="' + f.id + '" aria-pressed="' + imps.has(f.id) + '" type="button">' + PRINTER + '<span>Imprimir</span></button></figure>';
   }
   function pintar(){
     var s = sel(), fn = fin(), mias = s.filter(function(f){ return favs.has(f.id); });
@@ -206,11 +210,21 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
       h = fn.length ? (G.descargas ? '<div class="masivo"><button class="btn" id="dtodas" type="button">Descargar todas</button></div>' : '') + fn.map(tarjetaFinal).join('') : '<p class="vacio">Tus fotos finales aparecerán aquí.</p>';
     }
     $('#rej').innerHTML = h;
-    $('#barra').hidden = !puede();
+    $('#barra').hidden = !puede(); var enF = tab === 'finales' && G.estado === 'delivered'; $('#barraI').hidden = !enF; contarImp();
     $('#cnt').textContent = favs.size + (favs.size === 1 ? ' favorita' : ' favoritas');
     $('#enviar').disabled = !favs.size;
   }
 
+  function contarImp(){ $('#cntI').textContent = imps.size + (imps.size === 1 ? ' foto para imprimir' : ' fotos para imprimir'); $('#enviarI').disabled = !imps.size; }
+  function alternarImp(id){
+    var on = !imps.has(id); if (on) imps.add(id); else imps.delete(id);
+    document.querySelectorAll('[data-pr="' + id + '"]').forEach(function(b){ b.setAttribute('aria-pressed', on); }); contarImp();
+    post('/api/client/print', { code: codigo, token: acc.t, visitor: visitor, photo: id, active: on }).then(function(d){ if (!d.ok) throw new Error(d.error); }).catch(function(){
+      if (on) imps.delete(id); else imps.add(id);
+      document.querySelectorAll('[data-pr="' + id + '"]').forEach(function(b){ b.setAttribute('aria-pressed', !on); }); contarImp();
+      aviso('No se pudo guardar. Inténtalo de nuevo.');
+    });
+  }
   function poner(id, on){
     if (on) favs.add(id); else favs.delete(id);
     document.querySelectorAll('[data-fav="' + id + '"]').forEach(function(b){ b.setAttribute('aria-pressed', on); });
@@ -234,12 +248,15 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     if (!lista.length) return; vi = (i + lista.length) % lista.length; var f = lista[vi];
     visor.querySelector('img').src = url(f.t); $('#vnm').textContent = f.nombre;
     var c = $('#vco'); c.hidden = !puede(); c.dataset.fav = f.id; c.setAttribute('aria-pressed', favs.has(f.id));
+    var vp = $('#vpr'); vp.hidden = !(G.estado === 'delivered' && f.tipo === 'final'); if (!vp.hidden) { vp.dataset.pr = f.id; vp.setAttribute('aria-pressed', imps.has(f.id)); vp.innerHTML = PRINTER + '<span>Imprimir</span>'; }
     var dv = $('#vdl'); dv.hidden = !(G.descargas && f.tipo === 'final'); if (!dv.hidden) dv.href = url(f.t, true);
   }
   document.addEventListener('click', function(e){
     var t = e.target, el;
     if ((el = t.closest('#visor .co'))) { alternar(lista[vi].id); return; }
     if ((el = t.closest('.co[data-fav]'))) { alternar(el.dataset.fav); return; }
+    if ((el = t.closest('.pr[data-pr]'))) { alternarImp(el.dataset.pr); return; }
+    if (t.closest('#enviarI')) { post('/api/client/print-send', { code: codigo, token: acc.t, visitor: visitor }).then(function(d){ if (!d.ok) throw new Error(d.error); aviso('Listo, recibí tu pedido de ' + d.cantidad + (d.cantidad === 1 ? ' foto' : ' fotos') + ' para imprimir. Te escribo para tamaños y precios.'); }).catch(function(){ aviso('No se pudo enviar el pedido. Inténtalo de nuevo.'); }); return; }
     if (t.closest('#dtodas')) {
       fin().forEach(function(f, i){ setTimeout(function(){ var a = document.createElement('a'); a.href = url(f.t, true); a.download = ''; document.body.appendChild(a); a.click(); a.remove(); }, i * 700); });
       aviso('Iniciando las descargas. Si tu navegador pregunta, permite descargas múltiples.'); return;
