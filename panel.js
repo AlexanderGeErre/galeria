@@ -8,7 +8,7 @@ var ESTADOS = { draft: 'Borrador', selection: 'En selección', selection_sent: '
 var EXTS = ['.png.jpg', '.jpg.jpg', '.jpg', '.png', '.jpeg', '.webp', '.png.png'];
 var db, ph, root, gals = [], favs = {}, vista = 'inicio', galId = null, tab = 'panel', busca = '', fEst = '', cur = null;
 
-var CSS = '.pn-ck{cursor:pointer;position:absolute;top:6px;left:6px;z-index:2;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid var(--a);display:grid;place-items:center;font-size:.8rem;color:var(--a);font-weight:700}.pn-ck.off{background:rgba(255,255,255,.55);border-color:rgba(255,255,255,.9);color:transparent}.pn-ph.mk img{outline:3px solid var(--a);opacity:.85}.pn-barsel{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:20;background:var(--f);border:1px solid var(--l);border-radius:12px;padding:.6rem .8rem;margin:.6rem 0}.pn-barsel select{width:auto}.pn-esc{border-top:1px solid var(--l);padding:.8rem 0}.pn-fila{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.4rem 0}' +
+var CSS = '.pn-ac{flex-wrap:wrap}.pn-grid.sm .pn-ac button{font-size:.62rem;padding:0 .35rem}.pn-add{flex:0 0 96px;aspect-ratio:1;border:1.5px dashed var(--s);background:none;border-radius:10px;color:var(--s);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;cursor:pointer;font:inherit;font-size:.78rem;transition:background .2s,color .2s,border-color .2s}.pn-add b{font-size:1.6rem;font-weight:400;line-height:1}.pn-add:hover{background:var(--p);color:var(--t);border-color:var(--a)}#pn-dsub{width:min(34rem,94vw)}.pn-vacio1{margin:.4rem 0 1rem}.pn-ck{cursor:pointer;position:absolute;top:6px;left:6px;z-index:2;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid var(--a);display:grid;place-items:center;font-size:.8rem;color:var(--a);font-weight:700}.pn-ck.off{background:rgba(255,255,255,.55);border-color:rgba(255,255,255,.9);color:transparent}.pn-ph.mk img{outline:3px solid var(--a);opacity:.85}.pn-barsel{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:20;background:var(--f);border:1px solid var(--l);border-radius:12px;padding:.6rem .8rem;margin:.6rem 0}.pn-barsel select{width:auto}.pn-esc{border-top:1px solid var(--l);padding:.8rem 0}.pn-fila{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.4rem 0}' +
 '.pn{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--p:#F3EFE9;--c:#fff;display:grid;grid-template-columns:220px 1fr;min-height:100vh;background:var(--f);color:var(--t);font-family:Jost,system-ui,sans-serif}' +
 '.pn[data-e=dark]{--f:#151413;--t:#F1ECE4;--s:#a39a91;--l:#2c2926;--a:#C9A27A;--p:#1c1a18;--c:#1c1a18}.pn[data-e=dark] .pn-il{mix-blend-mode:normal!important;filter:none!important;border-radius:8px}' +
 '.pn-franja{display:flex;flex-wrap:wrap;border:1px solid var(--l);border-radius:10px;background:var(--c);margin:.6rem 0 1.4rem;font-size:.9rem}.pn-franja span{padding:.6rem 1rem;border-right:1px solid var(--l)}.pn-franja span:last-child{border:0}.pn-dot{display:inline-block;width:.55rem;height:.55rem;border-radius:50%;background:var(--a);margin-right:.5rem}' +
@@ -46,7 +46,7 @@ var CSS = '.pn-ck{cursor:pointer;position:absolute;top:6px;left:6px;z-index:2;wi
 '.pn dialog form{display:flex;flex-direction:column;gap:.7rem}.pn textarea{width:100%;height:9rem;background:none;border:1px solid var(--l);border-radius:10px;padding:.6rem;color:inherit;font:inherit}' +
 '.pn-toast{position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%);background:var(--t);color:var(--f);padding:.7rem 1.2rem;border-radius:999px;z-index:50;font-size:.95rem}' +
 '.pn aside button{display:flex;align-items:center;gap:.75rem;transition:background .2s,color .2s}.pn aside button:hover{background:var(--p);color:var(--t)}.pn aside button.on{background:var(--p);color:var(--t);box-shadow:inset 3px 0 0 var(--a)}.pn aside .pie button{font-size:.9rem}.pn-tema button{display:block!important}.pn-tema button.on{box-shadow:none!important;background:var(--l)!important;color:var(--t)}.pn-i{width:18px;height:18px;flex:0 0 18px}.pn aside .atras{margin-bottom:.2rem}' +
-'.pn .marca{margin:.2rem 0 1.4rem;padding:0 .3rem}.pn .marca img{width:100%;max-width:150px;display:block;border-radius:8px}.pn .lg-d{display:none}.pn[data-e=dark] .lg-l{display:none}.pn[data-e=dark] .lg-d{display:block}' +
+'.pn .marca{margin:.2rem 0 1.4rem;padding:0 .3rem}.pn .marca img{width:100%;max-width:150px;display:block;border-radius:8px}.pn .marca .lg-d{display:none}.pn[data-e=dark] .marca .lg-l{display:none}.pn[data-e=dark] .marca .lg-d{display:block}' +
 '.pn main{padding:2.8rem clamp(1.2rem,5vw,4rem);max-width:1180px}.pn h1{font-size:clamp(2.2rem,4vw,3.2rem);letter-spacing:-.01em;margin-bottom:.3rem}.pn h2{font-size:1.6rem}' +
 '.pn-card{border:0;border-radius:20px;box-shadow:0 1px 2px rgba(43,38,35,.05),0 10px 30px rgba(43,38,35,.06);padding:1.6rem}.pn[data-e=dark] .pn-card{box-shadow:none;border:1px solid var(--l)}' +
 '.pn-franja,.pn-cifras{border:0;border-radius:18px;box-shadow:0 1px 2px rgba(43,38,35,.05),0 10px 30px rgba(43,38,35,.05)}.pn[data-e=dark] .pn-franja,.pn[data-e=dark] .pn-cifras{box-shadow:none;border:1px solid var(--l)}.pn-cifras b{font-size:2.4rem}' +
@@ -87,7 +87,7 @@ async function api(path, body){
 async function firmar(ids){
   var out = {};
   for (var i = 0; i < ids.length; i += 200) {
-    var r = await api('/api/admin/sign', { photos: ids.slice(i, i + 200) });
+    var r = await api('/api/admin/sign', { photos: ids.slice(i, i + 200), preview: true });
     Object.assign(out, r.fotos || {});
   }
   return out;
@@ -189,7 +189,7 @@ async function abrirDetalle(id, conservar){
   var fotos = p.data || [];
   var ca = await db.from('photos').select('id,created_at').eq('gallery_id', id).limit(1000), conFecha = !ca.error;
   if (conFecha) { var mf = {}; (ca.data || []).forEach(function(x){ mf[x.id] = x.created_at; }); fotos.forEach(function(x){ x.created_at = mf[x.id] || ''; }); }
-  var tk = await firmar(fotos.filter(function(x){ return x.photo_type === 'selection'; }).map(function(x){ return x.id; }));
+  var tk = await firmar(fotos.map(function(x){ return x.id; }));
   var cvT = null, gg = gal(id); if (gg && gg.cover_key) { var cs = await api('/api/admin/cover-sign', { gallery: id }).catch(function(){ return null; }); cvT = cs && cs.t; }
   var es = await api('/api/admin/scenes', { gallery: id }).catch(function(){ return { escenas: [] }; });
   var ip = await api('/api/admin/prints', { gallery: id }).catch(function(){ return { picks: [] }; });
@@ -199,6 +199,9 @@ async function abrirDetalle(id, conservar){
 
 function fechaCad(g){ return g.expires_at ? String(g.expires_at).slice(0, 10) : ''; }
 function pintarDetalle(){
+  try { pintarDetalle0(); } catch (e) { console.error(e); var m = document.getElementById('pn-main'); if (m) m.innerHTML = '<div class="pn-card"><h2>No se pudo mostrar esta pestaña</h2><p class="pn-s">' + esc(e && e.message ? e.message : 'error') + '</p></div>'; }
+}
+function pintarDetalle0(){
   var g = gal(galId); if (!g) { vista = 'galerias'; return pintar(); }
   var sel = cur ? cur.fotos.filter(function(x){ return x.photo_type === 'selection'; }) : [];
   var fin = cur ? cur.fotos.filter(function(x){ return x.photo_type === 'final'; }) : [];
@@ -222,9 +225,9 @@ function pintarDetalle(){
       '<label class="pn-s" style="display:block;margin-top:.9rem">Descripción (la ve el cliente bajo el título)</label><textarea id="pn-dde" rows="3" maxlength="300" style="width:100%">' + esc(g.description || '') + '</textarea>' +
       '<div class="pn-row"><button class="pn-btn" data-act="guardar-detalles">Guardar</button></div></div>';
   } else if (tab === 'fotos') {
-    cuerpo = '<div class="pn-card"><h2>Subir fotos</h2><div class="pn-row"><label><input type="radio" name="pn-dest" value="selection" checked> Selección (se reducen según la calidad de Configuración)</label><label><input type="radio" name="pn-dest" value="final"> Finales (originales, hasta 45 MB)</label></div>' +
+    cuerpo = '<dialog id="pn-dsub"><h2>Subir fotos</h2><div class="pn-row"><label><input type="radio" name="pn-dest" value="selection" checked> Selección (se reducen según la calidad de Configuración)</label><label><input type="radio" name="pn-dest" value="final"> Finales (originales, hasta 45 MB)</label></div>' +
       (cur.escenas && cur.escenas.length ? '<div class="pn-marcaui"><label class="pn-s" for="pn-esc">Escena de destino</label><select id="pn-esc"><option value="">Sin escena</option>' + cur.escenas.map(function(e){ return '<option value="' + e.id + '"' + (fEsc === e.id ? ' selected' : '') + '>' + esc(e.name) + '</option>'; }).join('') + '</select></div>' : '') + '<div class="pn-marcaui" id="pn-mbox"><label class="pn-s" for="pn-marca">Marca de agua</label><select id="pn-marca"><option value="si">Con marca de agua</option><option value="no">Sin marca de agua</option></select></div>' +
-      '<div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul></div>' +
+      '<div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-subir" type="button">Cancelar</button></div></dialog>' +
       escenasCard(g, sel, fin) + barraSel(sel, fin) + seccionFotos('selection', 'Selección', sel, g) + seccionFotos('final', 'Finales', fin, g);
   } else if (tab === 'diseno') {
     var cvId = g.cover_photo_id || (sel[0] && sel[0].id), cv = cvId && cur.tk[cvId];
@@ -383,7 +386,7 @@ async function subirTodo(){
   var base = { tipo: tipo, marca: tipo === 'selection' ? opcionesMarca() : null, gid: galId, cal: (g0 && g0.view_quality) || 'media', texto: g0 && g0.watermark_text, esc: $('#pn-esc') && $('#pn-esc').value ? $('#pn-esc').value : '' };
   if (!subiendo()) { cola.total = 0; cola.hechas = 0; cola.fallos = []; cola.gids = {}; }
   files.forEach(function(f){ cola.trabajos.push(Object.assign({ file: f }, base)); }); cola.total += files.length;
-  $('#pn-file').value = ''; pintarCola();
+  $('#pn-file').value = ''; try { $('#pn-dsub').close(); } catch (e) {} pintarCola();
   aviso('Subiendo ' + files.length + (files.length === 1 ? ' foto' : ' fotos') + ' en segundo plano. Puedes seguir trabajando.');
   var corriendo = cola.activos;
   var hilos = Math.max(0, 3 - corriendo); var ps = [];
@@ -426,18 +429,17 @@ function seccionFotos(tipo, titulo, lista, g){
   var ab = abiertas[tipo] || modoSel, mostrar = ab ? lista : lista.slice(0, PRIM), mas = lista.length > PRIM;
   var cab = '<div class="pn-sec"><h2>' + titulo + '</h2><span class="pn-s">' + lista.length + (lista.length === 1 ? ' artículo' : ' artículos') + '</span>' +
     (lista.length > 1 ? '<span class="pn-orden"><label class="pn-s">Clasificar</label><select data-ord="' + tipo + '"><option value="">Elegir orden…</option>' + ORDENES.filter(function(o){ return cur.conFecha || o[0].indexOf('carga') < 0; }).map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select></span>' : '') + '</div>';
-  if (!lista.length) return cab + (tipo === 'selection' ? '<div class="pn-vacio">' + ilus('admin-subir') + '<p class="pn-s">Aún no hay fotos de selección.</p></div>' : '<p class="pn-s">Aún no hay fotos finales.</p>');
-  var cuerpo;
-  if (tipo === 'selection') {
-    cuerpo = '<div class="pn-grid sm' + (ab ? '' : ' fr') + '">' + mostrar.map(function(x){
-      return '<figure class="pn-ph' + (g.cover_photo_id === x.id ? ' cv' : '') + (marcadas.has(x.id) ? ' mk' : '') + '">' + '<span class="pn-ck' + (modoSel ? '' : ' off') + '" data-act="marcar" data-id="' + x.id + '">' + (marcadas.has(x.id) ? '✓' : '') + '</span>' + '<img data-act="' + (modoSel ? 'marcar' : 'ver') + '" data-id="' + x.id + '" loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (g.cover_photo_id === x.id ? ' · Portada' : '') + '</figcaption><div class="pn-ac"><button data-act="portada" data-id="' + x.id + '">Portada</button><button data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div></figure>';
-    }).join('') + '</div>';
-  } else {
-    cuerpo = mostrar.map(function(x){
-      return '<div class="pn-fila"><span>' + '<input type="checkbox" data-act="marcar" data-id="' + x.id + '"' + (marcadas.has(x.id) ? ' checked' : '') + '> ' + esc(x.filename) + ' · ' + mb(x.file_size || 0) + '</span><span><button class="pn-btn sec" data-act="ver" data-id="' + x.id + '">Ver</button> <button class="pn-btn sec" data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></span></div>';
-    }).join('');
-  }
-  return cab + cuerpo + (mas ? '<button class="pn-vt" data-act="vertodo" data-tipo="' + tipo + '"><span>' + (ab ? 'Ver menos ⌃' : 'Ver todo ⌄') + '</span></button>' : '');
+  var add = '<button class="pn-add" data-act="abrir-subir" data-tipo="' + tipo + '" type="button"><b>+</b><span>' + (tipo === 'selection' ? 'Subir fotos' : 'Subir finales') + '</span></button>';
+  var fig = mostrar.map(function(x){
+    var esPort = g.cover_photo_id === x.id;
+    return '<figure class="pn-ph' + (esPort ? ' cv' : '') + (marcadas.has(x.id) ? ' mk' : '') + '"><span class="pn-ck' + (modoSel ? '' : ' off') + '" data-act="marcar" data-id="' + x.id + '">' + (marcadas.has(x.id) ? '✓' : '') + '</span>' +
+      '<img data-act="' + (modoSel ? 'marcar' : 'ver') + '" data-id="' + x.id + '" loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '">' +
+      '<figcaption>' + esc(x.filename) + (esPort ? ' · Portada' : '') + (tipo === 'final' ? ' · ' + mb(x.file_size || 0) : '') + '</figcaption>' +
+      '<div class="pn-ac">' + (tipo === 'selection' ? '<button data-act="portada" data-id="' + x.id + '">Portada</button>' : '') + '<button data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div></figure>';
+  }).join('');
+  var vacio = lista.length ? '' : '<p class="pn-s pn-vacio1">' + (tipo === 'selection' ? 'Aún no hay fotos de selección.' : 'Aún no hay fotos finales.') + '</p>';
+  return cab + '<div class="pn-grid sm' + (ab ? '' : ' fr') + '">' + add + fig + '</div>' + vacio +
+    (mas ? '<button class="pn-vt" data-act="vertodo" data-tipo="' + tipo + '"><span>' + (ab ? 'Ver menos ⌃' : 'Ver todo ⌄') + '</span></button>' : '');
 }
 async function ordenar(tipo, modo){
   var lista = cur.fotos.filter(function(x){ return x.photo_type === tipo; });
@@ -495,6 +497,8 @@ async function accion(a, el){
   if (a === 'bloqueo') return cambiar({ finals_locked: !g.finals_locked }, g.finals_locked ? 'Fotos liberadas: el cliente ya las ve sin marca de agua' : 'Finales bloqueadas con marca de agua');
   if (a === 'ver') return abrirVer(el.dataset.id);
   if (a === 'cerrar-cola') { cola.total = 0; cola.hechas = 0; cola.fallos = []; return pintarCola(); }
+  if (a === 'abrir-subir') { var rd = root.querySelector('input[name=pn-dest][value=' + (el.dataset.tipo === 'final' ? 'final' : 'selection') + ']'); if (rd) { rd.checked = true; mostrarMarca(); } return $('#pn-dsub').showModal(); }
+  if (a === 'cerrar-subir') return $('#pn-dsub').close();
   if (a === 'wa') return window.open('https://wa.me/?text=' + encodeURIComponent(el.dataset.t), '_blank');
   if (a === 'modo-sel') { modoSel = !modoSel; marcadas = new Set(); return pintar(); }
   if (a === 'marcar') {
