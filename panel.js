@@ -8,7 +8,8 @@ var ESTADOS = { draft: 'Borrador', selection: 'En selección', selection_sent: '
 var EXTS = ['.png.jpg', '.jpg.jpg', '.jpg', '.png', '.jpeg', '.webp', '.png.png'];
 var db, ph, root, gals = [], favs = {}, vista = 'inicio', galId = null, tab = 'panel', busca = '', fEst = '', cur = null;
 
-var CSS = '.pn{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--p:#F3EFE9;--c:#fff;display:grid;grid-template-columns:220px 1fr;min-height:100vh;background:var(--f);color:var(--t);font-family:Jost,system-ui,sans-serif}' +
+var CSS = '.pn-ck{position:absolute;top:6px;left:6px;z-index:2;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid var(--a);display:grid;place-items:center;font-size:.8rem;color:var(--a);font-weight:700}.pn-ph.mk img{outline:3px solid var(--a);opacity:.85}.pn-barsel{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:20;background:var(--f);border:1px solid var(--l);border-radius:12px;padding:.6rem .8rem;margin:.6rem 0}.pn-barsel select{width:auto}.pn-esc{border-top:1px solid var(--l);padding:.8rem 0}.pn-fila{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.4rem 0}' +
+'.pn{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--p:#F3EFE9;--c:#fff;display:grid;grid-template-columns:220px 1fr;min-height:100vh;background:var(--f);color:var(--t);font-family:Jost,system-ui,sans-serif}' +
 '.pn[data-e=dark]{--f:#151413;--t:#F1ECE4;--s:#a39a91;--l:#2c2926;--a:#C9A27A;--p:#1c1a18;--c:#1c1a18}.pn[data-e=dark] .pn-il{mix-blend-mode:normal!important;filter:none!important;border-radius:8px}' +
 '.pn-franja{display:flex;flex-wrap:wrap;border:1px solid var(--l);border-radius:10px;background:var(--c);margin:.6rem 0 1.4rem;font-size:.9rem}.pn-franja span{padding:.6rem 1rem;border-right:1px solid var(--l)}.pn-franja span:last-child{border:0}.pn-dot{display:inline-block;width:.55rem;height:.55rem;border-radius:50%;background:var(--a);margin-right:.5rem}' +
 '.pn-portada{border-radius:12px;overflow:hidden;background:var(--l);max-width:34rem;aspect-ratio:3/2;display:grid;place-items:center;margin:.6rem 0}.pn-portada>img{width:100%;height:100%;object-fit:cover}.pn-portada .pn-il{width:30%}' +
@@ -34,6 +35,9 @@ var CSS = '.pn{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--p:#
 '.pn-opts{display:flex;gap:.7rem;flex-wrap:wrap}.pn-opt{background:var(--c);border:1px solid var(--l);border-radius:12px;padding:.7rem .9rem;text-align:left;color:var(--t);cursor:pointer;max-width:13rem;font:inherit}.pn-opt b{display:block;font-weight:500}.pn-opt span{font-size:.8rem;color:var(--s)}.pn-opt.on{border-color:var(--a);box-shadow:0 0 0 1px var(--a)}.pn-opt.pal{display:flex;align-items:center;gap:.6rem}.pn-opt i{width:1.6rem;height:1.6rem;border-radius:50%;border:1px solid var(--l);display:block}' +
 '.pn-marcaui{margin:.4rem 0 .8rem}.pn-marcaui select{width:auto}.pn-copia{display:flex;gap:.5rem;margin:.4rem 0 1rem}.pn-copia input{flex:1}.pn-lado{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap}.pn-lado .pn-il{width:13rem}' +
 '.pn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.pn-grid.sm{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}.pn-grid.sm .pn-ac button{font-size:.65rem;padding:0 .4rem}.pn-ph img[data-act=ver]{cursor:zoom-in}#pn-dver{width:min(60rem,96vw);padding:.6rem;text-align:center}#pn-dver img{max-width:100%;max-height:78vh;display:block;margin:0 auto;border-radius:8px}#pn-dver .pn-vb{display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin:.5rem 0 0}' +
+'.pn-sec{display:flex;align-items:baseline;gap:.8rem;flex-wrap:wrap;margin-top:1.4rem}.pn-sec h2{margin:0}.pn-orden{margin-left:auto;display:flex;align-items:center;gap:.4rem}.pn-orden select{width:auto;font-size:.85rem}' +
+'.pn-grid.fr{display:flex;gap:8px;overflow:hidden}.pn-grid.fr .pn-ph{flex:0 0 96px}' +
+'.pn-vt{display:flex;align-items:center;gap:1rem;width:100%;background:none;border:0;color:var(--s);margin:1rem 0;cursor:pointer;font:inherit}.pn-vt:before,.pn-vt:after{content:"";flex:1;border-top:1px solid var(--l)}' +
 '.pn-fila img{width:46px;height:46px;object-fit:cover;border-radius:6px}' +
 '.pn-ph{margin:0;position:relative}.pn-ph img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:var(--l);display:block}.pn-ph.cv img{outline:2px solid var(--a)}' +
 '.pn-ph figcaption{font-size:.75rem;color:var(--s);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pn-ac{display:flex;gap:.3rem;margin-top:.2rem}.pn-ac button{background:none;border:1px solid var(--l);border-radius:999px;font-size:.72rem;padding:.1rem .5rem;color:var(--t);cursor:pointer}' +
@@ -41,7 +45,7 @@ var CSS = '.pn{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--p:#
 '.pn dialog{border:1px solid var(--l);background:var(--f);color:var(--t);border-radius:16px;padding:1.4rem;width:min(30rem,92vw);margin:auto;box-shadow:0 24px 60px rgba(43,38,35,.25)}.pn dialog::backdrop{background:rgba(43,38,35,.5)}' +
 '.pn dialog form{display:flex;flex-direction:column;gap:.7rem}.pn textarea{width:100%;height:9rem;background:none;border:1px solid var(--l);border-radius:10px;padding:.6rem;color:inherit;font:inherit}' +
 '.pn-toast{position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%);background:var(--t);color:var(--f);padding:.7rem 1.2rem;border-radius:999px;z-index:50;font-size:.95rem}' +
-'@media(max-width:760px){.pn{grid-template-columns:1fr}.pn aside{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center}.pn .marca{margin:0 1rem 0 0}.pn aside .pie{margin:0 0 0 auto}}';
+'@media(max-width:760px){.pn{grid-template-columns:minmax(0,1fr)}.pn main{min-width:0;overflow-x:hidden}.pn input[type=file]{max-width:100%}.pn aside{position:sticky;top:0;z-index:30;height:auto;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;align-items:center;gap:.2rem;padding:.5rem .6rem;border-right:0;border-bottom:1px solid var(--l)}.pn aside>*{flex:0 0 auto;white-space:nowrap}.pn aside .marca,.pn aside .gt,.pn aside .sep,.pn aside .pn-pill{display:none}.pn aside .pie{margin:0 0 0 .6rem;display:flex;gap:.3rem;align-items:center}.pn-tema{margin:0}.pn main{padding:1rem .9rem 4rem}.pn h1{font-size:2rem}.pn-cifras{grid-template-columns:1fr 1fr}.pn-cifras div{border-bottom:1px solid var(--l)}.pn-franja span{border-right:0;border-bottom:1px solid var(--l);width:100%}.pn-orden{margin-left:0;width:100%}.pn-orden select{flex:1;min-width:0;max-width:100%}.pn-orden{flex-wrap:wrap}.pn-grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}.pn-grid.fr .pn-ph{flex:0 0 84px}.pn-rej{grid-template-columns:repeat(2,1fr);gap:12px}.pn-card{padding:.9rem}.pn-row{gap:.5rem}.pn-row input[type=text]{min-width:0;width:100%}.pn-btn{padding:.5rem .9rem}#pn-dver .pn-vb{flex-wrap:wrap}.pn-lado{flex-direction:column;align-items:stretch}.pn-copia{flex-wrap:wrap}.pn-copia input{min-width:0;width:100%}.pn-opt{max-width:none;flex:1 1 100%}.pn-tabs{overflow-x:auto;flex-wrap:nowrap}}';
 
 function esc(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function $(s){ return root.querySelector(s); }
@@ -148,14 +152,17 @@ function pintarLista(){
 }
 
 async function abrirDetalle(id, conservar){
-  galId = id; vista = 'detalle'; if (!conservar) tab = 'panel'; cur = null; pintar();
-  var p = await db.from('photos').select('id,filename,photo_type,file_size,sort_order').eq('gallery_id', id).order('sort_order').order('filename').limit(1000);
+  galId = id; vista = 'detalle'; if (!conservar) { tab = 'panel'; fEsc = ''; modoSel = false; marcadas = new Set(); } cur = null; pintar();
+  var p = await db.from('photos').select('id,filename,photo_type,file_size,sort_order,scene_id').eq('gallery_id', id).order('sort_order').order('filename').limit(1000);
   var f = await db.from('favorites').select('photo_id,visitor_token').eq('gallery_id', id).limit(1000);
   var v = await db.from('gallery_views').select('id', { count: 'exact', head: true }).eq('gallery_id', id);
   var fotos = p.data || [];
+  var ca = await db.from('photos').select('id,created_at').eq('gallery_id', id).limit(1000), conFecha = !ca.error;
+  if (conFecha) { var mf = {}; (ca.data || []).forEach(function(x){ mf[x.id] = x.created_at; }); fotos.forEach(function(x){ x.created_at = mf[x.id] || ''; }); }
   var tk = await firmar(fotos.filter(function(x){ return x.photo_type === 'selection'; }).map(function(x){ return x.id; }));
+  var es = await api('/api/admin/scenes', { gallery: id }).catch(function(){ return { escenas: [] }; });
   var ip = await api('/api/admin/prints', { gallery: id }).catch(function(){ return { picks: [] }; });
-  cur = { fotos: fotos, favs: f.data || [], vistas: v.count || 0, tk: tk, imp: (ip && ip.picks) || [] };
+  cur = { fotos: fotos, favs: f.data || [], vistas: v.count || 0, tk: tk, escenas: (es && es.escenas) || [], conFecha: conFecha, imp: (ip && ip.picks) || [] };
   pintar();
 }
 
@@ -184,15 +191,10 @@ function pintarDetalle(){
       '<label class="pn-s" style="display:block;margin-top:.9rem">Descripción (la ve el cliente bajo el título)</label><textarea id="pn-dde" rows="3" maxlength="300" style="width:100%">' + esc(g.description || '') + '</textarea>' +
       '<div class="pn-row"><button class="pn-btn" data-act="guardar-detalles">Guardar</button></div></div>';
   } else if (tab === 'fotos') {
-    cuerpo = '<div class="pn-card"><h2>Subir fotos</h2><div class="pn-row"><label><input type="radio" name="pn-dest" value="selection" checked> Selección (se reducen a 1600 px)</label><label><input type="radio" name="pn-dest" value="final"> Finales (originales, hasta 45 MB)</label></div>' +
-      '<div class="pn-marcaui" id="pn-mbox"><label class="pn-s" for="pn-marca">Marca de agua</label><select id="pn-marca"><option value="si">Con marca de agua</option><option value="no">Sin marca de agua</option></select></div>' +
+    cuerpo = '<div class="pn-card"><h2>Subir fotos</h2><div class="pn-row"><label><input type="radio" name="pn-dest" value="selection" checked> Selección (se reducen según la calidad de Configuración)</label><label><input type="radio" name="pn-dest" value="final"> Finales (originales, hasta 45 MB)</label></div>' +
+      (cur.escenas && cur.escenas.length ? '<div class="pn-marcaui"><label class="pn-s" for="pn-esc">Escena de destino</label><select id="pn-esc"><option value="">Sin escena</option>' + cur.escenas.map(function(e){ return '<option value="' + e.id + '"' + (fEsc === e.id ? ' selected' : '') + '>' + esc(e.name) + '</option>'; }).join('') + '</select></div>' : '') + '<div class="pn-marcaui" id="pn-mbox"><label class="pn-s" for="pn-marca">Marca de agua</label><select id="pn-marca"><option value="si">Con marca de agua</option><option value="no">Sin marca de agua</option></select></div>' +
       '<div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul></div>' +
-      '<h2>Selección (' + sel.length + ')</h2>' + (sel.length ? '<div class="pn-grid sm">' + sel.map(function(x){
-        return '<figure class="pn-ph' + (g.cover_photo_id === x.id ? ' cv' : '') + '"><img data-act="ver" data-id="' + x.id + '" loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (g.cover_photo_id === x.id ? ' · Portada' : '') + '</figcaption><div class="pn-ac"><button data-act="portada" data-id="' + x.id + '">Portada</button><button data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div></figure>';
-      }).join('') + '</div>' : '<div class="pn-vacio">' + ilus('admin-subir') + '<p class="pn-s">Aún no hay fotos de selección.</p></div>') +
-      '<h2 style="margin-top:1.6rem">Finales (' + fin.length + ')</h2>' + (fin.length ? fin.map(function(x){
-        return '<div class="pn-fila"><span>' + esc(x.filename) + ' · ' + mb(x.file_size || 0) + '</span><span><button class="pn-btn sec" data-act="ver" data-id="' + x.id + '">Ver</button> <button class="pn-btn sec" data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></span></div>';
-      }).join('') : '<p class="pn-s">Aún no hay fotos finales.</p>');
+      escenasCard(g, sel, fin) + barraSel(sel, fin) + seccionFotos('selection', 'Selección', sel, g) + seccionFotos('final', 'Finales', fin, g);
   } else if (tab === 'diseno') {
     var cvId = g.cover_photo_id || (sel[0] && sel[0].id), cv = cvId && cur.tk[cvId];
     cuerpo = '<div class="pn-card"><h2>Portada</h2><p class="pn-s">Es la foto con la que tu cliente recibe su galería al abrir el enlace.</p><div class="pn-portada">' + (cv ? '<img alt="" src="' + esc(src(cv)) + '">' : ilus('admin-sin-portada')) + '</div><div class="pn-row"><button class="pn-btn" data-act="elegir-portada"' + (sel.length ? '' : ' disabled') + '>Elegir portada</button></div></div>' +
@@ -237,6 +239,7 @@ function pintarDetalle(){
     cuerpo = '<div class="pn-card"><h2>Cómo entra tu cliente</h2><div class="pn-opts">' +
       '<button class="pn-opt' + (abierto ? ' on' : '') + '" data-act="modo" data-v="abierto"><b>Enlace sin clave</b><span>Cualquiera que tenga el enlace ve la galería directamente.</span></button>' +
       '<button class="pn-opt' + (abierto ? '' : ' on') + '" data-act="modo" data-v="codigo"><b>Enlace con código</b><span>Debe escribir el código para entrar.</span></button></div></div>' +
+      escenasEnlaces(fila) +
       '<div class="pn-card"><h2>' + (abierto ? 'Enlace sin clave' : 'Enlace con código') + '</h2>' +
       (abierto ? '<p class="pn-s">Envía este enlace. Entra directo, sin pedir nada.</p>' + fila('Enlace para el cliente', urlG)
         : '<p class="pn-s">Envía el enlace y el código por separado: el cliente escribe el código al abrirlo.</p>' + fila('Enlace para el cliente', urlG) + '<p class="pn-s">Código de acceso (puedes cambiarlo)</p><div class="pn-copia"><input type="text" id="pn-cod" maxlength="40" value="' + esc(g.access_code) + '"><button class="pn-btn sec" data-act="guardar-codigo">Guardar</button><button class="pn-btn sec" data-act="copiar" data-t="' + esc(g.access_code) + '">Copiar</button></div>' +
@@ -310,7 +313,7 @@ async function subirTodo(){
       if (tipo === 'selection') { var r = await reducir(f, marca, cal); blob = r.blob; w = r.w; h = r.h; nombre = f.name.replace(/\.[^.]+$/, '') + '.jpg'; }
       else { try { var bm = await createImageBitmap(f); w = bm.width; h = bm.height; } catch (e) {} }
       var s = (await db.auth.getSession()).data.session;
-      var q = '?gallery=' + galId + '&type=' + tipo + '&name=' + encodeURIComponent(nombre) + (w ? '&w=' + w + '&h=' + h : '');
+      var q = '?gallery=' + galId + ($('#pn-esc') && $('#pn-esc').value ? '&scene=' + $('#pn-esc').value : '') + '&type=' + tipo + '&name=' + encodeURIComponent(nombre) + (w ? '&w=' + w + '&h=' + h : '');
       var res = await fetch(W + '/api/upload' + q, { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, 'Content-Type': blob.type || 'image/jpeg' }, body: blob });
       var d = await res.json().catch(function(){ return {}; });
       if (d.ok && tipo === 'final' && d.photo) {
@@ -327,7 +330,75 @@ async function subirTodo(){
   await abrirDetalle(galId, true);
 }
 
-var vl = [], vix = 0;
+function escenasCard(g, sel, fin){
+  var es = cur.escenas || [], todas = sel.concat(fin);
+  var cuenta = function(id){ return todas.filter(function(x){ return x.scene_id === id; }).length; };
+  var filas = es.map(function(e){ return '<div class="pn-fila"><span>' + esc(e.name) + ' · ' + cuenta(e.id) + ' fotos' + (e.hidden ? ' · solo con su enlace' : '') + '</span><span><button class="pn-btn sec" data-act="esc-renombrar" data-id="' + e.id + '">Renombrar</button> <button class="pn-btn sec" data-act="esc-borrar" data-id="' + e.id + '">Eliminar</button></span></div>'; }).join('');
+  var opts = '<option value="">Todas las fotos</option><option value="_none"' + (fEsc === '_none' ? ' selected' : '') + '>Sin escena</option>' + es.map(function(e){ return '<option value="' + e.id + '"' + (fEsc === e.id ? ' selected' : '') + '>' + esc(e.name) + '</option>'; }).join('');
+  return '<div class="pn-card"><h2>Escenas</h2><p class="pn-s">Divide la galería en secciones, por ejemplo una por estudiante. Cada escena tiene su propio enlace (en la pestaña Compartir).</p>' + filas +
+    '<div class="pn-row"><input type="text" id="pn-nesc" maxlength="80" placeholder="Nombre de la nueva escena"><button class="pn-btn" data-act="esc-crear">Agregar escena</button></div>' +
+    (es.length ? '<div class="pn-row"><label class="pn-s">Ver en esta pantalla</label><select id="pn-fesc">' + opts + '</select></div>' : '') + '</div>';
+}
+function barraSel(sel, fin){
+  var todas = filtrarEsc(sel).concat(filtrarEsc(fin));
+  if (!todas.length) return '';
+  if (!modoSel) return '<div class="pn-row"><button class="pn-btn sec" data-act="modo-sel">Seleccionar fotos</button><span class="pn-s">Para eliminar o mover varias a la vez.</span></div>';
+  var es = cur.escenas || [];
+  return '<div class="pn-barsel"><b>' + marcadas.size + ' seleccionadas</b><button class="pn-btn sec" data-act="sel-todas">Seleccionar todas (' + todas.length + ')</button><button class="pn-btn sec" data-act="sel-ninguna">Quitar selección</button>' +
+    (es.length ? '<select id="pn-mv"' + (marcadas.size ? '' : ' disabled') + '><option value="">Mover a escena…</option><option value="_none">Sin escena</option>' + es.map(function(e){ return '<option value="' + e.id + '">' + esc(e.name) + '</option>'; }).join('') + '</select>' : '') +
+    '<button class="pn-btn rojo" data-act="borrar-sel"' + (marcadas.size ? '' : ' disabled') + '>Eliminar seleccionadas</button><button class="pn-btn" data-act="modo-sel">Listo</button></div>';
+}
+function escenasEnlaces(fila){
+  var es = cur.escenas || []; if (!es.length) return '';
+  return '<div class="pn-card"><h2>Enlaces por escena</h2><p class="pn-s">Cada escena tiene su propio enlace. El cliente que lo abre ve solo las fotos de esa escena.</p>' + es.map(function(e){
+    return '<div class="pn-esc"><b>' + esc(e.name) + '</b>' + fila('Enlace', BASES + e.link_token) +
+      '<div class="pn-row"><select data-escmodo="' + e.id + '"><option value="abierto"' + (e.access_mode === 'abierto' ? ' selected' : '') + '>Sin clave</option><option value="codigo"' + (e.access_mode === 'codigo' ? ' selected' : '') + '>Con código</option></select>' +
+      (e.access_mode === 'codigo' ? '<input type="text" id="pn-sc-' + e.id + '" maxlength="40" value="' + esc(e.access_code || '') + '"><button class="pn-btn sec" data-act="esc-codigo" data-id="' + e.id + '">Guardar código</button>' : '') + '</div>' +
+      '<label class="pn-s"><input type="checkbox" data-eschid="' + e.id + '"' + (e.hidden ? ' checked' : '') + '> Solo con su enlace (no aparece en la galería principal)</label></div>';
+  }).join('') + '</div>';
+}
+var ORDENES = [['nombre', 'Nombre del archivo'], ['nombre-inv', 'Nombre del archivo (inverso)'], ['carga', 'Tiempo de carga (primero las más antiguas)'], ['carga-inv', 'Tiempo de carga (primero las más recientes)'], ['azar', 'Aleatorio']];
+function filtrarEsc(l){ return l.filter(function(x){ return !fEsc || (fEsc === '_none' ? !x.scene_id : x.scene_id === fEsc); }); }
+function seccionFotos(tipo, titulo, lista, g){
+  lista = filtrarEsc(lista);
+  var ab = abiertas[tipo] || modoSel, mostrar = ab ? lista : lista.slice(0, PRIM), mas = lista.length > PRIM;
+  var cab = '<div class="pn-sec"><h2>' + titulo + '</h2><span class="pn-s">' + lista.length + (lista.length === 1 ? ' artículo' : ' artículos') + '</span>' +
+    (lista.length > 1 ? '<span class="pn-orden"><label class="pn-s">Clasificar</label><select data-ord="' + tipo + '"><option value="">Elegir orden…</option>' + ORDENES.filter(function(o){ return cur.conFecha || o[0].indexOf('carga') < 0; }).map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select></span>' : '') + '</div>';
+  if (!lista.length) return cab + (tipo === 'selection' ? '<div class="pn-vacio">' + ilus('admin-subir') + '<p class="pn-s">Aún no hay fotos de selección.</p></div>' : '<p class="pn-s">Aún no hay fotos finales.</p>');
+  var cuerpo;
+  if (tipo === 'selection') {
+    cuerpo = '<div class="pn-grid sm' + (ab ? '' : ' fr') + '">' + mostrar.map(function(x){
+      return '<figure class="pn-ph' + (g.cover_photo_id === x.id ? ' cv' : '') + (marcadas.has(x.id) ? ' mk' : '') + '">' + (modoSel ? '<span class="pn-ck">' + (marcadas.has(x.id) ? '✓' : '') + '</span>' : '') + '<img data-act="' + (modoSel ? 'marcar' : 'ver') + '" data-id="' + x.id + '" loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (g.cover_photo_id === x.id ? ' · Portada' : '') + '</figcaption><div class="pn-ac"><button data-act="portada" data-id="' + x.id + '">Portada</button><button data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div></figure>';
+    }).join('') + '</div>';
+  } else {
+    cuerpo = mostrar.map(function(x){
+      return '<div class="pn-fila"><span>' + (modoSel ? '<input type="checkbox" data-act="marcar" data-id="' + x.id + '"' + (marcadas.has(x.id) ? ' checked' : '') + '> ' : '') + esc(x.filename) + ' · ' + mb(x.file_size || 0) + '</span><span><button class="pn-btn sec" data-act="ver" data-id="' + x.id + '">Ver</button> <button class="pn-btn sec" data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></span></div>';
+    }).join('');
+  }
+  return cab + cuerpo + (mas ? '<button class="pn-vt" data-act="vertodo" data-tipo="' + tipo + '"><span>' + (ab ? 'Ver menos ⌃' : 'Ver todo ⌄') + '</span></button>' : '');
+}
+async function ordenar(tipo, modo){
+  var lista = cur.fotos.filter(function(x){ return x.photo_type === tipo; });
+  var cmpN = function(a, b){ return String(a.filename).localeCompare(String(b.filename), undefined, { numeric: true }); };
+  if (modo === 'nombre') lista.sort(cmpN);
+  else if (modo === 'nombre-inv') lista.sort(function(a, b){ return cmpN(b, a); });
+  else if (modo === 'carga') lista.sort(function(a, b){ return String(a.created_at).localeCompare(String(b.created_at)); });
+  else if (modo === 'carga-inv') lista.sort(function(a, b){ return String(b.created_at).localeCompare(String(a.created_at)); });
+  else if (modo === 'azar') { for (var i = lista.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = lista[i]; lista[i] = lista[j]; lista[j] = t; } }
+  else return;
+  aviso('Guardando el orden…');
+  var fallo = false;
+  for (var k = 0; k < lista.length; k += 15) {
+    var rs = await Promise.all(lista.slice(k, k + 15).map(function(x, n){ return db.from('photos').update({ sort_order: (k + n) * 10 }).eq('id', x.id); }));
+    rs.forEach(function(r){ if (r.error) fallo = true; });
+  }
+  if (fallo) return aviso('No se pudo guardar todo el orden. Inténtalo de nuevo.');
+  lista.forEach(function(x, n){ x.sort_order = n * 10; });
+  cur.fotos.sort(function(a, b){ return (a.sort_order - b.sort_order) || String(a.filename).localeCompare(String(b.filename)); });
+  aviso('Orden guardado: así lo verá tu cliente.'); pintar();
+}
+var BASES = 'https://alexandergeerre.github.io/galeria/cliente.html?s=', fEsc = '', modoSel = false, marcadas = new Set();
+var vl = [], vix = 0, abiertas = { selection: false, final: false }, PRIM = 7;
 async function mostrarVer(){
   var f = vl[vix]; if (!f) return;
   if (!cur.tk[f.id]) { var t = await firmar([f.id]); Object.assign(cur.tk, t); }
@@ -361,6 +432,45 @@ async function accion(a, el){
   if (a === 'tema') { try { localStorage.setItem('pn-tema', el.dataset.t); } catch(e) {} return pintar(); }
   if (a === 'bloqueo') return cambiar({ finals_locked: !g.finals_locked }, g.finals_locked ? 'Fotos liberadas: el cliente ya las ve sin marca de agua' : 'Finales bloqueadas con marca de agua');
   if (a === 'ver') return abrirVer(el.dataset.id);
+  if (a === 'modo-sel') { modoSel = !modoSel; marcadas = new Set(); return pintar(); }
+  if (a === 'marcar') {
+    if (marcadas.has(id)) marcadas.delete(id); else marcadas.add(id);
+    var fg = el.closest('figure'); if (fg) { fg.classList.toggle('mk', marcadas.has(id)); var ck = fg.querySelector('.pn-ck'); if (ck) ck.textContent = marcadas.has(id) ? '✓' : ''; }
+    var bc = root.querySelector('.pn-barsel b'); if (bc) bc.textContent = marcadas.size + ' seleccionadas';
+    root.querySelectorAll('[data-act=borrar-sel],#pn-mv').forEach(function(x){ x.disabled = !marcadas.size; });
+    return;
+  }
+  if (a === 'sel-todas') { marcadas = new Set(filtrarEsc(cur.fotos).map(function(x){ return x.id; })); return pintar(); }
+  if (a === 'sel-ninguna') { marcadas = new Set(); return pintar(); }
+  if (a === 'borrar-sel') {
+    var ids = Array.from(marcadas); if (!ids.length) return;
+    if (!confirm('¿Eliminar ' + ids.length + (ids.length === 1 ? ' foto' : ' fotos') + '? No se puede deshacer.')) return;
+    aviso('Eliminando…'); var okn = 0;
+    for (var i = 0; i < ids.length; i += 100) { var rr = await api('/api/admin/delete-photos', { photos: ids.slice(i, i + 100) }); if (rr.ok) okn += rr.borradas || 0; else break; }
+    if (g && ids.indexOf(g.cover_photo_id) >= 0) g.cover_photo_id = null;
+    marcadas = new Set(); modoSel = false; aviso(okn + ' eliminadas.'); return abrirDetalle(galId, true);
+  }
+  if (a === 'esc-crear') {
+    var nn = $('#pn-nesc').value.trim(); if (!nn) return aviso('Escribe el nombre de la escena.');
+    var rc = await api('/api/admin/scene', { gallery: galId, action: 'create', name: nn }); if (!rc.ok) return aviso('No se pudo crear la escena.');
+    cur.escenas.push(rc.escena); aviso('Escena creada'); return pintar();
+  }
+  if (a === 'esc-renombrar') {
+    var ee = cur.escenas.filter(function(x){ return x.id === id; })[0]; var nm = prompt('Nuevo nombre de la escena:', ee ? ee.name : ''); if (!nm || !nm.trim()) return;
+    var ru = await api('/api/admin/scene', { gallery: galId, action: 'update', id: id, name: nm.trim() }); if (!ru.ok) return aviso('No se pudo renombrar.');
+    ee.name = nm.trim().slice(0, 80); return pintar();
+  }
+  if (a === 'esc-borrar') {
+    if (!confirm('¿Eliminar esta escena? Sus fotos no se borran: quedan sin escena.')) return;
+    var rd = await api('/api/admin/scene', { gallery: galId, action: 'delete', id: id }); if (!rd.ok) return aviso('No se pudo eliminar.');
+    cur.fotos.forEach(function(x){ if (x.scene_id === id) x.scene_id = null; }); cur.escenas = cur.escenas.filter(function(x){ return x.id !== id; }); if (fEsc === id) fEsc = ''; return pintar();
+  }
+  if (a === 'esc-codigo') {
+    var cd = $('#pn-sc-' + id).value.trim().toUpperCase(); if (!/^[A-Z0-9-]{4,40}$/.test(cd)) return aviso('El código debe tener de 4 a 40 letras, números o guiones.');
+    var rk = await api('/api/admin/scene', { gallery: galId, action: 'update', id: id, access_code: cd }); if (!rk.ok) return aviso('No se pudo guardar el código.');
+    cur.escenas.filter(function(x){ return x.id === id; })[0].access_code = cd; return aviso('Código guardado');
+  }
+  if (a === 'vertodo') { abiertas[el.dataset.tipo] = !abiertas[el.dataset.tipo]; return pintar(); }
   if (a === 'modo') return cambiar({ access_mode: el.dataset.v }, el.dataset.v === 'abierto' ? 'Ahora el enlace entra sin clave' : 'Ahora el enlace pide código');
   if (a === 'guardar-codigo') {
     var nc = $('#pn-cod').value.trim().toUpperCase();
@@ -437,6 +547,20 @@ window.iniciarPanel = async function(photographer, cliente){
   dv.addEventListener('touchstart', function(e){ vx0 = e.touches[0].clientX; }, { passive: true });
   dv.addEventListener('touchend', function(e){ if (vx0 === null) return; var dx = e.changedTouches[0].clientX - vx0; vx0 = null; if (Math.abs(dx) > 50) pasarVer(dx < 0 ? 1 : -1); });
   dv.addEventListener('keydown', function(e){ if (e.key === 'ArrowLeft') pasarVer(-1); if (e.key === 'ArrowRight') pasarVer(1); });
+  root.addEventListener('change', async function(e){
+    var s = e.target.closest('select[data-ord]'); if (s && s.value) return ordenar(s.dataset.ord, s.value);
+    if (e.target.id === 'pn-fesc') { fEsc = e.target.value; return pintar(); }
+    if (e.target.id === 'pn-mv' && e.target.value) {
+      var dest = e.target.value === '_none' ? null : e.target.value, ids = Array.from(marcadas);
+      var rm = await db.from('photos').update({ scene_id: dest }).in('id', ids);
+      if (rm.error) return aviso('No se pudieron mover: ' + rm.error.message);
+      cur.fotos.forEach(function(x){ if (marcadas.has(x.id)) x.scene_id = dest; }); aviso('Fotos movidas'); marcadas = new Set(); return pintar();
+    }
+    var sm = e.target.closest('select[data-escmodo]');
+    if (sm) { var r1 = await api('/api/admin/scene', { gallery: galId, action: 'update', id: sm.dataset.escmodo, access_mode: sm.value }); if (!r1.ok) return aviso('No se pudo cambiar.'); cur.escenas.filter(function(x){ return x.id === sm.dataset.escmodo; })[0].access_mode = sm.value; return pintar(); }
+    var ch = e.target.closest('input[data-eschid]');
+    if (ch) { var r2 = await api('/api/admin/scene', { gallery: galId, action: 'update', id: ch.dataset.eschid, hidden: ch.checked }); if (!r2.ok) return aviso('No se pudo cambiar.'); cur.escenas.filter(function(x){ return x.id === ch.dataset.eschid; })[0].hidden = ch.checked; return aviso(ch.checked ? 'Solo se ve con su enlace' : 'Aparece también en la galería principal'); }
+  });
   root.onclick = function(e){
     var v = e.target.closest('aside [data-v]'); if (v) { vista = v.dataset.v; return pintar(); }
     var a = e.target.closest('[data-act]'); if (a) accion(a.dataset.act, a);
