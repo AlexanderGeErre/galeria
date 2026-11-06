@@ -8,7 +8,12 @@ var EXTS = ['.png.jpg', '.jpg.jpg', '.jpg', '.png', '.jpeg', '.webp', '.png.png'
 var db, ph, root, gals = [], favs = {}, vista = 'inicio', galId = null, tab = 'panel', busca = '', fEst = '', cur = null;
 
 var CSS = '.pn{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--p:#F3EFE9;--c:#fff;display:grid;grid-template-columns:220px 1fr;min-height:100vh;background:var(--f);color:var(--t);font-family:Jost,system-ui,sans-serif}' +
-'@media(prefers-color-scheme:dark){.pn{--f:#151413;--t:#F1ECE4;--s:#a39a91;--l:#2c2926;--a:#C9A27A;--p:#1c1a18;--c:#1c1a18}.pn-il{mix-blend-mode:normal!important;filter:none!important;border-radius:8px}}' +
+'.pn[data-e=dark]{--f:#151413;--t:#F1ECE4;--s:#a39a91;--l:#2c2926;--a:#C9A27A;--p:#1c1a18;--c:#1c1a18}.pn[data-e=dark] .pn-il{mix-blend-mode:normal!important;filter:none!important;border-radius:8px}' +
+'.pn-franja{display:flex;flex-wrap:wrap;border:1px solid var(--l);border-radius:10px;background:var(--c);margin:.6rem 0 1.4rem;font-size:.9rem}.pn-franja span{padding:.6rem 1rem;border-right:1px solid var(--l)}.pn-franja span:last-child{border:0}.pn-dot{display:inline-block;width:.55rem;height:.55rem;border-radius:50%;background:var(--a);margin-right:.5rem}' +
+'.pn-portada{border-radius:12px;overflow:hidden;background:var(--l);max-width:34rem;aspect-ratio:3/2;display:grid;place-items:center;margin:.6rem 0}.pn-portada>img{width:100%;height:100%;object-fit:cover}.pn-portada .pn-il{width:30%}' +
+'.pn aside .gt{font-family:"Cormorant Garamond",serif;font-size:1.3rem;line-height:1.15;margin:.4rem 0 .5rem;padding:0 .7rem}.pn aside .sep{border-top:1px solid var(--l);margin:.8rem 0}.pn aside .pn-pill{align-self:flex-start;margin-left:.7rem}' +
+'.pn-tema{display:flex;gap:.25rem;margin-bottom:.4rem}.pn-tema button{flex:1;text-align:center!important;padding:.35rem .2rem!important;font-size:.8rem;border:1px solid var(--l)!important;border-radius:999px!important}' +
+'.pn-pbtn{background:none;border:0;padding:0;cursor:pointer}.pn-pbtn img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block}#pn-dport{width:min(46rem,94vw)}#pn-gport{max-height:60vh;overflow:auto;margin:.8rem 0}' +
 '.pn *{box-sizing:border-box}.pn aside{background:var(--c);border-right:1px solid var(--l);padding:1.4rem 1rem;display:flex;flex-direction:column;gap:.3rem;position:sticky;top:0;height:100vh}' +
 '.pn .marca{font-family:"Cormorant Garamond",serif;font-size:1.35rem;margin-bottom:1.2rem}.pn aside button{background:none;border:0;text-align:left;padding:.55rem .7rem;border-radius:10px;color:var(--s)}' +
 '.pn aside button.on{background:var(--l);color:var(--t)}.pn aside .pie{margin-top:auto}.pn main{padding:2rem clamp(1rem,4vw,3rem);max-width:1100px;width:100%}' +
@@ -85,8 +90,27 @@ function tarjeta(g){
   return '<button class="pn-tar" data-act="abrir" data-id="' + g.id + '"><div class="cv">' + cv + '</div><h3>' + esc(g.title) + '</h3><p class="pn-s">' + esc(g.event_date || '') + '</p><span class="pn-pill">' + esc(ESTADOS[g.status] || g.status) + '</span></button>';
 }
 
+var TABS = [['panel', 'Panel de control'], ['detalles', 'Detalles'], ['fotos', 'Fotos y medios'], ['diseno', 'Diseño'], ['config', 'Configuración'], ['favoritas', 'Favoritas'], ['compartir', 'Compartir']];
+var TITULOS = { panel: 'Descripción general', detalles: 'Detalles', fotos: 'Fotos y medios', diseno: 'Diseño', config: 'Configuración de la galería', favoritas: 'Favoritas de los clientes', compartir: 'Compartir' };
+function temaGuardado(){ try { return localStorage.getItem('pn-tema') || 'auto'; } catch(e) { return 'auto'; } }
+function aplicarTema(){
+  var t = temaGuardado(), e = t === 'auto' ? (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : t;
+  var p = root && root.querySelector('.pn'); if (p) p.dataset.e = e;
+}
+function pintarLado(){
+  var a = root.querySelector('aside'), g = vista === 'detalle' ? gal(galId) : null, h;
+  if (g) {
+    h = '<div class="marca">' + esc(ph.studio_name) + '</div><button data-act="atras">← Galerías</button><div class="gt">' + esc(g.title) + '</div><span class="pn-pill">' + esc(ESTADOS[g.status] || g.status) + '</span><div class="sep"></div>' +
+      TABS.map(function(t){ return '<button data-act="tab" data-t="' + t[0] + '"' + (tab === t[0] ? ' class="on"' : '') + '>' + t[1] + '</button>'; }).join('');
+  } else {
+    h = '<div class="marca">' + esc(ph.studio_name) + '</div><button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>Inicio</button><button data-v="galerias"' + (vista === 'galerias' ? ' class="on"' : '') + '>Galerías de clientes</button>';
+  }
+  var tm = temaGuardado();
+  h += '<div class="pie"><div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button data-act="salir">Cerrar sesión</button></div>';
+  a.innerHTML = h;
+}
 function pintar(){
-  root.querySelectorAll('aside [data-v]').forEach(function(b){ b.classList.toggle('on', b.dataset.v === (vista === 'detalle' ? 'galerias' : vista)); });
+  pintarLado(); aplicarTema();
   if (vista === 'inicio') return pintarInicio();
   if (vista === 'galerias') return pintarLista();
   pintarDetalle();
@@ -128,6 +152,7 @@ async function abrirDetalle(id, conservar){
   pintar();
 }
 
+function fechaCad(g){ return g.expires_at ? String(g.expires_at).slice(0, 10) : ''; }
 function pintarDetalle(){
   var g = gal(galId); if (!g) { vista = 'galerias'; return pintar(); }
   var sel = cur ? cur.fotos.filter(function(x){ return x.photo_type === 'selection'; }) : [];
@@ -135,21 +160,35 @@ function pintarDetalle(){
   var cuerpo = '';
   if (!cur) cuerpo = '<p class="pn-s">Cargando…</p>';
   else if (tab === 'panel') {
-    var unicas = {}; cur.favs.forEach(function(x){ unicas[x.photo_id] = 1; });
-    cuerpo = '<div class="pn-cifras"><div><b>' + sel.length + '</b><span class="pn-s">Fotos de selección</span></div><div><b>' + fin.length + '</b><span class="pn-s">Finales</span></div><div><b>' + Object.keys(unicas).length + '</b><span class="pn-s">Favoritas</span></div><div><b>' + cur.vistas + '</b><span class="pn-s">Vistas</span></div></div>' +
-      '<div class="pn-row">' + (g.status === 'delivered' ? '<button class="pn-btn" data-act="reabrir">Reabrir selección</button>' : '<button class="pn-btn" data-act="entregar">Marcar como entregada</button>') + '<button class="pn-btn rojo" data-act="eliminar-galeria">Eliminar galería</button></div>' +
+    var unicas = {}, cuenta = {}; cur.favs.forEach(function(x){ unicas[x.photo_id] = 1; cuenta[x.photo_id] = (cuenta[x.photo_id] || 0) + 1; });
+    var top = sel.slice().sort(function(a, b){ return (cuenta[b.id] || 0) - (cuenta[a.id] || 0); }).slice(0, 5);
+    cuerpo = '<div class="pn-franja"><span><i class="pn-dot"></i>' + esc(ESTADOS[g.status] || g.status) + '</span><span>' + (sel.length + fin.length) + ' archivos guardados</span><span>Caducidad: ' + (fechaCad(g) || 'sin caducidad') + '</span></div>' +
+      '<div class="pn-cifras"><div><b>' + sel.length + '</b><span class="pn-s">Fotos de selección</span></div><div><b>' + fin.length + '</b><span class="pn-s">Finales</span></div><div><b>' + Object.keys(unicas).length + '</b><span class="pn-s">Favoritas</span></div><div><b>' + cur.vistas + '</b><span class="pn-s">Vistas</span></div></div>' +
+      '<div class="pn-row">' + (g.status === 'delivered' ? '<button class="pn-btn" data-act="reabrir">Reabrir selección</button>' : '<button class="pn-btn" data-act="entregar">Marcar como entregada</button>') + '</div>' +
       '<p class="pn-s">Al entregar, el cliente puede descargar las fotos finales y ya no puede cambiar sus favoritas.</p>' +
-      '<h2 style="margin-top:1.6rem">Texto de la marca de agua</h2><div class="pn-row"><input type="text" id="pn-wt" value="' + esc(g.watermark_text || 'Buenos Momentos') + '" maxlength="40"><button class="pn-btn sec" data-act="guardar-marca">Guardar</button></div><p class="pn-s">Se graba en las fotos de selección que subas a partir de ahora.</p>';
+      '<h2 style="margin-top:1.6rem">Fotos principales</h2>' + (top.length ? '<div class="pn-grid">' + top.map(function(x){
+        return '<figure class="pn-ph"><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (cuenta[x.id] ? ' · ♥ ' + cuenta[x.id] : '') + '</figcaption></figure>';
+      }).join('') + '</div>' : '<p class="pn-s">Aún no hay fotos de selección.</p>');
+  } else if (tab === 'detalles') {
+    cuerpo = '<div class="pn-card"><label class="pn-s">Nombre de la galería</label><input type="text" id="pn-dt" value="' + esc(g.title) + '"><label class="pn-s" style="display:block;margin-top:.9rem">Fecha del evento</label><input type="date" id="pn-dd" value="' + esc(g.event_date || '') + '"><div class="pn-row"><button class="pn-btn" data-act="guardar-detalles">Guardar</button></div></div>';
   } else if (tab === 'fotos') {
     cuerpo = '<div class="pn-card"><h2>Subir fotos</h2><div class="pn-row"><label><input type="radio" name="pn-dest" value="selection" checked> Selección (se reducen a 1600 px)</label><label><input type="radio" name="pn-dest" value="final"> Finales (originales, hasta 45 MB)</label></div>' +
       '<div class="pn-marcaui" id="pn-mbox"><label class="pn-s" for="pn-marca">Marca de agua</label><select id="pn-marca"><option value="si">Con marca de agua</option><option value="no">Sin marca de agua</option></select></div>' +
       '<div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul></div>' +
       '<h2>Selección (' + sel.length + ')</h2>' + (sel.length ? '<div class="pn-grid">' + sel.map(function(x){
-        return '<figure class="pn-ph' + (g.cover_photo_id === x.id ? ' cv' : '') + '"><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + '</figcaption><div class="pn-ac"><button data-act="portada" data-id="' + x.id + '">Portada</button><button data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div></figure>';
+        return '<figure class="pn-ph' + (g.cover_photo_id === x.id ? ' cv' : '') + '"><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (g.cover_photo_id === x.id ? ' · Portada' : '') + '</figcaption><div class="pn-ac"><button data-act="portada" data-id="' + x.id + '">Portada</button><button data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div></figure>';
       }).join('') + '</div>' : '<div class="pn-vacio">' + ilus('admin-subir') + '<p class="pn-s">Aún no hay fotos de selección.</p></div>') +
       '<h2 style="margin-top:1.6rem">Finales (' + fin.length + ')</h2>' + (fin.length ? fin.map(function(x){
         return '<div class="pn-fila"><span>' + esc(x.filename) + ' · ' + mb(x.file_size || 0) + '</span><button class="pn-btn sec" data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div>';
       }).join('') : '<p class="pn-s">Aún no hay fotos finales.</p>');
+  } else if (tab === 'diseno') {
+    var cvId = g.cover_photo_id || (sel[0] && sel[0].id), cv = cvId && cur.tk[cvId];
+    cuerpo = '<div class="pn-card"><h2>Portada</h2><p class="pn-s">Es la foto con la que tu cliente recibe su galería al abrir el enlace.</p><div class="pn-portada">' + (cv ? '<img alt="" src="' + esc(src(cv)) + '">' : ilus('admin-sin-portada')) + '</div><div class="pn-row"><button class="pn-btn" data-act="elegir-portada"' + (sel.length ? '' : ' disabled') + '>Elegir portada</button></div></div>';
+  } else if (tab === 'config') {
+    cuerpo = '<div class="pn-card"><h2>Marca de agua</h2><p class="pn-s">Texto que se graba en las fotos de selección que subas a partir de ahora.</p><input type="text" id="pn-wt" maxlength="40" value="' + esc(g.watermark_text || 'Buenos Momentos') + '"></div>' +
+      '<div class="pn-card"><h2>Caducidad</h2><p class="pn-s">Después de esta fecha el cliente ya no podrá abrir la galería. Déjala vacía para que no caduque.</p><input type="date" id="pn-ex" value="' + esc(fechaCad(g)) + '"></div>' +
+      '<div class="pn-row"><button class="pn-btn" data-act="guardar-config">Guardar cambios</button></div>' +
+      '<div class="pn-card"><h2>Eliminar galería</h2><p class="pn-s">Se borran la galería y todas sus fotos. No se puede deshacer.</p><button class="pn-btn rojo" data-act="eliminar-galeria">Eliminar galería</button></div>';
   } else if (tab === 'favoritas') {
     var nombre = {}; cur.fotos.forEach(function(x){ nombre[x.id] = x.filename; });
     var por = {}; cur.favs.forEach(function(x){ (por[x.visitor_token] = por[x.visitor_token] || []).push(x.photo_id); });
@@ -166,9 +205,9 @@ function pintarDetalle(){
     var url = BASE + g.access_code;
     cuerpo = '<div class="pn-lado">' + ilus('compartir-enlace') + '<div style="flex:1;min-width:15rem"><p class="pn-s">Enlace para el cliente</p><div class="pn-copia"><input type="text" readonly value="' + esc(url) + '"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(url) + '">Copiar</button></div><p class="pn-s">Código de acceso</p><div class="pn-copia"><input type="text" readonly value="' + esc(g.access_code) + '"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(g.access_code) + '">Copiar</button></div></div></div>';
   }
-  $('#pn-main').innerHTML = '<button class="pn-btn sec" data-act="atras">← Galerías</button><h1 style="margin-top:1rem">' + esc(g.title) + '</h1><span class="pn-pill">' + esc(ESTADOS[g.status] || g.status) + '</span>' +
-    '<div class="pn-tabs">' + [['panel', 'Panel de control'], ['fotos', 'Fotos'], ['favoritas', 'Favoritas'], ['compartir', 'Compartir']].map(function(x){ return '<button data-act="tab" data-t="' + x[0] + '"' + (tab === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div>' + cuerpo;
+  $('#pn-main').innerHTML = '<h1>' + esc(TITULOS[tab] || '') + '</h1><p class="pn-s">' + esc(g.title) + '</p>' + cuerpo;
   if (cur && tab === 'fotos') {
+    $('#pn-marca').addEventListener('change', mostrarMarca);
     root.querySelectorAll('input[name=pn-dest]').forEach(function(r){ r.addEventListener('change', mostrarMarca); });
     mostrarMarca();
     try { document.fonts.load('300 20px Jost'); } catch(e) {}
@@ -258,8 +297,31 @@ async function accion(a, el){
   if (a === 'subir') return subirTodo();
   if (a === 'entregar') { if (confirm('¿Marcar como entregada? El cliente podrá descargar las finales.')) cambiar({ status: 'delivered', selection_enabled: false, downloads_enabled: true }, 'Galería entregada'); return; }
   if (a === 'reabrir') return cambiar({ status: 'selection', selection_enabled: true, downloads_enabled: false }, 'Selección reabierta');
-  if (a === 'guardar-marca') { var tx = $('#pn-wt').value.trim(); if (!tx) return aviso('Escribe el texto de la marca.'); return cambiar({ watermark_text: tx }, 'Texto de la marca guardado'); }
-  if (a === 'portada') return cambiar({ cover_photo_id: id }, 'Portada actualizada');
+  if (a === 'salir') return window.cerrarSesion();
+  if (a === 'tema') { try { localStorage.setItem('pn-tema', el.dataset.t); } catch(e) {} return pintar(); }
+  if (a === 'guardar-detalles') {
+    var t1 = $('#pn-dt').value.trim(); if (!t1) return aviso('Escribe un nombre para la galería.');
+    return cambiar({ title: t1, event_date: $('#pn-dd').value || null }, 'Detalles guardados');
+  }
+  if (a === 'guardar-config') {
+    var tx = $('#pn-wt').value.trim(); if (!tx) return aviso('Escribe el texto de la marca.');
+    var ex = $('#pn-ex').value;
+    return cambiar({ watermark_text: tx, expires_at: ex ? ex + 'T23:59:59-06:00' : null }, 'Configuración guardada');
+  }
+  if (a === 'elegir-portada') {
+    var s0 = cur ? cur.fotos.filter(function(x){ return x.photo_type === 'selection'; }) : [];
+    $('#pn-gport').innerHTML = s0.map(function(x){ return '<button class="pn-pbtn" data-act="portada" data-id="' + x.id + '"><img loading="lazy" alt="' + esc(x.filename) + '" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"></button>'; }).join('');
+    return $('#pn-dport').showModal();
+  }
+  if (a === 'cerrar-portada') return $('#pn-dport').close();
+  if (a === 'portada') {
+    var mn = Math.min.apply(null, (cur ? cur.fotos : []).map(function(x){ return x.sort_order || 0; }).concat([0]));
+    var u = await db.from('photos').update({ sort_order: mn - 1 }).eq('id', id);
+    if (u.error) return aviso(u.error.message);
+    try { $('#pn-dport').close(); } catch(e) {}
+    await cambiar({ cover_photo_id: id }, 'Portada actualizada');
+    return abrirDetalle(galId, true);
+  }
   if (a === 'borrar-foto') {
     if (!confirm('¿Eliminar esta foto? No se puede deshacer.')) return;
     var r = await api('/api/admin/delete-photos', { photos: [id] });
@@ -296,15 +358,15 @@ async function crearGaleria(e){
 window.iniciarPanel = async function(photographer, cliente){
   ph = photographer; db = cliente; root = document.getElementById('vPanel');
   if (!document.getElementById('pn-css')) { var st = document.createElement('style'); st.id = 'pn-css'; st.textContent = CSS; document.head.appendChild(st); }
-  root.innerHTML = '<div class="pn"><aside><div class="marca">' + esc(ph.studio_name) + '</div><button data-v="inicio" class="on">Inicio</button><button data-v="galerias">Galerías de clientes</button><div class="pie"><button id="pn-salir">Cerrar sesión</button></div></aside><main id="pn-main"><p class="pn-s">Cargando…</p></main>' +
-    '<dialog id="pn-dnueva"><h2>Nueva galería</h2><form id="pn-fn"><input type="text" id="pn-cn" placeholder="Cliente (ej. Ana y Luis)"><input type="text" id="pn-ct" placeholder="Nombre de la galería (ej. Boda Ana y Luis)"><input type="date" id="pn-cf"><div class="pn-row"><button class="pn-btn" type="submit">Crear</button><button class="pn-btn sec" type="button" id="pn-cc">Cancelar</button></div></form></dialog></div>';
+  root.innerHTML = '<div class="pn"><aside></aside><main id="pn-main"><p class="pn-s">Cargando…</p></main>' +
+    '<dialog id="pn-dnueva"><h2>Nueva galería</h2><form id="pn-fn"><input type="text" id="pn-cn" placeholder="Cliente (ej. Ana y Luis)"><input type="text" id="pn-ct" placeholder="Nombre de la galería (ej. Boda Ana y Luis)"><input type="date" id="pn-cf"><div class="pn-row"><button class="pn-btn" type="submit">Crear</button><button class="pn-btn sec" type="button" id="pn-cc">Cancelar</button></div></form></dialog><dialog id="pn-dport"><h2>Elegir portada</h2><p class="pn-s">Toca la foto que quieres como portada.</p><div class="pn-grid" id="pn-gport"></div><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-portada">Cancelar</button></div></dialog></div>';
   root.onclick = function(e){
     var v = e.target.closest('aside [data-v]'); if (v) { vista = v.dataset.v; return pintar(); }
     var a = e.target.closest('[data-act]'); if (a) accion(a.dataset.act, a);
   };
   $('#pn-fn').addEventListener('submit', crearGaleria);
   $('#pn-cc').addEventListener('click', function(){ $('#pn-dnueva').close(); });
-  $('#pn-salir').addEventListener('click', function(){ window.cerrarSesion(); });
+  if (window.matchMedia && !window.__pnMq) { window.__pnMq = matchMedia('(prefers-color-scheme: dark)'); window.__pnMq.addEventListener('change', function(){ aplicarTema(); }); }
   vista = 'inicio';
   await cargarGalerias();
   pintar();
