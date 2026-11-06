@@ -8,7 +8,7 @@ var ESTADOS = { draft: 'Borrador', selection: 'En selección', selection_sent: '
 var EXTS = ['.png.jpg', '.jpg.jpg', '.jpg', '.png', '.jpeg', '.webp', '.png.png'];
 var db, ph, root, gals = [], favs = {}, vista = 'inicio', galId = null, tab = 'panel', busca = '', fEst = '', cur = null;
 
-var CSS = '.pn-ck{position:absolute;top:6px;left:6px;z-index:2;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid var(--a);display:grid;place-items:center;font-size:.8rem;color:var(--a);font-weight:700}.pn-ph.mk img{outline:3px solid var(--a);opacity:.85}.pn-barsel{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:20;background:var(--f);border:1px solid var(--l);border-radius:12px;padding:.6rem .8rem;margin:.6rem 0}.pn-barsel select{width:auto}.pn-esc{border-top:1px solid var(--l);padding:.8rem 0}.pn-fila{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.4rem 0}' +
+var CSS = '.pn-ck{cursor:pointer;position:absolute;top:6px;left:6px;z-index:2;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid var(--a);display:grid;place-items:center;font-size:.8rem;color:var(--a);font-weight:700}.pn-ck.off{background:rgba(255,255,255,.55);border-color:rgba(255,255,255,.9);color:transparent}.pn-ph.mk img{outline:3px solid var(--a);opacity:.85}.pn-barsel{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:20;background:var(--f);border:1px solid var(--l);border-radius:12px;padding:.6rem .8rem;margin:.6rem 0}.pn-barsel select{width:auto}.pn-esc{border-top:1px solid var(--l);padding:.8rem 0}.pn-fila{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.4rem 0}' +
 '.pn{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--p:#F3EFE9;--c:#fff;display:grid;grid-template-columns:220px 1fr;min-height:100vh;background:var(--f);color:var(--t);font-family:Jost,system-ui,sans-serif}' +
 '.pn[data-e=dark]{--f:#151413;--t:#F1ECE4;--s:#a39a91;--l:#2c2926;--a:#C9A27A;--p:#1c1a18;--c:#1c1a18}.pn[data-e=dark] .pn-il{mix-blend-mode:normal!important;filter:none!important;border-radius:8px}' +
 '.pn-franja{display:flex;flex-wrap:wrap;border:1px solid var(--l);border-radius:10px;background:var(--c);margin:.6rem 0 1.4rem;font-size:.9rem}.pn-franja span{padding:.6rem 1rem;border-right:1px solid var(--l)}.pn-franja span:last-child{border:0}.pn-dot{display:inline-block;width:.55rem;height:.55rem;border-radius:50%;background:var(--a);margin-right:.5rem}' +
@@ -342,7 +342,7 @@ function escenasCard(g, sel, fin){
 function barraSel(sel, fin){
   var todas = filtrarEsc(sel).concat(filtrarEsc(fin));
   if (!todas.length) return '';
-  if (!modoSel) return '<div class="pn-row"><button class="pn-btn sec" data-act="modo-sel">Seleccionar fotos</button><span class="pn-s">Para eliminar o mover varias a la vez.</span></div>';
+  if (!modoSel) return '<div class="pn-row"><button class="pn-btn" data-act="modo-sel">Seleccionar varias fotos</button><span class="pn-s">Toca el círculo de cualquier foto, o este botón, para eliminar o mover varias a la vez.</span></div>';
   var es = cur.escenas || [];
   return '<div class="pn-barsel"><b>' + marcadas.size + ' seleccionadas</b><button class="pn-btn sec" data-act="sel-todas">Seleccionar todas (' + todas.length + ')</button><button class="pn-btn sec" data-act="sel-ninguna">Quitar selección</button>' +
     (es.length ? '<select id="pn-mv"' + (marcadas.size ? '' : ' disabled') + '><option value="">Mover a escena…</option><option value="_none">Sin escena</option>' + es.map(function(e){ return '<option value="' + e.id + '">' + esc(e.name) + '</option>'; }).join('') + '</select>' : '') +
@@ -368,11 +368,11 @@ function seccionFotos(tipo, titulo, lista, g){
   var cuerpo;
   if (tipo === 'selection') {
     cuerpo = '<div class="pn-grid sm' + (ab ? '' : ' fr') + '">' + mostrar.map(function(x){
-      return '<figure class="pn-ph' + (g.cover_photo_id === x.id ? ' cv' : '') + (marcadas.has(x.id) ? ' mk' : '') + '">' + (modoSel ? '<span class="pn-ck">' + (marcadas.has(x.id) ? '✓' : '') + '</span>' : '') + '<img data-act="' + (modoSel ? 'marcar' : 'ver') + '" data-id="' + x.id + '" loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (g.cover_photo_id === x.id ? ' · Portada' : '') + '</figcaption><div class="pn-ac"><button data-act="portada" data-id="' + x.id + '">Portada</button><button data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div></figure>';
+      return '<figure class="pn-ph' + (g.cover_photo_id === x.id ? ' cv' : '') + (marcadas.has(x.id) ? ' mk' : '') + '">' + '<span class="pn-ck' + (modoSel ? '' : ' off') + '" data-act="marcar" data-id="' + x.id + '">' + (marcadas.has(x.id) ? '✓' : '') + '</span>' + '<img data-act="' + (modoSel ? 'marcar' : 'ver') + '" data-id="' + x.id + '" loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (g.cover_photo_id === x.id ? ' · Portada' : '') + '</figcaption><div class="pn-ac"><button data-act="portada" data-id="' + x.id + '">Portada</button><button data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div></figure>';
     }).join('') + '</div>';
   } else {
     cuerpo = mostrar.map(function(x){
-      return '<div class="pn-fila"><span>' + (modoSel ? '<input type="checkbox" data-act="marcar" data-id="' + x.id + '"' + (marcadas.has(x.id) ? ' checked' : '') + '> ' : '') + esc(x.filename) + ' · ' + mb(x.file_size || 0) + '</span><span><button class="pn-btn sec" data-act="ver" data-id="' + x.id + '">Ver</button> <button class="pn-btn sec" data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></span></div>';
+      return '<div class="pn-fila"><span>' + '<input type="checkbox" data-act="marcar" data-id="' + x.id + '"' + (marcadas.has(x.id) ? ' checked' : '') + '> ' + esc(x.filename) + ' · ' + mb(x.file_size || 0) + '</span><span><button class="pn-btn sec" data-act="ver" data-id="' + x.id + '">Ver</button> <button class="pn-btn sec" data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></span></div>';
     }).join('');
   }
   return cab + cuerpo + (mas ? '<button class="pn-vt" data-act="vertodo" data-tipo="' + tipo + '"><span>' + (ab ? 'Ver menos ⌃' : 'Ver todo ⌄') + '</span></button>' : '');
@@ -434,6 +434,7 @@ async function accion(a, el){
   if (a === 'ver') return abrirVer(el.dataset.id);
   if (a === 'modo-sel') { modoSel = !modoSel; marcadas = new Set(); return pintar(); }
   if (a === 'marcar') {
+    if (!modoSel) { modoSel = true; marcadas = new Set([id]); return pintar(); }
     if (marcadas.has(id)) marcadas.delete(id); else marcadas.add(id);
     var fg = el.closest('figure'); if (fg) { fg.classList.toggle('mk', marcadas.has(id)); var ck = fg.querySelector('.pn-ck'); if (ck) ck.textContent = marcadas.has(id) ? '✓' : ''; }
     var bc = root.querySelector('.pn-barsel b'); if (bc) bc.textContent = marcadas.size + ' seleccionadas';
