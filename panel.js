@@ -98,14 +98,16 @@ async function cargarGalerias(){
   var g = await db.from('galleries').select('id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity,gallery_type,description,location,grid_style,palette,link_token,access_mode,print_sent_at,finals_locked,view_quality,cover_key').is('deleted_at', null).order('created_at', { ascending: false });
   if (g.error) { aviso(g.error.message); return; }
   gals = g.data || [];
-  var sinPortada = gals.filter(function(x){ return !x.cover_photo_id; }).map(function(x){ return x.id; }), primeras = {};
+  var sinPortada = gals.filter(function(x){ return !x.cover_photo_id && !x.cover_key; }).map(function(x){ return x.id; }), primeras = {}, primerasF = {};
   if (sinPortada.length) {
-    var p = await db.from('photos').select('id,gallery_id').eq('photo_type', 'selection').in('gallery_id', sinPortada).order('sort_order').order('filename').limit(1000);
-    (p.data || []).forEach(function(x){ if (!primeras[x.gallery_id]) primeras[x.gallery_id] = x.id; });
+    var p = await db.from('photos').select('id,gallery_id,photo_type').in('gallery_id', sinPortada).order('sort_order').order('filename').limit(1000);
+    (p.data || []).forEach(function(x){ var m = x.photo_type === 'selection' ? primeras : primerasF; if (!m[x.gallery_id]) m[x.gallery_id] = x.id; });
   }
-  gals.forEach(function(x){ x.portadaId = x.cover_photo_id || primeras[x.id] || null; });
+  var conCover = gals.filter(function(x){ return x.cover_key; }).map(function(x){ return x.id; }), cvT = {};
+  if (conCover.length) { var cr = await api('/api/admin/cover-sign', { galleries: conCover }).catch(function(){ return null; }); cvT = (cr && cr.t) || {}; }
+  gals.forEach(function(x){ x.portadaId = x.cover_photo_id || primeras[x.id] || primerasF[x.id] || null; });
   var tk = await firmar(gals.map(function(x){ return x.portadaId; }).filter(Boolean));
-  gals.forEach(function(x){ x.portada = x.portadaId && tk[x.portadaId] ? src(tk[x.portadaId]) : ''; });
+  gals.forEach(function(x){ x.portada = cvT[x.id] ? src(cvT[x.id]) : (x.portadaId && tk[x.portadaId] ? src(tk[x.portadaId]) : ''); });
   var f = await db.from('favorites').select('gallery_id').limit(1000);
   favs = {}; (f.data || []).forEach(function(x){ favs[x.gallery_id] = (favs[x.gallery_id] || 0) + 1; });
 }
@@ -193,7 +195,7 @@ async function abrirDetalle(id, conservar){
   var cvT = null, gg = gal(id); if (gg && gg.cover_key) { var cs = await api('/api/admin/cover-sign', { gallery: id }).catch(function(){ return null; }); cvT = cs && cs.t; }
   var es = await api('/api/admin/scenes', { gallery: id }).catch(function(){ return { escenas: [] }; });
   var ip = await api('/api/admin/prints', { gallery: id }).catch(function(){ return { picks: [] }; });
-  cur = { fotos: fotos, favs: f.data || [], vistas: v.count || 0, tk: tk, cover: cvT, escenas: (es && es.escenas) || [], conFecha: conFecha, imp: (ip && ip.picks) || [] };
+  cur = { fotos: fotos, favs: f.data || [], vistas: v.count || 0, tk: tk, cover: cvT, escenas: (es && es.escenas) || [], conFecha: conFecha, imp: (ip && Array.isArray(ip.picks)) ? ip.picks : [], impErr: ip && ip.ok === false ? (ip.detalle || ip.error || 'error') : '' };
   pintar();
 }
 
@@ -259,6 +261,8 @@ function pintarDetalle0(){
     }).join('')
       : '<div class="pn-vacio">' + ilus('admin-sin-clientes') + '<p class="pn-s">Todavía no hay favoritas en esta galería.</p></div>';
   } else if (tab === 'impresiones') {
+    if (cur.impErr) { cuerpo = '<div class="pn-card"><h2>Falta activar las impresiones</h2><p class="pn-s">La tabla de impresiones todavía no existe en Supabase, por eso los pedidos de tus clientes no se guardan. Abre Supabase → SQL Editor, pega el contenido de <b>etapa4.sql</b> y pulsa Run. Después recarga esta página.</p><p class="pn-s">Detalle técnico: ' + esc(cur.impErr) + '</p></div>'; }
+    else {
     var nom2 = {}; cur.fotos.forEach(function(x){ nom2[x.id] = x.filename; });
     var por2 = {}; (cur.imp || []).forEach(function(x){ (por2[x.visitor_token] = por2[x.visitor_token] || []).push(x.photo_id); });
     var vis2 = Object.keys(por2);
@@ -267,6 +271,7 @@ function pintarDetalle0(){
       var nm = ids.map(function(id){ return nom2[id] || '?'; });
       return '<div class="pn-card"><h2>Cliente ' + (i + 1) + ' · ' + ids.length + (ids.length === 1 ? ' foto' : ' fotos') + ' para imprimir</h2><ul>' + nm.map(function(n){ return '<li>' + esc(n) + '</li>'; }).join('') + '</ul><div class="pn-row"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(nm.join(', ')) + '">Copiar nombres</button></div></div>';
     }).join('') : '<div class="pn-vacio"><p class="pn-s">Todavía nadie ha marcado fotos para imprimir. Aparecen aquí cuando la galería está entregada y el cliente toca «Imprimir» en sus fotos finales.</p></div>');
+    }
   } else {
     if (!g.link_token) {
       var bs = new Uint8Array(18); crypto.getRandomValues(bs);
@@ -485,7 +490,7 @@ async function cambiar(campos, msg){
 async function accion(a, el){
   var id = el.dataset.id, g = gal(galId);
   if (a === 'abrir') return abrirDetalle(id);
-  if (a === 'atras') { vista = 'galerias'; return pintar(); }
+  if (a === 'atras') { await cargarGalerias(); vista = 'galerias'; return pintar(); }
   if (a === 'tab') { tab = el.dataset.t; return pintar(); }
   if (a === 'copiar') { copiar(el.dataset.t); el.textContent = 'Copiado'; return; }
   if (a === 'nueva') return $('#pn-dnueva').showModal();
