@@ -141,9 +141,9 @@ function pintarDetalle(){
       '<p class="pn-s">Al entregar, el cliente puede descargar las fotos finales y ya no puede cambiar sus favoritas.</p>';
   } else if (tab === 'fotos') {
     cuerpo = '<div class="pn-card"><h2>Subir fotos</h2><div class="pn-row"><label><input type="radio" name="pn-dest" value="selection" checked> Selección (se reducen a 1600 px)</label><label><input type="radio" name="pn-dest" value="final"> Finales (originales, hasta 45 MB)</label></div>' +
-      '<div class="pn-marcaui"><label class="pn-s"><input type="checkbox" id="pn-marca" checked> Grabar marca de agua en las fotos de selección</label>' +
-      '<div class="pn-row"><input type="text" id="pn-mt" placeholder="Texto de la marca" value="' + esc(g.watermark_text || 'Buenos Momentos') + '"><select id="pn-mo"><option value="20">Suave</option><option value="35">Media</option><option value="55">Fuerte</option></select><select id="pn-ms"><option value="s">Pequeña</option><option value="m">Mediana</option><option value="l">Grande</option></select></div>' +
-      '<canvas id="pn-pv" style="width:100%;max-width:560px;border-radius:10px;display:block"></canvas><p class="pn-s">Vista previa. Elige una foto abajo para verla con tu marca. La marca se graba al subir: las fotos ya subidas no cambian.</p></div><div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul></div>' +
+      '<div class="pn-marcaui" id="pn-mbox"><label class="pn-s"><input type="checkbox" id="pn-marca" checked> Poner marca de agua en las fotos de selección</label>' +
+      '<div class="pn-row" id="pn-mopts"><input type="text" id="pn-mt" placeholder="Texto de la marca" value="' + esc(g.watermark_text || 'Buenos Momentos') + '"><select id="pn-mo"><option value="20">Suave</option><option value="35">Media</option><option value="55">Fuerte</option></select><select id="pn-ms"><option value="s">Pequeña</option><option value="m">Mediana</option><option value="l">Grande</option></select></div>' +
+      '</div><div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul></div>' +
       '<h2>Selección (' + sel.length + ')</h2>' + (sel.length ? '<div class="pn-grid">' + sel.map(function(x){
         return '<figure class="pn-ph' + (g.cover_photo_id === x.id ? ' cv' : '') + '"><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + '</figcaption><div class="pn-ac"><button data-act="portada" data-id="' + x.id + '">Portada</button><button data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div></figure>';
       }).join('') + '</div>' : '<div class="pn-vacio">' + ilus('admin-subir') + '<p class="pn-s">Aún no hay fotos de selección.</p></div>') +
@@ -164,9 +164,10 @@ function pintarDetalle(){
     '<div class="pn-tabs">' + [['panel', 'Panel de control'], ['fotos', 'Fotos'], ['favoritas', 'Favoritas'], ['compartir', 'Compartir']].map(function(x){ return '<button data-act="tab" data-t="' + x[0] + '"' + (tab === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div>' + cuerpo;
   if (cur && tab === 'fotos') {
     $('#pn-mo').value = String(opMarca(g)); if (!$('#pn-mo').value) $('#pn-mo').value = '35'; $('#pn-ms').value = tamMarca();
-    ['#pn-marca', '#pn-mt', '#pn-mo', '#pn-ms', '#pn-file'].forEach(function(q){ var el = $(q); el.addEventListener('input', vistaPrevia); el.addEventListener('change', vistaPrevia); });
-    root.querySelectorAll('input[name=pn-dest]').forEach(function(r){ r.addEventListener('change', vistaPrevia); });
-    try { document.fonts.load('300 20px Jost').then(vistaPrevia, vistaPrevia); } catch(e) { vistaPrevia(); }
+    $('#pn-marca').addEventListener('change', mostrarMarca);
+    root.querySelectorAll('input[name=pn-dest]').forEach(function(r){ r.addEventListener('change', mostrarMarca); });
+    mostrarMarca();
+    try { document.fonts.load('300 20px Jost'); } catch(e) {}
   }
 }
 
@@ -212,17 +213,11 @@ function opcionesMarca(){
   if (!$('#pn-marca') || !$('#pn-marca').checked) return null;
   return { text: $('#pn-mt').value, opacity: +$('#pn-mo').value, size: $('#pn-ms').value };
 }
-function vistaPrevia(){
-  var c = $('#pn-pv'), f = $('#pn-file'); if (!c) return;
-  var cx = c.getContext('2d'), o = opcionesMarca();
-  var dib = function(bm){
-    var W = 560, H = bm ? Math.round(W * bm.height / bm.width) : 373; c.width = W; c.height = H;
-    if (bm) cx.drawImage(bm, 0, 0, W, H); else { cx.fillStyle = '#6b625a'; cx.fillRect(0, 0, W, H); }
-    if (o) marcar(cx, W, H, o);
-  };
-  var tipo = root.querySelector('input[name=pn-dest]:checked');
-  if (f && f.files[0] && (!tipo || tipo.value === 'selection')) createImageBitmap(f.files[0]).then(dib, function(){ dib(null); });
-  else dib(null);
+function mostrarMarca(){
+  var box = $('#pn-mbox'); if (!box) return;
+  var fin = root.querySelector('input[name=pn-dest]:checked').value === 'final';
+  box.hidden = fin;
+  var op = $('#pn-mopts'); if (op) op.hidden = !$('#pn-marca').checked;
 }
 var ERR = { muy_grande: 'pesa más de 45 MB', formato: 'formato no permitido (usa JPG, PNG, WEBP o TIFF)', sin_sesion: 'tu sesión caducó, vuelve a entrar', registro: 'no se pudo registrar', galeria: 'galería no encontrada' };
 
