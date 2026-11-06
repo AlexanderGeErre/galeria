@@ -47,7 +47,7 @@ header h1{font-size:clamp(1.8rem,5vw,2.8rem);letter-spacing:.09em;text-transform
 .fin a{text-decoration:none}.vacio{text-align:center;color:var(--s);padding:3rem 1rem;column-span:all}
 .dl{position:absolute;right:10px;bottom:10px;width:42px;height:42px;border-radius:50%;background:var(--a);color:#fff;display:grid;place-items:center;text-decoration:none}.dl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .pr{position:absolute;left:10px;bottom:10px;height:42px;padding:0 .9rem 0 .7rem;border-radius:999px;border:1px solid var(--a);background:rgba(250,248,245,.94);color:#2B2623;display:flex;align-items:center;gap:.4rem;font-size:.85rem}.pr svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.pr[aria-pressed=true]{background:var(--a);color:#fff}
-#visor .pr{position:absolute;left:50%;transform:translateX(-50%);bottom:1rem}
+#visor .pr{position:absolute;left:50%;transform:translateX(-50%);bottom:1rem}.f .pr{width:42px;padding:0;justify-content:center}.f .pr span{display:none}.f.imp{box-shadow:0 0 0 3px var(--a)}
 .masivo{column-span:all;text-align:center;margin:0 0 1.2rem}#visor .dlv{position:absolute;bottom:1rem;right:1rem;text-decoration:none;padding:.5rem 1.1rem}
 #portada{position:fixed;top:0;left:0;right:0;height:100vh;height:100svh;z-index:20;display:grid;place-items:end center;color:#fff;text-align:center;overflow:hidden;background:#151413}
 #portada>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:kb 14s ease-out both}#portada:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),rgba(0,0,0,.05) 60%)}
@@ -195,11 +195,11 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   function tarjeta(f){
     var r = f.ancho && f.alto ? f.ancho + ' / ' + f.alto : '3 / 2';
     var co = puede() ? '<button class="co" data-fav="' + f.id + '" aria-pressed="' + favs.has(f.id) + '" aria-label="Favorita">' + HEART + '</button>' : '';
-    return '<figure class="f" style="aspect-ratio:' + r + '"><img loading="lazy" data-ver="' + f.id + '" alt="" src="' + esc(url(f.t)) + '">' + co + '</figure>';
+    return '<figure class="f' + (imps.has(f.id) ? ' imp' : '') + '" style="aspect-ratio:' + r + '"><img loading="lazy" data-ver="' + f.id + '" alt="" src="' + esc(url(f.t)) + '">' + co + '</figure>';
   }
   function tarjetaFinal(f){
     var r = f.ancho && f.alto ? f.ancho + ' / ' + f.alto : '3 / 2';
-    return '<figure class="f" style="aspect-ratio:' + r + '"><img loading="lazy" data-ver="' + f.id + '" alt="" src="' + esc(url(f.t)) + '">' + (G.descargas ? '<a class="dl" href="' + esc(url(f.t, true)) + '" download aria-label="Descargar">' + DESCARGA + '</a>' : '') + '<button class="pr" data-pr="' + f.id + '" aria-pressed="' + imps.has(f.id) + '" type="button">' + PRINTER + '<span>Imprimir</span></button></figure>';
+    return '<figure class="f' + (imps.has(f.id) ? ' imp' : '') + '" style="aspect-ratio:' + r + '"><img loading="lazy" data-ver="' + f.id + '" alt="" src="' + esc(url(f.t)) + '">' + (G.descargas ? '<a class="dl" href="' + esc(url(f.t, true)) + '" download aria-label="Descargar">' + DESCARGA + '</a>' : '') + '<button class="pr" data-pr="' + f.id + '" aria-label="Marcar para imprimir" aria-pressed="' + imps.has(f.id) + '" type="button">' + PRINTER + '<span>Imprimir</span></button></figure>';
   }
   function enEsc(f){ return !escSel || f.escena === escSel; }
   document.addEventListener('load', function(e){ var t = e.target; if (t && t.tagName === 'IMG' && t.closest && t.closest('.f')) t.classList.add('ld'); }, true);
@@ -227,12 +227,13 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   }
 
   function contarImp(){ $('#cntI').textContent = imps.size + (imps.size === 1 ? ' foto para imprimir' : ' fotos para imprimir'); $('#enviarI').disabled = !imps.size; }
+  function marcarImp(id, on){ document.querySelectorAll('[data-pr="' + id + '"]').forEach(function(b){ b.setAttribute('aria-pressed', on); var f = b.closest('.f'); if (f) f.classList.toggle('imp', on); }); }
   function alternarImp(id){
     var on = !imps.has(id); if (on) imps.add(id); else imps.delete(id);
-    document.querySelectorAll('[data-pr="' + id + '"]').forEach(function(b){ b.setAttribute('aria-pressed', on); }); contarImp();
+    marcarImp(id, on); contarImp();
     post('/api/client/print', { code: codigo, token: acc.t, scene: acc.s, visitor: visitor, photo: id, active: on }).then(function(d){ if (!d.ok) throw new Error(d.detalle || d.error); }).catch(function(e){
       if (on) imps.delete(id); else imps.add(id);
-      document.querySelectorAll('[data-pr="' + id + '"]').forEach(function(b){ b.setAttribute('aria-pressed', !on); }); contarImp();
+      marcarImp(id, !on); contarImp();
       aviso('No se pudo guardar (' + (e && e.message ? e.message : 'error') + '). Inténtalo de nuevo.');
     });
   }
