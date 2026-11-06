@@ -72,7 +72,7 @@ async function firmar(ids){
 function src(t){ return W + '/api/img?t=' + encodeURIComponent(t); }
 
 async function cargarGalerias(){
-  var g = await db.from('galleries').select('id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity,gallery_type,description,location,grid_style,palette,link_token,access_mode').is('deleted_at', null).order('created_at', { ascending: false });
+  var g = await db.from('galleries').select('id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity,gallery_type,description,location,grid_style,palette,link_token,access_mode,print_sent_at').is('deleted_at', null).order('created_at', { ascending: false });
   if (g.error) { aviso(g.error.message); return; }
   gals = g.data || [];
   var sinPortada = gals.filter(function(x){ return !x.cover_photo_id; }).map(function(x){ return x.id; }), primeras = {};
@@ -92,10 +92,10 @@ function tarjeta(g){
   return '<button class="pn-tar" data-act="abrir" data-id="' + g.id + '"><div class="cv">' + cv + '</div><h3>' + esc(g.title) + '</h3><p class="pn-s">' + esc(g.event_date || '') + '</p><span class="pn-pill">' + esc(ESTADOS[g.status] || g.status) + '</span></button>';
 }
 
-var TABS = [['panel', 'Panel de control'], ['detalles', 'Detalles'], ['fotos', 'Fotos y medios'], ['diseno', 'Diseño'], ['config', 'Configuración'], ['favoritas', 'Favoritas'], ['compartir', 'Compartir']];
+var TABS = [['panel', 'Panel de control'], ['detalles', 'Detalles'], ['fotos', 'Fotos y medios'], ['diseno', 'Diseño'], ['config', 'Configuración'], ['favoritas', 'Favoritas'], ['impresiones', 'Impresiones'], ['compartir', 'Compartir']];
 var ESTILOS = [['clasico', 'Clásico', 'Fotos con su proporción original'], ['uniforme', 'Uniforme', 'Cuadrícula ordenada, todas del mismo tamaño'], ['amplio', 'Amplio', 'Fotos grandes, menos por fila']];
 var PALETAS = [['auto', 'Automática', '#FAF8F5', '#151413'], ['blanco', 'Blanco', '#FFFFFF', '#111111'], ['beige', 'Beige', '#F3EDE3', '#8A6A3B'], ['oliva', 'Oliva', '#F1EFE4', '#6B7A3A'], ['noche', 'Azul noche', '#0F1B2D', '#8FB4E3'], ['negro', 'Negro', '#0B0B0B', '#C9A27A']];
-var TITULOS = { panel: 'Descripción general', detalles: 'Detalles', fotos: 'Fotos y medios', diseno: 'Diseño', config: 'Configuración de la galería', favoritas: 'Favoritas de los clientes', compartir: 'Compartir' };
+var TITULOS = { panel: 'Descripción general', detalles: 'Detalles', fotos: 'Fotos y medios', diseno: 'Diseño', config: 'Configuración de la galería', favoritas: 'Favoritas de los clientes', impresiones: 'Fotos para imprimir', compartir: 'Compartir' };
 function temaGuardado(){ try { return localStorage.getItem('pn-tema') || 'auto'; } catch(e) { return 'auto'; } }
 function aplicarTema(){
   var t = temaGuardado(), e = t === 'auto' ? (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : t;
@@ -152,7 +152,8 @@ async function abrirDetalle(id, conservar){
   var v = await db.from('gallery_views').select('id', { count: 'exact', head: true }).eq('gallery_id', id);
   var fotos = p.data || [];
   var tk = await firmar(fotos.filter(function(x){ return x.photo_type === 'selection'; }).map(function(x){ return x.id; }));
-  cur = { fotos: fotos, favs: f.data || [], vistas: v.count || 0, tk: tk };
+  var ip = await api('/api/admin/prints', { gallery: id }).catch(function(){ return { picks: [] }; });
+  cur = { fotos: fotos, favs: f.data || [], vistas: v.count || 0, tk: tk, imp: (ip && ip.picks) || [] };
   pintar();
 }
 
@@ -212,6 +213,15 @@ function pintarDetalle(){
       }).join('') + '</div><div class="pn-row"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(nom) + '">Copiar nombres</button></div></div>';
     }).join('')
       : '<div class="pn-vacio">' + ilus('admin-sin-clientes') + '<p class="pn-s">Todavía no hay favoritas en esta galería.</p></div>';
+  } else if (tab === 'impresiones') {
+    var nom2 = {}; cur.fotos.forEach(function(x){ nom2[x.id] = x.filename; });
+    var por2 = {}; (cur.imp || []).forEach(function(x){ (por2[x.visitor_token] = por2[x.visitor_token] || []).push(x.photo_id); });
+    var vis2 = Object.keys(por2);
+    cuerpo = (g.print_sent_at ? '<p class="pn-s">Pedido enviado por el cliente el ' + esc(new Date(g.print_sent_at).toLocaleString('es-GT')) + '.</p>' : '') + (vis2.length ? vis2.map(function(k, i){
+      var ids = por2[k].sort(function(a, b){ return String(nom2[a]).localeCompare(String(nom2[b])); });
+      var nm = ids.map(function(id){ return nom2[id] || '?'; });
+      return '<div class="pn-card"><h2>Cliente ' + (i + 1) + ' · ' + ids.length + (ids.length === 1 ? ' foto' : ' fotos') + ' para imprimir</h2><ul>' + nm.map(function(n){ return '<li>' + esc(n) + '</li>'; }).join('') + '</ul><div class="pn-row"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(nm.join(', ')) + '">Copiar nombres</button></div></div>';
+    }).join('') : '<div class="pn-vacio"><p class="pn-s">Todavía nadie ha marcado fotos para imprimir. Aparecen aquí cuando la galería está entregada y el cliente toca «Imprimir» en sus fotos finales.</p></div>');
   } else {
     if (!g.link_token) {
       var bs = new Uint8Array(18); crypto.getRandomValues(bs);
