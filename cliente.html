@@ -88,7 +88,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     if (i < EXTS.length) { t.dataset.i = i; t.src = 'imagenes/' + t.dataset.n + EXTS[i]; } else t.style.visibility = 'hidden';
   }, true);
   function ilus(n){ return '<img class="il" data-n="' + n + '" data-i="0" src="imagenes/' + n + EXTS[0] + '" alt="">'; }
-  function post(path, body){ return fetch(W + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function(r){ return r.json(); }); }
+  function post(path, body){ return fetch(W + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(function(r){ return r.text().then(function(t){ try { return JSON.parse(t); } catch(e) { throw new Error('respuesta inesperada, código ' + r.status); } }); }); }
   function url(t, dl){ return W + '/api/img?t=' + encodeURIComponent(t) + (dl ? '&dl=1' : ''); }
   function aviso(t){ var d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 4000); }
   function fechaLarga(s){
@@ -121,7 +121,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
       $('#tit').textContent = G.titulo; $('#fec').textContent = fechaLarga(G.fecha);
       $('#guia').textContent = G.estado === 'delivered' ? 'Tus fotos finales ya están listas. Descárgalas en la pestaña Finales.' : puede() ? 'Toca el corazón en tus fotos favoritas y luego envía tu selección.' : '';
       pintar(); mostrar('galeria');
-    }).catch(function(){ if (!silencioso) $('#err').textContent = 'No pude conectar. Revisa tu internet e inténtalo de nuevo.'; })
+    }).catch(function(e){ if (!silencioso) $('#err').textContent = 'No pude conectar (' + (e && e.message ? e.message : 'error') + '). Revisa tu internet e inténtalo de nuevo.'; })
       .then(function(){ btn.disabled = false; btn.textContent = 'Entrar a mi galería'; });
   }
 
