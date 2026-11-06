@@ -2,6 +2,7 @@
 'use strict';
 var W = 'https://galerias-api.alexandergeerre.workers.dev';
 var BASE = 'https://alexandergeerre.github.io/galeria/cliente.html?c=';
+var BASEG = 'https://alexandergeerre.github.io/galeria/cliente.html?g=';
 var MAX = 45 * 1048576;
 var ESTADOS = { draft: 'Borrador', selection: 'En selección', selection_sent: 'Selección enviada', delivered: 'Entregada', expired: 'Expirada' };
 var EXTS = ['.png.jpg', '.jpg.jpg', '.jpg', '.png', '.jpeg', '.webp', '.png.png'];
@@ -71,7 +72,7 @@ async function firmar(ids){
 function src(t){ return W + '/api/img?t=' + encodeURIComponent(t); }
 
 async function cargarGalerias(){
-  var g = await db.from('galleries').select('id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity,gallery_type,description,location,grid_style,palette').is('deleted_at', null).order('created_at', { ascending: false });
+  var g = await db.from('galleries').select('id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity,gallery_type,description,location,grid_style,palette,link_token,access_mode').is('deleted_at', null).order('created_at', { ascending: false });
   if (g.error) { aviso(g.error.message); return; }
   gals = g.data || [];
   var sinPortada = gals.filter(function(x){ return !x.cover_photo_id; }).map(function(x){ return x.id; }), primeras = {};
@@ -212,8 +213,20 @@ function pintarDetalle(){
     }).join('')
       : '<div class="pn-vacio">' + ilus('admin-sin-clientes') + '<p class="pn-s">Todavía no hay favoritas en esta galería.</p></div>';
   } else {
-    var url = BASE + g.access_code;
-    cuerpo = '<div class="pn-lado">' + ilus('compartir-enlace') + '<div style="flex:1;min-width:15rem"><p class="pn-s">Enlace para el cliente</p><div class="pn-copia"><input type="text" readonly value="' + esc(url) + '"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(url) + '">Copiar</button></div><p class="pn-s">Código de acceso</p><div class="pn-copia"><input type="text" readonly value="' + esc(g.access_code) + '"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(g.access_code) + '">Copiar</button></div></div></div>';
+    if (!g.link_token) {
+      var bs = new Uint8Array(18); crypto.getRandomValues(bs);
+      g.link_token = Array.prototype.map.call(bs, function(x){ return 'abcdefghijkmnpqrstuvwxyz23456789'[x % 32]; }).join('');
+      db.from('galleries').update({ link_token: g.link_token }).eq('id', g.id).then(function(){});
+    }
+    var abierto = g.access_mode === 'abierto', urlG = BASEG + g.link_token, urlC = BASE + g.access_code;
+    var fila = function(et, v){ return '<p class="pn-s">' + et + '</p><div class="pn-copia"><input type="text" readonly value="' + esc(v) + '"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(v) + '">Copiar</button></div>'; };
+    cuerpo = '<div class="pn-card"><h2>Cómo entra tu cliente</h2><div class="pn-opts">' +
+      '<button class="pn-opt' + (abierto ? ' on' : '') + '" data-act="modo" data-v="abierto"><b>Enlace sin clave</b><span>Cualquiera que tenga el enlace ve la galería directamente.</span></button>' +
+      '<button class="pn-opt' + (abierto ? '' : ' on') + '" data-act="modo" data-v="codigo"><b>Enlace con código</b><span>Debe escribir el código para entrar.</span></button></div></div>' +
+      '<div class="pn-card"><h2>' + (abierto ? 'Enlace sin clave' : 'Enlace con código') + '</h2>' +
+      (abierto ? '<p class="pn-s">Envía este enlace. Entra directo, sin pedir nada.</p>' + fila('Enlace para el cliente', urlG)
+        : '<p class="pn-s">Envía el enlace y el código por separado: el cliente escribe el código al abrirlo.</p>' + fila('Enlace para el cliente', urlG) + '<p class="pn-s">Código de acceso (puedes cambiarlo)</p><div class="pn-copia"><input type="text" id="pn-cod" maxlength="40" value="' + esc(g.access_code) + '"><button class="pn-btn sec" data-act="guardar-codigo">Guardar</button><button class="pn-btn sec" data-act="copiar" data-t="' + esc(g.access_code) + '">Copiar</button></div>' +
+          '<details class="pn-s" style="margin-top:.6rem"><summary>Enlace con el código incluido (entra sin escribirlo)</summary>' + fila('Enlace directo con código', urlC) + '</details>') + '</div>';
   }
   $('#pn-main').innerHTML = '<h1>' + esc(TITULOS[tab] || '') + '</h1><p class="pn-s">' + esc(g.title) + '</p>' + cuerpo;
   if (cur && tab === 'fotos') {
@@ -309,6 +322,13 @@ async function accion(a, el){
   if (a === 'reabrir') return cambiar({ status: 'selection', selection_enabled: true, downloads_enabled: false }, 'Selección reabierta');
   if (a === 'salir') return window.cerrarSesion();
   if (a === 'tema') { try { localStorage.setItem('pn-tema', el.dataset.t); } catch(e) {} return pintar(); }
+  if (a === 'modo') return cambiar({ access_mode: el.dataset.v }, el.dataset.v === 'abierto' ? 'Ahora el enlace entra sin clave' : 'Ahora el enlace pide código');
+  if (a === 'guardar-codigo') {
+    var nc = $('#pn-cod').value.trim().toUpperCase();
+    if (!/^[A-Z0-9-]{4,40}$/.test(nc)) return aviso('El código debe tener de 4 a 40 letras, números o guiones, sin espacios.');
+    if (gals.some(function(x){ return x.id !== g.id && String(x.access_code).toUpperCase() === nc; })) return aviso('Ese código ya lo usa otra galería. Elige otro.');
+    return cambiar({ access_code: nc }, 'Código guardado');
+  }
   if (a === 'estilo') return cambiar({ grid_style: el.dataset.v }, 'Estilo guardado');
   if (a === 'paleta') return cambiar({ palette: el.dataset.v }, 'Paleta guardada');
   if (a === 'guardar-detalles') {
