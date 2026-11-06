@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--c:#fff;--err:#A32D2D;color-scheme:light}
-@media(prefers-color-scheme:dark){:root{--f:#151413;--t:#F1ECE4;--s:#a39a91;--l:#2c2926;--a:#C9A27A;--c:#1c1a18;--err:#E58C8C;color-scheme:dark}.il{mix-blend-mode:normal!important;filter:none!important;border-radius:10px}.logo{display:none!important}}
+@media(prefers-color-scheme:dark){:root{--f:#151413;--t:#F1ECE4;--s:#a39a91;--l:#2c2926;--a:#C9A27A;--c:#1c1a18;--err:#E58C8C;color-scheme:dark}.il{mix-blend-mode:normal!important;filter:none!important;border-radius:10px}}
 *{box-sizing:border-box;margin:0}[hidden]{display:none!important}
 body{background:var(--f);color:var(--t);font-family:'Jost',system-ui,sans-serif;line-height:1.55;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
 h1,h2{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;line-height:1.1}
@@ -33,6 +33,8 @@ header h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.3rem 0}
 .co svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8}.co[aria-pressed=true]{background:var(--a);color:#fff}.co[aria-pressed=true] svg{fill:currentColor}
 .fin{margin:0 0 14px;break-inside:avoid;border:1px solid var(--l);border-radius:8px;overflow:hidden;background:var(--c)}.fin img{width:100%;display:block}.fin div{padding:.7rem .9rem;display:flex;justify-content:space-between;align-items:center;gap:.5rem;font-size:.85rem}
 .fin a{text-decoration:none}.vacio{text-align:center;color:var(--s);padding:3rem 1rem;column-span:all}
+.dl{position:absolute;right:10px;bottom:10px;width:42px;height:42px;border-radius:50%;background:var(--a);color:#fff;display:grid;place-items:center;text-decoration:none}.dl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.masivo{column-span:all;text-align:center;margin:0 0 1.2rem}#visor .dlv{position:absolute;bottom:1rem;right:1rem;text-decoration:none;padding:.5rem 1.1rem}
 .barra{position:fixed;left:0;right:0;bottom:0;background:var(--c);border-top:1px solid var(--l);padding:.8rem 1rem calc(.8rem + env(safe-area-inset-bottom));display:flex;justify-content:center;align-items:center;gap:1.2rem;z-index:5}
 dialog{border:1px solid var(--l);background:var(--f);color:var(--t);border-radius:16px;padding:1.5rem;width:min(26rem,92vw);margin:auto;box-shadow:0 24px 60px rgba(43,38,35,.25)}dialog::backdrop{background:rgba(21,20,19,.6)}
 dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
@@ -48,7 +50,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
 <body>
 
 <main id="acceso">
-  <img class="il logo" data-n="logo-claro" data-i="0" src="imagenes/logo-claro.png" alt="Alexander Ge Erre">
+  <picture><source media="(prefers-color-scheme: dark)" srcset="imagenes/logo-oscuro.png.jpg"><img class="il logo" data-n="logo-claro" data-i="0" src="imagenes/logo-claro.png.jpg" alt="Alexander Ge Erre"></picture>
   <h1>Entra a tu galería</h1>
   <p class="s">Escribe el código que te envié para ver tus fotos.</p>
   <form id="fa" autocomplete="off"><input id="cod" name="codigo-galeria" placeholder="Tu código" autocomplete="off" autocapitalize="characters" spellcheck="false"><p class="err" id="err" role="alert"></p><button class="btn" id="go" type="submit">Entrar a mi galería</button></form>
@@ -63,18 +65,19 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
 </section>
 
 <main id="gracias" hidden>
-  <img class="il" data-n="admin-al-dia" data-i="0" src="imagenes/admin-al-dia.png" alt="">
+  <img class="il" data-n="admin-al-dia" data-i="0" src="imagenes/admin-al-dia.png.jpg" alt="">
   <h1>¡Gracias!</h1><p class="s" id="txtG"></p><button class="btn sec" id="volver" type="button">Volver a mis fotos</button>
 </main>
 
-<dialog id="visor"><button class="x" aria-label="Cerrar">×</button><button class="p" aria-label="Anterior">‹</button><button class="n" aria-label="Siguiente">›</button><img alt=""><button class="co" id="vco" aria-pressed="false" aria-label="Favorita"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9.1C1.2 8.8 3 5.5 6.2 5.5c2 0 3.2 1.1 3.8 2.2h4c.6-1.1 1.8-2.2 3.8-2.2 3.2 0 5 3.3 3.5 6.4C19 16.4 12 21 12 21z" transform="translate(0 -1)"/></svg></button><span class="nm" id="vnm"></span></dialog>
+<dialog id="visor"><button class="x" aria-label="Cerrar">×</button><button class="p" aria-label="Anterior">‹</button><button class="n" aria-label="Siguiente">›</button><img alt=""><button class="co" id="vco" aria-pressed="false" aria-label="Favorita"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.6-9.3-9.1C1.2 8.8 3 5.5 6.2 5.5c2 0 3.2 1.1 3.8 2.2h4c.6-1.1 1.8-2.2 3.8-2.2 3.2 0 5 3.3 3.5 6.4C19 16.4 12 21 12 21z" transform="translate(0 -1)"/></svg></button><span class="nm" id="vnm"></span><a class="btn dlv" id="vdl" href="#" hidden>Descargar</a></dialog>
 
 <dialog id="conf"><h2>¿Enviar tu selección?</h2><p class="s" id="txtC"></p><div class="fil"><button class="btn" id="ok" type="button">Sí, enviar</button><button class="btn sec" id="no" type="button">Seguir eligiendo</button></div></dialog>
 
 <script>
 (function(){
   var W = 'https://galerias-api.alexandergeerre.workers.dev';
-  var EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.png.jpg', '.jpg.jpg', '.png.png'];
+  var EXTS = ['.png.jpg', '.jpg.jpg', '.jpg', '.png', '.jpeg', '.webp', '.png.png'];
+  var DESCARGA = '<svg viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>';
   var HEART = '<svg viewBox="0 0 24 24"><path d="M12 20.5s-7-4.4-9.2-8.9C1.3 8.5 3.1 5.3 6.2 5.3c2 0 3.2 1.1 3.8 2.2.6-1.1 1.8-2.2 3.8-2.2 3.1 0 4.9 3.2 3.4 6.3C19 16.1 12 20.5 12 20.5z"/></svg>';
   function $(s){ return document.querySelector(s); }
   function esc(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -115,11 +118,11 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
         $('#ilErr').innerHTML = ilus(exp ? 'galeria-expirada' : 'enlace-no-valido'); return;
       }
       codigo = c; escribir('age-codigo-cliente', c);
-      G = d.galeria; E = d.estudio; fotos = d.fotos || []; favs = new Set(d.favoritas || []); tab = 'todas';
+      G = d.galeria; E = d.estudio; fotos = d.fotos || []; favs = new Set(d.favoritas || []); tab = G.estado === 'delivered' && fin().length ? 'finales' : 'todas';
       document.title = G.titulo;
       $('#est').textContent = E && E.studio_name ? E.studio_name : '';
       $('#tit').textContent = G.titulo; $('#fec').textContent = fechaLarga(G.fecha);
-      $('#guia').textContent = G.estado === 'delivered' ? 'Tus fotos finales ya están listas. Descárgalas en la pestaña Finales.' : puede() ? 'Toca el corazón en tus fotos favoritas y luego envía tu selección.' : '';
+      $('#guia').textContent = G.estado === 'delivered' ? 'Tus fotos finales ya están listas. Descárgalas en la pestaña Fotos finales.' : puede() ? 'Toca el corazón en tus fotos favoritas y luego envía tu selección.' : '';
       pintar(); mostrar('galeria');
     }).catch(function(e){ if (!silencioso) $('#err').textContent = 'No pude conectar (' + (e && e.message ? e.message : 'error') + '). Revisa tu internet e inténtalo de nuevo.'; })
       .then(function(){ btn.disabled = false; btn.textContent = 'Entrar a mi galería'; });
@@ -130,21 +133,22 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     var co = puede() ? '<button class="co" data-fav="' + f.id + '" aria-pressed="' + favs.has(f.id) + '" aria-label="Favorita">' + HEART + '</button>' : '';
     return '<figure class="f" style="aspect-ratio:' + r + '"><img loading="lazy" data-ver="' + f.id + '" alt="" src="' + esc(url(f.t)) + '">' + co + '</figure>';
   }
+  function tarjetaFinal(f){
+    var r = f.ancho && f.alto ? f.ancho + ' / ' + f.alto : '3 / 2';
+    return '<figure class="f" style="aspect-ratio:' + r + '"><img loading="lazy" data-ver="' + f.id + '" alt="" src="' + esc(url(f.t)) + '">' + (G.descargas ? '<a class="dl" href="' + esc(url(f.t, true)) + '" download aria-label="Descargar">' + DESCARGA + '</a>' : '') + '</figure>';
+  }
   function pintar(){
     var s = sel(), fn = fin(), mias = s.filter(function(f){ return favs.has(f.id); });
     var tabs = [['todas', 'Todas ' + s.length]];
     if (puede() || favs.size) tabs.push(['favoritas', 'Mis favoritas ' + mias.length]);
-    if (G.estado === 'delivered') tabs.push(['finales', 'Finales ' + fn.length]);
+    if (G.estado === 'delivered') tabs.push(['finales', 'Fotos finales ' + fn.length]);
     $('#tabs').innerHTML = tabs.map(function(t){ return '<button data-tab="' + t[0] + '"' + (tab === t[0] ? ' class="on"' : '') + '>' + t[1] + '</button>'; }).join('');
     var h = '';
     if (tab === 'todas') { lista = s; h = s.length ? s.map(tarjeta).join('') : '<p class="vacio">Pronto verás aquí tus fotos.</p>'; }
     else if (tab === 'favoritas') { lista = mias; h = mias.length ? mias.map(tarjeta).join('') : '<p class="vacio">Aún no tienes favoritas. Toca el corazón en las fotos que más te gusten.</p>'; }
     else {
-      lista = [];
-      h = fn.length ? fn.map(function(f){
-        var v = s.filter(function(x){ return base(x.nombre) === base(f.nombre); })[0];
-        return '<div class="fin">' + (v ? '<img loading="lazy" alt="" src="' + esc(url(v.t)) + '">' : '') + '<div><span>' + esc(f.nombre) + '</span>' + (G.descargas ? '<a class="btn" href="' + esc(url(f.t, true)) + '">Descargar</a>' : '') + '</div></div>';
-      }).join('') : '<p class="vacio">Tus fotos finales aparecerán aquí.</p>';
+      lista = fn;
+      h = fn.length ? (G.descargas ? '<div class="masivo"><button class="btn" id="dtodas" type="button">Descargar todas</button></div>' : '') + fn.map(tarjetaFinal).join('') : '<p class="vacio">Tus fotos finales aparecerán aquí.</p>';
     }
     $('#rej').innerHTML = h;
     $('#barra').hidden = !puede();
@@ -175,11 +179,16 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     if (!lista.length) return; vi = (i + lista.length) % lista.length; var f = lista[vi];
     visor.querySelector('img').src = url(f.t); $('#vnm').textContent = f.nombre;
     var c = $('#vco'); c.hidden = !puede(); c.dataset.fav = f.id; c.setAttribute('aria-pressed', favs.has(f.id));
+    var dv = $('#vdl'); dv.hidden = !(G.descargas && f.tipo === 'final'); if (!dv.hidden) dv.href = url(f.t, true);
   }
   document.addEventListener('click', function(e){
     var t = e.target, el;
     if ((el = t.closest('#visor .co'))) { alternar(lista[vi].id); return; }
     if ((el = t.closest('.co[data-fav]'))) { alternar(el.dataset.fav); return; }
+    if (t.closest('#dtodas')) {
+      fin().forEach(function(f, i){ setTimeout(function(){ var a = document.createElement('a'); a.href = url(f.t, true); a.download = ''; document.body.appendChild(a); a.click(); a.remove(); }, i * 700); });
+      aviso('Iniciando las descargas. Si tu navegador pregunta, permite descargas múltiples.'); return;
+    }
     if ((el = t.closest('[data-tab]'))) { tab = el.dataset.tab; pintar(); return; }
     if ((el = t.closest('.f img'))) { var id = el.dataset.ver; for (var i = 0; i < lista.length; i++) if (lista[i].id === id) { verFoto(i); visor.showModal(); break; } return; }
     if (t.closest('#visor .x')) visor.close();
