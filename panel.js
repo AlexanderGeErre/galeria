@@ -4,7 +4,7 @@ var W = 'https://galerias-api.alexandergeerre.workers.dev';
 var BASE = 'https://alexandergeerre.github.io/galeria/cliente.html?c=';
 var MAX = 45 * 1048576;
 var ESTADOS = { draft: 'Borrador', selection: 'En selección', selection_sent: 'Selección enviada', delivered: 'Entregada', expired: 'Expirada' };
-var EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.png.jpg', '.jpg.jpg', '.png.png'];
+var EXTS = ['.png.jpg', '.jpg.jpg', '.jpg', '.png', '.jpeg', '.webp', '.png.png'];
 var db, ph, root, gals = [], favs = {}, vista = 'inicio', galId = null, tab = 'panel', busca = '', fEst = '', cur = null;
 
 var CSS = '.pn{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--p:#F3EFE9;--c:#fff;display:grid;grid-template-columns:220px 1fr;min-height:100vh;background:var(--f);color:var(--t);font-family:Jost,system-ui,sans-serif}' +
@@ -25,7 +25,7 @@ var CSS = '.pn{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--p:#
 '.pn-card{border:1px solid var(--l);border-radius:14px;background:var(--c);padding:1.2rem;margin:.6rem 0 1.4rem}.pn-vacio{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap}.pn-vacio .pn-il{width:7rem}' +
 '.pn-il{mix-blend-mode:multiply;filter:contrast(1.04) brightness(1.05);max-width:100%;display:block}' +
 '.pn-tabs{display:flex;gap:1.4rem;border-bottom:1px solid var(--l);margin:1rem 0 1.2rem;flex-wrap:wrap}.pn-tabs button{background:none;border:0;padding:.5rem 0;color:var(--s);border-bottom:2px solid transparent;cursor:pointer;font:inherit}.pn-tabs button.on{color:var(--t);border-color:var(--a)}' +
-'.pn-copia{display:flex;gap:.5rem;margin:.4rem 0 1rem}.pn-copia input{flex:1}.pn-lado{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap}.pn-lado .pn-il{width:13rem}' +
+'.pn-marcaui{margin:.4rem 0 .8rem}.pn-marcaui select{width:auto}.pn-copia{display:flex;gap:.5rem;margin:.4rem 0 1rem}.pn-copia input{flex:1}.pn-lado{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap}.pn-lado .pn-il{width:13rem}' +
 '.pn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.pn-ph{margin:0;position:relative}.pn-ph img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:var(--l);display:block}.pn-ph.cv img{outline:2px solid var(--a)}' +
 '.pn-ph figcaption{font-size:.75rem;color:var(--s);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pn-ac{display:flex;gap:.3rem;margin-top:.2rem}.pn-ac button{background:none;border:1px solid var(--l);border-radius:999px;font-size:.72rem;padding:.1rem .5rem;color:var(--t);cursor:pointer}' +
 '.pn-fila{display:flex;justify-content:space-between;gap:1rem;padding:.4rem 0;border-bottom:1px solid var(--l);font-size:.9rem}#pn-prog{list-style:none;padding:0;margin:.5rem 0 0;font-size:.9rem;max-height:12rem;overflow:auto}' +
@@ -65,7 +65,7 @@ async function firmar(ids){
 function src(t){ return W + '/api/img?t=' + encodeURIComponent(t); }
 
 async function cargarGalerias(){
-  var g = await db.from('galleries').select('id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled').is('deleted_at', null).order('created_at', { ascending: false });
+  var g = await db.from('galleries').select('id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity').is('deleted_at', null).order('created_at', { ascending: false });
   if (g.error) { aviso(g.error.message); return; }
   gals = g.data || [];
   var sinPortada = gals.filter(function(x){ return !x.cover_photo_id; }).map(function(x){ return x.id; }), primeras = {};
@@ -141,7 +141,9 @@ function pintarDetalle(){
       '<p class="pn-s">Al entregar, el cliente puede descargar las fotos finales y ya no puede cambiar sus favoritas.</p>';
   } else if (tab === 'fotos') {
     cuerpo = '<div class="pn-card"><h2>Subir fotos</h2><div class="pn-row"><label><input type="radio" name="pn-dest" value="selection" checked> Selección (se reducen a 1600 px)</label><label><input type="radio" name="pn-dest" value="final"> Finales (originales, hasta 45 MB)</label></div>' +
-      '<label class="pn-s"><input type="checkbox" id="pn-marca" checked> Grabar la marca «Bonitos Momentos» en la selección</label><div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul></div>' +
+      '<div class="pn-marcaui"><label class="pn-s"><input type="checkbox" id="pn-marca" checked> Grabar marca de agua en las fotos de selección</label>' +
+      '<div class="pn-row"><input type="text" id="pn-mt" placeholder="Texto de la marca" value="' + esc(g.watermark_text || 'Buenos Momentos') + '"><select id="pn-mo"><option value="20">Suave</option><option value="35">Media</option><option value="55">Fuerte</option></select><select id="pn-ms"><option value="s">Pequeña</option><option value="m">Mediana</option><option value="l">Grande</option></select></div>' +
+      '<canvas id="pn-pv" style="width:100%;max-width:560px;border-radius:10px;display:block"></canvas><p class="pn-s">Vista previa. Elige una foto abajo para verla con tu marca. La marca se graba al subir: las fotos ya subidas no cambian.</p></div><div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul></div>' +
       '<h2>Selección (' + sel.length + ')</h2>' + (sel.length ? '<div class="pn-grid">' + sel.map(function(x){
         return '<figure class="pn-ph' + (g.cover_photo_id === x.id ? ' cv' : '') + '"><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + '</figcaption><div class="pn-ac"><button data-act="portada" data-id="' + x.id + '">Portada</button><button data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div></figure>';
       }).join('') + '</div>' : '<div class="pn-vacio">' + ilus('admin-subir') + '<p class="pn-s">Aún no hay fotos de selección.</p></div>') +
@@ -160,31 +162,81 @@ function pintarDetalle(){
   }
   $('#pn-main').innerHTML = '<button class="pn-btn sec" data-act="atras">← Galerías</button><h1 style="margin-top:1rem">' + esc(g.title) + '</h1><span class="pn-pill">' + esc(ESTADOS[g.status] || g.status) + '</span>' +
     '<div class="pn-tabs">' + [['panel', 'Panel de control'], ['fotos', 'Fotos'], ['favoritas', 'Favoritas'], ['compartir', 'Compartir']].map(function(x){ return '<button data-act="tab" data-t="' + x[0] + '"' + (tab === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div>' + cuerpo;
+  if (cur && tab === 'fotos') {
+    $('#pn-mo').value = String(opMarca(g)); if (!$('#pn-mo').value) $('#pn-mo').value = '35'; $('#pn-ms').value = tamMarca();
+    ['#pn-marca', '#pn-mt', '#pn-mo', '#pn-ms', '#pn-file'].forEach(function(q){ var el = $(q); el.addEventListener('input', vistaPrevia); el.addEventListener('change', vistaPrevia); });
+    root.querySelectorAll('input[name=pn-dest]').forEach(function(r){ r.addEventListener('change', vistaPrevia); });
+    try { document.fonts.load('300 20px Jost').then(vistaPrevia, vistaPrevia); } catch(e) { vistaPrevia(); }
+  }
 }
 
+function opMarca(g){
+  var v = g && g.watermark_opacity != null ? Number(g.watermark_opacity) : 35;
+  if (!isFinite(v) || v <= 0) v = 35; if (v <= 1) v = Math.round(v * 100);
+  return Math.min(80, Math.max(10, v));
+}
+function tamMarca(){ try { return localStorage.getItem('pn-wm-tam') || 'm'; } catch(e) { return 'm'; } }
 function reducir(file, marca){
   return createImageBitmap(file).then(function(b){
     var k = Math.min(1, 1600 / Math.max(b.width, b.height)), c = document.createElement('canvas');
     c.width = Math.round(b.width * k); c.height = Math.round(b.height * k);
     var cx = c.getContext('2d'); cx.drawImage(b, 0, 0, c.width, c.height);
-    if (marca) marcar(cx, c.width, c.height);
+    if (marca) marcar(cx, c.width, c.height, marca);
     return new Promise(function(r){ c.toBlob(function(bl){ r({ blob: bl, w: c.width, h: c.height }); }, 'image/jpeg', 0.85); });
   });
 }
-function marcar(cx, w, h){
-  var t = 'Bonitos Momentos', fs = Math.max(18, Math.round(Math.max(w, h) / 26));
-  cx.save(); cx.translate(w / 2, h / 2); cx.rotate(-24 * Math.PI / 180);
-  cx.font = fs + 'px Georgia, serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
-  cx.fillStyle = 'rgba(255,255,255,.5)'; cx.strokeStyle = 'rgba(0,0,0,.25)'; cx.lineWidth = Math.max(1, fs / 20);
-  var px = cx.measureText(t).width + fs * 2, py = fs * 4.5, R = Math.hypot(w, h) / 2, fila = 0;
-  for (var y = -R; y <= R; y += py, fila++) for (var x = -R + (fila % 2 ? px / 2 : 0); x <= R; x += px) { cx.strokeText(t, x, y); cx.fillText(t, x, y); }
+// Marca de agua: MAYÚSCULAS, letras muy separadas, cuadrícula diagonal que cubre toda la foto.
+function marcar(cx, w, h, o){
+  var t = String(o.text || '').trim().toUpperCase(); if (!t) return;
+  var mult = { s: 0.75, m: 1, l: 1.4 }[o.size] || 1;
+  var fs = Math.max(12, Math.round(Math.sqrt(w * h) * 0.023 * mult)), sp = fs * 0.4;
+  var fam = '300 ' + fs + 'px Jost, "Helvetica Neue", Arial, sans-serif';
+  cx.save(); cx.font = fam; cx.textAlign = 'left'; cx.textBaseline = 'middle';
+  var anchos = [], tw = 0;
+  for (var i = 0; i < t.length; i++) { var a = cx.measureText(t[i]).width; anchos.push(a); tw += a + sp; }
+  tw -= sp;
+  var op = (o.opacity || 35) / 100;
+  cx.fillStyle = 'rgba(255,255,255,' + op + ')';
+  cx.shadowColor = 'rgba(0,0,0,' + (op * 0.6) + ')'; cx.shadowBlur = Math.max(1, fs / 10); cx.shadowOffsetX = 0; cx.shadowOffsetY = 0;
+  cx.translate(w / 2, h / 2); cx.rotate(-35 * Math.PI / 180);
+  var px = tw + fs * 6, py = fs * 4.8, R = Math.hypot(w, h) / 2 + px, fila = 0;
+  for (var y = -R; y <= R; y += py, fila++) {
+    for (var x = -R + (fila % 2 ? px / 2 : 0); x <= R; x += px) {
+      var cxp = x - tw / 2;
+      for (var j = 0; j < t.length; j++) { cx.fillText(t[j], cxp, y); cxp += anchos[j] + sp; }
+    }
+  }
   cx.restore();
+}
+function opcionesMarca(){
+  if (!$('#pn-marca') || !$('#pn-marca').checked) return null;
+  return { text: $('#pn-mt').value, opacity: +$('#pn-mo').value, size: $('#pn-ms').value };
+}
+function vistaPrevia(){
+  var c = $('#pn-pv'), f = $('#pn-file'); if (!c) return;
+  var cx = c.getContext('2d'), o = opcionesMarca();
+  var dib = function(bm){
+    var W = 560, H = bm ? Math.round(W * bm.height / bm.width) : 373; c.width = W; c.height = H;
+    if (bm) cx.drawImage(bm, 0, 0, W, H); else { cx.fillStyle = '#6b625a'; cx.fillRect(0, 0, W, H); }
+    if (o) marcar(cx, W, H, o);
+  };
+  var tipo = root.querySelector('input[name=pn-dest]:checked');
+  if (f && f.files[0] && (!tipo || tipo.value === 'selection')) createImageBitmap(f.files[0]).then(dib, function(){ dib(null); });
+  else dib(null);
 }
 var ERR = { muy_grande: 'pesa más de 45 MB', formato: 'formato no permitido (usa JPG, PNG, WEBP o TIFF)', sin_sesion: 'tu sesión caducó, vuelve a entrar', registro: 'no se pudo registrar', galeria: 'galería no encontrada' };
 
 async function subirTodo(){
-  var files = Array.from($('#pn-file').files), tipo = root.querySelector('input[name=pn-dest]:checked').value, marca = $('#pn-marca').checked;
+  var files = Array.from($('#pn-file').files), tipo = root.querySelector('input[name=pn-dest]:checked').value, marca = tipo === 'selection' ? opcionesMarca() : null;
   if (!files.length) return;
+  if (marca) {
+    try { localStorage.setItem('pn-wm-tam', marca.size); } catch(e) {}
+    var gg = gal(galId), tx = marca.text.trim();
+    if (gg && (tx !== (gg.watermark_text || '') || marca.opacity !== opMarca(gg))) {
+      var up = await db.from('galleries').update({ watermark_text: tx, watermark_opacity: marca.opacity }).eq('id', galId);
+      if (!up.error) { gg.watermark_text = tx; gg.watermark_opacity = marca.opacity; }
+    }
+  }
   var btn = $('#pn-go'), ul = $('#pn-prog'); btn.disabled = true; ul.innerHTML = '';
   for (var i = 0; i < files.length; i++) {
     var f = files[i], li = document.createElement('li'); li.textContent = f.name + ': subiendo…'; ul.appendChild(li);
@@ -245,7 +297,7 @@ async function crearGaleria(e){
   if (cli) { var c = await db.from('clients').insert({ photographer_id: ph.id, name: cli }).select('id').single(); if (c.error) { btn.disabled = false; return aviso(c.error.message); } cid = c.data.id; }
   var r;
   for (var i = 0; i < 4; i++) {
-    r = await db.from('galleries').insert({ photographer_id: ph.id, client_id: cid, title: titulo, slug: slug(titulo) + '-' + codigo().slice(0, 4).toLowerCase(), access_code: codigo(), event_date: fecha, status: 'selection', selection_enabled: true, downloads_enabled: false, watermark_text: 'Bonitos Momentos' }).select('id').single();
+    r = await db.from('galleries').insert({ photographer_id: ph.id, client_id: cid, title: titulo, slug: slug(titulo) + '-' + codigo().slice(0, 4).toLowerCase(), access_code: codigo(), event_date: fecha, status: 'selection', selection_enabled: true, downloads_enabled: false, watermark_text: 'Buenos Momentos', watermark_opacity: 35 }).select('id').single();
     if (!r.error || r.error.code !== '23505') break;
   }
   btn.disabled = false;
