@@ -136,7 +136,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     window.scrollTo(0, 0); ajustarPortada();
   }
 
-  var codigo = '', G = null, E = null, fotos = [], favs = new Set(), tab = 'todas', lista = [], vi = 0;
+  var acc = { t: '', c: '' }, codigo = '', G = null, E = null, fotos = [], favs = new Set(), tab = 'todas', lista = [], vi = 0;
   function sel(){ return fotos.filter(function(f){ return f.tipo === 'selection'; }); }
   function fin(){ return fotos.filter(function(f){ return f.tipo === 'final'; }); }
   function puede(){ return G && G.seleccion; }
@@ -152,16 +152,17 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   aplicarTemaC();
 
   function abrir(c, silencioso){
-    c = (c || '').trim(); if (!c) return;
+    c = (c || '').trim(); if (!c && !acc.t) return;
     var btn = $('#go'); btn.disabled = true; btn.textContent = 'Entrando…'; $('#err').textContent = ''; $('#ilErr').innerHTML = '';
-    post('/api/client/open', { code: c, visitor: visitor }).then(function(d){
+    post('/api/client/open', { code: c, token: acc.t, visitor: visitor }).then(function(d){
       if (!d.ok) {
-        if (silencioso) { escribir('age-codigo-cliente', ''); return; }
+        if (silencioso) { escribir('age-acceso', ''); escribir('age-codigo-cliente', ''); return; }
+        if (d.error === 'pide_codigo') { $('#err').textContent = 'Esta galería está protegida. Escribe el código que te enviaron.'; $('#cod').focus(); return; }
         var exp = d.error === 'expirada';
         $('#err').textContent = exp ? 'Esta galería ya expiró. Escríbeme y la reactivo.' : d.error === 'sin_publicar' ? 'Esta galería todavía no está publicada.' : d.error === 'servidor' ? 'La galería tuvo un problema técnico (servidor). Inténtalo en unos minutos.' : 'El código no es correcto. Revisa que esté escrito igual que te lo envié.';
         $('#ilErr').innerHTML = ilus(exp ? 'galeria-expirada' : 'enlace-no-valido'); return;
       }
-      codigo = c; escribir('age-codigo-cliente', c);
+      codigo = c; escribir('age-codigo-cliente', ''); escribir('age-acceso', JSON.stringify({ t: acc.t, c: c }));
       G = d.galeria; E = d.estudio; fotos = d.fotos || []; favs = new Set(d.favoritas || []); tab = G.estado === 'delivered' && fin().length ? 'finales' : 'todas';
       document.title = G.titulo;
       $('#est').textContent = E && E.studio_name ? E.studio_name : '';
@@ -220,7 +221,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   }
   function alternar(id){
     var on = !favs.has(id); poner(id, on);
-    post('/api/client/favorite', { code: codigo, visitor: visitor, photo: id, active: on }).then(function(d){
+    post('/api/client/favorite', { code: codigo, token: acc.t, visitor: visitor, photo: id, active: on }).then(function(d){
       if (!d.ok) throw new Error(d.error);
     }).catch(function(e){
       poner(id, !on);
@@ -255,18 +256,22 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   $('#no').addEventListener('click', function(){ $('#conf').close(); });
   $('#ok').addEventListener('click', function(){
     $('#conf').close();
-    post('/api/client/send', { code: codigo, visitor: visitor }).then(function(d){
+    post('/api/client/send', { code: codigo, token: acc.t, visitor: visitor }).then(function(d){
       if (!d.ok) throw new Error(d.error);
       $('#txtG').textContent = 'Recibí tus ' + d.cantidad + (d.cantidad === 1 ? ' foto' : ' fotos') + '. Voy a editarlas y te aviso cuando estén listas.';
       mostrar('gracias');
     }).catch(function(){ aviso('No se pudo enviar tu selección. Inténtalo de nuevo.'); });
   });
   $('#volver').addEventListener('click', function(){ mostrar('galeria'); });
-  $('#salir').addEventListener('click', function(){ escribir('age-codigo-cliente', ''); codigo = ''; $('#cod').value = ''; history.replaceState(null, '', location.pathname); mostrar('acceso'); });
+  $('#salir').addEventListener('click', function(){ escribir('age-codigo-cliente', ''); escribir('age-acceso', ''); acc = { t: '', c: '' }; codigo = ''; $('#cod').value = ''; history.replaceState(null, '', location.pathname); mostrar('acceso'); });
   $('#fa').addEventListener('submit', function(e){ e.preventDefault(); abrir($('#cod').value); });
 
-  var p = new URLSearchParams(location.search).get('c') || leer('age-codigo-cliente');
-  if (p) { $('#cod').value = p; abrir(p, !new URLSearchParams(location.search).get('c')); }
+  var qs = new URLSearchParams(location.search), gt = qs.get('g'), gc = qs.get('c'), guardado = null;
+  try { guardado = JSON.parse(leer('age-acceso') || 'null'); } catch (e) {}
+  if (gt) { acc.t = gt; abrir(guardado && guardado.t === gt ? guardado.c : '', false); }
+  else if (gc) { $('#cod').value = gc; abrir(gc, false); }
+  else if (guardado && (guardado.t || guardado.c)) { acc.t = guardado.t || ''; $('#cod').value = guardado.c || ''; abrir(guardado.c || '', true); }
+  else if (leer('age-codigo-cliente')) { $('#cod').value = leer('age-codigo-cliente'); abrir(leer('age-codigo-cliente'), true); }
 })();
 </script>
 </body>
