@@ -8,7 +8,7 @@ var ESTADOS = { draft: 'Borrador', selection: 'En selección', selection_sent: '
 var EXTS = ['.png.jpg', '.jpg.jpg', '.jpg', '.png', '.jpeg', '.webp', '.png.png'];
 var db, ph, root, gals = [], favs = {}, vista = 'inicio', galId = null, tab = 'panel', busca = '', fEst = '', cur = null;
 
-var CSS = '.pn-ac{flex-wrap:wrap}.pn-grid.sm .pn-ac button{font-size:.62rem;padding:0 .35rem}.pn-add{flex:0 0 96px;aspect-ratio:1;border:1.5px dashed var(--s);background:none;border-radius:10px;color:var(--s);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;cursor:pointer;font:inherit;font-size:.78rem;transition:background .2s,color .2s,border-color .2s}.pn-add b{font-size:1.6rem;font-weight:400;line-height:1}.pn-add:hover{background:var(--p);color:var(--t);border-color:var(--a)}#pn-dsub{width:min(34rem,94vw)}.pn-vacio1{margin:.4rem 0 1rem}.pn-ck{cursor:pointer;position:absolute;top:6px;left:6px;z-index:2;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid var(--a);display:grid;place-items:center;font-size:.8rem;color:var(--a);font-weight:700}.pn-ck.off{background:rgba(255,255,255,.55);border-color:rgba(255,255,255,.9);color:transparent}.pn-ph.mk img{outline:3px solid var(--a);opacity:.85}.pn-barsel{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:20;background:var(--f);border:1px solid var(--l);border-radius:12px;padding:.6rem .8rem;margin:.6rem 0}.pn-barsel select{width:auto}.pn-esc{border-top:1px solid var(--l);padding:.8rem 0}.pn-fila{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.4rem 0}' +
+var CSS = '.pn-pb{position:absolute;right:6px;bottom:34px;z-index:2;display:flex;align-items:center;gap:2px;background:var(--a);color:#fff;border-radius:999px;padding:3px 6px;font-size:.7rem;line-height:1}.pn-pb svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.pn-pb i{font-style:normal;font-weight:700}.pn-ph.pimp img{outline:2px solid var(--a)}.pn-sec .pn-btn svg{width:15px;height:15px;vertical-align:-2px;fill:none;stroke:currentColor;stroke-width:1.8}' + '.pn-ac{flex-wrap:wrap}.pn-grid.sm .pn-ac button{font-size:.62rem;padding:0 .35rem}.pn-add{flex:0 0 96px;aspect-ratio:1;border:1.5px dashed var(--s);background:none;border-radius:10px;color:var(--s);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;cursor:pointer;font:inherit;font-size:.78rem;transition:background .2s,color .2s,border-color .2s}.pn-add b{font-size:1.6rem;font-weight:400;line-height:1}.pn-add:hover{background:var(--p);color:var(--t);border-color:var(--a)}#pn-dsub{width:min(34rem,94vw)}.pn-vacio1{margin:.4rem 0 1rem}.pn-ck{cursor:pointer;position:absolute;top:6px;left:6px;z-index:2;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid var(--a);display:grid;place-items:center;font-size:.8rem;color:var(--a);font-weight:700}.pn-ck.off{background:rgba(255,255,255,.55);border-color:rgba(255,255,255,.9);color:transparent}.pn-ph.mk img{outline:3px solid var(--a);opacity:.85}.pn-barsel{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:20;background:var(--f);border:1px solid var(--l);border-radius:12px;padding:.6rem .8rem;margin:.6rem 0}.pn-barsel select{width:auto}.pn-esc{border-top:1px solid var(--l);padding:.8rem 0}.pn-fila{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.4rem 0}' +
 '.pn{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--p:#F3EFE9;--c:#fff;display:grid;grid-template-columns:220px 1fr;min-height:100vh;background:var(--f);color:var(--t);font-family:Jost,system-ui,sans-serif}' +
 '.pn[data-e=dark]{--f:#151413;--t:#F1ECE4;--s:#a39a91;--l:#2c2926;--a:#C9A27A;--p:#1c1a18;--c:#1c1a18}.pn[data-e=dark] .pn-il{mix-blend-mode:normal!important;filter:none!important;border-radius:8px}' +
 '.pn-franja{display:flex;flex-wrap:wrap;border:1px solid var(--l);border-radius:10px;background:var(--c);margin:.6rem 0 1.4rem;font-size:.9rem}.pn-franja span{padding:.6rem 1rem;border-right:1px solid var(--l)}.pn-franja span:last-child{border:0}.pn-dot{display:inline-block;width:.55rem;height:.55rem;border-radius:50%;background:var(--a);margin-right:.5rem}' +
@@ -184,7 +184,7 @@ function pintarLista(){
 }
 
 async function abrirDetalle(id, conservar){
-  galId = id; vista = 'detalle'; if (!conservar) { tab = 'panel'; fEsc = ''; modoSel = false; marcadas = new Set(); } cur = null; pintar();
+  galId = id; vista = 'detalle'; if (!conservar) { tab = 'panel'; fEsc = ''; fImp = false; modoSel = false; marcadas = new Set(); } cur = null; pintar();
   var p = await db.from('photos').select('id,filename,photo_type,file_size,sort_order,scene_id').eq('gallery_id', id).order('sort_order').order('filename').limit(1000);
   var f = await db.from('favorites').select('photo_id,visitor_token').eq('gallery_id', id).limit(1000);
   var v = await db.from('gallery_views').select('id', { count: 'exact', head: true }).eq('gallery_id', id);
@@ -230,7 +230,7 @@ function pintarDetalle0(){
     cuerpo = '<dialog id="pn-dsub"><h2>Subir fotos</h2><div class="pn-row"><label><input type="radio" name="pn-dest" value="selection" checked> Selección (se reducen según la calidad de Configuración)</label><label><input type="radio" name="pn-dest" value="final"> Finales (originales, hasta 45 MB)</label></div>' +
       (cur.escenas && cur.escenas.length ? '<div class="pn-marcaui"><label class="pn-s" for="pn-esc">Escena de destino</label><select id="pn-esc"><option value="">Sin escena</option>' + cur.escenas.map(function(e){ return '<option value="' + e.id + '"' + (fEsc === e.id ? ' selected' : '') + '>' + esc(e.name) + '</option>'; }).join('') + '</select></div>' : '') + '<div class="pn-marcaui" id="pn-mbox"><label class="pn-s" for="pn-marca">Marca de agua</label><select id="pn-marca"><option value="si">Con marca de agua</option><option value="no">Sin marca de agua</option></select></div>' +
       '<div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-subir" type="button">Cancelar</button></div></dialog>' +
-      escenasCard(g, sel, fin) + barraSel(sel, fin) + seccionFotos('selection', 'Selección', sel, g) + seccionFotos('final', 'Finales', fin, g);
+      escenasCard(g, sel, fin) + barraSel(sel, fin) + (fImp ? '' : seccionFotos('selection', 'Selección', sel, g)) + seccionFotos('final', 'Finales', fin, g);
   } else if (tab === 'diseno') {
     var cvId = g.cover_photo_id || (sel[0] && sel[0].id), cv = cvId && cur.tk[cvId];
     var cvSrc = cur.cover ? src(cur.cover) : (cv ? src(cv) : '');
@@ -428,21 +428,23 @@ function escenasEnlaces(fila){
   }).join('') + '</div>';
 }
 var ORDENES = [['nombre', 'Nombre del archivo'], ['nombre-inv', 'Nombre del archivo (inverso)'], ['carga', 'Tiempo de carga (primero las más antiguas)'], ['carga-inv', 'Tiempo de carga (primero las más recientes)'], ['azar', 'Aleatorio']];
-function filtrarEsc(l){ return l.filter(function(x){ return !fEsc || (fEsc === '_none' ? !x.scene_id : x.scene_id === fEsc); }); }
+function impCuenta(){ var m = {}; (cur && Array.isArray(cur.imp) ? cur.imp : []).forEach(function(x){ m[x.photo_id] = (m[x.photo_id] || 0) + 1; }); return m; }
+function filtrarEsc(l){ var ic = fImp ? impCuenta() : null; return l.filter(function(x){ return (!fEsc || (fEsc === '_none' ? !x.scene_id : x.scene_id === fEsc)) && (!ic || ic[x.id]); }); }
 function seccionFotos(tipo, titulo, lista, g){
   lista = filtrarEsc(lista);
+  var ic = impCuenta(), nImp = Object.keys(ic).length;
   var ab = abiertas[tipo] || modoSel, mostrar = ab ? lista : lista.slice(0, PRIM), mas = lista.length > PRIM;
   var cab = '<div class="pn-sec"><h2>' + titulo + '</h2><span class="pn-s">' + lista.length + (lista.length === 1 ? ' artículo' : ' artículos') + '</span>' +
-    (lista.length > 1 ? '<span class="pn-orden"><label class="pn-s">Clasificar</label><select data-ord="' + tipo + '"><option value="">Elegir orden…</option>' + ORDENES.filter(function(o){ return cur.conFecha || o[0].indexOf('carga') < 0; }).map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select></span>' : '') + '</div>';
+    (tipo === 'final' && (nImp || fImp) ? '<button class="pn-btn ' + (fImp ? '' : 'sec') + '" data-act="filtro-imp" type="button">' + ico('impresiones') + ' Para imprimir (' + nImp + ')' + (fImp ? ' ✕' : '') + '</button>' : '') + ' ' + (lista.length > 1 ? '<span class="pn-orden"><label class="pn-s">Clasificar</label><select data-ord="' + tipo + '"><option value="">Elegir orden…</option>' + ORDENES.filter(function(o){ return cur.conFecha || o[0].indexOf('carga') < 0; }).map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select></span>' : '') + '</div>';
   var add = '<button class="pn-add" data-act="abrir-subir" data-tipo="' + tipo + '" type="button"><b>+</b><span>' + (tipo === 'selection' ? 'Subir fotos' : 'Subir finales') + '</span></button>';
   var fig = mostrar.map(function(x){
     var esPort = g.cover_photo_id === x.id;
-    return '<figure class="pn-ph' + (esPort ? ' cv' : '') + (marcadas.has(x.id) ? ' mk' : '') + '"><span class="pn-ck' + (modoSel ? '' : ' off') + '" data-act="marcar" data-id="' + x.id + '">' + (marcadas.has(x.id) ? '✓' : '') + '</span>' +
+    return '<figure class="pn-ph' + (esPort ? ' cv' : '') + (marcadas.has(x.id) ? ' mk' : '') + (ic[x.id] ? ' pimp' : '') + '">' + (ic[x.id] ? '<span class="pn-pb" title="Marcada para imprimir">' + ico('impresiones') + (ic[x.id] > 1 ? '<i>' + ic[x.id] + '</i>' : '') + '</span>' : '') + '<span class="pn-ck' + (modoSel ? '' : ' off') + '" data-act="marcar" data-id="' + x.id + '">' + (marcadas.has(x.id) ? '✓' : '') + '</span>' +
       '<img data-act="' + (modoSel ? 'marcar' : 'ver') + '" data-id="' + x.id + '" loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '">' +
       '<figcaption>' + esc(x.filename) + (esPort ? ' · Portada' : '') + (tipo === 'final' ? ' · ' + mb(x.file_size || 0) : '') + '</figcaption>' +
       '<div class="pn-ac">' + (tipo === 'selection' ? '<button data-act="portada" data-id="' + x.id + '">Portada</button>' : '') + '<button data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div></figure>';
   }).join('');
-  var vacio = lista.length ? '' : '<p class="pn-s pn-vacio1">' + (tipo === 'selection' ? 'Aún no hay fotos de selección.' : 'Aún no hay fotos finales.') + '</p>';
+  var vacio = lista.length ? '' : '<p class="pn-s pn-vacio1">' + (fImp ? 'Ninguna foto final está marcada para imprimir.' : tipo === 'selection' ? 'Aún no hay fotos de selección.' : 'Aún no hay fotos finales.') + '</p>';
   return cab + '<div class="pn-grid sm' + (ab ? '' : ' fr') + '">' + add + fig + '</div>' + vacio +
     (mas ? '<button class="pn-vt" data-act="vertodo" data-tipo="' + tipo + '"><span>' + (ab ? 'Ver menos ⌃' : 'Ver todo ⌄') + '</span></button>' : '');
 }
@@ -466,7 +468,7 @@ async function ordenar(tipo, modo){
   cur.fotos.sort(function(a, b){ return (a.sort_order - b.sort_order) || String(a.filename).localeCompare(String(b.filename)); });
   aviso('Orden guardado: así lo verá tu cliente.'); pintar();
 }
-var BASES = 'https://alexandergeerre.github.io/galeria/cliente.html?s=', fEsc = '', modoSel = false, marcadas = new Set();
+var BASES = 'https://alexandergeerre.github.io/galeria/cliente.html?s=', fEsc = '', fImp = false, modoSel = false, marcadas = new Set();
 var vl = [], vix = 0, abiertas = { selection: false, final: false }, PRIM = 7;
 async function mostrarVer(){
   var f = vl[vix]; if (!f) return;
@@ -515,6 +517,7 @@ async function accion(a, el){
     return;
   }
   if (a === 'sel-todas') { marcadas = new Set(filtrarEsc(cur.fotos).map(function(x){ return x.id; })); return pintar(); }
+  if (a === 'filtro-imp') { fImp = !fImp; return pintar(); }
   if (a === 'sel-ninguna') { marcadas = new Set(); return pintar(); }
   if (a === 'borrar-sel') {
     var ids = Array.from(marcadas); if (!ids.length) return;
