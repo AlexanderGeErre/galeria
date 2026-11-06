@@ -58,6 +58,7 @@ var CSS = '.pn-ck{cursor:pointer;position:absolute;top:6px;left:6px;z-index:2;wi
 '.pn dialog[open]{animation:pnDlg .28s cubic-bezier(.2,.7,.2,1)}.pn dialog::backdrop{background:rgba(21,20,19,.55);backdrop-filter:blur(3px)}@keyframes pnDlg{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}' +
 '.pn-skel{height:3.2rem;width:60%;border-radius:12px;margin:1rem 0;background:linear-gradient(100deg,var(--l) 30%,var(--p) 50%,var(--l) 70%);background-size:200% 100%;animation:pnSh 1.5s infinite}.pn-skel.w1{width:35%;height:2.4rem}.pn-skel.h2{height:9rem;width:100%}' +
 '.pn-toast{animation:pnIn .3s both}@media(prefers-reduced-motion:reduce){.pn *{animation:none!important;transition:none!important}.pn-ph img,.pn-tar .cv>img,.pn-pbtn img{opacity:1}}' +
+'#pn-up{position:fixed;right:18px;bottom:18px;z-index:80;width:min(22rem,calc(100vw - 36px));background:var(--c);border:1px solid var(--l);border-radius:16px;box-shadow:0 12px 40px rgba(43,38,35,.22);padding:.9rem 1rem}.pn-up-t{display:flex;justify-content:space-between;gap:.6rem}.pn-up-b{height:6px;border-radius:99px;background:var(--l);overflow:hidden;margin:.6rem 0}.pn-up-b i{display:block;height:100%;background:var(--a);transition:width .3s}#pn-up ul{margin:.4rem 0 .5rem 1.1rem;padding:0;font-size:.8rem;color:#b5453f}#pn-up p{margin:0 0 .3rem}' +
 '@media(max-width:760px){.pn{grid-template-columns:minmax(0,1fr)}.pn main{min-width:0;overflow-x:hidden}.pn input[type=file]{max-width:100%}.pn aside{position:sticky;top:0;z-index:30;height:auto;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;align-items:center;gap:.2rem;padding:.5rem .6rem;border-right:0;border-bottom:1px solid var(--l)}.pn aside>*{flex:0 0 auto;white-space:nowrap}.pn aside .marca,.pn aside .gt,.pn aside .sep,.pn aside .pn-pill{display:none}.pn aside .pie{margin:0 0 0 .6rem;display:flex;gap:.3rem;align-items:center}.pn-tema{margin:0}.pn main{padding:1rem .9rem 4rem}.pn h1{font-size:2rem}.pn-cifras{grid-template-columns:1fr 1fr}.pn-cifras div{border-bottom:1px solid var(--l)}.pn-franja span{border-right:0;border-bottom:1px solid var(--l);width:100%}.pn-orden{margin-left:0;width:100%}.pn-orden select{flex:1;min-width:0;max-width:100%}.pn-orden{flex-wrap:wrap}.pn-grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}.pn-grid.fr .pn-ph{flex:0 0 84px}.pn-rej{grid-template-columns:repeat(2,1fr);gap:12px}.pn-card{padding:.9rem}.pn-row{gap:.5rem}.pn-row input[type=text]{min-width:0;width:100%}.pn-btn{padding:.5rem .9rem}#pn-dver .pn-vb{flex-wrap:wrap}.pn-lado{flex-direction:column;align-items:stretch}.pn-copia{flex-wrap:wrap}.pn-copia input{min-width:0;width:100%}.pn-opt{max-width:none;flex:1 1 100%}.pn-tabs{overflow-x:auto;flex-wrap:nowrap}}';
 
 function esc(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -336,33 +337,59 @@ function mostrarMarca(){
 }
 var ERR = { muy_grande: 'pesa más de 45 MB', formato: 'formato no permitido (usa JPG, PNG, WEBP o TIFF)', sin_sesion: 'tu sesión caducó, vuelve a entrar', registro: 'no se pudo registrar', galeria: 'galería no encontrada' };
 
-async function subirTodo(){
-  var files = Array.from($('#pn-file').files), tipo = root.querySelector('input[name=pn-dest]:checked').value, marca = tipo === 'selection' ? opcionesMarca() : null, g0 = gal(galId), cal = (g0 && g0.view_quality) || 'media';
-  if (!files.length) return;
-  var btn = $('#pn-go'), ul = $('#pn-prog'); btn.disabled = true; ul.innerHTML = '';
-  for (var i = 0; i < files.length; i++) {
-    var f = files[i], li = document.createElement('li'); li.textContent = f.name + ': subiendo…'; ul.appendChild(li);
+// ---------- Cola de subida en segundo plano ----------
+var cola = { trabajos: [], activos: 0, total: 0, hechas: 0, fallos: [], gids: {} };
+function subiendo(){ return cola.activos > 0 || cola.trabajos.length > 0; }
+window.addEventListener('beforeunload', function(e){ if (subiendo()) { e.preventDefault(); e.returnValue = ''; } });
+function pintarCola(){
+  var el = document.getElementById('pn-up'); if (!el) return;
+  if (!cola.total) { el.hidden = true; return; }
+  el.hidden = false;
+  var fin = !subiendo(), pct = Math.round(cola.hechas / cola.total * 100);
+  el.innerHTML = '<div class="pn-up-t"><b>' + (fin ? 'Subida terminada' : 'Subiendo fotos…') + '</b><span>' + cola.hechas + ' de ' + cola.total + '</span></div>' +
+    '<div class="pn-up-b"><i style="width:' + pct + '%"></i></div>' +
+    (fin ? '' : '<p class="pn-s">Puedes seguir trabajando en el panel. No cierres esta pestaña hasta que termine.</p>') +
+    (cola.fallos.length ? '<ul>' + cola.fallos.slice(-5).map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
+    (fin ? '<button class="pn-btn sec" data-act="cerrar-cola">Cerrar</button>' : '');
+}
+async function subirUna(t){
+  var f = t.file, blob = f, w = null, h = null, nombre = f.name;
+  if (f.size > MAX) throw new Error('pesa más de 45 MB');
+  if (t.tipo === 'selection') { var r = await reducir(f, t.marca, t.cal); blob = r.blob; w = r.w; h = r.h; nombre = f.name.replace(/\.[^.]+$/, '') + '.jpg'; }
+  else { try { var bm = await createImageBitmap(f); w = bm.width; h = bm.height; } catch (e) {} }
+  var s = (await db.auth.getSession()).data.session;
+  var q = '?gallery=' + t.gid + (t.esc ? '&scene=' + t.esc : '') + '&type=' + t.tipo + '&name=' + encodeURIComponent(nombre) + (w ? '&w=' + w + '&h=' + h : '');
+  var res = await fetch(W + '/api/upload' + q, { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, 'Content-Type': blob.type || 'image/jpeg' }, body: blob });
+  var d = await res.json().catch(function(){ return {}; });
+  if (!d.ok) throw new Error(ERR[d.error] || 'error al subir');
+  if (t.tipo === 'final' && d.photo) {
     try {
-      if (f.size > MAX) throw new Error('pesa más de 45 MB');
-      var blob = f, w = null, h = null, nombre = f.name;
-      if (tipo === 'selection') { var r = await reducir(f, marca, cal); blob = r.blob; w = r.w; h = r.h; nombre = f.name.replace(/\.[^.]+$/, '') + '.jpg'; }
-      else { try { var bm = await createImageBitmap(f); w = bm.width; h = bm.height; } catch (e) {} }
-      var s = (await db.auth.getSession()).data.session;
-      var q = '?gallery=' + galId + ($('#pn-esc') && $('#pn-esc').value ? '&scene=' + $('#pn-esc').value : '') + '&type=' + tipo + '&name=' + encodeURIComponent(nombre) + (w ? '&w=' + w + '&h=' + h : '');
-      var res = await fetch(W + '/api/upload' + q, { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, 'Content-Type': blob.type || 'image/jpeg' }, body: blob });
-      var d = await res.json().catch(function(){ return {}; });
-      if (d.ok && tipo === 'final' && d.photo) {
-        try {
-          li.textContent = f.name + ': preparando vista con marca de agua…';
-          var pv = await reducir(f, { text: (g0 && g0.watermark_text) || 'Buenos Momentos', opacity: MARCA_OPACIDAD, size: MARCA_TAM }, 'media');
-          await fetch(W + '/api/upload-preview?photo=' + d.photo.id, { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'image/jpeg' }, body: pv.blob });
-        } catch (e) {}
-      }
-      li.textContent = f.name + (d.ok ? ': lista' : ': ' + (ERR[d.error] || 'error al subir'));
-    } catch (e) { li.textContent = f.name + ': ' + (e.message || 'error'); }
+      var pv = await reducir(f, { text: t.texto || 'Buenos Momentos', opacity: MARCA_OPACIDAD, size: MARCA_TAM }, 'media');
+      await fetch(W + '/api/upload-preview?photo=' + d.photo.id, { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'image/jpeg' }, body: pv.blob });
+    } catch (e) {}
   }
-  btn.disabled = false;
-  await abrirDetalle(galId, true);
+}
+async function correrCola(){
+  while (cola.trabajos.length) {
+    var t = cola.trabajos.shift(); cola.activos++; pintarCola();
+    try { await subirUna(t); cola.gids[t.gid] = 1; }
+    catch (e) { cola.fallos.push(t.file.name + ': ' + (e.message || 'error')); }
+    cola.activos--; cola.hechas++; pintarCola();
+  }
+}
+async function subirTodo(){
+  var files = Array.from($('#pn-file').files); if (!files.length) return;
+  var tipo = root.querySelector('input[name=pn-dest]:checked').value, g0 = gal(galId);
+  var base = { tipo: tipo, marca: tipo === 'selection' ? opcionesMarca() : null, gid: galId, cal: (g0 && g0.view_quality) || 'media', texto: g0 && g0.watermark_text, esc: $('#pn-esc') && $('#pn-esc').value ? $('#pn-esc').value : '' };
+  if (!subiendo()) { cola.total = 0; cola.hechas = 0; cola.fallos = []; cola.gids = {}; }
+  files.forEach(function(f){ cola.trabajos.push(Object.assign({ file: f }, base)); }); cola.total += files.length;
+  $('#pn-file').value = ''; pintarCola();
+  aviso('Subiendo ' + files.length + (files.length === 1 ? ' foto' : ' fotos') + ' en segundo plano. Puedes seguir trabajando.');
+  var corriendo = cola.activos;
+  var hilos = Math.max(0, 3 - corriendo); var ps = [];
+  for (var k = 0; k < hilos; k++) ps.push(correrCola());
+  await Promise.all(ps);
+  if (!subiendo()) { aviso(cola.fallos.length ? 'Subida terminada con ' + cola.fallos.length + ' error(es).' : 'Subida terminada.'); if (vista === 'detalle' && cola.gids[galId]) await abrirDetalle(galId, true); }
 }
 
 function escenasCard(g, sel, fin){
@@ -467,6 +494,7 @@ async function accion(a, el){
   if (a === 'tema') { try { localStorage.setItem('pn-tema', el.dataset.t); } catch(e) {} return pintar(); }
   if (a === 'bloqueo') return cambiar({ finals_locked: !g.finals_locked }, g.finals_locked ? 'Fotos liberadas: el cliente ya las ve sin marca de agua' : 'Finales bloqueadas con marca de agua');
   if (a === 'ver') return abrirVer(el.dataset.id);
+  if (a === 'cerrar-cola') { cola.total = 0; cola.hechas = 0; cola.fallos = []; return pintarCola(); }
   if (a === 'wa') return window.open('https://wa.me/?text=' + encodeURIComponent(el.dataset.t), '_blank');
   if (a === 'modo-sel') { modoSel = !modoSel; marcadas = new Set(); return pintar(); }
   if (a === 'marcar') {
@@ -596,6 +624,7 @@ window.iniciarPanel = async function(photographer, cliente){
   if (!document.getElementById('pn-css')) { var st = document.createElement('style'); st.id = 'pn-css'; st.textContent = CSS; document.head.appendChild(st); }
   root.innerHTML = '<div class="pn"><aside></aside><main id="pn-main"><div class="pn-skel w1"></div><div class="pn-skel"></div><div class="pn-skel h2"></div></main>' +
     '<dialog id="pn-dnueva"><h2>Nueva galería</h2><form id="pn-fn"><input type="text" id="pn-cn" placeholder="Cliente (ej. Ana y Luis)"><input type="text" id="pn-ct" placeholder="Nombre de la galería (ej. Boda Ana y Luis)"><input type="date" id="pn-cf"><div class="pn-row"><button class="pn-btn" type="submit">Crear</button><button class="pn-btn sec" type="button" id="pn-cc">Cancelar</button></div></form></dialog><dialog id="pn-dport"><h2>Elegir portada</h2><p class="pn-s">Toca la foto que quieres como portada.</p><div class="pn-grid" id="pn-gport"></div><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-portada">Cancelar</button></div></dialog></div>';
+  root.querySelector('.pn').insertAdjacentHTML('beforeend', '<div id="pn-up" hidden></div>');
   root.querySelector('.pn').insertAdjacentHTML('beforeend', '<dialog id="pn-dver"><div class="pn-vb"><button class="pn-btn sec" id="pn-vp" type="button">‹ Anterior</button><span class="pn-s" id="pn-vnm"></span><button class="pn-btn sec" id="pn-vn" type="button">Siguiente ›</button><button class="pn-btn sec" id="pn-vx" type="button">Cerrar</button></div><img id="pn-vimg" alt=""></dialog>');
   $('#pn-vp').onclick = function(){ pasarVer(-1); }; $('#pn-vn').onclick = function(){ pasarVer(1); }; $('#pn-vx').onclick = function(){ $('#pn-dver').close(); };
   var vx0 = null, dv = $('#pn-dver');
