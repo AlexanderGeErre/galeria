@@ -45,6 +45,19 @@ var CSS = '.pn-ck{cursor:pointer;position:absolute;top:6px;left:6px;z-index:2;wi
 '.pn dialog{border:1px solid var(--l);background:var(--f);color:var(--t);border-radius:16px;padding:1.4rem;width:min(30rem,92vw);margin:auto;box-shadow:0 24px 60px rgba(43,38,35,.25)}.pn dialog::backdrop{background:rgba(43,38,35,.5)}' +
 '.pn dialog form{display:flex;flex-direction:column;gap:.7rem}.pn textarea{width:100%;height:9rem;background:none;border:1px solid var(--l);border-radius:10px;padding:.6rem;color:inherit;font:inherit}' +
 '.pn-toast{position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%);background:var(--t);color:var(--f);padding:.7rem 1.2rem;border-radius:999px;z-index:50;font-size:.95rem}' +
+'.pn aside button{display:flex;align-items:center;gap:.75rem;transition:background .2s,color .2s}.pn aside button:hover{background:var(--p);color:var(--t)}.pn aside button.on{background:var(--p);color:var(--t);box-shadow:inset 3px 0 0 var(--a)}.pn aside .pie button{font-size:.9rem}.pn-tema button{display:block!important}.pn-tema button.on{box-shadow:none!important;background:var(--l)!important;color:var(--t)}.pn-i{width:18px;height:18px;flex:0 0 18px}.pn aside .atras{margin-bottom:.2rem}' +
+'.pn .marca{margin:.2rem 0 1.4rem;padding:0 .3rem}.pn .marca img{width:100%;max-width:150px;display:block;border-radius:8px}.pn .lg-d{display:none}.pn[data-e=dark] .lg-l{display:none}.pn[data-e=dark] .lg-d{display:block}' +
+'.pn main{padding:2.8rem clamp(1.2rem,5vw,4rem);max-width:1180px}.pn h1{font-size:clamp(2.2rem,4vw,3.2rem);letter-spacing:-.01em;margin-bottom:.3rem}.pn h2{font-size:1.6rem}' +
+'.pn-card{border:0;border-radius:20px;box-shadow:0 1px 2px rgba(43,38,35,.05),0 10px 30px rgba(43,38,35,.06);padding:1.6rem}.pn[data-e=dark] .pn-card{box-shadow:none;border:1px solid var(--l)}' +
+'.pn-franja,.pn-cifras{border:0;border-radius:18px;box-shadow:0 1px 2px rgba(43,38,35,.05),0 10px 30px rgba(43,38,35,.05)}.pn[data-e=dark] .pn-franja,.pn[data-e=dark] .pn-cifras{box-shadow:none;border:1px solid var(--l)}.pn-cifras b{font-size:2.4rem}' +
+'.pn-btn{transition:transform .15s,opacity .2s,box-shadow .2s}.pn-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 16px rgba(43,38,35,.16)}.pn-btn:active{transform:scale(.97)}' +
+'.pn-rej{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:26px}.pn-tar .cv{border-radius:16px}.pn-tar h3{margin-top:.7rem}' +
+'.pn-ph img,.pn-tar .cv>img,.pn-pbtn img{opacity:0;transition:opacity .6s ease,transform .5s ease;background:linear-gradient(100deg,var(--l) 30%,var(--p) 50%,var(--l) 70%);background-size:200% 100%}.pn-ph img.ld,.pn-tar .cv>img.ld,.pn-pbtn img.ld{opacity:1}.pn-ph,.pn-tar .cv{background:linear-gradient(100deg,var(--l) 30%,var(--p) 50%,var(--l) 70%);background-size:200% 100%;animation:pnSh 1.5s infinite;border-radius:10px}.pn-ph img{border-radius:10px}.pn-ph:hover img.ld{transform:scale(1.03)}.pn-ph{overflow:hidden}' +
+'#pn-main>*{animation:pnIn .5s cubic-bezier(.2,.7,.2,1) both}#pn-main>*:nth-child(2){animation-delay:.05s}#pn-main>*:nth-child(3){animation-delay:.1s}#pn-main>*:nth-child(4){animation-delay:.15s}#pn-main>*:nth-child(n+5){animation-delay:.2s}' +
+'@keyframes pnIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}@keyframes pnSh{from{background-position:200% 0}to{background-position:-200% 0}}' +
+'.pn dialog[open]{animation:pnDlg .28s cubic-bezier(.2,.7,.2,1)}.pn dialog::backdrop{background:rgba(21,20,19,.55);backdrop-filter:blur(3px)}@keyframes pnDlg{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}' +
+'.pn-skel{height:3.2rem;width:60%;border-radius:12px;margin:1rem 0;background:linear-gradient(100deg,var(--l) 30%,var(--p) 50%,var(--l) 70%);background-size:200% 100%;animation:pnSh 1.5s infinite}.pn-skel.w1{width:35%;height:2.4rem}.pn-skel.h2{height:9rem;width:100%}' +
+'.pn-toast{animation:pnIn .3s both}@media(prefers-reduced-motion:reduce){.pn *{animation:none!important;transition:none!important}.pn-ph img,.pn-tar .cv>img,.pn-pbtn img{opacity:1}}' +
 '@media(max-width:760px){.pn{grid-template-columns:minmax(0,1fr)}.pn main{min-width:0;overflow-x:hidden}.pn input[type=file]{max-width:100%}.pn aside{position:sticky;top:0;z-index:30;height:auto;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;align-items:center;gap:.2rem;padding:.5rem .6rem;border-right:0;border-bottom:1px solid var(--l)}.pn aside>*{flex:0 0 auto;white-space:nowrap}.pn aside .marca,.pn aside .gt,.pn aside .sep,.pn aside .pn-pill{display:none}.pn aside .pie{margin:0 0 0 .6rem;display:flex;gap:.3rem;align-items:center}.pn-tema{margin:0}.pn main{padding:1rem .9rem 4rem}.pn h1{font-size:2rem}.pn-cifras{grid-template-columns:1fr 1fr}.pn-cifras div{border-bottom:1px solid var(--l)}.pn-franja span{border-right:0;border-bottom:1px solid var(--l);width:100%}.pn-orden{margin-left:0;width:100%}.pn-orden select{flex:1;min-width:0;max-width:100%}.pn-orden{flex-wrap:wrap}.pn-grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}.pn-grid.fr .pn-ph{flex:0 0 84px}.pn-rej{grid-template-columns:repeat(2,1fr);gap:12px}.pn-card{padding:.9rem}.pn-row{gap:.5rem}.pn-row input[type=text]{min-width:0;width:100%}.pn-btn{padding:.5rem .9rem}#pn-dver .pn-vb{flex-wrap:wrap}.pn-lado{flex-direction:column;align-items:stretch}.pn-copia{flex-wrap:wrap}.pn-copia input{min-width:0;width:100%}.pn-opt{max-width:none;flex:1 1 100%}.pn-tabs{overflow-x:auto;flex-wrap:nowrap}}';
 
 function esc(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -55,6 +68,9 @@ document.addEventListener('error', function(e){
   var i = +t.dataset.i + 1;
   if (i < EXTS.length) { t.dataset.i = i; t.src = 'imagenes/' + t.dataset.n + EXTS[i]; } else t.style.visibility = 'hidden';
 }, true);
+document.addEventListener('load', function(e){ var t = e.target; if (t && t.tagName === 'IMG' && t.closest && t.closest('.pn')) t.classList.add('ld'); }, true);
+document.addEventListener('error', function(e){ var t = e.target; if (t && t.tagName === 'IMG' && t.closest && t.closest('.pn') && !t.dataset.n) t.classList.add('ld'); }, true);
+function marcarCargadas(){ if (root) root.querySelectorAll('img').forEach(function(i){ if (i.complete) i.classList.add('ld'); }); }
 function aviso(t){ var d = document.createElement('div'); d.className = 'pn-toast'; d.textContent = t; root.appendChild(d); setTimeout(function(){ d.remove(); }, 4200); }
 function slug(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'galeria'; }
 function codigo(){ var a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', c = ''; for (var i = 0; i < 8; i++) c += a[Math.floor(Math.random() * a.length)]; return c; }
@@ -107,20 +123,33 @@ function aplicarTema(){
   var t = temaGuardado(), e = t === 'auto' ? (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : t;
   var p = root && root.querySelector('.pn'); if (p) p.dataset.e = e;
 }
+var ICO = {
+  panel: '<path d="M4 4h7v7H4zM13 4h7v4h-7zM13 11h7v9h-7zM4 14h7v6H4z"/>', detalles: '<path d="M5 4h14v16H5zM8 9h8M8 13h8M8 17h5"/>',
+  fotos: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/>',
+  diseno: '<path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.8 1.8-1.6 0-1.2-1-1.4-1-2.4 0-.9.7-1.5 1.7-1.5H17a4 4 0 0 0 4-4C21 6.5 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/>',
+  config: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
+  favoritas: '<path d="M12 20.5s-7-4.4-9.2-8.9C1.3 8.5 3.1 5.3 6.2 5.3c2 0 3.2 1.1 3.8 2.2.6-1.1 1.8-2.2 3.8-2.2 3.1 0 4.9 3.2 3.4 6.3C19 16.1 12 20.5 12 20.5z"/>',
+  impresiones: '<path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/>',
+  compartir: '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 11l7.6-4M8.2 13l7.6 4"/>',
+  inicio: '<path d="M4 11l8-7 8 7v9H4z"/>', galerias: '<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>',
+  atras: '<path d="M15 5l-7 7 7 7"/>', salir: '<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>'
+};
+function ico(n){ return '<svg class="pn-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICO[n] || '') + '</svg>'; }
+function logo(){ return '<div class="marca"><img class="pn-il lg-l" data-n="logo-claro" data-i="0" src="imagenes/logo-claro' + EXTS[0] + '" alt="' + esc(ph.studio_name) + '"><img class="pn-il lg-d" data-n="logo-oscuro" data-i="0" src="imagenes/logo-oscuro' + EXTS[0] + '" alt="' + esc(ph.studio_name) + '"></div>'; }
 function pintarLado(){
   var a = root.querySelector('aside'), g = vista === 'detalle' ? gal(galId) : null, h;
   if (g) {
-    h = '<div class="marca">' + esc(ph.studio_name) + '</div><button data-act="atras">← Galerías</button><div class="gt">' + esc(g.title) + '</div><span class="pn-pill">' + esc(ESTADOS[g.status] || g.status) + '</span><div class="sep"></div>' +
-      TABS.map(function(t){ return '<button data-act="tab" data-t="' + t[0] + '"' + (tab === t[0] ? ' class="on"' : '') + '>' + t[1] + '</button>'; }).join('');
+    h = logo() + '<button data-act="atras" class="atras">' + ico('atras') + 'Galerías</button><div class="gt">' + esc(g.title) + '</div><span class="pn-pill">' + esc(ESTADOS[g.status] || g.status) + '</span><div class="sep"></div>' +
+      TABS.map(function(t){ return '<button data-act="tab" data-t="' + t[0] + '"' + (tab === t[0] ? ' class="on"' : '') + '>' + ico(t[0]) + '<span>' + t[1] + '</span></button>'; }).join('');
   } else {
-    h = '<div class="marca">' + esc(ph.studio_name) + '</div><button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>Inicio</button><button data-v="galerias"' + (vista === 'galerias' ? ' class="on"' : '') + '>Galerías de clientes</button>';
+    h = logo() + '<button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias"' + (vista === 'galerias' ? ' class="on"' : '') + '>' + ico('galerias') + '<span>Galerías de clientes</span></button>';
   }
   var tm = temaGuardado();
-  h += '<div class="pie"><div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button data-act="salir">Cerrar sesión</button></div>';
+  h += '<div class="pie"><div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button></div>';
   a.innerHTML = h;
 }
 function pintar(){
-  pintarLado(); aplicarTema();
+  pintarLado(); aplicarTema(); setTimeout(marcarCargadas, 0);
   if (vista === 'inicio') return pintarInicio();
   if (vista === 'galerias') return pintarLista();
   pintarDetalle();
@@ -235,14 +264,14 @@ function pintarDetalle(){
       db.from('galleries').update({ link_token: g.link_token }).eq('id', g.id).then(function(){});
     }
     var abierto = g.access_mode === 'abierto', urlG = BASEG + g.link_token, urlC = BASE + g.access_code;
-    var fila = function(et, v){ return '<p class="pn-s">' + et + '</p><div class="pn-copia"><input type="text" readonly value="' + esc(v) + '"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(v) + '">Copiar</button></div>'; };
+    var fila = function(et, v, cod){ return '<p class="pn-s">' + et + '</p><div class="pn-copia"><input type="text" readonly value="' + esc(v) + '"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(v) + '">Copiar</button><button class="pn-btn sec" data-act="wa" data-t="' + esc('Hola, te comparto tu galería de fotos: ' + v + (cod ? '\nCódigo de acceso: ' + cod : '')) + '">WhatsApp</button></div>'; };
     cuerpo = '<div class="pn-card"><h2>Cómo entra tu cliente</h2><div class="pn-opts">' +
       '<button class="pn-opt' + (abierto ? ' on' : '') + '" data-act="modo" data-v="abierto"><b>Enlace sin clave</b><span>Cualquiera que tenga el enlace ve la galería directamente.</span></button>' +
       '<button class="pn-opt' + (abierto ? '' : ' on') + '" data-act="modo" data-v="codigo"><b>Enlace con código</b><span>Debe escribir el código para entrar.</span></button></div></div>' +
       escenasEnlaces(fila) +
       '<div class="pn-card"><h2>' + (abierto ? 'Enlace sin clave' : 'Enlace con código') + '</h2>' +
       (abierto ? '<p class="pn-s">Envía este enlace. Entra directo, sin pedir nada.</p>' + fila('Enlace para el cliente', urlG)
-        : '<p class="pn-s">Envía el enlace y el código por separado: el cliente escribe el código al abrirlo.</p>' + fila('Enlace para el cliente', urlG) + '<p class="pn-s">Código de acceso (puedes cambiarlo)</p><div class="pn-copia"><input type="text" id="pn-cod" maxlength="40" value="' + esc(g.access_code) + '"><button class="pn-btn sec" data-act="guardar-codigo">Guardar</button><button class="pn-btn sec" data-act="copiar" data-t="' + esc(g.access_code) + '">Copiar</button></div>' +
+        : '<p class="pn-s">Envía el enlace y el código por separado: el cliente escribe el código al abrirlo.</p>' + fila('Enlace para el cliente', urlG, g.access_code) + '<p class="pn-s">Código de acceso (puedes cambiarlo)</p><div class="pn-copia"><input type="text" id="pn-cod" maxlength="40" value="' + esc(g.access_code) + '"><button class="pn-btn sec" data-act="guardar-codigo">Guardar</button><button class="pn-btn sec" data-act="copiar" data-t="' + esc(g.access_code) + '">Copiar</button></div>' +
           '<details class="pn-s" style="margin-top:.6rem"><summary>Enlace con el código incluido (entra sin escribirlo)</summary>' + fila('Enlace directo con código', urlC) + '</details>') + '</div>';
   }
   $('#pn-main').innerHTML = '<h1>' + esc(TITULOS[tab] || '') + '</h1><p class="pn-s">' + esc(g.title) + '</p>' + cuerpo;
@@ -351,7 +380,7 @@ function barraSel(sel, fin){
 function escenasEnlaces(fila){
   var es = cur.escenas || []; if (!es.length) return '';
   return '<div class="pn-card"><h2>Enlaces por escena</h2><p class="pn-s">Cada escena tiene su propio enlace. El cliente que lo abre ve solo las fotos de esa escena.</p>' + es.map(function(e){
-    return '<div class="pn-esc"><b>' + esc(e.name) + '</b>' + fila('Enlace', BASES + e.link_token) +
+    return '<div class="pn-esc"><b>' + esc(e.name) + '</b>' + fila('Enlace', BASES + e.link_token, e.access_mode === 'codigo' ? e.access_code : '') +
       '<div class="pn-row"><select data-escmodo="' + e.id + '"><option value="abierto"' + (e.access_mode === 'abierto' ? ' selected' : '') + '>Sin clave</option><option value="codigo"' + (e.access_mode === 'codigo' ? ' selected' : '') + '>Con código</option></select>' +
       (e.access_mode === 'codigo' ? '<input type="text" id="pn-sc-' + e.id + '" maxlength="40" value="' + esc(e.access_code || '') + '"><button class="pn-btn sec" data-act="esc-codigo" data-id="' + e.id + '">Guardar código</button>' : '') + '</div>' +
       '<label class="pn-s"><input type="checkbox" data-eschid="' + e.id + '"' + (e.hidden ? ' checked' : '') + '> Solo con su enlace (no aparece en la galería principal)</label></div>';
@@ -432,6 +461,7 @@ async function accion(a, el){
   if (a === 'tema') { try { localStorage.setItem('pn-tema', el.dataset.t); } catch(e) {} return pintar(); }
   if (a === 'bloqueo') return cambiar({ finals_locked: !g.finals_locked }, g.finals_locked ? 'Fotos liberadas: el cliente ya las ve sin marca de agua' : 'Finales bloqueadas con marca de agua');
   if (a === 'ver') return abrirVer(el.dataset.id);
+  if (a === 'wa') return window.open('https://wa.me/?text=' + encodeURIComponent(el.dataset.t), '_blank');
   if (a === 'modo-sel') { modoSel = !modoSel; marcadas = new Set(); return pintar(); }
   if (a === 'marcar') {
     if (!modoSel) { modoSel = true; marcadas = new Set([id]); return pintar(); }
@@ -540,7 +570,7 @@ async function crearGaleria(e){
 window.iniciarPanel = async function(photographer, cliente){
   ph = photographer; db = cliente; root = document.getElementById('vPanel');
   if (!document.getElementById('pn-css')) { var st = document.createElement('style'); st.id = 'pn-css'; st.textContent = CSS; document.head.appendChild(st); }
-  root.innerHTML = '<div class="pn"><aside></aside><main id="pn-main"><p class="pn-s">Cargando…</p></main>' +
+  root.innerHTML = '<div class="pn"><aside></aside><main id="pn-main"><div class="pn-skel w1"></div><div class="pn-skel"></div><div class="pn-skel h2"></div></main>' +
     '<dialog id="pn-dnueva"><h2>Nueva galería</h2><form id="pn-fn"><input type="text" id="pn-cn" placeholder="Cliente (ej. Ana y Luis)"><input type="text" id="pn-ct" placeholder="Nombre de la galería (ej. Boda Ana y Luis)"><input type="date" id="pn-cf"><div class="pn-row"><button class="pn-btn" type="submit">Crear</button><button class="pn-btn sec" type="button" id="pn-cc">Cancelar</button></div></form></dialog><dialog id="pn-dport"><h2>Elegir portada</h2><p class="pn-s">Toca la foto que quieres como portada.</p><div class="pn-grid" id="pn-gport"></div><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-portada">Cancelar</button></div></dialog></div>';
   root.querySelector('.pn').insertAdjacentHTML('beforeend', '<dialog id="pn-dver"><div class="pn-vb"><button class="pn-btn sec" id="pn-vp" type="button">‹ Anterior</button><span class="pn-s" id="pn-vnm"></span><button class="pn-btn sec" id="pn-vn" type="button">Siguiente ›</button><button class="pn-btn sec" id="pn-vx" type="button">Cerrar</button></div><img id="pn-vimg" alt=""></dialog>');
   $('#pn-vp').onclick = function(){ pasarVer(-1); }; $('#pn-vn').onclick = function(){ pasarVer(1); }; $('#pn-vx').onclick = function(){ $('#pn-dver').close(); };
