@@ -33,7 +33,9 @@ var CSS = '.pn{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--p:#
 '.pn-tabs{display:flex;gap:1.4rem;border-bottom:1px solid var(--l);margin:1rem 0 1.2rem;flex-wrap:wrap}.pn-tabs button{background:none;border:0;padding:.5rem 0;color:var(--s);border-bottom:2px solid transparent;cursor:pointer;font:inherit}.pn-tabs button.on{color:var(--t);border-color:var(--a)}' +
 '.pn-opts{display:flex;gap:.7rem;flex-wrap:wrap}.pn-opt{background:var(--c);border:1px solid var(--l);border-radius:12px;padding:.7rem .9rem;text-align:left;color:var(--t);cursor:pointer;max-width:13rem;font:inherit}.pn-opt b{display:block;font-weight:500}.pn-opt span{font-size:.8rem;color:var(--s)}.pn-opt.on{border-color:var(--a);box-shadow:0 0 0 1px var(--a)}.pn-opt.pal{display:flex;align-items:center;gap:.6rem}.pn-opt i{width:1.6rem;height:1.6rem;border-radius:50%;border:1px solid var(--l);display:block}' +
 '.pn-marcaui{margin:.4rem 0 .8rem}.pn-marcaui select{width:auto}.pn-copia{display:flex;gap:.5rem;margin:.4rem 0 1rem}.pn-copia input{flex:1}.pn-lado{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap}.pn-lado .pn-il{width:13rem}' +
-'.pn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.pn-ph{margin:0;position:relative}.pn-ph img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:var(--l);display:block}.pn-ph.cv img{outline:2px solid var(--a)}' +
+'.pn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}.pn-grid.sm{grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}.pn-grid.sm .pn-ac button{font-size:.65rem;padding:0 .4rem}.pn-ph img[data-act=ver]{cursor:zoom-in}#pn-dver{width:min(60rem,96vw);padding:.6rem;text-align:center}#pn-dver img{max-width:100%;max-height:78vh;display:block;margin:0 auto;border-radius:8px}#pn-dver .pn-vb{display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin:.5rem 0 0}' +
+'.pn-fila img{width:46px;height:46px;object-fit:cover;border-radius:6px}' +
+'.pn-ph{margin:0;position:relative}.pn-ph img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:var(--l);display:block}.pn-ph.cv img{outline:2px solid var(--a)}' +
 '.pn-ph figcaption{font-size:.75rem;color:var(--s);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pn-ac{display:flex;gap:.3rem;margin-top:.2rem}.pn-ac button{background:none;border:1px solid var(--l);border-radius:999px;font-size:.72rem;padding:.1rem .5rem;color:var(--t);cursor:pointer}' +
 '.pn-fila{display:flex;justify-content:space-between;gap:1rem;padding:.4rem 0;border-bottom:1px solid var(--l);font-size:.9rem}#pn-prog{list-style:none;padding:0;margin:.5rem 0 0;font-size:.9rem;max-height:12rem;overflow:auto}' +
 '.pn dialog{border:1px solid var(--l);background:var(--f);color:var(--t);border-radius:16px;padding:1.4rem;width:min(30rem,92vw);margin:auto;box-shadow:0 24px 60px rgba(43,38,35,.25)}.pn dialog::backdrop{background:rgba(43,38,35,.5)}' +
@@ -72,7 +74,7 @@ async function firmar(ids){
 function src(t){ return W + '/api/img?t=' + encodeURIComponent(t); }
 
 async function cargarGalerias(){
-  var g = await db.from('galleries').select('id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity,gallery_type,description,location,grid_style,palette,link_token,access_mode,print_sent_at').is('deleted_at', null).order('created_at', { ascending: false });
+  var g = await db.from('galleries').select('id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity,gallery_type,description,location,grid_style,palette,link_token,access_mode,print_sent_at,finals_locked,view_quality').is('deleted_at', null).order('created_at', { ascending: false });
   if (g.error) { aviso(g.error.message); return; }
   gals = g.data || [];
   var sinPortada = gals.filter(function(x){ return !x.cover_photo_id; }).map(function(x){ return x.id; }), primeras = {};
@@ -169,7 +171,7 @@ function pintarDetalle(){
     var top = sel.slice().sort(function(a, b){ return (cuenta[b.id] || 0) - (cuenta[a.id] || 0); }).slice(0, 5);
     cuerpo = '<div class="pn-franja"><span><i class="pn-dot"></i>' + esc(ESTADOS[g.status] || g.status) + '</span><span>' + (sel.length + fin.length) + ' archivos guardados</span><span>Caducidad: ' + (fechaCad(g) || 'sin caducidad') + '</span></div>' +
       '<div class="pn-cifras"><div><b>' + sel.length + '</b><span class="pn-s">Fotos de selección</span></div><div><b>' + fin.length + '</b><span class="pn-s">Finales</span></div><div><b>' + Object.keys(unicas).length + '</b><span class="pn-s">Favoritas</span></div><div><b>' + cur.vistas + '</b><span class="pn-s">Vistas</span></div></div>' +
-      '<div class="pn-row">' + (g.status === 'delivered' ? '<button class="pn-btn" data-act="reabrir">Reabrir selección</button>' : '<button class="pn-btn" data-act="entregar">Marcar como entregada</button>') + '</div>' +
+      '<div class="pn-row">' + (g.status === 'delivered' ? '<button class="pn-btn" data-act="reabrir">Reabrir selección</button><button class="pn-btn sec" data-act="bloqueo">' + (g.finals_locked ? 'Pago recibido: liberar fotos sin marca' : 'Bloquear finales con marca de agua') + '</button>' : '<button class="pn-btn" data-act="entregar">Marcar como entregada</button>') + '</div>' +
       '<p class="pn-s">Al entregar, el cliente puede descargar las fotos finales y ya no puede cambiar sus favoritas.</p>' +
       '<h2 style="margin-top:1.6rem">Fotos principales</h2>' + (top.length ? '<div class="pn-grid">' + top.map(function(x){
         return '<figure class="pn-ph"><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (cuenta[x.id] ? ' · ♥ ' + cuenta[x.id] : '') + '</figcaption></figure>';
@@ -185,11 +187,11 @@ function pintarDetalle(){
     cuerpo = '<div class="pn-card"><h2>Subir fotos</h2><div class="pn-row"><label><input type="radio" name="pn-dest" value="selection" checked> Selección (se reducen a 1600 px)</label><label><input type="radio" name="pn-dest" value="final"> Finales (originales, hasta 45 MB)</label></div>' +
       '<div class="pn-marcaui" id="pn-mbox"><label class="pn-s" for="pn-marca">Marca de agua</label><select id="pn-marca"><option value="si">Con marca de agua</option><option value="no">Sin marca de agua</option></select></div>' +
       '<div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul></div>' +
-      '<h2>Selección (' + sel.length + ')</h2>' + (sel.length ? '<div class="pn-grid">' + sel.map(function(x){
-        return '<figure class="pn-ph' + (g.cover_photo_id === x.id ? ' cv' : '') + '"><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (g.cover_photo_id === x.id ? ' · Portada' : '') + '</figcaption><div class="pn-ac"><button data-act="portada" data-id="' + x.id + '">Portada</button><button data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div></figure>';
+      '<h2>Selección (' + sel.length + ')</h2>' + (sel.length ? '<div class="pn-grid sm">' + sel.map(function(x){
+        return '<figure class="pn-ph' + (g.cover_photo_id === x.id ? ' cv' : '') + '"><img data-act="ver" data-id="' + x.id + '" loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (g.cover_photo_id === x.id ? ' · Portada' : '') + '</figcaption><div class="pn-ac"><button data-act="portada" data-id="' + x.id + '">Portada</button><button data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div></figure>';
       }).join('') + '</div>' : '<div class="pn-vacio">' + ilus('admin-subir') + '<p class="pn-s">Aún no hay fotos de selección.</p></div>') +
       '<h2 style="margin-top:1.6rem">Finales (' + fin.length + ')</h2>' + (fin.length ? fin.map(function(x){
-        return '<div class="pn-fila"><span>' + esc(x.filename) + ' · ' + mb(x.file_size || 0) + '</span><button class="pn-btn sec" data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></div>';
+        return '<div class="pn-fila"><span>' + esc(x.filename) + ' · ' + mb(x.file_size || 0) + '</span><span><button class="pn-btn sec" data-act="ver" data-id="' + x.id + '">Ver</button> <button class="pn-btn sec" data-act="borrar-foto" data-id="' + x.id + '">Eliminar</button></span></div>';
       }).join('') : '<p class="pn-s">Aún no hay fotos finales.</p>');
   } else if (tab === 'diseno') {
     var cvId = g.cover_photo_id || (sel[0] && sel[0].id), cv = cvId && cur.tk[cvId];
@@ -198,6 +200,8 @@ function pintarDetalle(){
       '<div class="pn-card"><h2>Paleta de colores</h2><p class="pn-s">Colores de la galería del cliente. “Automática” sigue el modo claro u oscuro de su dispositivo.</p><div class="pn-opts">' + PALETAS.map(function(c){ return '<button class="pn-opt pal' + ((g.palette || 'auto') === c[0] ? ' on' : '') + '" data-act="paleta" data-v="' + c[0] + '"><i style="background:linear-gradient(135deg,' + c[2] + ' 50%,' + c[3] + ' 50%)"></i><b>' + c[1] + '</b></button>'; }).join('') + '</div></div>';
   } else if (tab === 'config') {
     cuerpo = '<div class="pn-card"><h2>Marca de agua</h2><p class="pn-s">Texto que se graba en las fotos de selección que subas a partir de ahora.</p><input type="text" id="pn-wt" maxlength="40" value="' + esc(g.watermark_text || 'Buenos Momentos') + '"></div>' +
+      '<div class="pn-card"><h2>Calidad de las fotos de selección</h2><p class="pn-s">Tamaño con el que tu cliente ve las fotos que subas a partir de ahora. Más calidad se ve mejor pero pesa más.</p><select id="pn-vq"><option value="baja"' + (g.view_quality === 'baja' ? ' selected' : '') + '>Baja (ligera, 1000 px)</option><option value="media"' + (!g.view_quality || g.view_quality === 'media' ? ' selected' : '') + '>Media (1600 px)</option><option value="alta"' + (g.view_quality === 'alta' ? ' selected' : '') + '>Alta (2400 px)</option></select></div>' +
+      '<div class="pn-card"><h2>Fotos finales y pago</h2><p class="pn-s">Controla si tu cliente ve y descarga las finales sin marca de agua. Mientras estén bloqueadas, las ve con marca de agua y no puede descargarlas.</p><select id="pn-fl"><option value="0"' + (g.finals_locked ? '' : ' selected') + '>Liberadas: sin marca de agua y con descarga</option><option value="1"' + (g.finals_locked ? ' selected' : '') + '>Bloqueadas: con marca de agua, sin descarga (hasta recibir el pago)</option></select><p class="pn-s">Las finales que subas desde ahora guardan una vista con marca de agua. Las que ya subiste antes deben subirse de nuevo para poder bloquearse.</p></div>' +
       '<div class="pn-card"><h2>Caducidad</h2><p class="pn-s">Después de esta fecha el cliente ya no podrá abrir la galería. Déjala vacía para que no caduque.</p><input type="date" id="pn-ex" value="' + esc(fechaCad(g)) + '"></div>' +
       '<div class="pn-row"><button class="pn-btn" data-act="guardar-config">Guardar cambios</button></div>' +
       '<div class="pn-card"><h2>Eliminar galería</h2><p class="pn-s">Se borran la galería y todas sus fotos. No se puede deshacer.</p><button class="pn-btn rojo" data-act="eliminar-galeria">Eliminar galería</button></div>';
@@ -248,13 +252,15 @@ function pintarDetalle(){
 }
 
 var MARCA_OPACIDAD = 35, MARCA_TAM = 's';   // media y pequeña (por defecto)
-function reducir(file, marca){
+var CALIDAD = { baja: [1000, 0.72], media: [1600, 0.85], alta: [2400, 0.9] };
+function reducir(file, marca, cal){
+  var qd = CALIDAD[cal] || CALIDAD.media;
   return createImageBitmap(file).then(function(b){
-    var k = Math.min(1, 1600 / Math.max(b.width, b.height)), c = document.createElement('canvas');
+    var k = Math.min(1, qd[0] / Math.max(b.width, b.height)), c = document.createElement('canvas');
     c.width = Math.round(b.width * k); c.height = Math.round(b.height * k);
     var cx = c.getContext('2d'); cx.drawImage(b, 0, 0, c.width, c.height);
     if (marca) marcar(cx, c.width, c.height, marca);
-    return new Promise(function(r){ c.toBlob(function(bl){ r({ blob: bl, w: c.width, h: c.height }); }, 'image/jpeg', 0.85); });
+    return new Promise(function(r){ c.toBlob(function(bl){ r({ blob: bl, w: c.width, h: c.height }); }, 'image/jpeg', qd[1]); });
   });
 }
 // Marca de agua: MAYÚSCULAS, letras muy separadas, cuadrícula diagonal que cubre toda la foto.
@@ -293,7 +299,7 @@ function mostrarMarca(){
 var ERR = { muy_grande: 'pesa más de 45 MB', formato: 'formato no permitido (usa JPG, PNG, WEBP o TIFF)', sin_sesion: 'tu sesión caducó, vuelve a entrar', registro: 'no se pudo registrar', galeria: 'galería no encontrada' };
 
 async function subirTodo(){
-  var files = Array.from($('#pn-file').files), tipo = root.querySelector('input[name=pn-dest]:checked').value, marca = tipo === 'selection' ? opcionesMarca() : null;
+  var files = Array.from($('#pn-file').files), tipo = root.querySelector('input[name=pn-dest]:checked').value, marca = tipo === 'selection' ? opcionesMarca() : null, g0 = gal(galId), cal = (g0 && g0.view_quality) || 'media';
   if (!files.length) return;
   var btn = $('#pn-go'), ul = $('#pn-prog'); btn.disabled = true; ul.innerHTML = '';
   for (var i = 0; i < files.length; i++) {
@@ -301,18 +307,39 @@ async function subirTodo(){
     try {
       if (f.size > MAX) throw new Error('pesa más de 45 MB');
       var blob = f, w = null, h = null, nombre = f.name;
-      if (tipo === 'selection') { var r = await reducir(f, marca); blob = r.blob; w = r.w; h = r.h; nombre = f.name.replace(/\.[^.]+$/, '') + '.jpg'; }
+      if (tipo === 'selection') { var r = await reducir(f, marca, cal); blob = r.blob; w = r.w; h = r.h; nombre = f.name.replace(/\.[^.]+$/, '') + '.jpg'; }
       else { try { var bm = await createImageBitmap(f); w = bm.width; h = bm.height; } catch (e) {} }
       var s = (await db.auth.getSession()).data.session;
       var q = '?gallery=' + galId + '&type=' + tipo + '&name=' + encodeURIComponent(nombre) + (w ? '&w=' + w + '&h=' + h : '');
       var res = await fetch(W + '/api/upload' + q, { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, 'Content-Type': blob.type || 'image/jpeg' }, body: blob });
       var d = await res.json().catch(function(){ return {}; });
+      if (d.ok && tipo === 'final' && d.photo) {
+        try {
+          li.textContent = f.name + ': preparando vista con marca de agua…';
+          var pv = await reducir(f, { text: (g0 && g0.watermark_text) || 'Buenos Momentos', opacity: MARCA_OPACIDAD, size: MARCA_TAM }, 'media');
+          await fetch(W + '/api/upload-preview?photo=' + d.photo.id, { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'image/jpeg' }, body: pv.blob });
+        } catch (e) {}
+      }
       li.textContent = f.name + (d.ok ? ': lista' : ': ' + (ERR[d.error] || 'error al subir'));
     } catch (e) { li.textContent = f.name + ': ' + (e.message || 'error'); }
   }
   btn.disabled = false;
   await abrirDetalle(galId, true);
 }
+
+var vl = [], vix = 0;
+async function mostrarVer(){
+  var f = vl[vix]; if (!f) return;
+  if (!cur.tk[f.id]) { var t = await firmar([f.id]); Object.assign(cur.tk, t); }
+  $('#pn-vimg').src = cur.tk[f.id] ? src(cur.tk[f.id]) : '';
+  $('#pn-vnm').textContent = f.filename + ' · ' + (vix + 1) + ' de ' + vl.length;
+}
+function abrirVer(id){
+  var f = cur.fotos.filter(function(x){ return x.id === id; })[0]; if (!f) return;
+  vl = cur.fotos.filter(function(x){ return x.photo_type === f.photo_type; });
+  vix = vl.indexOf(f); $('#pn-dver').showModal(); mostrarVer();
+}
+function pasarVer(d){ if (!vl.length) return; vix = (vix + d + vl.length) % vl.length; mostrarVer(); }
 
 async function cambiar(campos, msg){
   var r = await db.from('galleries').update(campos).eq('id', galId);
@@ -332,6 +359,8 @@ async function accion(a, el){
   if (a === 'reabrir') return cambiar({ status: 'selection', selection_enabled: true, downloads_enabled: false }, 'Selección reabierta');
   if (a === 'salir') return window.cerrarSesion();
   if (a === 'tema') { try { localStorage.setItem('pn-tema', el.dataset.t); } catch(e) {} return pintar(); }
+  if (a === 'bloqueo') return cambiar({ finals_locked: !g.finals_locked }, g.finals_locked ? 'Fotos liberadas: el cliente ya las ve sin marca de agua' : 'Finales bloqueadas con marca de agua');
+  if (a === 'ver') return abrirVer(el.dataset.id);
   if (a === 'modo') return cambiar({ access_mode: el.dataset.v }, el.dataset.v === 'abierto' ? 'Ahora el enlace entra sin clave' : 'Ahora el enlace pide código');
   if (a === 'guardar-codigo') {
     var nc = $('#pn-cod').value.trim().toUpperCase();
@@ -348,7 +377,7 @@ async function accion(a, el){
   if (a === 'guardar-config') {
     var tx = $('#pn-wt').value.trim(); if (!tx) return aviso('Escribe el texto de la marca.');
     var ex = $('#pn-ex').value;
-    return cambiar({ watermark_text: tx, expires_at: ex ? ex + 'T23:59:59-06:00' : null }, 'Configuración guardada');
+    return cambiar({ watermark_text: tx, expires_at: ex ? ex + 'T23:59:59-06:00' : null, view_quality: $('#pn-vq').value, finals_locked: $('#pn-fl').value === '1' }, 'Configuración guardada');
   }
   if (a === 'elegir-portada') {
     var s0 = cur ? cur.fotos.filter(function(x){ return x.photo_type === 'selection'; }) : [];
@@ -402,6 +431,12 @@ window.iniciarPanel = async function(photographer, cliente){
   if (!document.getElementById('pn-css')) { var st = document.createElement('style'); st.id = 'pn-css'; st.textContent = CSS; document.head.appendChild(st); }
   root.innerHTML = '<div class="pn"><aside></aside><main id="pn-main"><p class="pn-s">Cargando…</p></main>' +
     '<dialog id="pn-dnueva"><h2>Nueva galería</h2><form id="pn-fn"><input type="text" id="pn-cn" placeholder="Cliente (ej. Ana y Luis)"><input type="text" id="pn-ct" placeholder="Nombre de la galería (ej. Boda Ana y Luis)"><input type="date" id="pn-cf"><div class="pn-row"><button class="pn-btn" type="submit">Crear</button><button class="pn-btn sec" type="button" id="pn-cc">Cancelar</button></div></form></dialog><dialog id="pn-dport"><h2>Elegir portada</h2><p class="pn-s">Toca la foto que quieres como portada.</p><div class="pn-grid" id="pn-gport"></div><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-portada">Cancelar</button></div></dialog></div>';
+  root.querySelector('.pn').insertAdjacentHTML('beforeend', '<dialog id="pn-dver"><div class="pn-vb"><button class="pn-btn sec" id="pn-vp" type="button">‹ Anterior</button><span class="pn-s" id="pn-vnm"></span><button class="pn-btn sec" id="pn-vn" type="button">Siguiente ›</button><button class="pn-btn sec" id="pn-vx" type="button">Cerrar</button></div><img id="pn-vimg" alt=""></dialog>');
+  $('#pn-vp').onclick = function(){ pasarVer(-1); }; $('#pn-vn').onclick = function(){ pasarVer(1); }; $('#pn-vx').onclick = function(){ $('#pn-dver').close(); };
+  var vx0 = null, dv = $('#pn-dver');
+  dv.addEventListener('touchstart', function(e){ vx0 = e.touches[0].clientX; }, { passive: true });
+  dv.addEventListener('touchend', function(e){ if (vx0 === null) return; var dx = e.changedTouches[0].clientX - vx0; vx0 = null; if (Math.abs(dx) > 50) pasarVer(dx < 0 ? 1 : -1); });
+  dv.addEventListener('keydown', function(e){ if (e.key === 'ArrowLeft') pasarVer(-1); if (e.key === 'ArrowRight') pasarVer(1); });
   root.onclick = function(e){
     var v = e.target.closest('aside [data-v]'); if (v) { vista = v.dataset.v; return pintar(); }
     var a = e.target.closest('[data-act]'); if (a) accion(a.dataset.act, a);
