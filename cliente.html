@@ -182,8 +182,8 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
       $('#rej').className = 'rej ' + (G.estilo || 'clasico');
       pintar();
       var pf = portadaFoto();
-      if (pf) {
-        $('#pimg').src = url(pf.t); $('#pest').textContent = E && E.studio_name ? E.studio_name : '';
+      if (pf || G.portadaT) {
+        $('#pimg').src = url(G.portadaT || pf.t); $('#pest').textContent = E && E.studio_name ? E.studio_name : '';
         $('#ptit').textContent = G.titulo; $('#pfec').textContent = fechaLarga(G.fecha);
         $('#pcs').textContent = E && E.studio_name ? E.studio_name : ''; $('#pct').textContent = G.titulo; conPortada = true;
       } else conPortada = false;
