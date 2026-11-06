@@ -230,10 +230,10 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   function alternarImp(id){
     var on = !imps.has(id); if (on) imps.add(id); else imps.delete(id);
     document.querySelectorAll('[data-pr="' + id + '"]').forEach(function(b){ b.setAttribute('aria-pressed', on); }); contarImp();
-    post('/api/client/print', { code: codigo, token: acc.t, scene: acc.s, visitor: visitor, photo: id, active: on }).then(function(d){ if (!d.ok) throw new Error(d.error); }).catch(function(){
+    post('/api/client/print', { code: codigo, token: acc.t, scene: acc.s, visitor: visitor, photo: id, active: on }).then(function(d){ if (!d.ok) throw new Error(d.detalle || d.error); }).catch(function(e){
       if (on) imps.delete(id); else imps.add(id);
       document.querySelectorAll('[data-pr="' + id + '"]').forEach(function(b){ b.setAttribute('aria-pressed', !on); }); contarImp();
-      aviso('No se pudo guardar. Inténtalo de nuevo.');
+      aviso('No se pudo guardar (' + (e && e.message ? e.message : 'error') + '). Inténtalo de nuevo.');
     });
   }
   function poner(id, on){
