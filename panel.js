@@ -94,7 +94,7 @@ async function firmar(ids){
 function src(t){ return W + '/api/img?t=' + encodeURIComponent(t); }
 
 async function cargarGalerias(){
-  var g = await db.from('galleries').select('id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity,gallery_type,description,location,grid_style,palette,link_token,access_mode,print_sent_at,finals_locked,view_quality').is('deleted_at', null).order('created_at', { ascending: false });
+  var g = await db.from('galleries').select('id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity,gallery_type,description,location,grid_style,palette,link_token,access_mode,print_sent_at,finals_locked,view_quality,cover_key').is('deleted_at', null).order('created_at', { ascending: false });
   if (g.error) { aviso(g.error.message); return; }
   gals = g.data || [];
   var sinPortada = gals.filter(function(x){ return !x.cover_photo_id; }).map(function(x){ return x.id; }), primeras = {};
@@ -189,9 +189,10 @@ async function abrirDetalle(id, conservar){
   var ca = await db.from('photos').select('id,created_at').eq('gallery_id', id).limit(1000), conFecha = !ca.error;
   if (conFecha) { var mf = {}; (ca.data || []).forEach(function(x){ mf[x.id] = x.created_at; }); fotos.forEach(function(x){ x.created_at = mf[x.id] || ''; }); }
   var tk = await firmar(fotos.filter(function(x){ return x.photo_type === 'selection'; }).map(function(x){ return x.id; }));
+  var cvT = null, gg = gal(id); if (gg && gg.cover_key) { var cs = await api('/api/admin/cover-sign', { gallery: id }).catch(function(){ return null; }); cvT = cs && cs.t; }
   var es = await api('/api/admin/scenes', { gallery: id }).catch(function(){ return { escenas: [] }; });
   var ip = await api('/api/admin/prints', { gallery: id }).catch(function(){ return { picks: [] }; });
-  cur = { fotos: fotos, favs: f.data || [], vistas: v.count || 0, tk: tk, escenas: (es && es.escenas) || [], conFecha: conFecha, imp: (ip && ip.picks) || [] };
+  cur = { fotos: fotos, favs: f.data || [], vistas: v.count || 0, tk: tk, cover: cvT, escenas: (es && es.escenas) || [], conFecha: conFecha, imp: (ip && ip.picks) || [] };
   pintar();
 }
 
@@ -226,7 +227,12 @@ function pintarDetalle(){
       escenasCard(g, sel, fin) + barraSel(sel, fin) + seccionFotos('selection', 'Selección', sel, g) + seccionFotos('final', 'Finales', fin, g);
   } else if (tab === 'diseno') {
     var cvId = g.cover_photo_id || (sel[0] && sel[0].id), cv = cvId && cur.tk[cvId];
-    cuerpo = '<div class="pn-card"><h2>Portada</h2><p class="pn-s">Es la foto con la que tu cliente recibe su galería al abrir el enlace.</p><div class="pn-portada">' + (cv ? '<img alt="" src="' + esc(src(cv)) + '">' : ilus('admin-sin-portada')) + '</div><div class="pn-row"><button class="pn-btn" data-act="elegir-portada"' + (sel.length ? '' : ' disabled') + '>Elegir portada</button></div></div>' +
+    var cvSrc = cur.cover ? src(cur.cover) : (cv ? src(cv) : '');
+    cuerpo = '<div class="pn-card"><h2>Portada</h2><p class="pn-s">Es la imagen con la que tu cliente recibe su galería al abrir el enlace. ' + (g.cover_key ? 'Ahora usa una portada que subiste aparte.' : 'Ahora usa una foto del álbum.') + '</p><div class="pn-portada">' + (cvSrc ? '<img alt="" src="' + esc(cvSrc) + '">' : ilus('admin-sin-portada')) + '</div>' +
+      '<div class="pn-row"><button class="pn-btn" data-act="elegir-portada"' + (sel.length ? '' : ' disabled') + '>Elegir de las fotos subidas</button></div>' +
+      '<h2 style="margin-top:1.2rem;font-size:1.25rem">Subir una portada distinta</h2><p class="pn-s">Sirve para un diseño o una foto que solo quieres como portada. <b>No aparece en el álbum</b> del cliente.</p>' +
+      '<div class="pn-marcaui"><label class="pn-s" for="pn-pm">Marca de agua</label><select id="pn-pm"><option value="no">Sin marca de agua</option><option value="si">Con marca de agua</option></select></div>' +
+      '<div class="pn-row"><input type="file" id="pn-pf" accept="image/jpeg,image/png,image/webp"><button class="pn-btn" data-act="subir-portada" id="pn-pg">Subir portada</button>' + (g.cover_key ? '<button class="pn-btn sec" data-act="quitar-portada">Quitar portada subida</button>' : '') + '</div></div>' +
       '<div class="pn-card"><h2>Estilo de la galería</h2><p class="pn-s">Cómo se acomodan las fotos que ve tu cliente.</p><div class="pn-opts">' + ESTILOS.map(function(e){ return '<button class="pn-opt' + ((g.grid_style || 'clasico') === e[0] ? ' on' : '') + '" data-act="estilo" data-v="' + e[0] + '"><b>' + e[1] + '</b><span>' + e[2] + '</span></button>'; }).join('') + '</div></div>' +
       '<div class="pn-card"><h2>Paleta de colores</h2><p class="pn-s">Colores de la galería del cliente. “Automática” sigue el modo claro u oscuro de su dispositivo.</p><div class="pn-opts">' + PALETAS.map(function(c){ return '<button class="pn-opt pal' + ((g.palette || 'auto') === c[0] ? ' on' : '') + '" data-act="paleta" data-v="' + c[0] + '"><i style="background:linear-gradient(135deg,' + c[2] + ' 50%,' + c[3] + ' 50%)"></i><b>' + c[1] + '</b></button>'; }).join('') + '</div></div>';
   } else if (tab === 'config') {
@@ -526,7 +532,25 @@ async function accion(a, el){
     return $('#pn-dport').showModal();
   }
   if (a === 'cerrar-portada') return $('#pn-dport').close();
+  if (a === 'subir-portada') {
+    var pf = $('#pn-pf').files[0]; if (!pf) return aviso('Elige primero una imagen.');
+    var pmarca = $('#pn-pm').value === 'si' ? { text: (g && g.watermark_text) || 'Buenos Momentos', opacity: MARCA_OPACIDAD, size: MARCA_TAM } : null;
+    var pgo = $('#pn-pg'); pgo.disabled = true; pgo.textContent = 'Subiendo…';
+    try {
+      var rp = await reducir(pf, pmarca, 'alta'); var ss = (await db.auth.getSession()).data.session;
+      var rs = await fetch(W + '/api/admin/cover-upload?gallery=' + galId, { method: 'POST', headers: { Authorization: 'Bearer ' + ss.access_token, 'Content-Type': 'image/jpeg' }, body: rp.blob });
+      var dd = await rs.json().catch(function(){ return {}; });
+      if (!dd.ok) throw new Error('no se pudo subir');
+      g.cover_key = 'x'; if (cur) cur.cover = dd.t; aviso('Portada actualizada');
+    } catch (e) { aviso('No se pudo subir la portada: ' + (e.message || 'error')); }
+    return pintar();
+  }
+  if (a === 'quitar-portada') {
+    var rq = await api('/api/admin/cover-clear', { gallery: galId }); if (!rq.ok) return aviso('No se pudo quitar.');
+    g.cover_key = null; if (cur) cur.cover = null; aviso('Portada subida eliminada'); return pintar();
+  }
   if (a === 'portada') {
+    if (g && g.cover_key) { await api('/api/admin/cover-clear', { gallery: galId }); g.cover_key = null; if (cur) cur.cover = null; }
     var mn = Math.min.apply(null, (cur ? cur.fotos : []).map(function(x){ return x.sort_order || 0; }).concat([0]));
     var u = await db.from('photos').update({ sort_order: mn - 1 }).eq('id', id);
     if (u.error) return aviso(u.error.message);
