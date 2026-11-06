@@ -10,7 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--f:#FAF8F5;--t:#2B2623;--s:#7a7068;--l:#E6DFD6;--a:#B08968;--c:#fff;--err:#A32D2D;color-scheme:light}
-@media(prefers-color-scheme:dark){:root{--f:#151413;--t:#F1ECE4;--s:#a39a91;--l:#2c2926;--a:#C9A27A;--c:#1c1a18;--err:#E58C8C;color-scheme:dark}.il{mix-blend-mode:normal!important;filter:none!important;border-radius:10px}}
+:root[data-tema=dark]{--f:#151413;--t:#F1ECE4;--s:#a39a91;--l:#2c2926;--a:#C9A27A;--c:#1c1a18;--err:#E58C8C;color-scheme:dark}:root[data-tema=dark] .il{mix-blend-mode:normal!important;filter:none!important;border-radius:10px}
+@media(prefers-color-scheme:dark){:root:not([data-tema=light]){--f:#151413;--t:#F1ECE4;--s:#a39a91;--l:#2c2926;--a:#C9A27A;--c:#1c1a18;--err:#E58C8C;color-scheme:dark}:root:not([data-tema=light]) .il{mix-blend-mode:normal!important;filter:none!important;border-radius:10px}}
 *{box-sizing:border-box;margin:0}[hidden]{display:none!important}
 body{background:var(--f);color:var(--t);font-family:'Jost',system-ui,sans-serif;line-height:1.55;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
 h1,h2{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;line-height:1.1}
@@ -35,6 +36,10 @@ header h1{font-size:clamp(2.2rem,6vw,3.4rem);margin:.3rem 0}
 .fin a{text-decoration:none}.vacio{text-align:center;color:var(--s);padding:3rem 1rem;column-span:all}
 .dl{position:absolute;right:10px;bottom:10px;width:42px;height:42px;border-radius:50%;background:var(--a);color:#fff;display:grid;place-items:center;text-decoration:none}.dl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .masivo{column-span:all;text-align:center;margin:0 0 1.2rem}#visor .dlv{position:absolute;bottom:1rem;right:1rem;text-decoration:none;padding:.5rem 1.1rem}
+#portada{position:relative;min-height:100vh;min-height:100svh;display:grid;place-items:end center;color:#fff;text-align:center;overflow:hidden;background:#151413}
+#portada>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}#portada:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),rgba(0,0,0,.05) 60%)}
+.pv{position:relative;z-index:1;padding:0 1.2rem 12vh}.pv h1{font-size:clamp(2.4rem,7vw,4.6rem);margin:.3rem 0}.pv .pe{letter-spacing:.22em;text-transform:uppercase;font-size:.8rem}.pv p{opacity:.85;margin:.3rem 0 1.6rem}
+#portada .btn{background:#fff;color:#2B2623;border-color:#fff;padding:.8rem 2rem}
 .barra{position:fixed;left:0;right:0;bottom:0;background:var(--c);border-top:1px solid var(--l);padding:.8rem 1rem calc(.8rem + env(safe-area-inset-bottom));display:flex;justify-content:center;align-items:center;gap:1.2rem;z-index:5}
 dialog{border:1px solid var(--l);background:var(--f);color:var(--t);border-radius:16px;padding:1.5rem;width:min(26rem,92vw);margin:auto;box-shadow:0 24px 60px rgba(43,38,35,.25)}dialog::backdrop{background:rgba(21,20,19,.6)}
 dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
@@ -57,8 +62,10 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   <div id="ilErr"></div>
 </main>
 
+<section id="portada" hidden><img id="pimg" alt=""><div class="pv"><div class="pe" id="pest"></div><h1 id="ptit"></h1><p id="pfec"></p><button class="btn" id="pver" type="button">Ver galería</button></div></section>
+
 <section id="galeria" hidden>
-  <header class="h"><div class="e" id="est"></div><h1 id="tit"></h1><p class="s" id="fec"></p><p id="guia"></p><button class="btn sec" id="salir" style="margin-top:.8rem;padding:.3rem 1rem;font-size:.85rem">Salir</button></header>
+  <header class="h"><div class="e" id="est"></div><h1 id="tit"></h1><p class="s" id="fec"></p><p id="guia"></p><div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem"><button class="btn sec" id="tema" type="button" style="padding:.3rem 1rem;font-size:.85rem">Tema: automático</button><button class="btn sec" id="salir" style="padding:.3rem 1rem;font-size:.85rem">Salir</button></div></header>
   <nav class="tabs" id="tabs"></nav>
   <div class="rej" id="rej"></div>
   <div class="barra" id="barra" hidden><span id="cnt"></span><button class="btn" id="enviar" type="button">Enviar selección</button></div>
@@ -100,12 +107,22 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     return parseInt(m[3], 10) + ' de ' + ms[parseInt(m[2], 10) - 1] + ' de ' + m[1];
   }
   function base(n){ return String(n || '').replace(/\.[^.]+$/, '').toLowerCase(); }
-  function mostrar(id){ ['acceso', 'galeria', 'gracias'].forEach(function(x){ $('#' + x).hidden = x !== id; }); window.scrollTo(0, 0); }
+  function mostrar(id){ ['acceso', 'portada', 'galeria', 'gracias'].forEach(function(x){ $('#' + x).hidden = x !== id; }); window.scrollTo(0, 0); }
 
   var codigo = '', G = null, E = null, fotos = [], favs = new Set(), tab = 'todas', lista = [], vi = 0;
   function sel(){ return fotos.filter(function(f){ return f.tipo === 'selection'; }); }
   function fin(){ return fotos.filter(function(f){ return f.tipo === 'final'; }); }
   function puede(){ return G && G.seleccion; }
+
+  function portadaFoto(){ var s = sel(), f = fin(); return G && G.estado === 'delivered' && f.length ? f[0] : (s[0] || null); }
+  function temaC(){ return leer('age-tema') || 'auto'; }
+  function aplicarTemaC(){
+    var t = temaC(); if (t === 'auto') document.documentElement.removeAttribute('data-tema'); else document.documentElement.setAttribute('data-tema', t);
+    $('#tema').textContent = { auto: 'Tema: automático', light: 'Tema: claro', dark: 'Tema: oscuro' }[t];
+  }
+  $('#tema').addEventListener('click', function(){ var n = { auto: 'light', light: 'dark', dark: 'auto' }[temaC()]; escribir('age-tema', n === 'auto' ? '' : n); aplicarTemaC(); });
+  $('#pver').addEventListener('click', function(){ mostrar('galeria'); });
+  aplicarTemaC();
 
   function abrir(c, silencioso){
     c = (c || '').trim(); if (!c) return;
@@ -123,7 +140,12 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
       $('#est').textContent = E && E.studio_name ? E.studio_name : '';
       $('#tit').textContent = G.titulo; $('#fec').textContent = fechaLarga(G.fecha);
       $('#guia').textContent = G.estado === 'delivered' ? 'Tus fotos finales ya están listas. Descárgalas en la pestaña Fotos finales.' : puede() ? 'Toca el corazón en tus fotos favoritas y luego envía tu selección.' : '';
-      pintar(); mostrar('galeria');
+      pintar();
+      var pf = portadaFoto();
+      if (pf) {
+        $('#pimg').src = url(pf.t); $('#pest').textContent = E && E.studio_name ? E.studio_name : '';
+        $('#ptit').textContent = G.titulo; $('#pfec').textContent = fechaLarga(G.fecha); mostrar('portada');
+      } else mostrar('galeria');
     }).catch(function(e){ if (!silencioso) $('#err').textContent = 'No pude conectar (' + (e && e.message ? e.message : 'error') + '). Revisa tu internet e inténtalo de nuevo.'; })
       .then(function(){ btn.disabled = false; btn.textContent = 'Entrar a mi galería'; });
   }
