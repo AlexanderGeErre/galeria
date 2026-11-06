@@ -111,7 +111,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
       if (!d.ok) {
         if (silencioso) { escribir('age-codigo-cliente', ''); return; }
         var exp = d.error === 'expirada';
-        $('#err').textContent = exp ? 'Esta galería ya expiró. Escríbeme y la reactivo.' : d.error === 'sin_publicar' ? 'Esta galería todavía no está publicada.' : 'El código no es correcto. Revisa que esté escrito igual que te lo envié.';
+        $('#err').textContent = exp ? 'Esta galería ya expiró. Escríbeme y la reactivo.' : d.error === 'sin_publicar' ? 'Esta galería todavía no está publicada.' : d.error === 'servidor' ? 'La galería tuvo un problema técnico (servidor). Inténtalo en unos minutos.' : 'El código no es correcto. Revisa que esté escrito igual que te lo envié.';
         $('#ilErr').innerHTML = ilus(exp ? 'galeria-expirada' : 'enlace-no-valido'); return;
       }
       codigo = c; escribir('age-codigo-cliente', c);
