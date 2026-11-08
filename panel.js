@@ -147,6 +147,9 @@ function dibujarQR(url){
   cv.style.width = Math.min(W, 280) + 'px'; return true;
 }
 
+CSS += '.pn-ph.vsel{cursor:pointer}.pn-ph.vsel.on img{outline:3px solid var(--a);outline-offset:-3px}.pn-vn{position:absolute;left:6px;top:6px;min-width:22px;height:22px;padding:0 5px;border-radius:999px;background:var(--a);color:#fff;font-size:.72rem;font-weight:600;display:none;place-items:center}.pn-ph.vsel.on .pn-vn{display:grid}' +
+'.pn-vprev{background:#0c0a08;border-radius:12px;padding:.8rem;display:grid;place-items:center;min-height:12rem}.pn-vprev canvas{max-width:100%;height:auto;border-radius:6px;background:#000}.pn-vb{height:6px;border-radius:99px;background:var(--l);overflow:hidden;margin:.7rem 0}.pn-vb i{display:block;height:100%;width:0;background:var(--a);transition:width .2s}';
+
 function esc(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function $(s){ return root.querySelector(s); }
 function ilus(n){ return '<img class="pn-il" data-n="' + n + '" data-i="0" src="imagenes/' + n + exts(n)[0] + '" alt="">'; }
@@ -181,7 +184,9 @@ async function firmar(ids){
 function src(t){ return W + '/api/img?t=' + encodeURIComponent(t); }
 
 async function cargarGalerias(){
-  var g = await db.from('galleries').select('id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity,gallery_type,description,location,grid_style,palette,link_token,access_mode,print_sent_at,finals_locked,view_quality,cover_key').is('deleted_at', null).order('created_at', { ascending: false });
+  var COLS = 'id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity,gallery_type,description,location,grid_style,palette,link_token,access_mode,print_sent_at,finals_locked,view_quality,cover_key';
+  var g = await db.from('galleries').select(COLS + ',selection_watermark').is('deleted_at', null).order('created_at', { ascending: false });
+  if (g.error) g = await db.from('galleries').select(COLS).is('deleted_at', null).order('created_at', { ascending: false });
   if (g.error) { aviso(g.error.message); return; }
   gals = g.data || [];
   var sinPortada = gals.filter(function(x){ return !x.cover_photo_id && !x.cover_key; }).map(function(x){ return x.id; }), primeras = {}, primerasF = {};
@@ -203,10 +208,10 @@ function tarjeta(g){
   return '<button class="pn-tar" data-act="abrir" data-id="' + g.id + '"><div class="cv">' + cv + '</div><h3>' + esc(g.title) + '</h3><p class="pn-s">' + esc(g.event_date || '') + '</p><span class="pn-pill">' + esc(ESTADOS[g.status] || g.status) + '</span></button>';
 }
 
-var TABS = [['panel', 'Panel de control'], ['detalles', 'Detalles'], ['fotos', 'Fotos y medios'], ['diseno', 'Diseño'], ['config', 'Configuración'], ['favoritas', 'Favoritas'], ['impresiones', 'Impresiones'], ['compartir', 'Compartir']];
+var TABS = [['panel', 'Panel de control'], ['detalles', 'Detalles'], ['fotos', 'Fotos y medios'], ['diseno', 'Diseño'], ['config', 'Configuración'], ['favoritas', 'Favoritas'], ['impresiones', 'Impresiones'], ['video', 'Video'], ['compartir', 'Compartir']];
 var ESTILOS = [['clasico', 'Clásico', 'Fotos con su proporción original'], ['uniforme', 'Uniforme', 'Cuadrícula ordenada, todas del mismo tamaño'], ['amplio', 'Amplio', 'Fotos grandes, menos por fila']];
 var PALETAS = [['auto', 'Automática (según el evento)', '#FAFAF8', '#B8946A', '#1A1A1A'], ['arena', 'Arena y carbón', '#FAFAF8', '#B8946A', '#1A1A1A'], ['marfil', 'Marfil cálido', '#F7F3EC', '#A67C52', '#1C1917'], ['blanco', 'Blanco galería', '#FFFFFF', '#1F1F1F', '#121212'], ['oliva', 'Oliva y arena', '#F6F5F0', '#6F7F5E', '#161A17'], ['vino', 'Vino y crema', '#FBF8F5', '#8C3B3B', '#1B1516'], ['azul', 'Azul noche', '#F6F7F9', '#3F5B8C', '#14171C']];
-var TITULOS = { panel: 'Descripción general', detalles: 'Detalles', fotos: 'Fotos y medios', diseno: 'Diseño', config: 'Configuración de la galería', favoritas: 'Favoritas de los clientes', impresiones: 'Fotos para imprimir', compartir: 'Compartir' };
+var TITULOS = { panel: 'Descripción general', detalles: 'Detalles', fotos: 'Fotos y medios', diseno: 'Diseño', config: 'Configuración de la galería', favoritas: 'Favoritas de los clientes', impresiones: 'Fotos para imprimir', compartir: 'Compartir', video: 'Video de fotos' };
 function ayudasOn(){ try { return localStorage.getItem('pn-ay') !== 'off'; } catch(e) { return true; } }
 function marcaBase(){ return (ph && (ph.watermark_default || ph.studio_name)) || 'Estudio'; }
 function temaGuardado(){ try { return localStorage.getItem('pn-tema') || 'auto'; } catch(e) { return 'auto'; } }
@@ -222,7 +227,7 @@ var ICO = {
   favoritas: '<path d="M12 20.5s-7-4.4-9.2-8.9C1.3 8.5 3.1 5.3 6.2 5.3c2 0 3.2 1.1 3.8 2.2.6-1.1 1.8-2.2 3.8-2.2 3.1 0 4.9 3.2 3.4 6.3C19 16.1 12 20.5 12 20.5z"/>',
   impresiones: '<path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/>',
   compartir: '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 11l7.6-4M8.2 13l7.6 4"/>',
-  inicio: '<path d="M4 11l8-7 8 7v9H4z"/>', galerias: '<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>',
+  video: '<rect x="3" y="6" width="14" height="12" rx="2"/><path d="M17 10l4-2v8l-4-2z"/>', inicio: '<path d="M4 11l8-7 8 7v9H4z"/>', galerias: '<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>',
   atras: '<path d="M15 5l-7 7 7 7"/>', salir: '<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>', cuenta: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>'
 };
 function ico(n){ return '<svg class="pn-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICO[n] || '') + '</svg>'; }
@@ -241,6 +246,7 @@ function pintarLado(){
   a.innerHTML = h;
 }
 function pintar(){
+  if (!(vista === 'detalle' && tab === 'video')) vidLiberar();
   pintarLado(); aplicarTema(); setTimeout(marcarCargadas, 0);
   if (vista === 'cuenta') return pintarCuenta();
   if (vista === 'inicio') return pintarInicio();
@@ -275,7 +281,7 @@ function pintarLista(){
 }
 
 async function abrirDetalle(id, conservar){
-  galId = id; vista = 'detalle'; if (!conservar) { tab = 'panel'; fEsc = ''; fImp = false; modoSel = false; marcadas = new Set(); } cur = null; pintar();
+  galId = id; vista = 'detalle'; if (!conservar) { vidLiberar(); vidIds = []; tab = 'panel'; fEsc = ''; fImp = false; modoSel = false; marcadas = new Set(); } cur = null; pintar();
   var p = await db.from('photos').select('id,filename,photo_type,file_size,sort_order,scene_id').eq('gallery_id', id).order('sort_order').order('filename').limit(1000);
   var f = await db.from('favorites').select('photo_id,visitor_token').eq('gallery_id', id).limit(1000);
   var v = await db.from('gallery_views').select('created_at,visitor_token').eq('gallery_id', id).order('created_at', { ascending: false }).limit(1000), vRows = null;
@@ -372,6 +378,78 @@ function plegar(abierta){
     d.appendChild(sm); d.appendChild(inn); c.replaceWith(d);
   });
 }
+
+var vidIds = [], vidForm = 'v', vidSeg = 2.5, vidPart = true, vidCache = {}, vidTok = 0, vidBusy = false, vidCancel = false;
+function cargarSlideshow(){
+  if (window.Slideshow) return Promise.resolve();
+  return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = 'slideshow.js?v=1'; sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró slideshow.js en GitHub. Súbelo junto a panel.js.')); }; document.head.appendChild(sc); });
+}
+function vidEstado(t){ var e = $('#pn-vst'); if (e) e.textContent = t || ''; }
+function vidBarra(x){ var b = $('#pn-vbar'); if (b) b.style.width = Math.round(clampN(x) * 100) + '%'; }
+function clampN(x){ return Math.max(0, Math.min(1, x)); }
+function vidStop(){ vidTok++; }
+function vidLiberar(){ if (vidBusy) return; vidStop(); Object.keys(vidCache).forEach(function(k){ try { vidCache[k].bmp.close(); } catch(e) {} }); vidCache = {}; }
+function vidHtml(g, sel, fin){
+  var todas = fin.concat(sel);
+  var thumb = function(x){ return '<figure class="pn-ph vsel" data-act="vid-foto" data-id="' + x.id + '"><span class="pn-vn"></span><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (x.photo_type === 'selection' ? ' · sel.' : '') + '</figcaption></figure>'; };
+  var fm = [['v', 'Vertical', '1080×1920 · historias, Reels, WhatsApp'], ['h', 'Horizontal', '1920×1080 · pantalla, YouTube'], ['ambos', 'Los dos', 'Genera dos archivos con la misma plantilla']];
+  return '<div class="pn-card"><h2>1. Elige las fotos</h2><p class="pn-s ay">Toca las fotos en el orden en que quieres que salgan. El número indica su lugar. Las fotos del video salen sin marca de agua, salvo las de selección subidas antes de esta actualización.</p>' +
+    '<div class="pn-row"><button class="pn-btn sec" data-act="vid-sel" data-v="fin" type="button"' + (fin.length ? '' : ' disabled') + '>Todas las finales (' + fin.length + ')</button><button class="pn-btn sec" data-act="vid-sel" data-v="sel" type="button"' + (sel.length ? '' : ' disabled') + '>Todas las de selección (' + sel.length + ')</button><button class="pn-btn sec" data-act="vid-sel" data-v="orden" type="button">Orden de la galería</button><button class="pn-btn sec" data-act="vid-sel" data-v="ninguna" type="button">Quitar todas</button></div>' +
+    '<div class="pn-grid sm" id="pn-vg">' + (todas.length ? todas.map(thumb).join('') : '<p class="pn-s">Esta galería aún no tiene fotos.</p>') + '</div><p class="pn-s" id="pn-vc"></p></div>' +
+    '<div class="pn-card"><h2>2. Formato</h2><div class="pn-opts">' + fm.map(function(f){ return '<button class="pn-opt' + (vidForm === f[0] ? ' on' : '') + '" data-act="vid-fmt" data-v="' + f[0] + '" type="button"><b>' + f[1] + '</b><span>' + f[2] + '</span></button>'; }).join('') + '</div>' +
+    '<div class="pn-row"><label class="pn-s" for="pn-vs">Segundos por foto</label><select id="pn-vs">' + [1.5, 2, 2.5, 3, 4, 5].map(function(v){ return '<option value="' + v + '"' + (vidSeg === v ? ' selected' : '') + '>' + String(v).replace('.', ',') + '</option>'; }).join('') + '</select><label class="pn-chk"><input type="checkbox" id="pn-vp"' + (vidPart ? ' checked' : '') + '> Partículas</label></div><p class="pn-s ay">El video sale sin música; tu cliente la agrega al publicarlo. Cada foto va con un marco de papel, fondo desenfocado de la misma foto y transiciones suaves.</p></div>' +
+    '<div class="pn-card"><h2>3. Vista previa y descarga</h2><div class="pn-vprev"><canvas id="pn-vcv" width="270" height="480"></canvas></div>' +
+    '<div class="pn-row"><button class="pn-btn sec" data-act="vid-prev" type="button">Ver vista previa</button><button class="pn-btn" data-act="vid-gen" type="button" id="pn-vgen">Generar y descargar MP4</button><button class="pn-btn sec" data-act="vid-cancel" type="button" id="pn-vcan" hidden>Cancelar</button></div>' +
+    '<div class="pn-vb"><i id="pn-vbar"></i></div><p class="pn-s" id="pn-vst"></p><p class="pn-s ay">Funciona en Chrome o Edge actualizados, en computadora. Deja esta pestaña abierta mientras se genera; un video de 70 segundos puede tardar unos minutos. Este generador es solo para ti, tus clientes no lo ven.</p></div>';
+}
+function vidRefrescar(){
+  var n = vidIds.length;
+  root.querySelectorAll('#pn-vg .pn-ph').forEach(function(f){ var i = vidIds.indexOf(f.dataset.id); f.classList.toggle('on', i >= 0); var b = f.querySelector('.pn-vn'); if (b) b.textContent = i >= 0 ? i + 1 : ''; });
+  var c = $('#pn-vc'); if (c) c.textContent = n ? n + (n === 1 ? ' foto elegida' : ' fotos elegidas') + ' · el video durará unos ' + Math.round(n * vidSeg) + ' segundos' : 'Aún no has elegido fotos.';
+}
+function vidIniciar(){
+  vidRefrescar();
+  cargarSlideshow().then(function(){ if (!window.Slideshow.soportado()) vidEstado('Tu navegador no puede crear el video. Usa Chrome o Edge actualizados en la computadora.'); }).catch(function(e){ vidEstado(e.message); });
+}
+async function vidCargar(){
+  var faltan = vidIds.filter(function(id){ return !vidCache[id]; }), tk = {};
+  for (var i = 0; i < faltan.length; i += 100) { var r = await api('/api/admin/sign', { photos: faltan.slice(i, i + 100) }); Object.assign(tk, r.fotos || {}); }
+  for (var k = 0; k < faltan.length; k++) {
+    if (vidCancel) throw new Error('cancelado');
+    vidEstado('Leyendo foto ' + (k + 1) + ' de ' + faltan.length + '…'); vidBarra(k / Math.max(1, faltan.length) * 0.25);
+    if (!tk[faltan[k]]) throw new Error('No se pudo acceder a una de las fotos.');
+    vidCache[faltan[k]] = await window.Slideshow.cargarFoto(src(tk[faltan[k]]));
+  }
+  return vidIds.map(function(id){ return vidCache[id]; });
+}
+async function vidPrev(){
+  if (vidBusy) return;
+  if (vidIds.length < 2) return aviso('Elige al menos 2 fotos.');
+  try { await cargarSlideshow(); vidBusy = true; vidCancel = false; vidStop(); var fotos = await vidCargar(); } catch(e) { vidBusy = false; return vidEstado(e.message === 'cancelado' ? '' : e.message); }
+  vidBusy = false; vidBarra(0); vidEstado('Vista previa en pequeño. El video final sale en alta calidad.');
+  var vert = vidForm !== 'h', W = vert ? 270 : 480, H = vert ? 480 : 270, cv = $('#pn-vcv'); if (!cv) return; cv.width = W; cv.height = H;
+  var esc2 = window.Slideshow.crearEscena(fotos, W, H, vidSeg, { particulas: vidPart }), cx = cv.getContext('2d'), t0 = performance.now(), mi = ++vidTok;
+  (function f(){ if (mi !== vidTok || !document.body.contains(cv)) return; esc2.dibujar(cx, ((performance.now() - t0) / 1000) % esc2.duracion); requestAnimationFrame(f); })();
+}
+async function vidGenerar(){
+  if (vidBusy) return;
+  if (vidIds.length < 2) return aviso('Elige al menos 2 fotos.');
+  if (vidIds.length > 60) return aviso('Para cuidar la memoria, usa 60 fotos o menos por video.');
+  var g = gal(galId), btn = $('#pn-vgen'), can = $('#pn-vcan');
+  try {
+    await cargarSlideshow(); if (!window.Slideshow.soportado()) throw new Error('Tu navegador no puede crear el video. Usa Chrome o Edge actualizados en la computadora.');
+    vidBusy = true; vidCancel = false; vidStop(); btn.disabled = true; can.hidden = false;
+    var fotos = await vidCargar(), fmts = vidForm === 'ambos' ? ['v', 'h'] : [vidForm];
+    for (var q = 0; q < fmts.length; q++) {
+      var vert = fmts[q] === 'v', W = vert ? 1080 : 1920, H = vert ? 1920 : 1080, esc2 = window.Slideshow.crearEscena(fotos, W, H, vidSeg, { particulas: vidPart });
+      vidEstado('Creando el video ' + (vert ? 'vertical' : 'horizontal') + '… no cierres esta pestaña.');
+      var blob = await window.Slideshow.exportar(esc2, { fps: 30, bitrate: 8e6, cancelado: function(){ return vidCancel; }, progreso: function(x){ vidBarra(0.25 + 0.75 * (q + x) / fmts.length); vidEstado('Creando el video ' + (vert ? 'vertical' : 'horizontal') + '… ' + Math.round(x * 100) + '%'); } });
+      var u = URL.createObjectURL(blob), l = document.createElement('a'); l.href = u; l.download = 'slideshow-' + slug(g ? g.title : 'galeria') + '-' + (vert ? 'vertical' : 'horizontal') + '.mp4'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000);
+    }
+    vidBarra(1); vidEstado('Listo. El video se descargó en tu computadora.');
+  } catch(e) { vidBarra(0); vidEstado(e && e.message === 'cancelado' ? 'Cancelado.' : 'No se pudo crear el video: ' + (e && e.message ? e.message : 'error')); }
+  vidBusy = false; var b2 = $('#pn-vgen'), c2 = $('#pn-vcan'); if (b2) b2.disabled = false; if (c2) c2.hidden = true;
+}
 function fechaCad(g){ return g.expires_at ? String(g.expires_at).slice(0, 10) : ''; }
 function pintarDetalle(){
   try { pintarDetalle0(); } catch (e) { console.error(e); var m = document.getElementById('pn-main'); if (m) m.innerHTML = '<div class="pn-card"><h2>No se pudo mostrar esta pestaña</h2><p class="pn-s">' + esc(e && e.message ? e.message : 'error') + '</p></div>'; }
@@ -401,7 +479,7 @@ function pintarDetalle0(){
       '<div class="pn-row"><button class="pn-btn" data-act="guardar-detalles">Guardar</button></div></div>';
   } else if (tab === 'fotos') {
     cuerpo = '<dialog id="pn-dsub"><h2>Subir fotos</h2><div class="pn-row"><label><input type="radio" name="pn-dest" value="selection" checked> Selección (se reducen según la calidad de Configuración)</label><label><input type="radio" name="pn-dest" value="final"> Finales (originales, hasta 45 MB)</label></div>' +
-      (cur.escenas && cur.escenas.length ? '<div class="pn-marcaui"><label class="pn-s" for="pn-esc">Escena de destino</label><select id="pn-esc"><option value="">Sin escena</option>' + cur.escenas.map(function(e){ return '<option value="' + e.id + '"' + (fEsc === e.id ? ' selected' : '') + '>' + esc(e.name) + '</option>'; }).join('') + '</select></div>' : '') + '<div class="pn-marcaui" id="pn-mbox"><label class="pn-s" for="pn-marca">Marca de agua</label><select id="pn-marca"><option value="si">Con marca de agua</option><option value="no">Sin marca de agua</option></select></div>' +
+      (cur.escenas && cur.escenas.length ? '<div class="pn-marcaui"><label class="pn-s" for="pn-esc">Escena de destino</label><select id="pn-esc"><option value="">Sin escena</option>' + cur.escenas.map(function(e){ return '<option value="' + e.id + '"' + (fEsc === e.id ? ' selected' : '') + '>' + esc(e.name) + '</option>'; }).join('') + '</select></div>' : '') + '<p class="pn-s pn-marcaui" id="pn-mbox">De cada foto se guardan dos versiones: limpia y con marca de agua. En Configuración eliges cuál ve tu cliente.</p>' +
       '<div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-subir" type="button">Cancelar</button></div></dialog>' +
       escenasCard(g, sel, fin) + barraSel(sel, fin) + (fImp ? '' : seccionFotos('selection', 'Selección', sel, g)) + seccionFotos('final', 'Finales', fin, g);
   } else if (tab === 'diseno') {
@@ -415,12 +493,15 @@ function pintarDetalle0(){
       '<div class="pn-card"><h2>Estilo de la galería</h2><p class="pn-s">Cómo se acomodan las fotos que ve tu cliente.</p><div class="pn-opts">' + ESTILOS.map(function(e){ return '<button class="pn-opt' + ((g.grid_style || 'clasico') === e[0] ? ' on' : '') + '" data-act="estilo" data-v="' + e[0] + '"><b>' + e[1] + '</b><span>' + e[2] + '</span></button>'; }).join('') + '</div></div>' +
       '<div class="pn-card"><h2>Paleta de colores</h2><p class="pn-s">Cada paleta tiene versión clara y oscura, y se adapta al modo del dispositivo de tu cliente. “Automática” elige una según el tipo de evento (ahora: ' + esc((PALETAS.filter(function(c){ return c[0] === (PAL_TIPO[g.gallery_type] || 'arena'); })[0] || [])[1] || '') + ').</p><div class="pn-opts">' + PALETAS.map(function(c){ var pa = PAL_VIEJA[g.palette] || g.palette || 'auto'; return '<button class="pn-opt pal' + (pa === c[0] ? ' on' : '') + '" data-act="paleta" data-v="' + c[0] + '"><i style="background:linear-gradient(135deg,' + c[2] + ' 34%,' + c[3] + ' 34% 67%,' + c[4] + ' 67%)"></i><b>' + c[1] + '</b></button>'; }).join('') + '</div></div>';
   } else if (tab === 'config') {
-    cuerpo = '<div class="pn-card"><h2>Marca de agua</h2><p class="pn-s">Texto que se graba en las fotos de selección que subas a partir de ahora.</p><input type="text" id="pn-wt" maxlength="40" value="' + esc(g.watermark_text || marcaBase()) + '"></div>' +
+    cuerpo = '<div class="pn-card"><h2>Marca de agua</h2><p class="pn-s">Texto de la marca de agua. Se graba en las fotos que subas a partir de ahora.</p><input type="text" id="pn-wt" maxlength="40" value="' + esc(g.watermark_text || marcaBase()) + '"></div>' +
+      '<div class="pn-card"><h2>Fotos de selección y marca de agua</h2><p class="pn-s">Decide si tu cliente ve con marca de agua las fotos donde elige sus favoritas. Por defecto la ve.</p><select id="pn-sw"><option value="1"' + (g.selection_watermark === false ? '' : ' selected') + '>Con marca de agua (recomendado)</option><option value="0"' + (g.selection_watermark === false ? ' selected' : '') + '>Sin marca de agua</option></select><p class="pn-s">Se aplica a las fotos de selección que subas desde ahora. Las que ya subiste antes tienen la marca grabada y para quitarla hay que subirlas de nuevo.</p></div>' +
       '<div class="pn-card"><h2>Calidad de las fotos de selección</h2><p class="pn-s">Tamaño con el que tu cliente ve las fotos que subas a partir de ahora. Más calidad se ve mejor pero pesa más.</p><select id="pn-vq"><option value="baja"' + (g.view_quality === 'baja' ? ' selected' : '') + '>Baja (ligera, 1000 px)</option><option value="media"' + (!g.view_quality || g.view_quality === 'media' ? ' selected' : '') + '>Media (1600 px)</option><option value="alta"' + (g.view_quality === 'alta' ? ' selected' : '') + '>Alta (2400 px)</option></select></div>' +
       '<div class="pn-card"><h2>Fotos finales y pago</h2><p class="pn-s">Controla si tu cliente ve y descarga las finales sin marca de agua. Mientras estén bloqueadas, las ve con marca de agua y no puede descargarlas.</p><select id="pn-fl"><option value="0"' + (g.finals_locked ? '' : ' selected') + '>Liberadas: sin marca de agua y con descarga</option><option value="1"' + (g.finals_locked ? ' selected' : '') + '>Bloqueadas: con marca de agua, sin descarga (hasta recibir el pago)</option></select><p class="pn-s">Las finales que subas desde ahora guardan una vista con marca de agua. Las que ya subiste antes deben subirse de nuevo para poder bloquearse.</p></div>' +
       '<div class="pn-card"><h2>Caducidad</h2><p class="pn-s">Después de esta fecha el cliente ya no podrá abrir la galería. Déjala vacía para que no caduque.</p><input type="date" id="pn-ex" value="' + esc(fechaCad(g)) + '"></div>' +
       '<div class="pn-row"><button class="pn-btn" data-act="guardar-config">Guardar cambios</button></div>' +
       '<div class="pn-card"><h2>Eliminar galería</h2><p class="pn-s">Se borran la galería y todas sus fotos. No se puede deshacer.</p><button class="pn-btn rojo" data-act="eliminar-galeria">Eliminar galería</button></div>';
+  } else if (tab === 'video') {
+    cuerpo = vidHtml(g, sel, fin);
   } else if (tab === 'favoritas') {
     var nombre = {}; cur.fotos.forEach(function(x){ nombre[x.id] = x.filename; });
     var por = {}; cur.favs.forEach(function(x){ (por[x.visitor_token] = por[x.visitor_token] || []).push(x.photo_id); });
@@ -463,10 +544,11 @@ function pintarDetalle0(){
           '<details class="pn-s" style="margin-top:.6rem"><summary>Enlace con el código incluido (entra sin escribirlo)</summary>' + fila('Enlace directo con código', urlC) + '</details>') + '</div>';
   }
   $('#pn-main').innerHTML = '<h1>' + esc(TITULOS[tab] || '') + '</h1><p class="pn-s">' + esc(g.title) + '</p>' + cuerpo;
+  if (cur && tab === 'video') vidIniciar();
   if (cur && (tab === 'config' || tab === 'diseno')) plegar(function(t){ return t === 'Portada' || t === 'Paleta de colores'; });
   else root.querySelectorAll('#pn-main .pn-card > h2 + p.pn-s').forEach(function(x){ x.classList.add('ay'); });
   if (cur && tab === 'fotos') {
-    $('#pn-marca').addEventListener('change', mostrarMarca);
+    if ($('#pn-marca')) $('#pn-marca').addEventListener('change', mostrarMarca);
     root.querySelectorAll('input[name=pn-dest]').forEach(function(r){ r.addEventListener('change', mostrarMarca); });
     mostrarMarca();
     try { document.fonts.load('300 20px Jost'); } catch(e) {}
@@ -545,11 +627,16 @@ async function subirUna(t){
   var res = await fetch(W + '/api/upload' + q, { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, 'Content-Type': blob.type || 'image/jpeg' }, body: blob });
   var d = await res.json().catch(function(){ return {}; });
   if (!d.ok) throw new Error(ERR[d.error] || 'error al subir');
-  if (t.tipo === 'final' && d.photo) {
-    try {
-      var pv = await reducir(f, { text: t.texto || marcaBase(), opacity: MARCA_OPACIDAD, size: MARCA_TAM }, 'media');
-      await fetch(W + '/api/upload-preview?photo=' + d.photo.id, { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'image/jpeg' }, body: pv.blob });
-    } catch (e) {}
+  if (d.photo) {
+    var okp = false;
+    for (var n = 0; n < 3 && !okp; n++) {
+      try {
+        var pv = await reducir(f, { text: t.texto || marcaBase(), opacity: MARCA_OPACIDAD, size: MARCA_TAM }, t.tipo === 'selection' ? t.cal : 'media');
+        var rp = await fetch(W + '/api/upload-preview?photo=' + d.photo.id, { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'image/jpeg' }, body: pv.blob });
+        var dp = await rp.json().catch(function(){ return {}; }); okp = !!dp.ok;
+      } catch (e) {}
+    }
+    if (!okp && t.tipo === 'selection') { try { await api('/api/admin/delete-photos', { photos: [d.photo.id] }); } catch (e) {} throw new Error('no se pudo guardar la versión con marca de agua, vuelve a subirla'); }
   }
 }
 async function correrCola(){
@@ -563,7 +650,7 @@ async function correrCola(){
 async function subirTodo(){
   var files = Array.from($('#pn-file').files); if (!files.length) return;
   var tipo = root.querySelector('input[name=pn-dest]:checked').value, g0 = gal(galId);
-  var base = { tipo: tipo, marca: tipo === 'selection' ? opcionesMarca() : null, gid: galId, cal: (g0 && g0.view_quality) || 'media', texto: g0 && g0.watermark_text, esc: $('#pn-esc') && $('#pn-esc').value ? $('#pn-esc').value : '' };
+  var base = { tipo: tipo, marca: null, gid: galId, cal: (g0 && g0.view_quality) || 'media', texto: g0 && g0.watermark_text, esc: $('#pn-esc') && $('#pn-esc').value ? $('#pn-esc').value : '' };
   if (!subiendo()) { cola.total = 0; cola.hechas = 0; cola.fallos = []; cola.gids = {}; }
   files.forEach(function(f){ cola.trabajos.push(Object.assign({ file: f }, base)); }); cola.total += files.length;
   $('#pn-file').value = ''; try { $('#pn-dsub').close(); } catch (e) {} pintarCola();
@@ -662,7 +749,7 @@ function pasarVer(d){ if (!vl.length) return; vix = (vix + d + vl.length) % vl.l
 
 async function cambiar(campos, msg){
   var r = await db.from('galleries').update(campos).eq('id', galId);
-  if (r.error) { aviso(r.error.message); return; }
+  if (r.error) { aviso(/selection_watermark/.test(r.error.message || '') ? 'Falta ejecutar etapa9.sql en Supabase (ver instrucciones).' : r.error.message); return; }
   var g = gal(galId); Object.assign(g, campos); aviso(msg); pintar();
 }
 
@@ -674,6 +761,19 @@ async function accion(a, el){
   if (a === 'cuenta-guardar') return guardarCuenta();
   if (a === 'cuenta-clave') return cambiarClave();
   if (a === 'logo-quitar') { var col = el.dataset.v === 'claro' ? 'logo_para_claro' : 'logo_para_oscuro', cam = {}; cam[col] = null; var rq = await db.from('photographers').update(cam).eq('id', ph.id).select('id'); if (rq.error || !rq.data || !rq.data.length) return aviso(errCuenta(rq.error)); ph[col] = null; aviso('Se volvió al logo por defecto'); pintarLado(); return pintarCuenta(); }
+  if (a === 'vid-foto') { var vi2 = vidIds.indexOf(id); if (vi2 >= 0) vidIds.splice(vi2, 1); else vidIds.push(id); vidStop(); return vidRefrescar(); }
+  if (a === 'vid-sel') {
+    var v0 = el.dataset.v, fl = cur.fotos;
+    if (v0 === 'fin') vidIds = fl.filter(function(x){ return x.photo_type === 'final'; }).map(function(x){ return x.id; });
+    else if (v0 === 'sel') vidIds = fl.filter(function(x){ return x.photo_type === 'selection'; }).map(function(x){ return x.id; });
+    else if (v0 === 'orden') { var m0 = {}; vidIds.forEach(function(x){ m0[x] = 1; }); vidIds = fl.filter(function(x){ return m0[x.id]; }).map(function(x){ return x.id; }); }
+    else vidIds = [];
+    vidStop(); return vidRefrescar();
+  }
+  if (a === 'vid-fmt') { vidForm = el.dataset.v; vidStop(); return pintar(); }
+  if (a === 'vid-prev') return vidPrev();
+  if (a === 'vid-gen') return vidGenerar();
+  if (a === 'vid-cancel') { vidCancel = true; return vidEstado('Cancelando…'); }
   if (a === 'abrir') return abrirDetalle(id);
   if (a === 'atras') { await cargarGalerias(); vista = 'galerias'; return pintar(); }
   if (a === 'tab') { tab = el.dataset.t; return pintar(); }
@@ -747,7 +847,7 @@ async function accion(a, el){
   if (a === 'guardar-config') {
     var tx = $('#pn-wt').value.trim(); if (!tx) return aviso('Escribe el texto de la marca.');
     var ex = $('#pn-ex').value;
-    return cambiar({ watermark_text: tx, expires_at: ex ? ex + 'T23:59:59-06:00' : null, view_quality: $('#pn-vq').value, finals_locked: $('#pn-fl').value === '1' }, 'Configuración guardada');
+    return cambiar({ watermark_text: tx, expires_at: ex ? ex + 'T23:59:59-06:00' : null, view_quality: $('#pn-vq').value, finals_locked: $('#pn-fl').value === '1', selection_watermark: $('#pn-sw').value !== '0' }, 'Configuración guardada');
   }
   if (a === 'elegir-portada') {
     var s0 = cur ? cur.fotos.filter(function(x){ return x.photo_type === 'selection'; }) : [];
@@ -829,6 +929,8 @@ window.iniciarPanel = async function(photographer, cliente){
   dv.addEventListener('keydown', function(e){ if (e.key === 'ArrowLeft') pasarVer(-1); if (e.key === 'ArrowRight') pasarVer(1); });
   root.addEventListener('change', async function(e){
     if (e.target.id === 'pn-lg-c' || e.target.id === 'pn-lg-o') { var fl = e.target.files && e.target.files[0]; e.target.value = ''; return subirLogo(fl, e.target.id === 'pn-lg-c' ? 'claro' : 'oscuro'); }
+    if (e.target.id === 'pn-vs') { vidSeg = parseFloat(e.target.value) || 2.5; vidStop(); return vidRefrescar(); }
+    if (e.target.id === 'pn-vp') { vidPart = e.target.checked; return vidStop(); }
     if (e.target.id === 'pn-cu-ay') { try { localStorage.setItem('pn-ay', e.target.checked ? 'on' : 'off'); } catch(x) {} return aplicarTema(); }
     var s = e.target.closest('select[data-ord]'); if (s && s.value) return ordenar(s.dataset.ord, s.value);
     if (e.target.id === 'pn-fesc') { fEsc = e.target.value; return pintar(); }
