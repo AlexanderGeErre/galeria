@@ -76,7 +76,8 @@ async function cargarFoto(url){
 
 // ---------- Escena: dibuja el cuadro del tiempo t (segundos) ----------
 function ease(p){ p = clamp(p, 0, 1); return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
-function duracionTotal(n, seg, estilo){ var d = seg || 2.5; return n * d + (estilo === 'pantalla' ? Math.max(0, Math.max(d, 3.2) - d) : 0); }
+var INTRO = 2.8;
+function duracionTotal(n, seg, estilo, intro){ var d = seg || 2.5; return n * d + (estilo === 'pantalla' ? Math.max(0, Math.max(d, 3.2) - d) : 0) + (intro ? INTRO : 0); }
 // Copia desenfocada de la foto (lienzo pequeño; al agrandarlo se ve suave)
 function fondoDesenf(f, w, h, zoom, radio){
   var s = 6, c = lienzo(w / s, h / s), x = c.getContext('2d');
@@ -90,7 +91,8 @@ function crearEscena(fotos, W, H, seg, op){
   var n = fotos.length, vertical = H > W, u = Math.min(W, H) / 1080, D = seg || 2.5, Tr = Math.min(estilo === 'pantalla' ? 0.7 : 0.9, D * 0.42);
   var dur = [], ini = [], tot = 0;
   for (var q0 = 0; q0 < n; q0++) { dur[q0] = (estilo === 'pantalla' && q0 === 0) ? Math.max(D, 3.2) : D; ini[q0] = tot; tot += dur[q0]; }
-  var duracion = tot, cache = {}, papel = estilo === 'papel', particulas = papel && op.particulas !== false;
+  var I = op.intro ? INTRO : 0, logo = op.logo || null;
+  var duracion = tot + I, cache = {}, papel = estilo === 'papel', particulas = papel && op.particulas !== false;
   var rnd = mulberry(20260601), P = [];
   if (particulas) for (var i = 0; i < Math.round(70 * (W * H) / (1080 * 1920)) + 30; i++) {
     var grande = rnd() < 0.12;
@@ -216,31 +218,51 @@ function crearEscena(fotos, W, H, seg, op){
     cx.restore();
   }
 
+  // ---- Marca al inicio ----
+  function capaIntro(cx, t, dx, dy){
+    cx.save(); cx.translate(dx, dy);
+    var g = cx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, Math.max(W, H) * 0.7); g.addColorStop(0, papel ? '#3a2512' : '#1d1813'); g.addColorStop(1, '#0b0806'); cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+    var a = clamp((t - 0.25) / 0.8, 0, 1), e = ease(a);
+    cx.globalAlpha = e; cx.translate(W / 2, H / 2); cx.scale(0.94 + 0.06 * e, 0.94 + 0.06 * e);
+    if (logo && logo.bmp) {
+      var lw = (vertical ? 0.62 : 0.32) * W, lh = lw * logo.h / logo.w, mh = H * (vertical ? 0.3 : 0.4); if (lh > mh) { lw *= mh / lh; lh = mh; }
+      cx.imageSmoothingQuality = 'high'; cx.drawImage(logo.bmp, -lw / 2, -lh / 2, lw, lh);
+    } else if (op.nombre) {
+      var fs = (vertical ? W * 0.085 : H * 0.1); cx.fillStyle = '#E9D9B8'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.font = '300 ' + fs + 'px "Cormorant Garamond", Georgia, serif';
+      try { cx.letterSpacing = (fs * 0.12) + 'px'; } catch (e2) {}
+      cx.fillText(String(op.nombre).toUpperCase(), 0, 0);
+    }
+    cx.restore();
+  }
+
   function dibujar(cx, t){
     t = clamp(t, 0, duracion - 0.0001);
-    var i = 0; while (i < n - 1 && t >= ini[i + 1]) i++;
-    var lt = t - ini[i];
     cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = 1; cx.filter = 'none'; cx.fillStyle = papel ? '#0b0806' : '#000'; cx.fillRect(0, 0, W, H);
-    var fil = 'filter' in cx;
+    var fil = 'filter' in cx, tt = t - I, i = 0, lt = 0;
+    if (tt >= 0) { while (i < n - 1 && tt >= ini[i + 1]) i++; lt = tt - ini[i]; }
     if (papel) {
-      if (lt < Tr) {
+      if (tt < 0) capaIntro(cx, t, 0, 0);
+      else if (lt < Tr) {
         var p = ease(lt / Tr), bl = Math.sin(Math.PI * p) * 9 * u;
         if (fil && bl > 0.6) cx.filter = 'blur(' + bl.toFixed(1) + 'px)';
         if (i > 0) capaPapel(cx, i - 1, lt + dur[i - 1], -p * H * 0.9, -p * H * 1.12, 1);
+        else if (I > 0) capaIntro(cx, t, 0, -p * H * 0.9);
         capaPapel(cx, i, lt, (1 - p) * H, (1 - p) * H * 1.15, lt / Tr);
         cx.filter = 'none';
       } else capaPapel(cx, i, lt, 0, 0, 1);
       destellos(cx, t); dibujarParticulas(cx, t);
     } else {
-      if (i > 0 && lt < Tr) {
+      if (tt < 0) capaIntro(cx, t, 0, 0);
+      else if ((i > 0 || I > 0) && lt < Tr) {
         var p2 = ease(lt / Tr);
-        capaPantalla(cx, i - 1, lt + dur[i - 1], -p2 * W * 0.35); cx.fillStyle = 'rgba(0,0,0,' + (0.4 * p2).toFixed(3) + ')'; cx.fillRect(0, 0, W, H);
+        if (i > 0) capaPantalla(cx, i - 1, lt + dur[i - 1], -p2 * W * 0.35); else capaIntro(cx, t, -p2 * W * 0.35, 0);
+        cx.fillStyle = 'rgba(0,0,0,' + (0.4 * p2).toFixed(3) + ')'; cx.fillRect(0, 0, W, H);
         capaPantalla(cx, i, lt, (1 - p2) * W);
       } else capaPantalla(cx, i, lt, 0);
-      if (i === 0) portada(cx, t);
+      if (i === 0 && tt >= 0) portada(cx, tt);
     }
-    var fin = duracion - t, ini0 = t;
-    var neg = Math.max(clamp(1 - fin / 0.7, 0, 1), papel ? 0 : clamp(1 - ini0 / 0.35, 0, 1));
+    var fin = duracion - t;
+    var neg = Math.max(clamp(1 - fin / 0.7, 0, 1), (papel && I === 0) ? 0 : clamp(1 - t / (I > 0 ? 0.6 : 0.35), 0, 1));
     if (neg > 0) { cx.fillStyle = 'rgba(8,6,4,' + neg.toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
   }
   return { W: W, H: H, duracion: duracion, dibujar: dibujar, n: n, seg: D, estilo: estilo };
