@@ -16,7 +16,8 @@ var db, ph, root, gals = [], favs = {}, vista = 'inicio', galId = null, tab = 'p
 
 var CSS = '.pn-pb{position:absolute;right:6px;bottom:34px;z-index:2;display:flex;align-items:center;gap:2px;background:var(--a);color:#fff;border-radius:999px;padding:3px 6px;font-size:.7rem;line-height:1}.pn-pb svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.pn-pb i{font-style:normal;font-weight:700}.pn-ph.pimp img{outline:2px solid var(--a)}.pn-sec .pn-btn svg{width:15px;height:15px;vertical-align:-2px;fill:none;stroke:currentColor;stroke-width:1.8}' + '.pn-ac{flex-wrap:wrap}.pn-grid.sm .pn-ac button{font-size:.62rem;padding:0 .35rem}.pn-add{flex:0 0 96px;aspect-ratio:1;border:1.5px dashed var(--s);background:none;border-radius:10px;color:var(--s);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;cursor:pointer;font:inherit;font-size:.78rem;transition:background .2s,color .2s,border-color .2s}.pn-add b{font-size:1.6rem;font-weight:400;line-height:1}.pn-add:hover{background:var(--p);color:var(--t);border-color:var(--a)}#pn-dsub{width:min(34rem,94vw)}.pn-vacio1{margin:.4rem 0 1rem}.pn-ck{cursor:pointer;position:absolute;top:6px;left:6px;z-index:2;width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.9);border:2px solid var(--a);display:grid;place-items:center;font-size:.8rem;color:var(--a);font-weight:700}.pn-ck.off{background:rgba(255,255,255,.55);border-color:rgba(255,255,255,.9);color:transparent}.pn-ph.mk img{outline:3px solid var(--a);opacity:.85}.pn-barsel{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;position:sticky;top:0;z-index:20;background:var(--f);border:1px solid var(--l);border-radius:12px;padding:.6rem .8rem;margin:.6rem 0}.pn-barsel select{width:auto}.pn-esc{border-top:1px solid var(--l);padding:.8rem 0}.pn-fila{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.4rem 0}' +
 '.pn{--f:#FAFAF8;--t:#2B2623;--s:#8A837C;--l:#E6E3DF;--a:#B8946A;--p:#F0EFED;--c:#fff;display:grid;grid-template-columns:220px 1fr;min-height:100vh;background:var(--f);color:var(--t);font-family:Jost,system-ui,sans-serif}' +
-'.pn[data-e=dark]{--f:#1A1A1A;--t:#EDEBE8;--s:#9A948D;--l:#333;--a:#C9A877;--p:#252525;--c:#202020}.pn[data-e=dark] .pn-il{mix-blend-mode:normal!important;filter:none!important;border-radius:8px}' +
+'.pn[data-e=dark]{--f:#1A1A1A;--t:#EDEBE8;--s:#9A948D;--l:#333;--a:#C9A877;--p:#252525;--c:#202020}' +
+'.pn[data-pa=marfil]{--f:#F7F3EC;--t:#2E2924;--s:#8C8276;--l:#E2D9CA;--a:#A67C52;--p:#EDE6DA;--c:color-mix(in srgb,#fff 65%,var(--f))}.pn[data-pa=marfil][data-e=dark]{--f:#1C1917;--t:#EFE9E1;--s:#A0978B;--l:#34302B;--a:#C8996A;--p:#272320;--c:color-mix(in srgb,var(--f) 55%,var(--p))}.pn[data-pa=blanco]{--f:#FFFFFF;--t:#1F1F1F;--s:#7D7D7D;--l:#E8E8E8;--a:#1F1F1F;--p:#F2F2F2;--c:color-mix(in srgb,#fff 65%,var(--f))}.pn[data-pa=blanco][data-e=dark]{--f:#121212;--t:#F0F0F0;--s:#8F8F8F;--l:#2C2C2C;--a:#C2A15F;--p:#1E1E1E;--c:color-mix(in srgb,var(--f) 55%,var(--p))}.pn[data-pa=oliva]{--f:#F6F5F0;--t:#26302A;--s:#7C8379;--l:#DDDCCF;--a:#6F7F5E;--p:#E9E8DF;--c:color-mix(in srgb,#fff 65%,var(--f))}.pn[data-pa=oliva][data-e=dark]{--f:#161A17;--t:#E8EBE4;--s:#929A8E;--l:#2D332E;--a:#9DB08A;--p:#202520;--c:color-mix(in srgb,var(--f) 55%,var(--p))}.pn[data-pa=vino]{--f:#FBF8F5;--t:#2A1F1F;--s:#8A7B79;--l:#E7DCD7;--a:#8C3B3B;--p:#F0E8E4;--c:color-mix(in srgb,#fff 65%,var(--f))}.pn[data-pa=vino][data-e=dark]{--f:#1B1516;--t:#F1E9E7;--s:#A3938F;--l:#342A2B;--a:#C47A7A;--p:#261E1F;--c:color-mix(in srgb,var(--f) 55%,var(--p))}.pn[data-pa=azul]{--f:#F6F7F9;--t:#1E2430;--s:#7A8294;--l:#DDE1E8;--a:#3F5B8C;--p:#E9ECF1;--c:color-mix(in srgb,#fff 65%,var(--f))}.pn[data-pa=azul][data-e=dark]{--f:#14171C;--t:#E9ECF2;--s:#8D96A8;--l:#2A2F38;--a:#7F9BD0;--p:#1D2128;--c:color-mix(in srgb,var(--f) 55%,var(--p))}.pn[data-e=dark] .pn-il{mix-blend-mode:normal!important;filter:none!important;border-radius:8px}' +
 '.pn-franja{display:flex;flex-wrap:wrap;border:1px solid var(--l);border-radius:10px;background:var(--c);margin:.6rem 0 1.4rem;font-size:.9rem}.pn-franja span{padding:.6rem 1rem;border-right:1px solid var(--l)}.pn-franja span:last-child{border:0}.pn-dot{display:inline-block;width:.55rem;height:.55rem;border-radius:50%;background:var(--a);margin-right:.5rem}' +
 '.pn-portada{border-radius:12px;overflow:hidden;background:var(--l);max-width:34rem;aspect-ratio:3/2;display:grid;place-items:center;margin:.6rem 0}.pn-portada>img{width:100%;height:100%;object-fit:cover}.pn-portada .pn-il{width:30%}' +
 '.pn aside .gt{font-family:"Cormorant Garamond",serif;font-size:1.3rem;line-height:1.15;margin:.4rem 0 .5rem;padding:0 .7rem}.pn aside .sep{border-top:1px solid var(--l);margin:.8rem 0}.pn aside .pn-pill{align-self:flex-start;margin-left:.7rem}' +
@@ -220,9 +221,12 @@ var TITULOS = { panel: 'Descripción general', detalles: 'Detalles', fotos: 'Fot
 function ayudasOn(){ try { return localStorage.getItem('pn-ay') !== 'off'; } catch(e) { return true; } }
 function marcaBase(){ return (ph && (ph.watermark_default || ph.studio_name)) || 'Estudio'; }
 function temaGuardado(){ try { return localStorage.getItem('pn-tema') || 'auto'; } catch(e) { return 'auto'; } }
+var PAL_PANEL = [['arena', 'Arena y carbón', 'La más parecida a Pic-Time, con dorado como acento'], ['marfil', 'Marfil cálido', 'Cálida y cercana'], ['blanco', 'Blanco galería', 'Sobria, casi sin color'], ['oliva', 'Oliva y arena', 'Natural y tranquila'], ['vino', 'Vino y crema', 'Elegante y cálida'], ['azul', 'Azul noche', 'Moderna y tecnológica']];
+var PAL_PANEL_COL = {'arena': ['#FAFAF8', '#B8946A', '#1A1A1A'], 'marfil': ['#F7F3EC', '#A67C52', '#1C1917'], 'blanco': ['#FFFFFF', '#1F1F1F', '#121212'], 'oliva': ['#F6F5F0', '#6F7F5E', '#161A17'], 'vino': ['#FBF8F5', '#8C3B3B', '#1B1516'], 'azul': ['#F6F7F9', '#3F5B8C', '#14171C']};
+function palPanel(){ var v = 'arena'; try { v = localStorage.getItem('pn-pal') || 'arena'; } catch(e) {} return PAL_PANEL.some(function(x){ return x[0] === v; }) ? v : 'arena'; }
 function aplicarTema(){
   var t = temaGuardado(), e = t === 'auto' ? (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : t;
-  var p = root && root.querySelector('.pn'); if (p) { p.dataset.e = e; p.dataset.ay = ayudasOn() ? 'on' : 'off'; }
+  var p = root && root.querySelector('.pn'); if (p) { p.dataset.e = e; p.dataset.pa = palPanel(); p.dataset.ay = ayudasOn() ? 'on' : 'off'; }
 }
 var ICO = {
   panel: '<path d="M4 4h7v7H4zM13 4h7v4h-7zM13 11h7v9h-7zM4 14h7v6H4z"/>', detalles: '<path d="M5 4h14v16H5zM8 9h8M8 13h8M8 17h5"/>',
@@ -333,7 +337,8 @@ function pintarCuenta(){
       '<div><b>Para fondo oscuro</b>' + pv('oscuro', 'logo-claro', ph.logo_para_oscuro) + '<input type="file" id="pn-lg-o" accept="image/png,image/webp,image/jpeg"><div class="pn-row"><button class="pn-btn sec" data-act="logo-quitar" data-v="oscuro" type="button">Volver al logo por defecto</button></div></div></div>') +
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
-    dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') + '</div>';
+    dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
+    dt('Colores del panel', (PAL_PANEL.filter(function(x){ return x[0] === palPanel(); })[0] || [])[1], '<p class="pn-s ay">Elige los colores de este panel. Cada paleta tiene modo claro y oscuro; el modo lo cambias abajo a la izquierda (Auto, Claro, Oscuro). Es solo para ti: no cambia lo que ven tus clientes.</p><div class="pn-opts">' + PAL_PANEL.map(function(c){ var pa = PAL_PANEL_COL[c[0]]; return '<button class="pn-opt pal' + (palPanel() === c[0] ? ' on' : '') + '" type="button" data-act="pal-panel" data-v="' + c[0] + '"><i style="background:linear-gradient(135deg,' + pa[0] + ' 34%,' + pa[1] + ' 34% 67%,' + pa[2] + ' 67%)"></i><div><b>' + c[1] + '</b><span>' + c[2] + '</span></div></button>'; }).join('') + '</div>') + '</div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -394,7 +399,7 @@ function vidBarra(x){ var b = $('#pn-vbar'); if (b) b.style.width = Math.round(c
 function clampN(x){ return Math.max(0, Math.min(1, x)); }
 function vidStop(){ vidPlay = false; cancelAnimationFrame(vidRaf); vidCtl(); }
 function vidLiberar(){ if (vidBusy) return; vidStop(); vidLoadTok++; vidEsc = null; vidLogo = undefined; Object.keys(vidCache).forEach(function(k){ try { vidCache[k].bmp.close(); } catch(e) {} }); vidCache = {}; }
-var vidEstilo = 'papel', vidTit = null, vidSub = null, vidMarca = true, vidLogo, vidTrans = 'variadas';
+var vidEstilo = 'papel', vidTit = null, vidSub = null, vidMarca = true, vidLogo, vidTrans = 'variadas', vidTransP = 'variadas', vidSem = Math.floor(Math.random() * 4e9);
 function cargarLogoVideo(){
   var dato = ph.logo_para_oscuro || ph.logo_para_claro, lista = dato ? [dato] : exts('logo-claro').map(function(e){ return 'imagenes/logo-claro' + e; });
   return new Promise(function(ok){
@@ -406,7 +411,7 @@ function cargarLogoVideo(){
 }
 var vidEsc = null, vidT = 0, vidPlay = false, vidRaf = 0, vidLast = 0, vidDeb = 0, vidDrag = -1, vidLoadTok = 0;
 function vidSubDef(g){ var y = String(g.event_date || g.created_at || '').slice(0, 4); return [g.gallery_type, y].filter(Boolean).join(' · '); }
-function vidOp(){ var g = gal(galId) || {}; return { particulas: vidPart, estilo: vidEstilo, transicion: vidTrans, intro: vidMarca, logo: vidLogo || null, nombre: (ph && ph.studio_name) || '', titulo: vidTit !== null ? vidTit : (g.title || ''), subtitulo: vidSub !== null ? vidSub : vidSubDef(g) }; }
+function vidOp(){ var g = gal(galId) || {}; return { semilla: vidSem, particulas: vidPart, estilo: vidEstilo, transicion: vidEstilo === 'pantalla' ? vidTrans : vidTransP, intro: vidMarca, logo: vidLogo || null, nombre: (ph && ph.studio_name) || '', titulo: vidTit !== null ? vidTit : (g.title || ''), subtitulo: vidSub !== null ? vidSub : vidSubDef(g) }; }
 var VFMT = { v: 'Vertical', h: 'Horizontal', ambos: 'Los dos' }, VRIT = { 3.5: 'Lento', 2.5: 'Normal', 1.5: 'Rápido' };
 function mmss(x){ x = Math.max(0, Math.round(x)); return ('0' + Math.floor(x / 60)).slice(-2) + ':' + ('0' + (x % 60)).slice(-2); }
 function vidHtml(g, sel, fin){
@@ -435,7 +440,7 @@ function vidRefrescar(){
   var chip = function(id, t, v){ var e = $(id); if (e) e.innerHTML = '<small>' + t + '</small>' + v; };
   root.querySelectorAll('#pn-ve .pn-opt').forEach(function(o){ o.classList.toggle('on', o.dataset.v === vidEstilo); }); root.querySelectorAll('#pn-vm .pn-opt').forEach(function(o){ o.classList.toggle('on', (o.dataset.v === 'si') === vidMarca); }); chip('#pn-cf', 'Formato', VFMT[vidForm]); chip('#pn-cr', 'Ritmo', VRIT[vidSeg] || 'Normal'); chip('#pn-cp', 'Partículas', vidPart ? 'Sí' : 'No');
   var cpp = $('#pn-cp'); if (cpp) cpp.hidden = vidEstilo !== 'papel';
-  chip('#pn-ct', 'Transiciones', { variadas: 'Variadas', desliza: 'Deslizar', disuelve: 'Disolver', corte: 'Corte directo' }[vidTrans]); var ctt = $('#pn-ct'); if (ctt) ctt.hidden = vidEstilo !== 'pantalla';
+  chip('#pn-ct', 'Transiciones', vidEstilo === 'pantalla' ? { variadas: 'Variadas', desliza: 'Deslizar (varias direcciones)', disuelve: 'Disolver', corte: 'Corte directo' }[vidTrans] : { variadas: 'Variadas (todas las direcciones)', der: 'Hacia la derecha', izq: 'Hacia la izquierda', arriba: 'Hacia arriba', abajo: 'Hacia abajo' }[vidTransP]);
   var tx = $('#pn-vtx'); if (tx) { tx.hidden = vidEstilo !== 'pantalla'; var g0 = gal(galId) || {}, o0 = vidOp(); if ($('#pn-vtt') && document.activeElement !== $('#pn-vtt')) $('#pn-vtt').value = o0.titulo; if ($('#pn-vts') && document.activeElement !== $('#pn-vts')) $('#pn-vts').value = o0.subtitulo; }
   clearTimeout(vidDeb); vidEsc = null; vidDeb = setTimeout(vidPrepara, 350); vidCtl();
 }
@@ -510,7 +515,7 @@ async function vidGenerar(){
       var blob = await window.Slideshow.exportar(esc2, { fps: 30, bitrate: 8e6, cancelado: function(){ return vidCancel; }, progreso: function(x){ vidBarra(0.25 + 0.75 * (q + x) / fmts.length); vidEstado('Creando el video ' + (vert ? 'vertical' : 'horizontal') + '… ' + Math.round(x * 100) + '%'); } });
       var u = URL.createObjectURL(blob), l = document.createElement('a'); l.href = u; l.download = 'slideshow-' + slug(g ? g.title : 'galeria') + '-' + (vidEstilo === 'pantalla' ? 'pantalla-' : '') + (vert ? 'vertical' : 'horizontal') + (vidMarca ? '' : '-sin-logo') + '.mp4'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000);
     }
-    vidBarra(1); fin = 'Listo. El video se descargó en tu computadora.';
+    vidSem = Math.floor(Math.random() * 4e9); vidBarra(1); fin = 'Listo. El video se descargó en tu computadora.';
   } catch(e) { vidBarra(0); fin = e && e.message === 'cancelado' ? 'Cancelado.' : 'No se pudo crear el video: ' + (e && e.message ? e.message : 'error'); }
   vidBusy = false; var b2 = $('#pn-vgen'), c2 = $('#pn-vcan'); if (b2) b2.disabled = false; if (c2) c2.hidden = true;
   if (vista === 'detalle' && tab === 'video') await vidPrepara();
@@ -839,7 +844,7 @@ async function accion(a, el){
   if (a === 'vid-cerrar') return $('#pn-dvp').close();
   if (a === 'vid-quitar') { vidIds.splice(+el.dataset.i, 1); vidStop(); return vidRefrescar(); }
   if (a === 'vid-estilo') { vidEstilo = el.dataset.v === 'pantalla' ? 'pantalla' : 'papel'; vidStop(); vidT = 0; return vidRefrescar(); }
-  if (a === 'vid-trans') { vidTrans = { variadas: 'desliza', desliza: 'disuelve', disuelve: 'corte', corte: 'variadas' }[vidTrans]; vidStop(); vidT = 0; return vidRefrescar(); }
+  if (a === 'vid-trans') { if (vidEstilo === 'pantalla') vidTrans = { variadas: 'desliza', desliza: 'disuelve', disuelve: 'corte', corte: 'variadas' }[vidTrans]; else vidTransP = { variadas: 'der', der: 'izq', izq: 'arriba', arriba: 'abajo', abajo: 'variadas' }[vidTransP]; vidStop(); vidT = 0; return vidRefrescar(); }
   if (a === 'vid-marca') { vidMarca = el.dataset.v !== 'no'; vidStop(); vidT = 0; return vidRefrescar(); }
   if (a === 'vid-fmt') { vidForm = vidForm === 'v' ? 'h' : vidForm === 'h' ? 'ambos' : 'v'; vidStop(); return vidRefrescar(); }
   if (a === 'vid-ritmo') { vidSeg = vidSeg === 2.5 ? 1.5 : vidSeg === 1.5 ? 3.5 : 2.5; vidStop(); vidT = 0; return vidRefrescar(); }
@@ -856,6 +861,7 @@ async function accion(a, el){
   if (a === 'entregar') { if (confirm('¿Marcar como entregada? El cliente podrá descargar las finales.')) cambiar({ status: 'delivered', selection_enabled: false, downloads_enabled: true }, 'Galería entregada'); return; }
   if (a === 'reabrir') return cambiar({ status: 'selection', selection_enabled: true, downloads_enabled: false }, 'Selección reabierta');
   if (a === 'salir') return window.cerrarSesion();
+  if (a === 'pal-panel') { try { localStorage.setItem('pn-pal', el.dataset.v); } catch(e) {} aplicarTema(); return pintar(); }
   if (a === 'tema') { try { localStorage.setItem('pn-tema', el.dataset.t); } catch(e) {} return pintar(); }
   if (a === 'bloqueo') return cambiar({ finals_locked: !g.finals_locked }, g.finals_locked ? 'Fotos liberadas: el cliente ya las ve sin marca de agua' : 'Finales bloqueadas con marca de agua');
   if (a === 'ver') return abrirVer(el.dataset.id);
