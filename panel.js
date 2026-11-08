@@ -181,7 +181,7 @@ async function api(path, body){
 async function firmar(ids){
   var out = {};
   for (var i = 0; i < ids.length; i += 200) {
-    var r = await api('/api/admin/sign', { photos: ids.slice(i, i + 200), preview: true });
+    var r = await api('/api/admin/sign', { photos: ids.slice(i, i + 200) });
     Object.assign(out, r.fotos || {});
   }
   return out;
@@ -393,18 +393,29 @@ function vidEstado(t){ var e = $('#pn-vst'); if (e) e.textContent = t || ''; }
 function vidBarra(x){ var b = $('#pn-vbar'); if (b) b.style.width = Math.round(clampN(x) * 100) + '%'; }
 function clampN(x){ return Math.max(0, Math.min(1, x)); }
 function vidStop(){ vidPlay = false; cancelAnimationFrame(vidRaf); vidCtl(); }
-function vidLiberar(){ if (vidBusy) return; vidStop(); vidLoadTok++; vidEsc = null; Object.keys(vidCache).forEach(function(k){ try { vidCache[k].bmp.close(); } catch(e) {} }); vidCache = {}; }
-var vidEstilo = 'papel', vidTit = null, vidSub = null;
+function vidLiberar(){ if (vidBusy) return; vidStop(); vidLoadTok++; vidEsc = null; vidLogo = undefined; Object.keys(vidCache).forEach(function(k){ try { vidCache[k].bmp.close(); } catch(e) {} }); vidCache = {}; }
+var vidEstilo = 'papel', vidTit = null, vidSub = null, vidMarca = true, vidLogo;
+function cargarLogoVideo(){
+  var dato = ph.logo_para_oscuro || ph.logo_para_claro, lista = dato ? [dato] : exts('logo-claro').map(function(e){ return 'imagenes/logo-claro' + e; });
+  return new Promise(function(ok){
+    (function prueba(k){
+      if (k >= lista.length) return ok(null);
+      var im = new Image(); im.onload = function(){ if (!im.naturalWidth) return prueba(k + 1); createImageBitmap(im).then(function(b){ ok({ bmp: b, w: b.width, h: b.height }); }, function(){ prueba(k + 1); }); }; im.onerror = function(){ prueba(k + 1); }; im.src = lista[k];
+    })(0);
+  });
+}
 var vidEsc = null, vidT = 0, vidPlay = false, vidRaf = 0, vidLast = 0, vidDeb = 0, vidDrag = -1, vidLoadTok = 0;
 function vidSubDef(g){ var y = String(g.event_date || g.created_at || '').slice(0, 4); return [g.gallery_type, y].filter(Boolean).join(' · '); }
-function vidOp(){ var g = gal(galId) || {}; return { particulas: vidPart, estilo: vidEstilo, titulo: vidTit !== null ? vidTit : (g.title || ''), subtitulo: vidSub !== null ? vidSub : vidSubDef(g) }; }
-var VEST = { papel: 'Marco de papel', pantalla: 'Pantalla completa' }, VFMT = { v: 'Vertical', h: 'Horizontal', ambos: 'Los dos' }, VRIT = { 3.5: 'Lento', 2.5: 'Normal', 1.5: 'Rápido' };
+function vidOp(){ var g = gal(galId) || {}; return { particulas: vidPart, estilo: vidEstilo, intro: vidMarca, logo: vidLogo || null, nombre: (ph && ph.studio_name) || '', titulo: vidTit !== null ? vidTit : (g.title || ''), subtitulo: vidSub !== null ? vidSub : vidSubDef(g) }; }
+var VFMT = { v: 'Vertical', h: 'Horizontal', ambos: 'Los dos' }, VRIT = { 3.5: 'Lento', 2.5: 'Normal', 1.5: 'Rápido' };
 function mmss(x){ x = Math.max(0, Math.round(x)); return ('0' + Math.floor(x / 60)).slice(-2) + ':' + ('0' + (x % 60)).slice(-2); }
 function vidHtml(g, sel, fin){
   var todas = fin.concat(sel);
   var thumb = function(x){ return '<figure class="pn-ph vsel" data-act="vid-foto" data-id="' + x.id + '"><span class="pn-vn"></span><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (x.photo_type === 'selection' ? ' · sel.' : '') + '</figcaption></figure>'; };
   return '<div class="pn-ved"><div class="pn-vizq"><p class="pn-s" id="pn-vinfo" style="margin-top:0"></p>' +
-    '<div class="pn-vchips"><button class="pn-vchip" type="button" data-act="vid-estilo" id="pn-ce"></button><button class="pn-vchip" type="button" data-act="vid-fmt" id="pn-cf"></button><button class="pn-vchip" type="button" data-act="vid-ritmo" id="pn-cr"></button><button class="pn-vchip" type="button" data-act="vid-part" id="pn-cp"></button><button class="pn-vchip pri" style="grid-column:1/-1" type="button" data-act="vid-gen" id="pn-vgen"><small>Sin música</small>Generar y descargar MP4</button></div>' +
+    '<div class="pn-opts" id="pn-ve"><button class="pn-opt" type="button" data-act="vid-estilo" data-v="papel"><b>Marco de papel</b><span>Marco inclinado, fondo animado, destellos y partículas</span></button><button class="pn-opt" type="button" data-act="vid-estilo" data-v="pantalla"><b>Pantalla completa</b><span>Estilo recuerdos del iPhone, con título del evento</span></button></div>' +
+    '<div class="pn-opts" id="pn-vm" style="margin-top:.7rem"><button class="pn-opt" type="button" data-act="vid-marca" data-v="si"><b>Con mi logo</b><span>Empieza con tu logo, para ti y tus redes</span></button><button class="pn-opt" type="button" data-act="vid-marca" data-v="no"><b>Sin logo</b><span>Empieza directo con las fotos, para tu cliente</span></button></div>' +
+    '<div class="pn-vchips"><button class="pn-vchip" type="button" data-act="vid-fmt" id="pn-cf"></button><button class="pn-vchip" type="button" data-act="vid-ritmo" id="pn-cr"></button><button class="pn-vchip" type="button" data-act="vid-part" id="pn-cp"></button><button class="pn-vchip pri" style="grid-column:1/-1" type="button" data-act="vid-gen" id="pn-vgen"><small>Sin música</small>Generar y descargar MP4</button></div>' +
     '<div id="pn-vtx" hidden><label class="pn-s" for="pn-vtt">Título de la portada</label><input type="text" id="pn-vtt" maxlength="60"><label class="pn-s" for="pn-vts" style="display:block;margin-top:.6rem">Subtítulo (tipo de evento y año)</label><input type="text" id="pn-vts" maxlength="40"></div>' +
     '<div class="pn-vb"><i id="pn-vbar"></i></div><p class="pn-s" id="pn-vst"></p><div class="pn-row"><button class="pn-btn sec" data-act="vid-cancel" type="button" id="pn-vcan" hidden>Cancelar</button></div>' +
     '<p class="pn-s ay">Marco de papel: marco inclinado, fondo desenfocado de la misma foto, destellos y partículas. Pantalla completa: estilo recuerdos del iPhone, con portada de título. Funciona en Chrome o Edge en computadora; deja esta pestaña abierta mientras se genera. Solo tú ves este generador.</p></div>' +
@@ -420,9 +431,9 @@ function vidRefrescar(){
   var c = $('#pn-vc'); if (c) c.textContent = n ? n + (n === 1 ? ' foto elegida' : ' fotos elegidas') : 'Aún no has elegido fotos.';
   var tr = $('#pn-vtira');
   if (tr) tr.innerHTML = '<button class="pn-vadd" data-act="vid-agregar" type="button"><b>+</b><span>Agregar fotos</span></button>' + vidIds.map(function(id, i){ return '<div class="pn-vt" draggable="true" data-i="' + i + '"><img draggable="false" alt="" src="' + (cur.tk[id] ? esc(src(cur.tk[id])) : '') + '"><i>' + (i + 1) + '</i><button type="button" data-act="vid-quitar" data-i="' + i + '" aria-label="Quitar">×</button></div>'; }).join('');
-  var inf = $('#pn-vinfo'); if (inf) inf.textContent = n ? n + (n === 1 ? ' diapositiva' : ' diapositivas') + ' · ' + mmss(window.Slideshow ? window.Slideshow.duracionTotal(n, vidSeg, vidEstilo) : n * vidSeg) + ' de duración' : 'Aún no hay fotos. Toca «Agregar fotos» en la tira de abajo.';
+  var inf = $('#pn-vinfo'); if (inf) inf.textContent = n ? n + (n === 1 ? ' diapositiva' : ' diapositivas') + ' · ' + mmss(window.Slideshow ? window.Slideshow.duracionTotal(n, vidSeg, vidEstilo, vidMarca) : n * vidSeg) + ' de duración' : 'Aún no hay fotos. Toca «Agregar fotos» en la tira de abajo.';
   var chip = function(id, t, v){ var e = $(id); if (e) e.innerHTML = '<small>' + t + '</small>' + v; };
-  chip('#pn-ce', 'Estilo', VEST[vidEstilo]); chip('#pn-cf', 'Formato', VFMT[vidForm]); chip('#pn-cr', 'Ritmo', VRIT[vidSeg] || 'Normal'); chip('#pn-cp', 'Partículas', vidPart ? 'Sí' : 'No');
+  root.querySelectorAll('#pn-ve .pn-opt').forEach(function(o){ o.classList.toggle('on', o.dataset.v === vidEstilo); }); root.querySelectorAll('#pn-vm .pn-opt').forEach(function(o){ o.classList.toggle('on', (o.dataset.v === 'si') === vidMarca); }); chip('#pn-cf', 'Formato', VFMT[vidForm]); chip('#pn-cr', 'Ritmo', VRIT[vidSeg] || 'Normal'); chip('#pn-cp', 'Partículas', vidPart ? 'Sí' : 'No');
   var cpp = $('#pn-cp'); if (cpp) cpp.hidden = vidEstilo !== 'papel';
   var tx = $('#pn-vtx'); if (tx) { tx.hidden = vidEstilo !== 'pantalla'; var g0 = gal(galId) || {}, o0 = vidOp(); if ($('#pn-vtt') && document.activeElement !== $('#pn-vtt')) $('#pn-vtt').value = o0.titulo; if ($('#pn-vts') && document.activeElement !== $('#pn-vts')) $('#pn-vts').value = o0.subtitulo; }
   clearTimeout(vidDeb); vidEsc = null; vidDeb = setTimeout(vidPrepara, 350); vidCtl();
@@ -461,7 +472,7 @@ async function vidPrepara(){
   var mi = ++vidLoadTok, ids = vidIds.slice();
   if (ids.length < 2) { vidEsc = null; vidT = 0; vidDibuja(); vidCtl(); vidEstado(ids.length ? 'Agrega al menos una foto más.' : ''); return; }
   try {
-    await cargarSlideshow();
+    await cargarSlideshow(); if (vidMarca && vidLogo === undefined) vidLogo = await cargarLogoVideo();
     var fotos = await vidCargar(ids, function(k, n){ vidEstado('Preparando vista previa… foto ' + (k + 1) + ' de ' + n); vidBarra((k + 1) / n); }, function(){ return mi !== vidLoadTok; });
     if (mi !== vidLoadTok) return;
     var vert = vidForm !== 'h', W = vert ? 360 : 640, H = vert ? 640 : 360;
@@ -489,13 +500,14 @@ async function vidGenerar(){
   try {
     await cargarSlideshow(); if (!window.Slideshow.soportado()) throw new Error('Tu navegador no puede crear el video. Usa Chrome o Edge actualizados en la computadora.');
     vidStop(); vidLoadTok++; vidBusy = true; vidCancel = false; btn.disabled = true; can.hidden = false;
+    if (vidMarca && vidLogo === undefined) vidLogo = await cargarLogoVideo();
     var fotos = await vidCargar(vidIds.slice(), function(k, n){ vidEstado('Leyendo foto ' + (k + 1) + ' de ' + n + '…'); vidBarra(k / Math.max(1, n) * 0.25); }, function(){ return vidCancel; });
     var fmts = vidForm === 'ambos' ? ['v', 'h'] : [vidForm];
     for (var q = 0; q < fmts.length; q++) {
       var vert = fmts[q] === 'v', W = vert ? 1080 : 1920, H = vert ? 1920 : 1080, esc2 = window.Slideshow.crearEscena(fotos, W, H, vidSeg, vidOp());
       vidEstado('Creando el video ' + (vert ? 'vertical' : 'horizontal') + '… no cierres esta pestaña.');
       var blob = await window.Slideshow.exportar(esc2, { fps: 30, bitrate: 8e6, cancelado: function(){ return vidCancel; }, progreso: function(x){ vidBarra(0.25 + 0.75 * (q + x) / fmts.length); vidEstado('Creando el video ' + (vert ? 'vertical' : 'horizontal') + '… ' + Math.round(x * 100) + '%'); } });
-      var u = URL.createObjectURL(blob), l = document.createElement('a'); l.href = u; l.download = 'slideshow-' + slug(g ? g.title : 'galeria') + '-' + (vidEstilo === 'pantalla' ? 'pantalla-' : '') + (vert ? 'vertical' : 'horizontal') + '.mp4'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000);
+      var u = URL.createObjectURL(blob), l = document.createElement('a'); l.href = u; l.download = 'slideshow-' + slug(g ? g.title : 'galeria') + '-' + (vidEstilo === 'pantalla' ? 'pantalla-' : '') + (vert ? 'vertical' : 'horizontal') + (vidMarca ? '' : '-sin-logo') + '.mp4'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000);
     }
     vidBarra(1); fin = 'Listo. El video se descargó en tu computadora.';
   } catch(e) { vidBarra(0); fin = e && e.message === 'cancelado' ? 'Cancelado.' : 'No se pudo crear el video: ' + (e && e.message ? e.message : 'error'); }
@@ -825,7 +837,8 @@ async function accion(a, el){
   if (a === 'vid-agregar') return $('#pn-dvp').showModal();
   if (a === 'vid-cerrar') return $('#pn-dvp').close();
   if (a === 'vid-quitar') { vidIds.splice(+el.dataset.i, 1); vidStop(); return vidRefrescar(); }
-  if (a === 'vid-estilo') { vidEstilo = vidEstilo === 'papel' ? 'pantalla' : 'papel'; vidStop(); vidT = 0; return vidRefrescar(); }
+  if (a === 'vid-estilo') { vidEstilo = el.dataset.v === 'pantalla' ? 'pantalla' : 'papel'; vidStop(); vidT = 0; return vidRefrescar(); }
+  if (a === 'vid-marca') { vidMarca = el.dataset.v !== 'no'; vidStop(); vidT = 0; return vidRefrescar(); }
   if (a === 'vid-fmt') { vidForm = vidForm === 'v' ? 'h' : vidForm === 'h' ? 'ambos' : 'v'; vidStop(); return vidRefrescar(); }
   if (a === 'vid-ritmo') { vidSeg = vidSeg === 2.5 ? 1.5 : vidSeg === 1.5 ? 3.5 : 2.5; vidStop(); vidT = 0; return vidRefrescar(); }
   if (a === 'vid-part') { vidPart = !vidPart; vidStop(); return vidRefrescar(); }
