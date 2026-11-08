@@ -91,6 +91,14 @@ function crearEscena(fotos, W, H, seg, op){
   var n = fotos.length, vertical = H > W, u = Math.min(W, H) / 1080, D = seg || 2.5, Tr = Math.min(estilo === 'pantalla' ? 0.7 : 1.1, D * (estilo === 'pantalla' ? 0.42 : 0.55));
   var dur = [], ini = [], tot = 0;
   for (var q0 = 0; q0 < n; q0++) { dur[q0] = (estilo === 'pantalla' && q0 === 0) ? Math.max(D, 3.2) : D; ini[q0] = tot; tot += dur[q0]; }
+  var VEC = { der: [1, 0], izq: [-1, 0], abajo: [0, 1], arriba: [0, -1] }, SEQ_P = ['der', 'arriba', 'izq', 'abajo', 'der', 'abajo', 'izq', 'arriba'], SEQ_S = ['izq', 'arriba', 'der', 'abajo'];
+  var _sd = (op.semilla != null ? op.semilla : 12345) >>> 0;
+  function _rnd(){ _sd = (_sd + 0x6D2B79F5) >>> 0; var t = _sd; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }
+  var NOMS = ['der', 'izq', 'arriba', 'abajo'];
+  function secuencia(n, ini){ var r = [], p = ini || ''; for (var k = 0; k < n; k++) { var c; do { c = NOMS[Math.floor(_rnd() * 4)]; } while (c === p); r.push(c); p = c; } return r; }
+  var DP = secuencia(n + 1), DS = secuencia(n + 1);
+  function dirP(i){ var t = op.transicion; if (VEC[t]) return t; return DP[i]; }
+  function dirS(i){ return i < 1 ? 'izq' : DS[i]; }
   var CICLO = ['disuelve', 'desliza', 'corte', 'desliza', 'desliza', 'disuelve', 'corte', 'desliza'];
   function tipoTr(i){ var t = op.transicion; if (t === 'desliza' || t === 'disuelve' || t === 'corte') return t; return CICLO[(i - 1 + 800) % CICLO.length]; }
   function trDe(i){ if (papel) return Tr; var t = tipoTr(i); return t === 'corte' ? 0 : (t === 'disuelve' ? Math.min(0.8, D * 0.45) : Tr); }
@@ -168,31 +176,47 @@ function crearEscena(fotos, W, H, seg, op){
     if (tin < 1) { var p = ease(tin); rot += (1 - p) * (rr >= 0 ? -3 : 3); esc *= 1 + (1 - p) * 0.12; }
     cx.save(); cx.translate(W / 2 + (o.cardDx || 0), H / 2 + (o.cardDy || 0)); cx.rotate(rot * Math.PI / 180); cx.scale(esc, esc); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.card, -t.cw / 2, -t.ch / 2);
     if (o.veil > 0.001) {
-      var x0 = -t.cw / 2 + pad + b, y0 = -t.ch / 2 + pad + b, fe = fw * 0.22, ex = x0 + (1 - o.veil) * (fw + fe) - fe;
+      var x0 = -t.cw / 2 + pad + b, y0 = -t.ch / 2 + pad + b, vd = o.veilDir || 'der', gv, ex, ey, fe;
       cx.beginPath(); cx.rect(x0, y0, fw, fh); cx.clip();
-      var gv = cx.createLinearGradient(ex, 0, ex + fe, 0); gv.addColorStop(0, 'rgba(236,236,236,0)'); gv.addColorStop(1, 'rgba(236,236,236,.94)');
-      cx.fillStyle = gv; cx.fillRect(ex, y0, fe, fh); cx.fillStyle = 'rgba(236,236,236,.94)'; cx.fillRect(ex + fe, y0, fw, fh);
+      if (vd === 'der' || vd === 'izq') {
+        if (vd === 'izq') { var mx = x0 + fw / 2; cx.translate(mx, 0); cx.scale(-1, 1); cx.translate(-mx, 0); }
+        fe = fw * 0.22; ex = x0 + (1 - o.veil) * (fw + fe) - fe;
+        gv = cx.createLinearGradient(ex, 0, ex + fe, 0); gv.addColorStop(0, 'rgba(236,236,236,0)'); gv.addColorStop(1, 'rgba(236,236,236,.94)');
+        cx.fillStyle = gv; cx.fillRect(ex, y0, fe, fh); cx.fillStyle = 'rgba(236,236,236,.94)'; cx.fillRect(ex + fe, y0, fw, fh);
+      } else {
+        if (vd === 'arriba') { var my = y0 + fh / 2; cx.translate(0, my); cx.scale(1, -1); cx.translate(0, -my); }
+        fe = fh * 0.22; ey = y0 + (1 - o.veil) * (fh + fe) - fe;
+        gv = cx.createLinearGradient(0, ey, 0, ey + fe); gv.addColorStop(0, 'rgba(236,236,236,0)'); gv.addColorStop(1, 'rgba(236,236,236,.94)');
+        cx.fillStyle = gv; cx.fillRect(x0, ey, fw, fe); cx.fillStyle = 'rgba(236,236,236,.94)'; cx.fillRect(x0, ey + fe, fw, fh);
+      }
     }
     cx.restore();
   }
-  // Barrido blanco: una franja blanca desenfocada cruza de izquierda a derecha y el marco nuevo entra por la izquierda
+  // Barrido blanco en 4 direcciones: la franja cruza la pantalla, el marco nuevo entra desde el lado contrario y el viejo sale hacia donde va la franja
   var tmp = null;
-  function barrido(cx, i, lt, trr){
-    var p = ease(lt / trr), hw = 0.4 * W, xc = -0.45 * W + p * 1.9 * W, e2 = ease(clamp((p - 0.12) / 0.88, 0, 1));
-    capaPapel(cx, i - 1, lt + dur[i - 1], { bgDx: p * 0.10 * W, cardDx: p * 0.32 * W });
+  function barrido(cx, i, lt, trr, dir){
+    var v = VEC[dir] || VEC.der, hz = v[0] !== 0, sg = v[0] + v[1], L = hz ? W : H, p = ease(lt / trr), hw = 0.4 * L, e2 = ease(clamp((p - 0.12) / 0.88, 0, 1));
+    var s0 = -0.45 * L + p * 1.9 * L, sc = sg > 0 ? s0 : L - s0;
+    capaPapel(cx, i - 1, lt + dur[i - 1], { bgDx: v[0] * p * 0.10 * W, bgDy: v[1] * p * 0.10 * H, cardDx: v[0] * p * 0.32 * W, cardDy: v[1] * p * 0.32 * H });
     if (!tmp) tmp = lienzo(W, H);
     var tx = tmp.getContext('2d'); tx.setTransform(1, 0, 0, 1, 0, 0); tx.globalCompositeOperation = 'source-over'; tx.globalAlpha = 1; tx.clearRect(0, 0, W, H);
-    capaPapel(tx, i, lt, { bgDx: (p - 1) * 0.12 * W, cardDx: -(1 - e2) * 1.1 * W, tin: e2, veil: 1 - clamp((p - 0.42) / 0.5, 0, 1) });
+    capaPapel(tx, i, lt, { bgDx: -v[0] * (1 - p) * 0.12 * W, bgDy: -v[1] * (1 - p) * 0.12 * H, cardDx: -v[0] * (1 - e2) * 1.1 * W, cardDy: -v[1] * (1 - e2) * 1.1 * H, tin: e2, veil: 1 - clamp((p - 0.42) / 0.5, 0, 1), veilDir: dir });
     tx.globalCompositeOperation = 'destination-in';
-    var gm = tx.createLinearGradient(xc - 0.08 * W, 0, xc + 0.08 * W, 0); gm.addColorStop(0, 'rgba(0,0,0,1)'); gm.addColorStop(1, 'rgba(0,0,0,0)');
+    var lin = function(c, a, b2){ return hz ? c.createLinearGradient(a, 0, b2, 0) : c.createLinearGradient(0, a, 0, b2); };
+    var gm = lin(tx, sc - 0.08 * L, sc + 0.08 * L); gm.addColorStop(0, sg > 0 ? 'rgba(0,0,0,1)' : 'rgba(0,0,0,0)'); gm.addColorStop(1, sg > 0 ? 'rgba(0,0,0,0)' : 'rgba(0,0,0,1)');
     tx.fillStyle = gm; tx.fillRect(0, 0, W, H); tx.globalCompositeOperation = 'source-over';
     cx.drawImage(tmp, 0, 0);
-    var gb = cx.createLinearGradient(xc - hw, 0, xc + hw, 0);
+    var gb = lin(cx, sc - hw, sc + hw);
     gb.addColorStop(0, 'rgba(240,240,240,0)'); gb.addColorStop(0.3, 'rgba(240,240,240,.93)'); gb.addColorStop(0.7, 'rgba(240,240,240,.93)'); gb.addColorStop(1, 'rgba(240,240,240,0)');
-    cx.fillStyle = gb; cx.fillRect(xc - hw, 0, 2 * hw, H);
-    cx.save(); cx.beginPath(); cx.rect(xc - hw, 0, 2 * hw, H); cx.clip();
+    cx.fillStyle = gb;
+    cx.save(); cx.beginPath();
+    if (hz) { cx.fillRect(sc - hw, 0, 2 * hw, H); cx.rect(sc - hw, 0, 2 * hw, H); } else { cx.fillRect(0, sc - hw, W, 2 * hw); cx.rect(0, sc - hw, W, 2 * hw); }
+    cx.clip();
     var bk = [[0.2, 0.22, 0.28], [-0.1, 0.55, 0.22], [0.1, 0.82, 0.3]];
-    for (var q = 0; q < bk.length; q++) { var bx2 = xc + bk[q][0] * hw, by2 = bk[q][1] * H, br = bk[q][2] * Math.min(W, H) * 0.9, gr = cx.createRadialGradient(bx2, by2, 0, bx2, by2, br); gr.addColorStop(0, 'rgba(210,210,210,.55)'); gr.addColorStop(1, 'rgba(210,210,210,0)'); cx.fillStyle = gr; cx.fillRect(bx2 - br, by2 - br, 2 * br, 2 * br); }
+    for (var q = 0; q < bk.length; q++) {
+      var bs = sc + bk[q][0] * hw, bt = bk[q][1] * (hz ? H : W), bx2 = hz ? bs : bt, by2 = hz ? bt : bs, br = bk[q][2] * Math.min(W, H) * 0.9, gr = cx.createRadialGradient(bx2, by2, 0, bx2, by2, br);
+      gr.addColorStop(0, 'rgba(210,210,210,.55)'); gr.addColorStop(1, 'rgba(210,210,210,0)'); cx.fillStyle = gr; cx.fillRect(bx2 - br, by2 - br, 2 * br, 2 * br);
+    }
     cx.restore();
   }
   function destellos(cx, t, m){
@@ -225,9 +249,9 @@ function crearEscena(fotos, W, H, seg, op){
   }
 
   // ---- Pantalla completa (estilo iPhone) ----
-  function capaPantalla(cx, i, lt, dx){
+  function capaPantalla(cx, i, lt, dx, dy){
     var t = activo(i), h = clamp(lt / D, 0, 1.3), z = 1 + 0.08 * h, s = (i % 2 ? -1 : 1);
-    cx.save(); cx.translate(W / 2 + dx + s * 0.02 * W * h, H / 2); cx.scale(z, z); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.img, -W / 2, -H / 2); cx.restore();
+    cx.save(); cx.translate(W / 2 + dx + s * 0.02 * W * h, H / 2 + (dy || 0)); cx.scale(z, z); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.img, -W / 2, -H / 2); cx.restore();
   }
   function lineas(cx, txt, maxW){
     var pal = String(txt || '').split(/\s+/).filter(Boolean), out = [], cur = '';
@@ -273,7 +297,7 @@ function crearEscena(fotos, W, H, seg, op){
     if (tt >= 0) { while (i < n - 1 && tt >= ini[i + 1]) i++; lt = tt - ini[i]; }
     if (papel) {
       if (tt < 0) capaIntro(cx, t, 0, 0);
-      else if (lt < Tr && i > 0) barrido(cx, i, lt, Tr);
+      else if (lt < Tr && i > 0) barrido(cx, i, lt, Tr, dirP(i));
       else if (lt < Tr) {
         var p = ease(lt / Tr), bl = Math.sin(Math.PI * p) * 9 * u;
         if (fil && bl > 0.6) cx.filter = 'blur(' + bl.toFixed(1) + 'px)';
@@ -291,9 +315,10 @@ function crearEscena(fotos, W, H, seg, op){
           capaPantalla(cx, i - 1, lt + dur[i - 1], 0); cx.globalAlpha = pq; capaPantalla(cx, i, lt, 0); cx.globalAlpha = 1;
         } else {
           var p2 = ease(lt / trr);
-          if (i > 0) capaPantalla(cx, i - 1, lt + dur[i - 1], -p2 * W * 0.35); else capaIntro(cx, t, -p2 * W * 0.35, 0);
+          var vv = VEC[dirS(i)];
+          if (i > 0) capaPantalla(cx, i - 1, lt + dur[i - 1], vv[0] * p2 * W * 0.35, vv[1] * p2 * H * 0.35); else capaIntro(cx, t, vv[0] * p2 * W * 0.35, vv[1] * p2 * H * 0.35);
           cx.fillStyle = 'rgba(0,0,0,' + (0.4 * p2).toFixed(3) + ')'; cx.fillRect(0, 0, W, H);
-          capaPantalla(cx, i, lt, (1 - p2) * W);
+          capaPantalla(cx, i, lt, -vv[0] * (1 - p2) * W, -vv[1] * (1 - p2) * H);
         }
       } else capaPantalla(cx, i, lt, 0);
       if (i === 0 && tt >= 0) portada(cx, tt);
