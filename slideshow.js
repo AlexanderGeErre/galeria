@@ -119,7 +119,8 @@ function crearEscena(fotos, W, H, seg, op){
 
   // Destellos hexagonales (sprites con desenfoque, una sola vez)
   var sprites = [];
-  if (papel) [[255, 190, 60], [255, 120, 40], [210, 60, 45], [255, 165, 50], [190, 70, 55], [255, 205, 90]].forEach(function(col){
+  var fiel = op.destello !== 'calido';
+  if (papel) (fiel ? [[255, 238, 208], [255, 214, 178], [246, 196, 178], [255, 228, 192], [242, 206, 192], [255, 242, 212]] : [[255, 190, 60], [255, 120, 40], [210, 60, 45], [255, 165, 50], [190, 70, 55], [255, 205, 90]]).forEach(function(col){
     var c = lienzo(160, 160), x = c.getContext('2d'); if ('filter' in x) x.filter = 'blur(4px)';
     x.fillStyle = 'rgb(' + col.join(',') + ')'; x.beginPath(); for (var k = 0; k < 6; k++) { var a = Math.PI / 6 + k * Math.PI / 3; x[k ? 'lineTo' : 'moveTo'](80 + 56 * Math.cos(a), 80 + 56 * Math.sin(a)); } x.closePath(); x.fill(); sprites.push(c);
   });
@@ -225,7 +226,7 @@ function crearEscena(fotos, W, H, seg, op){
     var R = 0.62 * Math.max(W, H), L = [[0.35, 0.21, 0.0], [0.6, 0.17, 2.1]];
     for (var k = 0; k < L.length; k++) {
       var x = W * (0.5 + 0.5 * Math.cos(t * L[k][1] + L[k][2])), y = H * (0.5 + 0.45 * Math.sin(t * L[k][1] * 0.8 + L[k][2] * 1.7)), gr = cx.createRadialGradient(x, y, 0, x, y, R);
-      gr.addColorStop(0, 'rgba(200,130,45,' + ((0.20 + 0.06 * Math.sin(t * 0.7 + k)) * m).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(200,130,45,0)'); cx.fillStyle = gr; cx.fillRect(0, 0, W, H);
+      gr.addColorStop(0, (fiel ? 'rgba(255,246,232,' : 'rgba(200,130,45,') + ((fiel ? 0.085 + 0.025 * Math.sin(t * 0.7 + k) : 0.20 + 0.06 * Math.sin(t * 0.7 + k)) * m).toFixed(3) + ')'); gr.addColorStop(1, fiel ? 'rgba(255,246,232,0)' : 'rgba(200,130,45,0)'); cx.fillStyle = gr; cx.fillRect(0, 0, W, H);
     }
     for (var f = 0; f < 2; f++) {
       var ph = ((t * 0.045 + f * 0.5) % 1), al = Math.sin(ph * Math.PI), ang = (-35 + 10 * Math.sin(t * 0.2 + f)) * Math.PI / 180;
