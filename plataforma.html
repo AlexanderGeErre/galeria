@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Alexander Ge Erre · Acceso para fotógrafos</title>
-<link rel="icon" href="imagenes/logo-icono.png.jpg">
+<link rel="icon" href="imagenes/logo-icono.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
@@ -20,8 +20,8 @@ button{cursor:pointer}
 :focus-visible{outline:2px solid var(--ac);outline-offset:2px}
 .vista{min-height:100vh;display:grid;grid-template-columns:1fr}
 .lado{background:var(--pn);display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
-.lado picture{display:contents}.lado img{width:min(420px,90%);aspect-ratio:2.2/1;object-fit:cover;mix-blend-mode:multiply;filter:url(#aBlanco)}
-@media(prefers-color-scheme:dark){.lado img{mix-blend-mode:normal;filter:none;border-radius:6px}}
+.lado img{width:min(420px,90%);height:auto}.lado .lgD{display:none}
+@media(prefers-color-scheme:dark){.lado .lgL{display:none}.lado .lgD{display:block}}
 .caja{display:flex;flex-direction:column;justify-content:center;gap:1rem;padding:2rem 1.5rem 3rem;max-width:30rem;width:100%;margin:0 auto}
 .caja h1{font-size:clamp(2.1rem,5vw,2.8rem)}
 .sub{color:var(--su)}
@@ -52,7 +52,7 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><filter id="aBlanco" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncR type="linear" slope="1.045"/><feFuncG type="linear" slope="1.05"/><feFuncB type="linear" slope="1.075"/></feComponentTransfer></filter></defs></svg>
 
 <main id="vAuth" class="vista" hidden>
-  <div class="lado"><picture><source media="(prefers-color-scheme: dark)" srcset="imagenes/logo-oscuro.png.jpg"><img src="imagenes/logo-claro.png.jpg" alt="Alexander Ge Erre, fotografía y videografía profesional"></picture></div>
+  <div class="lado"><img class="lgL" data-n="logo-oscuro" data-i="0" src="imagenes/logo-oscuro.png" alt="Logotipo del estudio"><img class="lgD" data-n="logo-claro" data-i="0" src="imagenes/logo-claro.png" alt=""></div>
   <div class="caja">
     <h1>Tu espacio como fotógrafo</h1>
     <p class="sub">Entra o crea tu cuenta para administrar tus clientes y galerías.</p>
@@ -72,7 +72,7 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
 </main>
 
 <main id="vEspacio" class="vista" hidden>
-  <div class="lado"><picture><source media="(prefers-color-scheme: dark)" srcset="imagenes/logo-oscuro.png.jpg"><img src="imagenes/logo-claro.png.jpg" alt=""></picture></div>
+  <div class="lado"><img class="lgL" data-n="logo-oscuro" data-i="0" src="imagenes/logo-oscuro.png" alt=""><img class="lgD" data-n="logo-claro" data-i="0" src="imagenes/logo-claro.png" alt=""></div>
   <div class="caja">
     <h1>Crea tu espacio</h1>
     <p class="sub">Será el nombre que verán tus clientes en sus galerías.</p>
@@ -86,7 +86,7 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
 </main>
 
 <main id="vNueva" class="vista" hidden>
-  <div class="lado"><picture><source media="(prefers-color-scheme: dark)" srcset="imagenes/logo-oscuro.png.jpg"><img src="imagenes/logo-claro.png.jpg" alt=""></picture></div>
+  <div class="lado"><img class="lgL" data-n="logo-oscuro" data-i="0" src="imagenes/logo-oscuro.png" alt=""><img class="lgD" data-n="logo-claro" data-i="0" src="imagenes/logo-claro.png" alt=""></div>
   <div class="caja">
     <h1>Nueva contraseña</h1>
     <p class="sub">Escribe la contraseña que usarás de ahora en adelante.</p>
@@ -103,6 +103,15 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="panel.js"></script>
+<script>
+(function(){
+  var LX = ['.png', '.svg', '.png.jpg', '.jpg.jpg', '.jpg', '.jpeg', '.webp', '.png.png'];
+  document.addEventListener('error', function(e){
+    var t = e.target; if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.n) return;
+    var i = +t.dataset.i + 1; if (i < LX.length) { t.dataset.i = i; t.src = 'imagenes/' + t.dataset.n + LX[i]; } else t.style.visibility = 'hidden';
+  }, true);
+})();
+</script>
 <script>
 (function(){
   var SUPA_URL = 'https://wvinketfnxnfvseaeswz.supabase.co';
@@ -162,7 +171,8 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
     if (recuperando) { ver('vNueva'); return; }
     var ss = await db.auth.getSession();
     if (!ss.data || !ss.data.session) { ver('vAuth'); return; }
-    var r = await db.from('photographers').select('id,studio_name,slug').eq('owner_id', ss.data.session.user.id).maybeSingle();
+    var r = await db.from('photographers').select('id,studio_name,slug,logo_para_claro,logo_para_oscuro,wa_phone,contact_email,watermark_default').eq('owner_id', ss.data.session.user.id).maybeSingle();
+    if (r.error) r = await db.from('photographers').select('id,studio_name,slug').eq('owner_id', ss.data.session.user.id).maybeSingle();
     if (r.error) { ver('vAuth'); msg('#mAuth', traducir(r.error.message)); return; }
     if (!r.data) { ver('vEspacio'); return; }
     ver('vPanel');
