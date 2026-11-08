@@ -75,53 +75,110 @@ async function cargarFoto(url){
 }
 
 // ---------- Escena: dibuja el cuadro del tiempo t (segundos) ----------
+function ease(p){ p = clamp(p, 0, 1); return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
+function duracionTotal(n, seg, estilo){ var d = seg || 2.5; return n * d + (estilo === 'pantalla' ? Math.max(0, Math.max(d, 3.2) - d) : 0); }
+// Copia desenfocada de la foto (lienzo pequeño; al agrandarlo se ve suave)
+function fondoDesenf(f, w, h, zoom, radio){
+  var s = 6, c = lienzo(w / s, h / s), x = c.getContext('2d');
+  if ('filter' in x) { x.filter = 'blur(' + radio + 'px)'; x.save(); x.translate(c.width / 2, c.height / 2); x.scale(zoom, zoom); x.translate(-c.width / 2, -c.height / 2); cubrir(x, f.bmp, f.w, f.h, -c.width * 0.1, -c.height * 0.1, c.width * 1.2, c.height * 1.2); x.restore(); x.filter = 'none'; }
+  else { var t = lienzo(18, 18 * h / w), tx = t.getContext('2d'); cubrir(tx, f.bmp, f.w, f.h, 0, 0, t.width, t.height); x.imageSmoothingQuality = 'high'; x.drawImage(t, 0, 0, c.width, c.height); }
+  return c;
+}
 function crearEscena(fotos, W, H, seg, op){
   op = op || {};
-  var n = fotos.length, vertical = H > W, u = Math.min(W, H) / 1080, D = seg || 2.5, Tr = Math.min(0.85, D * 0.4);
-  var duracion = n * D, particulas = op.particulas !== false, cache = {};
+  var estilo = op.estilo === 'pantalla' ? 'pantalla' : 'papel';
+  var n = fotos.length, vertical = H > W, u = Math.min(W, H) / 1080, D = seg || 2.5, Tr = Math.min(estilo === 'pantalla' ? 0.7 : 0.9, D * 0.42);
+  var dur = [], ini = [], tot = 0;
+  for (var q0 = 0; q0 < n; q0++) { dur[q0] = (estilo === 'pantalla' && q0 === 0) ? Math.max(D, 3.2) : D; ini[q0] = tot; tot += dur[q0]; }
+  var duracion = tot, cache = {}, papel = estilo === 'papel', particulas = papel && op.particulas !== false;
   var rnd = mulberry(20260601), P = [];
   if (particulas) for (var i = 0; i < Math.round(70 * (W * H) / (1080 * 1920)) + 30; i++) {
     var grande = rnd() < 0.12;
     P.push({ x: rnd(), y: rnd(), r: (grande ? 7 + rnd() * 8 : 1.2 + rnd() * 2.6) * u, a: grande ? 0.10 + rnd() * 0.10 : 0.35 + rnd() * 0.45, vx: (rnd() - 0.5) * 0.012, vy: -0.01 - rnd() * 0.03, f: rnd() * 6.28, g: grande });
   }
-  // textura de papel (una sola vez)
-  var ruido = lienzo(256, 256), rc = ruido.getContext('2d'), rr = mulberry(7);
-  for (var q = 0; q < 2600; q++) { rc.fillStyle = 'rgba(' + (rr() < 0.5 ? '120,100,70' : '255,255,255') + ',' + (0.03 + rr() * 0.07).toFixed(3) + ')'; rc.fillRect(rr() * 256, rr() * 256, 1 + rr() * 2, 1 + rr() * 2); }
+  var ruido = lienzo(256, 256), rc = ruido.getContext('2d'), rr0 = mulberry(7);
+  for (var q = 0; q < 2600; q++) { rc.fillStyle = 'rgba(' + (rr0() < 0.5 ? '120,100,70' : '255,255,255') + ',' + (0.03 + rr0() * 0.07).toFixed(3) + ')'; rc.fillRect(rr0() * 256, rr0() * 256, 1 + rr0() * 2, 1 + rr0() * 2); }
 
-  function tarjeta(i){
-    if (cache[i] && cache[i].card) return cache[i];
-    var f = fotos[i], a = clamp(f.w / f.h, 0.62, 1.7);
-    var maxPW = (vertical ? 0.95 : 0.9) * W, maxPH = (vertical ? 0.74 : 0.8) * H;
-    var pw = Math.min(maxPW, maxPH * a), ph = pw / a, b = (vertical ? 0.036 : 0.032) * Math.min(W, H) * (vertical ? 1 : 1.1), pad = 70 * u;
-    var cw = pw + 2 * b, ch = ph + 2 * b, c = lienzo(cw + 2 * pad, ch + 2 * pad), cx = c.getContext('2d');
-    cx.shadowColor = 'rgba(30,20,10,.38)'; cx.shadowBlur = 46 * u; cx.shadowOffsetY = 16 * u; cx.fillStyle = '#F6F1E6'; cx.fillRect(pad, pad, cw, ch);
-    cx.shadowColor = 'transparent'; cx.shadowBlur = 0; cx.shadowOffsetY = 0;
-    var g = cx.createLinearGradient(pad, pad, pad + cw, pad + ch); g.addColorStop(0, '#FBF8F1'); g.addColorStop(1, '#EBE3D3'); cx.fillStyle = g; cx.fillRect(pad, pad, cw, ch);
-    cx.fillStyle = cx.createPattern(ruido, 'repeat'); cx.fillRect(pad, pad, cw, ch);
-    cx.save(); cx.shadowColor = 'rgba(40,30,20,.35)'; cx.shadowBlur = 6 * u; cx.fillStyle = '#000'; cx.fillRect(pad + b, pad + b, pw, ph); cx.restore();
-    cx.imageSmoothingQuality = 'high'; cubrir(cx, f.bmp, f.w, f.h, pad + b, pad + b, pw, ph);
-    var bg = lienzo(W / 6, H / 6), bx = bg.getContext('2d'), k = 1.7;
-    if ('filter' in bx) { bx.filter = 'blur(' + Math.max(2, Math.round(7 * u)) + 'px)'; bx.save(); bx.translate(bg.width / 2, bg.height / 2); bx.scale(k, k); bx.translate(-bg.width / 2, -bg.height / 2); cubrir(bx, f.bmp, f.w, f.h, -bg.width * 0.1, -bg.height * 0.1, bg.width * 1.2, bg.height * 1.2); bx.restore(); bx.filter = 'none'; }
-    else { var t = lienzo(18, 18 * H / W), tx = t.getContext('2d'); cubrir(tx, f.bmp, f.w, f.h, 0, 0, t.width, t.height); bx.imageSmoothingQuality = 'high'; bx.drawImage(t, 0, 0, bg.width, bg.height); }
-    bx.fillStyle = 'rgba(248,244,236,.34)'; bx.fillRect(0, 0, bg.width, bg.height);
-    cache[i] = { card: c, bg: bg, cw: c.width, ch: c.height };
-    Object.keys(cache).forEach(function(kk){ if (Math.abs(+kk - i) > 2) delete cache[kk]; });
-    return cache[i];
+  // Geometría del marco de papel
+  var b = 0.036 * Math.min(W, H), pad = 70 * u;
+  var ow = (vertical ? 0.92 : 0.79) * W, oh = (vertical ? 0.66 : 0.79) * H, fw = Math.round(ow - 2 * b), fh = Math.round(oh - 2 * b);
+
+  // Destellos hexagonales (sprites con desenfoque, una sola vez)
+  var sprites = [];
+  if (papel) [[255, 190, 60], [255, 120, 40], [210, 60, 45], [255, 165, 50], [190, 70, 55], [255, 205, 90]].forEach(function(col){
+    var c = lienzo(160, 160), x = c.getContext('2d'); if ('filter' in x) x.filter = 'blur(4px)';
+    x.fillStyle = 'rgb(' + col.join(',') + ')'; x.beginPath(); for (var k = 0; k < 6; k++) { var a = Math.PI / 6 + k * Math.PI / 3; x[k ? 'lineTo' : 'moveTo'](80 + 56 * Math.cos(a), 80 + 56 * Math.sin(a)); } x.closePath(); x.fill(); sprites.push(c);
+  });
+
+  function ventana(f){
+    var c = lienzo(fw, fh), x = c.getContext('2d'), asp = f.w / f.h, wa = fw / fh;
+    x.imageSmoothingQuality = 'high';
+    if (Math.abs(asp / wa - 1) < 0.10) { cubrir(x, f.bmp, f.w, f.h, 0, 0, fw, fh); return c; }
+    x.drawImage(fondoDesenf(f, fw, fh, 1.25, Math.max(2, Math.round(6 * u))), 0, 0, fw, fh);
+    x.fillStyle = 'rgba(255,255,255,.08)'; x.fillRect(0, 0, fw, fh);
+    var k = Math.min(fw / f.w, fh / f.h), pw = f.w * k, ph = f.h * k;
+    x.drawImage(f.bmp, (fw - pw) / 2, (fh - ph) / 2, pw, ph);
+    return c;
+  }
+  function activo(i){
+    if (cache[i]) return cache[i];
+    var f = fotos[i], res;
+    if (papel) {
+      var cw = fw + 2 * b, ch = fh + 2 * b, c = lienzo(cw + 2 * pad, ch + 2 * pad), cx = c.getContext('2d');
+      cx.shadowColor = 'rgba(30,20,10,.38)'; cx.shadowBlur = 46 * u; cx.shadowOffsetY = 16 * u; cx.fillStyle = '#F6F1E6'; cx.fillRect(pad, pad, cw, ch);
+      cx.shadowColor = 'transparent'; cx.shadowBlur = 0; cx.shadowOffsetY = 0;
+      var g = cx.createLinearGradient(pad, pad, pad + cw, pad + ch); g.addColorStop(0, '#FBF8F1'); g.addColorStop(1, '#EBE3D3'); cx.fillStyle = g; cx.fillRect(pad, pad, cw, ch);
+      cx.fillStyle = cx.createPattern(ruido, 'repeat'); cx.fillRect(pad, pad, cw, ch);
+      cx.save(); cx.shadowColor = 'rgba(40,30,20,.35)'; cx.shadowBlur = 6 * u; cx.fillStyle = '#000'; cx.fillRect(pad + b, pad + b, fw, fh); cx.restore();
+      cx.drawImage(ventana(f), pad + b, pad + b);
+      // fondo: la misma foto muy desenfocada + marcos grandes inclinados
+      var bg = fondoDesenf(f, W, H, 1.7, Math.max(2, Math.round(7 * u))), bx = bg.getContext('2d'), rr = mulberry(100 + i * 13);
+      bx.fillStyle = 'rgba(248,244,236,.30)'; bx.fillRect(0, 0, bg.width, bg.height);
+      for (var k = 0; k < 4; k++) {
+        var sz = (0.55 + rr() * 0.5) * bg.width, asp = fw / fh, ww = sz, hh = sz / asp;
+        bx.save(); bx.translate(rr() * bg.width, rr() * bg.height); bx.rotate((rr() < 0.5 ? -1 : 1) * (8 + rr() * 34) * Math.PI / 180);
+        bx.strokeStyle = 'rgba(255,251,242,' + (0.34 + rr() * 0.2).toFixed(2) + ')'; bx.lineWidth = Math.max(2, b * 2.4 / 6); bx.strokeRect(-ww / 2, -hh / 2, ww, hh); bx.restore();
+      }
+      res = { card: c, bg: bg, cw: c.width, ch: c.height };
+    } else {
+      var c2 = lienzo(W, H), x2 = c2.getContext('2d'), asp2 = f.w / f.h, wa2 = W / H;
+      x2.imageSmoothingQuality = 'high';
+      if (Math.abs(asp2 / wa2 - 1) <= 0.38) cubrir(x2, f.bmp, f.w, f.h, 0, 0, W, H);
+      else {
+        x2.drawImage(fondoDesenf(f, W, H, 1.3, Math.max(2, Math.round(6 * u))), 0, 0, W, H); x2.fillStyle = 'rgba(0,0,0,.14)'; x2.fillRect(0, 0, W, H);
+        var kk = Math.min(W / f.w, H / f.h), pw = f.w * kk, ph = f.h * kk; x2.drawImage(f.bmp, (W - pw) / 2, (H - ph) / 2, pw, ph);
+      }
+      res = { img: c2 };
+    }
+    cache[i] = res; Object.keys(cache).forEach(function(kk){ if (Math.abs(+kk - i) > 2) delete cache[kk]; });
+    return res;
   }
 
-  function dibujarFondo(cx, i, alfa, lt){
-    var t = tarjeta(i), z = 1 + 0.07 * clamp(lt / D, 0, 1.2);
-    cx.save(); cx.globalAlpha = alfa; cx.translate(W / 2, H / 2); cx.scale(z, z); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.bg, -W / 2, -H / 2, W, H); cx.restore();
+  // ---- Marco de papel ----
+  function capaPapel(cx, i, lt, bgDy, cardDy, tin){
+    var t = activo(i), s = (i % 2 ? -1 : 1), h = clamp(lt / D, 0, 1.3);
+    cx.save(); cx.translate(W / 2, H / 2 + bgDy); cx.rotate(s * 0.9 * h * Math.PI / 180); cx.scale(1.06 * (1 + 0.08 * h), 1.06 * (1 + 0.08 * h)); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.bg, -W / 2, -H / 2, W, H); cx.restore();
+    var rr = GIROS[i % GIROS.length], rot = rr + s * 0.6 * h, esc = 1 + 0.035 * h;
+    if (tin < 1) { var p = ease(tin); rot += (1 - p) * (rr >= 0 ? -3 : 3); esc *= 1 + (1 - p) * 0.12; }
+    cx.save(); cx.translate(W / 2, H / 2 + cardDy); cx.rotate(rot * Math.PI / 180); cx.scale(esc, esc); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.card, -t.cw / 2, -t.ch / 2); cx.restore();
   }
-  function dibujarTarjeta(cx, i, lt, modo, tp){
-    var t = tarjeta(i), s = (i % 2 ? -1 : 1), rr = GIROS[i % GIROS.length], h = clamp(lt / D, 0, 1.3);
-    var rot = rr + s * 0.6 * h, esc = 1 + 0.035 * h, dy = 0, alfa = 1, desen = 0;
-    if (modo === 'in') { var p = salida(tp); rot += (1 - p) * (rr >= 0 ? -4.5 : 4.5); esc *= 1 + (1 - p) * 0.3; dy = (1 - p) * 0.09 * H; alfa = clamp(tp / 0.45, 0, 1); desen = (1 - p) * 12 * u; }
-    else if (modo === 'out') { var q = entrada(tp); rot += s * 3 * q; esc *= 1 + 0.1 * q; dy = -q * 0.05 * H; alfa = 1 - q; }
-    cx.save(); cx.globalAlpha = alfa;
-    if (desen > 0.5 && 'filter' in cx) cx.filter = 'blur(' + desen.toFixed(1) + 'px)';
-    cx.translate(W / 2, H / 2 + dy); cx.rotate(rot * Math.PI / 180); cx.scale(esc, esc); cx.imageSmoothingQuality = 'high';
-    cx.drawImage(t.card, -t.cw / 2, -t.ch / 2); cx.restore();
+  function destellos(cx, t){
+    cx.save(); cx.globalCompositeOperation = 'lighter';
+    var R = 0.62 * Math.max(W, H), L = [[0.35, 0.21, 0.0], [0.6, 0.17, 2.1]];
+    for (var k = 0; k < L.length; k++) {
+      var x = W * (0.5 + 0.5 * Math.cos(t * L[k][1] + L[k][2])), y = H * (0.5 + 0.45 * Math.sin(t * L[k][1] * 0.8 + L[k][2] * 1.7)), gr = cx.createRadialGradient(x, y, 0, x, y, R);
+      gr.addColorStop(0, 'rgba(200,130,45,' + (0.20 + 0.06 * Math.sin(t * 0.7 + k)).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(200,130,45,0)'); cx.fillStyle = gr; cx.fillRect(0, 0, W, H);
+    }
+    for (var f = 0; f < 2; f++) {
+      var ph = ((t * 0.045 + f * 0.5) % 1), al = Math.sin(ph * Math.PI), ang = (-35 + 10 * Math.sin(t * 0.2 + f)) * Math.PI / 180;
+      var bx = W * (-0.1 + 1.2 * ph), by = H * (0.25 + 0.5 * ((f * 0.37 + 0.2) % 1)), sp = 0.085 * Math.max(W, H), Rr = 0.07 * Math.min(W, H) * (vertical ? 1.4 : 1.9);
+      for (var k2 = 0; k2 < sprites.length; k2++) {
+        var d = (k2 - 1) * sp, rs = Rr * (1.1 - 0.13 * k2) / 56;
+        cx.globalAlpha = al * (k2 === 0 ? 0.33 : 0.16 + 0.04 * (k2 % 3));
+        cx.drawImage(sprites[k2], bx + d * Math.cos(ang) - 80 * rs, by + d * Math.sin(ang) - 80 * rs, 160 * rs, 160 * rs);
+      }
+    }
+    cx.restore();
   }
   function dibujarParticulas(cx, t){
     if (!P.length) return;
@@ -134,20 +191,59 @@ function crearEscena(fotos, W, H, seg, op){
     cx.restore();
   }
 
+  // ---- Pantalla completa (estilo iPhone) ----
+  function capaPantalla(cx, i, lt, dx){
+    var t = activo(i), h = clamp(lt / D, 0, 1.3), z = 1 + 0.08 * h, s = (i % 2 ? -1 : 1);
+    cx.save(); cx.translate(W / 2 + dx + s * 0.02 * W * h, H / 2); cx.scale(z, z); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.img, -W / 2, -H / 2); cx.restore();
+  }
+  function lineas(cx, txt, maxW){
+    var pal = String(txt || '').split(/\s+/).filter(Boolean), out = [], cur = '';
+    pal.forEach(function(w){ var t2 = cur ? cur + ' ' + w : w; if (cx.measureText(t2).width > maxW && cur) { out.push(cur); cur = w; } else cur = t2; });
+    if (cur) out.push(cur); return out.slice(0, 3);
+  }
+  function portada(cx, t){
+    var d0 = dur[0], al = Math.min(clamp((t - 0.25) / 0.55, 0, 1), clamp((d0 - 0.15 - t) / 0.45, 0, 1));
+    var tit = String(op.titulo || '').trim(), sub = String(op.subtitulo || '').trim().toUpperCase();
+    if (al <= 0 || (!tit && !sub)) return;
+    var gr = cx.createLinearGradient(0, H * 0.45, 0, H); gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,' + (0.5 * al).toFixed(3) + ')'); cx.fillStyle = gr; cx.fillRect(0, H * 0.45, W, H * 0.55);
+    var fs = vertical ? W * 0.072 : H * 0.095, fam = 'Jost, "Helvetica Neue", Arial, sans-serif';
+    cx.save(); cx.globalAlpha = al; cx.textAlign = 'center'; cx.textBaseline = 'alphabetic'; cx.fillStyle = '#fff'; cx.shadowColor = 'rgba(0,0,0,.35)'; cx.shadowBlur = fs * 0.25;
+    cx.font = '600 ' + fs + 'px ' + fam;
+    var L = lineas(cx, tit, W * 0.82), y0 = (vertical ? 0.80 : 0.80) * H, lh = fs * 1.14, ysub = y0 + (L.length - 1) * lh * 0 ;
+    var yFirst = y0 - (L.length - 1) * lh;
+    L.forEach(function(s, k){ cx.fillText(s, W / 2, yFirst + k * lh + (1 - al) * fs * 0.4); });
+    if (sub) { cx.font = '500 ' + (fs * 0.34) + 'px ' + fam; try { cx.letterSpacing = (fs * 0.07) + 'px'; } catch (e) {} cx.fillStyle = 'rgba(255,255,255,.88)'; cx.fillText(sub, W / 2, y0 + fs * 0.62 + (1 - al) * fs * 0.4); try { cx.letterSpacing = '0px'; } catch (e) {} }
+    cx.restore();
+  }
+
   function dibujar(cx, t){
     t = clamp(t, 0, duracion - 0.0001);
-    var i = Math.min(n - 1, Math.floor(t / D)), lt = t - i * D;
-    cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = 1; cx.fillStyle = '#EDE7DA'; cx.fillRect(0, 0, W, H);
-    var enTr = i > 0 && lt < Tr, entra = lt < Tr;
-    if (enTr) { dibujarFondo(cx, i - 1, 1, lt + D); dibujarFondo(cx, i, salida(lt / Tr), lt); } else dibujarFondo(cx, i, 1, lt);
-    if (enTr) dibujarTarjeta(cx, i - 1, lt + D, 'out', lt / Tr);
-    dibujarTarjeta(cx, i, lt, entra ? 'in' : 'hold', lt / Tr);
-    dibujarParticulas(cx, t);
-    var fin = duracion - t, ini = t;
-    var neg = Math.max(clamp(1 - fin / 0.7, 0, 1), clamp(1 - ini / 0.35, 0, 1));
+    var i = 0; while (i < n - 1 && t >= ini[i + 1]) i++;
+    var lt = t - ini[i];
+    cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = 1; cx.filter = 'none'; cx.fillStyle = papel ? '#0b0806' : '#000'; cx.fillRect(0, 0, W, H);
+    var fil = 'filter' in cx;
+    if (papel) {
+      if (lt < Tr) {
+        var p = ease(lt / Tr), bl = Math.sin(Math.PI * p) * 9 * u;
+        if (fil && bl > 0.6) cx.filter = 'blur(' + bl.toFixed(1) + 'px)';
+        if (i > 0) capaPapel(cx, i - 1, lt + dur[i - 1], -p * H * 0.9, -p * H * 1.12, 1);
+        capaPapel(cx, i, lt, (1 - p) * H, (1 - p) * H * 1.15, lt / Tr);
+        cx.filter = 'none';
+      } else capaPapel(cx, i, lt, 0, 0, 1);
+      destellos(cx, t); dibujarParticulas(cx, t);
+    } else {
+      if (i > 0 && lt < Tr) {
+        var p2 = ease(lt / Tr);
+        capaPantalla(cx, i - 1, lt + dur[i - 1], -p2 * W * 0.35); cx.fillStyle = 'rgba(0,0,0,' + (0.4 * p2).toFixed(3) + ')'; cx.fillRect(0, 0, W, H);
+        capaPantalla(cx, i, lt, (1 - p2) * W);
+      } else capaPantalla(cx, i, lt, 0);
+      if (i === 0) portada(cx, t);
+    }
+    var fin = duracion - t, ini0 = t;
+    var neg = Math.max(clamp(1 - fin / 0.7, 0, 1), papel ? 0 : clamp(1 - ini0 / 0.35, 0, 1));
     if (neg > 0) { cx.fillStyle = 'rgba(8,6,4,' + neg.toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
   }
-  return { W: W, H: H, duracion: duracion, dibujar: dibujar, n: n, seg: D };
+  return { W: W, H: H, duracion: duracion, dibujar: dibujar, n: n, seg: D, estilo: estilo };
 }
 
 // ---------- Exportar a MP4 ----------
@@ -183,6 +279,6 @@ async function exportar(escena, o){
   return mux.finalizar();
 }
 
-var API = { Mp4Mux: Mp4Mux, soportado: soportado, crearEscena: crearEscena, exportar: exportar, cargarFoto: cargarFoto };
+var API = { Mp4Mux: Mp4Mux, soportado: soportado, crearEscena: crearEscena, duracionTotal: duracionTotal, exportar: exportar, cargarFoto: cargarFoto };
 if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.Slideshow = API;
 })(typeof window !== 'undefined' ? window : this);
