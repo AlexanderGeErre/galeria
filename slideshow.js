@@ -96,12 +96,13 @@ function crearEscena(fotos, W, H, seg, op){
   function _rnd(){ _sd = (_sd + 0x6D2B79F5) >>> 0; var t = _sd; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }
   var NOMS = ['der', 'izq', 'arriba', 'abajo'];
   function secuencia(n, ini){ var r = [], p = ini || ''; for (var k = 0; k < n; k++) { var c; do { c = NOMS[Math.floor(_rnd() * 4)]; } while (c === p); r.push(c); p = c; } return r; }
-  var DP = secuencia(n + 1), DS = secuencia(n + 1);
+  function seqH(n){ var r = [], H2 = ['izq', 'der']; for (var k = 0; k < n; k++) { var c = H2[Math.floor(_rnd() * 2)]; if (k > 1 && r[k - 1] === c && r[k - 2] === c) c = c === 'izq' ? 'der' : 'izq'; r.push(c); } return r; }
+  function seqT(n){ var r = [], T2 = ['desliza', 'disuelve']; for (var k = 0; k < n; k++) { var c = T2[_rnd() < 0.58 ? 0 : 1]; if (k > 1 && r[k - 1] === c && r[k - 2] === c) c = c === 'desliza' ? 'disuelve' : 'desliza'; r.push(c); } return r; }
+  var DP = secuencia(n + 1), DS = seqH(n + 1), TS = seqT(n + 1);
   function dirP(i){ var t = op.transicion; if (VEC[t]) return t; return DP[i]; }
   function dirS(i){ return i < 1 ? 'izq' : DS[i]; }
-  var CICLO = ['disuelve', 'desliza', 'corte', 'desliza', 'desliza', 'disuelve', 'corte', 'desliza'];
-  function tipoTr(i){ var t = op.transicion; if (t === 'desliza' || t === 'disuelve' || t === 'corte') return t; return CICLO[(i - 1 + 800) % CICLO.length]; }
-  function trDe(i){ if (papel) return Tr; var t = tipoTr(i); return t === 'corte' ? 0 : (t === 'disuelve' ? Math.min(0.8, D * 0.45) : Tr); }
+  function tipoTr(i){ var t = op.transicion; if (t === 'desliza' || t === 'disuelve') return t; return TS[i]; }
+  function trDe(i){ if (papel) return Tr; var t = tipoTr(i); return (t === 'disuelve' ? Math.min(0.8, D * 0.45) : Tr); }
   var I = op.intro ? INTRO : 0, logo = op.logo || null;
   var duracion = tot + I, cache = {}, papel = estilo === 'papel', particulas = papel && op.particulas !== false;
   var rnd = mulberry(20260601), P = [];
@@ -319,6 +320,7 @@ function crearEscena(fotos, W, H, seg, op){
           if (i > 0) capaPantalla(cx, i - 1, lt + dur[i - 1], vv[0] * p2 * W * 0.35, vv[1] * p2 * H * 0.35); else capaIntro(cx, t, vv[0] * p2 * W * 0.35, vv[1] * p2 * H * 0.35);
           cx.fillStyle = 'rgba(0,0,0,' + (0.4 * p2).toFixed(3) + ')'; cx.fillRect(0, 0, W, H);
           capaPantalla(cx, i, lt, -vv[0] * (1 - p2) * W, -vv[1] * (1 - p2) * H);
+          var ex = vv[0] ? (vv[0] > 0 ? p2 * W : (1 - p2) * W) : 0, ey = vv[1] ? (vv[1] > 0 ? p2 * H : (1 - p2) * H) : 0, gr = Math.max(2, 3.5 * u); cx.fillStyle = '#000'; if (vv[0]) cx.fillRect(ex - gr / 2, 0, gr, H); else cx.fillRect(0, ey - gr / 2, W, gr);
         }
       } else capaPantalla(cx, i, lt, 0);
       if (i === 0 && tt >= 0) portada(cx, tt);
