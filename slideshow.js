@@ -88,9 +88,12 @@ function fondoDesenf(f, w, h, zoom, radio){
 function crearEscena(fotos, W, H, seg, op){
   op = op || {};
   var estilo = op.estilo === 'pantalla' ? 'pantalla' : 'papel';
-  var n = fotos.length, vertical = H > W, u = Math.min(W, H) / 1080, D = seg || 2.5, Tr = Math.min(estilo === 'pantalla' ? 0.7 : 0.9, D * 0.42);
+  var n = fotos.length, vertical = H > W, u = Math.min(W, H) / 1080, D = seg || 2.5, Tr = Math.min(estilo === 'pantalla' ? 0.7 : 1.1, D * (estilo === 'pantalla' ? 0.42 : 0.55));
   var dur = [], ini = [], tot = 0;
   for (var q0 = 0; q0 < n; q0++) { dur[q0] = (estilo === 'pantalla' && q0 === 0) ? Math.max(D, 3.2) : D; ini[q0] = tot; tot += dur[q0]; }
+  var CICLO = ['disuelve', 'desliza', 'corte', 'desliza', 'desliza', 'disuelve', 'corte', 'desliza'];
+  function tipoTr(i){ var t = op.transicion; if (t === 'desliza' || t === 'disuelve' || t === 'corte') return t; return CICLO[(i - 1 + 800) % CICLO.length]; }
+  function trDe(i){ if (papel) return Tr; var t = tipoTr(i); return t === 'corte' ? 0 : (t === 'disuelve' ? Math.min(0.8, D * 0.45) : Tr); }
   var I = op.intro ? INTRO : 0, logo = op.logo || null;
   var duracion = tot + I, cache = {}, papel = estilo === 'papel', particulas = papel && op.particulas !== false;
   var rnd = mulberry(20260601), P = [];
@@ -102,8 +105,8 @@ function crearEscena(fotos, W, H, seg, op){
   for (var q = 0; q < 2600; q++) { rc.fillStyle = 'rgba(' + (rr0() < 0.5 ? '120,100,70' : '255,255,255') + ',' + (0.03 + rr0() * 0.07).toFixed(3) + ')'; rc.fillRect(rr0() * 256, rr0() * 256, 1 + rr0() * 2, 1 + rr0() * 2); }
 
   // Geometría del marco de papel
-  var b = 0.036 * Math.min(W, H), pad = 70 * u;
-  var ow = (vertical ? 0.92 : 0.79) * W, oh = (vertical ? 0.66 : 0.79) * H, fw = Math.round(ow - 2 * b), fh = Math.round(oh - 2 * b);
+  var b = vertical ? 0.074 * W : 0.036 * Math.min(W, H), pad = 70 * u;
+  var ow = (vertical ? 1.14 : 0.79) * W, oh = (vertical ? 0.76 : 0.79) * H, fw = Math.round(ow - 2 * b), fh = Math.round(oh - 2 * b);
 
   // Destellos hexagonales (sprites con desenfoque, una sola vez)
   var sprites = [];
@@ -115,7 +118,7 @@ function crearEscena(fotos, W, H, seg, op){
   function ventana(f){
     var c = lienzo(fw, fh), x = c.getContext('2d'), asp = f.w / f.h, wa = fw / fh;
     x.imageSmoothingQuality = 'high';
-    if (Math.abs(asp / wa - 1) < 0.10) { cubrir(x, f.bmp, f.w, f.h, 0, 0, fw, fh); return c; }
+    var rz = asp / wa; if (rz > 0.72 && rz < 1.4) { cubrir(x, f.bmp, f.w, f.h, 0, 0, fw, fh); return c; }
     x.drawImage(fondoDesenf(f, fw, fh, 1.25, Math.max(2, Math.round(6 * u))), 0, 0, fw, fh);
     x.fillStyle = 'rgba(255,255,255,.08)'; x.fillRect(0, 0, fw, fh);
     var k = Math.min(fw / f.w, fh / f.h), pw = f.w * k, ph = f.h * k;
@@ -157,36 +160,64 @@ function crearEscena(fotos, W, H, seg, op){
   }
 
   // ---- Marco de papel ----
-  function capaPapel(cx, i, lt, bgDy, cardDy, tin){
-    var t = activo(i), s = (i % 2 ? -1 : 1), h = clamp(lt / D, 0, 1.3);
-    cx.save(); cx.translate(W / 2, H / 2 + bgDy); cx.rotate(s * 0.9 * h * Math.PI / 180); cx.scale(1.06 * (1 + 0.08 * h), 1.06 * (1 + 0.08 * h)); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.bg, -W / 2, -H / 2, W, H); cx.restore();
+  function capaPapel(cx, i, lt, o){
+    o = o || {};
+    var t = activo(i), s = (i % 2 ? -1 : 1), h = clamp(lt / D, 0, 1.3), tin = o.tin == null ? 1 : o.tin;
+    cx.save(); cx.translate(W / 2 + (o.bgDx || 0), H / 2 + (o.bgDy || 0)); cx.rotate(s * 0.9 * h * Math.PI / 180); cx.scale(1.06 * (1 + 0.08 * h), 1.06 * (1 + 0.08 * h)); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.bg, -W / 2, -H / 2, W, H); cx.restore();
     var rr = GIROS[i % GIROS.length], rot = rr + s * 0.6 * h, esc = 1 + 0.035 * h;
     if (tin < 1) { var p = ease(tin); rot += (1 - p) * (rr >= 0 ? -3 : 3); esc *= 1 + (1 - p) * 0.12; }
-    cx.save(); cx.translate(W / 2, H / 2 + cardDy); cx.rotate(rot * Math.PI / 180); cx.scale(esc, esc); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.card, -t.cw / 2, -t.ch / 2); cx.restore();
+    cx.save(); cx.translate(W / 2 + (o.cardDx || 0), H / 2 + (o.cardDy || 0)); cx.rotate(rot * Math.PI / 180); cx.scale(esc, esc); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.card, -t.cw / 2, -t.ch / 2);
+    if (o.veil > 0.001) {
+      var x0 = -t.cw / 2 + pad + b, y0 = -t.ch / 2 + pad + b, fe = fw * 0.22, ex = x0 + (1 - o.veil) * (fw + fe) - fe;
+      cx.beginPath(); cx.rect(x0, y0, fw, fh); cx.clip();
+      var gv = cx.createLinearGradient(ex, 0, ex + fe, 0); gv.addColorStop(0, 'rgba(236,236,236,0)'); gv.addColorStop(1, 'rgba(236,236,236,.94)');
+      cx.fillStyle = gv; cx.fillRect(ex, y0, fe, fh); cx.fillStyle = 'rgba(236,236,236,.94)'; cx.fillRect(ex + fe, y0, fw, fh);
+    }
+    cx.restore();
   }
-  function destellos(cx, t){
+  // Barrido blanco: una franja blanca desenfocada cruza de izquierda a derecha y el marco nuevo entra por la izquierda
+  var tmp = null;
+  function barrido(cx, i, lt, trr){
+    var p = ease(lt / trr), hw = 0.4 * W, xc = -0.45 * W + p * 1.9 * W, e2 = ease(clamp((p - 0.12) / 0.88, 0, 1));
+    capaPapel(cx, i - 1, lt + dur[i - 1], { bgDx: p * 0.10 * W, cardDx: p * 0.32 * W });
+    if (!tmp) tmp = lienzo(W, H);
+    var tx = tmp.getContext('2d'); tx.setTransform(1, 0, 0, 1, 0, 0); tx.globalCompositeOperation = 'source-over'; tx.globalAlpha = 1; tx.clearRect(0, 0, W, H);
+    capaPapel(tx, i, lt, { bgDx: (p - 1) * 0.12 * W, cardDx: -(1 - e2) * 1.1 * W, tin: e2, veil: 1 - clamp((p - 0.42) / 0.5, 0, 1) });
+    tx.globalCompositeOperation = 'destination-in';
+    var gm = tx.createLinearGradient(xc - 0.08 * W, 0, xc + 0.08 * W, 0); gm.addColorStop(0, 'rgba(0,0,0,1)'); gm.addColorStop(1, 'rgba(0,0,0,0)');
+    tx.fillStyle = gm; tx.fillRect(0, 0, W, H); tx.globalCompositeOperation = 'source-over';
+    cx.drawImage(tmp, 0, 0);
+    var gb = cx.createLinearGradient(xc - hw, 0, xc + hw, 0);
+    gb.addColorStop(0, 'rgba(240,240,240,0)'); gb.addColorStop(0.3, 'rgba(240,240,240,.93)'); gb.addColorStop(0.7, 'rgba(240,240,240,.93)'); gb.addColorStop(1, 'rgba(240,240,240,0)');
+    cx.fillStyle = gb; cx.fillRect(xc - hw, 0, 2 * hw, H);
+    cx.save(); cx.beginPath(); cx.rect(xc - hw, 0, 2 * hw, H); cx.clip();
+    var bk = [[0.2, 0.22, 0.28], [-0.1, 0.55, 0.22], [0.1, 0.82, 0.3]];
+    for (var q = 0; q < bk.length; q++) { var bx2 = xc + bk[q][0] * hw, by2 = bk[q][1] * H, br = bk[q][2] * Math.min(W, H) * 0.9, gr = cx.createRadialGradient(bx2, by2, 0, bx2, by2, br); gr.addColorStop(0, 'rgba(210,210,210,.55)'); gr.addColorStop(1, 'rgba(210,210,210,0)'); cx.fillStyle = gr; cx.fillRect(bx2 - br, by2 - br, 2 * br, 2 * br); }
+    cx.restore();
+  }
+  function destellos(cx, t, m){
     cx.save(); cx.globalCompositeOperation = 'lighter';
     var R = 0.62 * Math.max(W, H), L = [[0.35, 0.21, 0.0], [0.6, 0.17, 2.1]];
     for (var k = 0; k < L.length; k++) {
       var x = W * (0.5 + 0.5 * Math.cos(t * L[k][1] + L[k][2])), y = H * (0.5 + 0.45 * Math.sin(t * L[k][1] * 0.8 + L[k][2] * 1.7)), gr = cx.createRadialGradient(x, y, 0, x, y, R);
-      gr.addColorStop(0, 'rgba(200,130,45,' + (0.20 + 0.06 * Math.sin(t * 0.7 + k)).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(200,130,45,0)'); cx.fillStyle = gr; cx.fillRect(0, 0, W, H);
+      gr.addColorStop(0, 'rgba(200,130,45,' + ((0.20 + 0.06 * Math.sin(t * 0.7 + k)) * m).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(200,130,45,0)'); cx.fillStyle = gr; cx.fillRect(0, 0, W, H);
     }
     for (var f = 0; f < 2; f++) {
       var ph = ((t * 0.045 + f * 0.5) % 1), al = Math.sin(ph * Math.PI), ang = (-35 + 10 * Math.sin(t * 0.2 + f)) * Math.PI / 180;
       var bx = W * (-0.1 + 1.2 * ph), by = H * (0.25 + 0.5 * ((f * 0.37 + 0.2) % 1)), sp = 0.085 * Math.max(W, H), Rr = 0.07 * Math.min(W, H) * (vertical ? 1.4 : 1.9);
       for (var k2 = 0; k2 < sprites.length; k2++) {
         var d = (k2 - 1) * sp, rs = Rr * (1.1 - 0.13 * k2) / 56;
-        cx.globalAlpha = al * (k2 === 0 ? 0.33 : 0.16 + 0.04 * (k2 % 3));
+        cx.globalAlpha = m * al * (k2 === 0 ? 0.33 : 0.16 + 0.04 * (k2 % 3));
         cx.drawImage(sprites[k2], bx + d * Math.cos(ang) - 80 * rs, by + d * Math.sin(ang) - 80 * rs, 160 * rs, 160 * rs);
       }
     }
     cx.restore();
   }
-  function dibujarParticulas(cx, t){
+  function dibujarParticulas(cx, t, m){
     if (!P.length) return;
     cx.save();
     for (var i = 0; i < P.length; i++) {
-      var p = P[i], x = (((p.x + p.vx * t) % 1) + 1) % 1 * W, y = (((p.y + p.vy * t) % 1) + 1) % 1 * H, al = p.a * (0.55 + 0.45 * Math.sin(p.f + t * (p.g ? 0.6 : 1.4)));
+      var p = P[i], x = (((p.x + p.vx * t) % 1) + 1) % 1 * W, y = (((p.y + p.vy * t) % 1) + 1) % 1 * H, al = m * p.a * (0.55 + 0.45 * Math.sin(p.f + t * (p.g ? 0.6 : 1.4)));
       if (p.g) { var gr = cx.createRadialGradient(x, y, 0, x, y, p.r); gr.addColorStop(0, 'rgba(255,255,255,' + al.toFixed(3) + ')'); gr.addColorStop(1, 'rgba(255,255,255,0)'); cx.fillStyle = gr; cx.beginPath(); cx.arc(x, y, p.r, 0, 6.2832); cx.fill(); }
       else { cx.fillStyle = 'rgba(255,255,255,' + al.toFixed(3) + ')'; cx.beginPath(); cx.arc(x, y, p.r, 0, 6.2832); cx.fill(); }
     }
@@ -242,22 +273,28 @@ function crearEscena(fotos, W, H, seg, op){
     if (tt >= 0) { while (i < n - 1 && tt >= ini[i + 1]) i++; lt = tt - ini[i]; }
     if (papel) {
       if (tt < 0) capaIntro(cx, t, 0, 0);
+      else if (lt < Tr && i > 0) barrido(cx, i, lt, Tr);
       else if (lt < Tr) {
         var p = ease(lt / Tr), bl = Math.sin(Math.PI * p) * 9 * u;
         if (fil && bl > 0.6) cx.filter = 'blur(' + bl.toFixed(1) + 'px)';
-        if (i > 0) capaPapel(cx, i - 1, lt + dur[i - 1], -p * H * 0.9, -p * H * 1.12, 1);
-        else if (I > 0) capaIntro(cx, t, 0, -p * H * 0.9);
-        capaPapel(cx, i, lt, (1 - p) * H, (1 - p) * H * 1.15, lt / Tr);
+        if (I > 0) capaIntro(cx, t, 0, -p * H * 0.9);
+        capaPapel(cx, i, lt, { bgDy: (1 - p) * H, cardDy: (1 - p) * H * 1.15, tin: lt / Tr });
         cx.filter = 'none';
-      } else capaPapel(cx, i, lt, 0, 0, 1);
-      destellos(cx, t); dibujarParticulas(cx, t);
+      } else capaPapel(cx, i, lt, {});
+      if (tt >= 0) { var ef = I > 0 ? clamp(tt / Tr, 0, 1) : 1; destellos(cx, tt, ef); dibujarParticulas(cx, tt, ef); }
     } else {
       if (tt < 0) capaIntro(cx, t, 0, 0);
-      else if ((i > 0 || I > 0) && lt < Tr) {
-        var p2 = ease(lt / Tr);
-        if (i > 0) capaPantalla(cx, i - 1, lt + dur[i - 1], -p2 * W * 0.35); else capaIntro(cx, t, -p2 * W * 0.35, 0);
-        cx.fillStyle = 'rgba(0,0,0,' + (0.4 * p2).toFixed(3) + ')'; cx.fillRect(0, 0, W, H);
-        capaPantalla(cx, i, lt, (1 - p2) * W);
+      else if ((i > 0 || I > 0) && lt < (i > 0 ? trDe(i) : Tr)) {
+        var ty = i > 0 ? tipoTr(i) : 'desliza', trr = i > 0 ? trDe(i) : Tr;
+        if (ty === 'disuelve') {
+          var q = clamp(lt / trr, 0, 1), pq = q * q * (3 - 2 * q);
+          capaPantalla(cx, i - 1, lt + dur[i - 1], 0); cx.globalAlpha = pq; capaPantalla(cx, i, lt, 0); cx.globalAlpha = 1;
+        } else {
+          var p2 = ease(lt / trr);
+          if (i > 0) capaPantalla(cx, i - 1, lt + dur[i - 1], -p2 * W * 0.35); else capaIntro(cx, t, -p2 * W * 0.35, 0);
+          cx.fillStyle = 'rgba(0,0,0,' + (0.4 * p2).toFixed(3) + ')'; cx.fillRect(0, 0, W, H);
+          capaPantalla(cx, i, lt, (1 - p2) * W);
+        }
       } else capaPantalla(cx, i, lt, 0);
       if (i === 0 && tt >= 0) portada(cx, tt);
     }
