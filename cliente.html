@@ -52,7 +52,7 @@ header h1{font-size:clamp(1.8rem,5vw,2.8rem);letter-spacing:.09em;text-transform
 #visor .pr{position:absolute;left:50%;transform:translateX(-50%);bottom:1rem}.f .pr{width:42px;padding:0;justify-content:center}.f .pr span{display:none}.f.imp{box-shadow:0 0 0 3px var(--a)}
 .masivo{column-span:all;text-align:center;margin:0 0 1.2rem}#visor .dlv{position:absolute;bottom:1rem;right:1rem;text-decoration:none;padding:.5rem 1.1rem}
 #portada{position:fixed;top:0;left:0;right:0;height:100vh;height:100svh;z-index:20;display:grid;place-items:end center;color:#fff;text-align:center;overflow:hidden;background:#151413}
-#portada>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:kb 14s ease-out both}#portada:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),rgba(0,0,0,.05) 60%)}
+#portada>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:kb 14s ease-out both}#portada>img#pbg{display:none;inset:-8%;width:116%;height:116%;filter:blur(38px) brightness(.62) saturate(1.15);animation:none}#portada.ct>img#pbg{display:block}#portada.ct>img#pimg{object-fit:contain}#portada:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),rgba(0,0,0,.05) 60%)}
 .pv{position:relative;z-index:1;padding:0 1.2rem 12vh}.pv>*{animation:up 1s cubic-bezier(.2,.7,.2,1) both}.pv>*:nth-child(2){animation-delay:.12s}.pv>*:nth-child(3){animation-delay:.24s}.pv>*:nth-child(4){animation-delay:.36s}.pv h1{font-size:clamp(2rem,6vw,3.8rem);letter-spacing:.09em;text-transform:uppercase;font-weight:500;margin:.4rem 0}.pv .pe{letter-spacing:.22em;text-transform:uppercase;font-size:.8rem}.pv p{opacity:.85;margin:.3rem 0 1.6rem}
 #portada .btn{background:#fff;color:#2B2623;border-color:#fff;padding:.8rem 2rem}
 .pc{position:absolute;z-index:2;left:0;right:0;top:0;height:56px;display:flex;align-items:center;justify-content:center;gap:.8rem;opacity:0;pointer-events:none;font-family:'Cormorant Garamond',serif;font-size:1.25rem;white-space:nowrap;padding:0 1rem}.pc small{font-family:'Jost',sans-serif;letter-spacing:.2em;text-transform:uppercase;font-size:.65rem;opacity:.85}
@@ -89,11 +89,11 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   <div id="ilErr"></div>
 </main>
 
-<section id="portada" hidden><img id="pimg" alt=""><div class="pc" id="pc"><small id="pcs"></small><span id="pct"></span></div><div class="pv" id="pvv"><div class="pe" id="pest"></div><h1 id="ptit"></h1><p id="pfec"></p><button class="btn" id="pver" type="button">Ver galería</button></div></section>
+<section id="portada" hidden><img id="pbg" alt="" aria-hidden="true"><img id="pimg" alt=""><div class="pc" id="pc"><small id="pcs"></small><span id="pct"></span></div><div class="pv" id="pvv"><div class="pe" id="pest"></div><h1 id="ptit"></h1><p id="pfec"></p><button class="btn" id="pver" type="button">Ver galería</button></div></section>
 
 <div id="pspacer" hidden></div>
 <section id="galeria" hidden>
-  <header class="h"><div class="e" id="est"></div><h1 id="tit"></h1><p class="s" id="fec"></p><p id="desc"></p><p id="guia"></p><div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem"><button class="btn sec" id="show" type="button" style="padding:.3rem 1rem;font-size:.85rem" hidden>▶ Presentación</button><button class="btn sec" id="tema" type="button" style="padding:.3rem 1rem;font-size:.85rem">Tema: automático</button><button class="btn sec" id="salir" style="padding:.3rem 1rem;font-size:.85rem">Salir</button></div></header>
+  <header class="h"><div class="e" id="est"></div><h1 id="tit"></h1><p class="s" id="fec"></p><p id="desc"></p><p id="guia"></p><div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem"><button class="btn sec" id="salir" style="padding:.3rem 1rem;font-size:.85rem">Salir</button></div></header>
   <div class="cont" id="cont" hidden></div>
   <nav class="tabs" id="tabs"></nav>
   <div class="escs" id="escs" hidden></div>
@@ -169,15 +169,15 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   function fin(){ return fotos.filter(function(f){ return f.tipo === 'final'; }); }
   function puede(){ return G && G.seleccion; }
 
+  function ajustarFoto(){ var im = $('#pimg'); if (!im || !im.naturalWidth) return; var r = (im.naturalWidth / im.naturalHeight) / (window.innerWidth / window.innerHeight); $('#portada').classList.toggle('ct', r < 0.85 || r > 1.18); }
+  $('#pimg').addEventListener('load', ajustarFoto); window.addEventListener('resize', ajustarFoto);
   function portadaFoto(){ var s = sel(), f = fin(), id = G && G.portada, x; if (G && G.estado === 'delivered' && f.length) return f[0]; if (id) { x = s.filter(function(q){ return q.id === id; })[0]; if (x) return x; } return s[0] || null; }
-  function temaC(){ return leer('age-tema') || 'auto'; }
+  function temaC(){ return 'auto'; }
   function aplicarTemaC(){
     var t = temaC(), m = t === 'light' || t === 'dark' ? t : (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     document.documentElement.setAttribute('data-m', m);
-    $('#tema').textContent = { auto: 'Tema: automático', light: 'Tema: claro', dark: 'Tema: oscuro' }[t];
   }
   if (window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change', aplicarTemaC);
-  $('#tema').addEventListener('click', function(){ var n = { auto: 'light', light: 'dark', dark: 'auto' }[temaC()]; escribir('age-tema', n === 'auto' ? '' : n); aplicarTemaC(); });
   $('#pver').addEventListener('click', function(){ window.scrollTo({ top: $('#galeria').getBoundingClientRect().top + window.scrollY - 56, behavior: 'smooth' }); });
   aplicarTemaC();
 
@@ -206,7 +206,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
       pintar();
       var pf = portadaFoto();
       if (pf || G.portadaT) {
-        $('#pimg').src = url(G.portadaT || pf.t); $('#pest').textContent = E && E.studio_name ? E.studio_name : '';
+        var pu = url(G.portadaT || pf.t); $('#pimg').src = pu; $('#pbg').src = pu; $('#pest').textContent = E && E.studio_name ? E.studio_name : '';
         $('#ptit').textContent = G.titulo; $('#pfec').textContent = fechaLarga(G.fecha);
         $('#pcs').textContent = E && E.studio_name ? E.studio_name : ''; $('#pct').textContent = G.titulo; conPortada = true;
       } else conPortada = false;
@@ -269,7 +269,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     }
     $('#rej').innerHTML = h;
     setTimeout(function(){ document.querySelectorAll('.f img').forEach(function(i){ if (i.complete) i.classList.add('ld'); }); }, 0);
-    revelar(); $('#show').hidden = lista.length < 2;
+    revelar();
     $('#barra').hidden = !puede(); var enF = tab === 'finales' && G.estado === 'delivered'; $('#barraI').hidden = !enF; contarImp();
     $('#cnt').textContent = favs.size + (favs.size === 1 ? ' favorita' : ' favoritas');
     $('#enviar').disabled = !favs.size;
