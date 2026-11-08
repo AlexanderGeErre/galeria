@@ -394,19 +394,19 @@ function vidBarra(x){ var b = $('#pn-vbar'); if (b) b.style.width = Math.round(c
 function clampN(x){ return Math.max(0, Math.min(1, x)); }
 function vidStop(){ vidPlay = false; cancelAnimationFrame(vidRaf); vidCtl(); }
 function vidLiberar(){ if (vidBusy) return; vidStop(); vidLoadTok++; vidEsc = null; vidLogo = undefined; Object.keys(vidCache).forEach(function(k){ try { vidCache[k].bmp.close(); } catch(e) {} }); vidCache = {}; }
-var vidEstilo = 'papel', vidTit = null, vidSub = null, vidMarca = true, vidLogo;
+var vidEstilo = 'papel', vidTit = null, vidSub = null, vidMarca = true, vidLogo, vidTrans = 'variadas';
 function cargarLogoVideo(){
   var dato = ph.logo_para_oscuro || ph.logo_para_claro, lista = dato ? [dato] : exts('logo-claro').map(function(e){ return 'imagenes/logo-claro' + e; });
   return new Promise(function(ok){
     (function prueba(k){
       if (k >= lista.length) return ok(null);
-      var im = new Image(); im.onload = function(){ if (!im.naturalWidth) return prueba(k + 1); createImageBitmap(im).then(function(b){ ok({ bmp: b, w: b.width, h: b.height }); }, function(){ prueba(k + 1); }); }; im.onerror = function(){ prueba(k + 1); }; im.src = lista[k];
+      var im = new Image(); im.onload = function(){ if (!im.naturalWidth) return prueba(k + 1); createImageBitmap(im).then(function(b){ try { var tc = document.createElement('canvas'); tc.width = tc.height = 2; var tx = tc.getContext('2d'); tx.drawImage(b, 0, 0, 2, 2); tx.getImageData(0, 0, 1, 1); } catch (e) { return ok(null); } ok({ bmp: b, w: b.width, h: b.height }); }, function(){ prueba(k + 1); }); }; im.onerror = function(){ prueba(k + 1); }; im.src = lista[k];
     })(0);
   });
 }
 var vidEsc = null, vidT = 0, vidPlay = false, vidRaf = 0, vidLast = 0, vidDeb = 0, vidDrag = -1, vidLoadTok = 0;
 function vidSubDef(g){ var y = String(g.event_date || g.created_at || '').slice(0, 4); return [g.gallery_type, y].filter(Boolean).join(' · '); }
-function vidOp(){ var g = gal(galId) || {}; return { particulas: vidPart, estilo: vidEstilo, intro: vidMarca, logo: vidLogo || null, nombre: (ph && ph.studio_name) || '', titulo: vidTit !== null ? vidTit : (g.title || ''), subtitulo: vidSub !== null ? vidSub : vidSubDef(g) }; }
+function vidOp(){ var g = gal(galId) || {}; return { particulas: vidPart, estilo: vidEstilo, transicion: vidTrans, intro: vidMarca, logo: vidLogo || null, nombre: (ph && ph.studio_name) || '', titulo: vidTit !== null ? vidTit : (g.title || ''), subtitulo: vidSub !== null ? vidSub : vidSubDef(g) }; }
 var VFMT = { v: 'Vertical', h: 'Horizontal', ambos: 'Los dos' }, VRIT = { 3.5: 'Lento', 2.5: 'Normal', 1.5: 'Rápido' };
 function mmss(x){ x = Math.max(0, Math.round(x)); return ('0' + Math.floor(x / 60)).slice(-2) + ':' + ('0' + (x % 60)).slice(-2); }
 function vidHtml(g, sel, fin){
@@ -415,10 +415,10 @@ function vidHtml(g, sel, fin){
   return '<div class="pn-ved"><div class="pn-vizq"><p class="pn-s" id="pn-vinfo" style="margin-top:0"></p>' +
     '<div class="pn-opts" id="pn-ve"><button class="pn-opt" type="button" data-act="vid-estilo" data-v="papel"><b>Marco de papel</b><span>Marco inclinado, fondo animado, destellos y partículas</span></button><button class="pn-opt" type="button" data-act="vid-estilo" data-v="pantalla"><b>Pantalla completa</b><span>Estilo recuerdos del iPhone, con título del evento</span></button></div>' +
     '<div class="pn-opts" id="pn-vm" style="margin-top:.7rem"><button class="pn-opt" type="button" data-act="vid-marca" data-v="si"><b>Con mi logo</b><span>Empieza con tu logo, para ti y tus redes</span></button><button class="pn-opt" type="button" data-act="vid-marca" data-v="no"><b>Sin logo</b><span>Empieza directo con las fotos, para tu cliente</span></button></div>' +
-    '<div class="pn-vchips"><button class="pn-vchip" type="button" data-act="vid-fmt" id="pn-cf"></button><button class="pn-vchip" type="button" data-act="vid-ritmo" id="pn-cr"></button><button class="pn-vchip" type="button" data-act="vid-part" id="pn-cp"></button><button class="pn-vchip pri" style="grid-column:1/-1" type="button" data-act="vid-gen" id="pn-vgen"><small>Sin música</small>Generar y descargar MP4</button></div>' +
+    '<div class="pn-vchips"><button class="pn-vchip" type="button" data-act="vid-fmt" id="pn-cf"></button><button class="pn-vchip" type="button" data-act="vid-ritmo" id="pn-cr"></button><button class="pn-vchip" type="button" data-act="vid-trans" id="pn-ct"></button><button class="pn-vchip" type="button" data-act="vid-part" id="pn-cp"></button><button class="pn-vchip pri" style="grid-column:1/-1" type="button" data-act="vid-gen" id="pn-vgen"><small>Sin música</small>Generar y descargar MP4</button></div>' +
     '<div id="pn-vtx" hidden><label class="pn-s" for="pn-vtt">Título de la portada</label><input type="text" id="pn-vtt" maxlength="60"><label class="pn-s" for="pn-vts" style="display:block;margin-top:.6rem">Subtítulo (tipo de evento y año)</label><input type="text" id="pn-vts" maxlength="40"></div>' +
     '<div class="pn-vb"><i id="pn-vbar"></i></div><p class="pn-s" id="pn-vst"></p><div class="pn-row"><button class="pn-btn sec" data-act="vid-cancel" type="button" id="pn-vcan" hidden>Cancelar</button></div>' +
-    '<p class="pn-s ay">Marco de papel: marco inclinado, fondo desenfocado de la misma foto, destellos y partículas. Pantalla completa: estilo recuerdos del iPhone, con portada de título. Funciona en Chrome o Edge en computadora; deja esta pestaña abierta mientras se genera. Solo tú ves este generador.</p></div>' +
+    '<p class="pn-s ay">Marco de papel: marco inclinado, fondo desenfocado de la misma foto, destellos y partículas. Pantalla completa: estilo recuerdos del iPhone, con portada de título y transiciones variadas (deslizar, disolver, corte). Funciona en Chrome o Edge en computadora; deja esta pestaña abierta mientras se genera. Solo tú ves este generador.</p></div>' +
     '<div class="pn-vpl"><div class="pn-vprev"><canvas id="pn-vcv" width="360" height="640"></canvas></div><div class="pn-vctl"><button type="button" data-act="vid-play" id="pn-vplay" aria-label="Reproducir">▶</button><input type="range" id="pn-vseek" min="0" max="1000" value="0" aria-label="Posición"><span id="pn-vtm">00:00 / 00:00</span></div></div></div>' +
     '<div class="pn-card"><h2>Diapositivas</h2><p class="pn-s ay">Arrastra una foto para cambiar su lugar. Toca la × para quitarla.</p><div class="pn-vtira" id="pn-vtira"></div></div>' +
     '<dialog id="pn-dvp" style="width:min(54rem,94vw)"><h2>Agregar fotos</h2><p class="pn-s">Toca las fotos para agregarlas o quitarlas. Se suman al final, en el orden en que las toques.</p>' +
@@ -435,6 +435,7 @@ function vidRefrescar(){
   var chip = function(id, t, v){ var e = $(id); if (e) e.innerHTML = '<small>' + t + '</small>' + v; };
   root.querySelectorAll('#pn-ve .pn-opt').forEach(function(o){ o.classList.toggle('on', o.dataset.v === vidEstilo); }); root.querySelectorAll('#pn-vm .pn-opt').forEach(function(o){ o.classList.toggle('on', (o.dataset.v === 'si') === vidMarca); }); chip('#pn-cf', 'Formato', VFMT[vidForm]); chip('#pn-cr', 'Ritmo', VRIT[vidSeg] || 'Normal'); chip('#pn-cp', 'Partículas', vidPart ? 'Sí' : 'No');
   var cpp = $('#pn-cp'); if (cpp) cpp.hidden = vidEstilo !== 'papel';
+  chip('#pn-ct', 'Transiciones', { variadas: 'Variadas', desliza: 'Deslizar', disuelve: 'Disolver', corte: 'Corte directo' }[vidTrans]); var ctt = $('#pn-ct'); if (ctt) ctt.hidden = vidEstilo !== 'pantalla';
   var tx = $('#pn-vtx'); if (tx) { tx.hidden = vidEstilo !== 'pantalla'; var g0 = gal(galId) || {}, o0 = vidOp(); if ($('#pn-vtt') && document.activeElement !== $('#pn-vtt')) $('#pn-vtt').value = o0.titulo; if ($('#pn-vts') && document.activeElement !== $('#pn-vts')) $('#pn-vts').value = o0.subtitulo; }
   clearTimeout(vidDeb); vidEsc = null; vidDeb = setTimeout(vidPrepara, 350); vidCtl();
 }
@@ -838,6 +839,7 @@ async function accion(a, el){
   if (a === 'vid-cerrar') return $('#pn-dvp').close();
   if (a === 'vid-quitar') { vidIds.splice(+el.dataset.i, 1); vidStop(); return vidRefrescar(); }
   if (a === 'vid-estilo') { vidEstilo = el.dataset.v === 'pantalla' ? 'pantalla' : 'papel'; vidStop(); vidT = 0; return vidRefrescar(); }
+  if (a === 'vid-trans') { vidTrans = { variadas: 'desliza', desliza: 'disuelve', disuelve: 'corte', corte: 'variadas' }[vidTrans]; vidStop(); vidT = 0; return vidRefrescar(); }
   if (a === 'vid-marca') { vidMarca = el.dataset.v !== 'no'; vidStop(); vidT = 0; return vidRefrescar(); }
   if (a === 'vid-fmt') { vidForm = vidForm === 'v' ? 'h' : vidForm === 'h' ? 'ambos' : 'v'; vidStop(); return vidRefrescar(); }
   if (a === 'vid-ritmo') { vidSeg = vidSeg === 2.5 ? 1.5 : vidSeg === 1.5 ? 3.5 : 2.5; vidStop(); vidT = 0; return vidRefrescar(); }
