@@ -306,7 +306,7 @@ function crearEscena(fotos, W, H, seg, op){
         capaPapel(cx, i, lt, { bgDy: (1 - p) * H, cardDy: (1 - p) * H * 1.15, tin: lt / Tr });
         cx.filter = 'none';
       } else capaPapel(cx, i, lt, {});
-      if (tt >= 0) { var ef = I > 0 ? clamp(tt / Tr, 0, 1) : 1; destellos(cx, tt, ef); dibujarParticulas(cx, tt, ef); }
+      if (tt >= 0) { var ef = clamp((tt - 0.72 * Tr) / 0.85, 0, 1); ef = ef * ef * (3 - 2 * ef); destellos(cx, tt, ef); dibujarParticulas(cx, tt, ef); }
     } else {
       if (tt < 0) capaIntro(cx, t, 0, 0);
       else if ((i > 0 || I > 0) && lt < (i > 0 ? trDe(i) : Tr)) {
