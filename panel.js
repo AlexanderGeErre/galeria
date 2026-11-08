@@ -150,6 +150,11 @@ function dibujarQR(url){
 CSS += '.pn-ph.vsel{cursor:pointer}.pn-ph.vsel.on img{outline:3px solid var(--a);outline-offset:-3px}.pn-vn{position:absolute;left:6px;top:6px;min-width:22px;height:22px;padding:0 5px;border-radius:999px;background:var(--a);color:#fff;font-size:.72rem;font-weight:600;display:none;place-items:center}.pn-ph.vsel.on .pn-vn{display:grid}' +
 '.pn-vprev{background:#0c0a08;border-radius:12px;padding:.8rem;display:grid;place-items:center;min-height:12rem}.pn-vprev canvas{max-width:100%;height:auto;border-radius:6px;background:#000}.pn-vb{height:6px;border-radius:99px;background:var(--l);overflow:hidden;margin:.7rem 0}.pn-vb i{display:block;height:100%;width:0;background:var(--a);transition:width .2s}';
 
+CSS += '.pn-ved{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,380px);gap:1.4rem;align-items:start;margin-bottom:1.2rem}' +
+'.pn-vchips{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:1rem 0}.pn-vchip{background:var(--c);border:1px solid var(--l);border-radius:12px;padding:.9rem .6rem;color:var(--t);font:inherit;cursor:pointer;text-align:center;line-height:1.3}.pn-vchip small{display:block;color:var(--s);font-size:.74rem;margin-bottom:.15rem}.pn-vchip.pri{background:var(--a);color:var(--o);border-color:var(--a)}.pn-vchip.pri small{color:inherit;opacity:.8}.pn-vchip:disabled{opacity:.6;cursor:wait}' +
+'.pn-vpl{background:#0c0a08;border-radius:14px;overflow:hidden}.pn-vpl .pn-vprev{border-radius:0;min-height:0}.pn-vpl canvas{max-height:62vh;width:auto;max-width:100%}.pn-vctl{display:flex;align-items:center;gap:.7rem;padding:.6rem .9rem;color:#eee;background:#161310}.pn-vctl button{background:none;border:0;color:#fff;font-size:1.05rem;cursor:pointer;width:2rem;height:2rem}.pn-vctl input{flex:1;min-width:0;accent-color:var(--a)}.pn-vctl span{font-size:.78rem;font-variant-numeric:tabular-nums;white-space:nowrap}' +
+'.pn-vtira{display:flex;gap:.6rem;overflow-x:auto;padding:.3rem 0 .7rem}.pn-vt,.pn-vadd{flex:0 0 auto;width:84px;height:112px;border-radius:8px;position:relative;overflow:hidden}.pn-vadd{border:1.5px dashed var(--l);background:var(--c);color:var(--s);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;cursor:pointer;font:inherit;font-size:.78rem}.pn-vadd b{font-size:1.4rem;font-weight:300}.pn-vt img{width:100%;height:100%;object-fit:cover;display:block;cursor:grab}.pn-vt i{position:absolute;left:4px;top:4px;background:rgba(0,0,0,.6);color:#fff;font-style:normal;font-size:.68rem;border-radius:99px;padding:0 .4rem}.pn-vt button{position:absolute;right:3px;top:3px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;line-height:1;padding:0}.pn-vt.ov{outline:2px solid var(--a)}' +
+'@media(max-width:760px){.pn-ved{grid-template-columns:minmax(0,1fr)}}';
 function esc(t){ return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function $(s){ return root.querySelector(s); }
 function ilus(n){ return '<img class="pn-il" data-n="' + n + '" data-i="0" src="imagenes/' + n + exts(n)[0] + '" alt="">'; }
@@ -387,68 +392,110 @@ function cargarSlideshow(){
 function vidEstado(t){ var e = $('#pn-vst'); if (e) e.textContent = t || ''; }
 function vidBarra(x){ var b = $('#pn-vbar'); if (b) b.style.width = Math.round(clampN(x) * 100) + '%'; }
 function clampN(x){ return Math.max(0, Math.min(1, x)); }
-function vidStop(){ vidTok++; }
-function vidLiberar(){ if (vidBusy) return; vidStop(); Object.keys(vidCache).forEach(function(k){ try { vidCache[k].bmp.close(); } catch(e) {} }); vidCache = {}; }
+function vidStop(){ vidPlay = false; cancelAnimationFrame(vidRaf); vidCtl(); }
+function vidLiberar(){ if (vidBusy) return; vidStop(); vidLoadTok++; vidEsc = null; Object.keys(vidCache).forEach(function(k){ try { vidCache[k].bmp.close(); } catch(e) {} }); vidCache = {}; }
+var vidEsc = null, vidT = 0, vidPlay = false, vidRaf = 0, vidLast = 0, vidDeb = 0, vidDrag = -1, vidLoadTok = 0;
+var VFMT = { v: 'Vertical', h: 'Horizontal', ambos: 'Los dos' }, VRIT = { 3.5: 'Lento', 2.5: 'Normal', 1.5: 'Rápido' };
+function mmss(x){ x = Math.max(0, Math.round(x)); return ('0' + Math.floor(x / 60)).slice(-2) + ':' + ('0' + (x % 60)).slice(-2); }
 function vidHtml(g, sel, fin){
   var todas = fin.concat(sel);
   var thumb = function(x){ return '<figure class="pn-ph vsel" data-act="vid-foto" data-id="' + x.id + '"><span class="pn-vn"></span><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (x.photo_type === 'selection' ? ' · sel.' : '') + '</figcaption></figure>'; };
-  var fm = [['v', 'Vertical', '1080×1920 · historias, Reels, WhatsApp'], ['h', 'Horizontal', '1920×1080 · pantalla, YouTube'], ['ambos', 'Los dos', 'Genera dos archivos con la misma plantilla']];
-  return '<div class="pn-card"><h2>1. Elige las fotos</h2><p class="pn-s ay">Toca las fotos en el orden en que quieres que salgan. El número indica su lugar. Las fotos del video salen sin marca de agua, salvo las de selección subidas antes de esta actualización.</p>' +
-    '<div class="pn-row"><button class="pn-btn sec" data-act="vid-sel" data-v="fin" type="button"' + (fin.length ? '' : ' disabled') + '>Todas las finales (' + fin.length + ')</button><button class="pn-btn sec" data-act="vid-sel" data-v="sel" type="button"' + (sel.length ? '' : ' disabled') + '>Todas las de selección (' + sel.length + ')</button><button class="pn-btn sec" data-act="vid-sel" data-v="orden" type="button">Orden de la galería</button><button class="pn-btn sec" data-act="vid-sel" data-v="ninguna" type="button">Quitar todas</button></div>' +
-    '<div class="pn-grid sm" id="pn-vg">' + (todas.length ? todas.map(thumb).join('') : '<p class="pn-s">Esta galería aún no tiene fotos.</p>') + '</div><p class="pn-s" id="pn-vc"></p></div>' +
-    '<div class="pn-card"><h2>2. Formato</h2><div class="pn-opts">' + fm.map(function(f){ return '<button class="pn-opt' + (vidForm === f[0] ? ' on' : '') + '" data-act="vid-fmt" data-v="' + f[0] + '" type="button"><b>' + f[1] + '</b><span>' + f[2] + '</span></button>'; }).join('') + '</div>' +
-    '<div class="pn-row"><label class="pn-s" for="pn-vs">Segundos por foto</label><select id="pn-vs">' + [1.5, 2, 2.5, 3, 4, 5].map(function(v){ return '<option value="' + v + '"' + (vidSeg === v ? ' selected' : '') + '>' + String(v).replace('.', ',') + '</option>'; }).join('') + '</select><label class="pn-chk"><input type="checkbox" id="pn-vp"' + (vidPart ? ' checked' : '') + '> Partículas</label></div><p class="pn-s ay">El video sale sin música; tu cliente la agrega al publicarlo. Cada foto va con un marco de papel, fondo desenfocado de la misma foto y transiciones suaves.</p></div>' +
-    '<div class="pn-card"><h2>3. Vista previa y descarga</h2><div class="pn-vprev"><canvas id="pn-vcv" width="270" height="480"></canvas></div>' +
-    '<div class="pn-row"><button class="pn-btn sec" data-act="vid-prev" type="button">Ver vista previa</button><button class="pn-btn" data-act="vid-gen" type="button" id="pn-vgen">Generar y descargar MP4</button><button class="pn-btn sec" data-act="vid-cancel" type="button" id="pn-vcan" hidden>Cancelar</button></div>' +
-    '<div class="pn-vb"><i id="pn-vbar"></i></div><p class="pn-s" id="pn-vst"></p><p class="pn-s ay">Funciona en Chrome o Edge actualizados, en computadora. Deja esta pestaña abierta mientras se genera; un video de 70 segundos puede tardar unos minutos. Este generador es solo para ti, tus clientes no lo ven.</p></div>';
+  return '<div class="pn-ved"><div class="pn-vizq"><p class="pn-s" id="pn-vinfo" style="margin-top:0"></p>' +
+    '<div class="pn-vchips"><button class="pn-vchip" type="button" data-act="vid-fmt" id="pn-cf"></button><button class="pn-vchip" type="button" data-act="vid-ritmo" id="pn-cr"></button><button class="pn-vchip" type="button" data-act="vid-part" id="pn-cp"></button><button class="pn-vchip pri" type="button" data-act="vid-gen" id="pn-vgen"><small>Sin música</small>Generar y descargar MP4</button></div>' +
+    '<div class="pn-vb"><i id="pn-vbar"></i></div><p class="pn-s" id="pn-vst"></p><div class="pn-row"><button class="pn-btn sec" data-act="vid-cancel" type="button" id="pn-vcan" hidden>Cancelar</button></div>' +
+    '<p class="pn-s ay">Cada foto va con un marco de papel, fondo desenfocado de la misma foto, transiciones suaves y partículas. Funciona en Chrome o Edge en computadora; deja esta pestaña abierta mientras se genera. Solo tú ves este generador.</p></div>' +
+    '<div class="pn-vpl"><div class="pn-vprev"><canvas id="pn-vcv" width="360" height="640"></canvas></div><div class="pn-vctl"><button type="button" data-act="vid-play" id="pn-vplay" aria-label="Reproducir">▶</button><input type="range" id="pn-vseek" min="0" max="1000" value="0" aria-label="Posición"><span id="pn-vtm">00:00 / 00:00</span></div></div></div>' +
+    '<div class="pn-card"><h2>Diapositivas</h2><p class="pn-s ay">Arrastra una foto para cambiar su lugar. Toca la × para quitarla.</p><div class="pn-vtira" id="pn-vtira"></div></div>' +
+    '<dialog id="pn-dvp" style="width:min(54rem,94vw)"><h2>Agregar fotos</h2><p class="pn-s">Toca las fotos para agregarlas o quitarlas. Se suman al final, en el orden en que las toques.</p>' +
+    '<div class="pn-row"><button class="pn-btn sec" data-act="vid-sel" data-v="fin" type="button"' + (fin.length ? '' : ' disabled') + '>Todas las finales (' + fin.length + ')</button><button class="pn-btn sec" data-act="vid-sel" data-v="sel" type="button"' + (sel.length ? '' : ' disabled') + '>Todas las de selección (' + sel.length + ')</button><button class="pn-btn sec" data-act="vid-sel" data-v="ninguna" type="button">Quitar todas</button></div>' +
+    '<div class="pn-grid sm" id="pn-vg" style="max-height:52vh;overflow:auto;margin-top:.8rem">' + (todas.length ? todas.map(thumb).join('') : '<p class="pn-s">Esta galería aún no tiene fotos.</p>') + '</div><p class="pn-s" id="pn-vc"></p><div class="pn-row"><button class="pn-btn" data-act="vid-cerrar" type="button">Listo</button></div></dialog>';
 }
 function vidRefrescar(){
   var n = vidIds.length;
   root.querySelectorAll('#pn-vg .pn-ph').forEach(function(f){ var i = vidIds.indexOf(f.dataset.id); f.classList.toggle('on', i >= 0); var b = f.querySelector('.pn-vn'); if (b) b.textContent = i >= 0 ? i + 1 : ''; });
-  var c = $('#pn-vc'); if (c) c.textContent = n ? n + (n === 1 ? ' foto elegida' : ' fotos elegidas') + ' · el video durará unos ' + Math.round(n * vidSeg) + ' segundos' : 'Aún no has elegido fotos.';
+  var c = $('#pn-vc'); if (c) c.textContent = n ? n + (n === 1 ? ' foto elegida' : ' fotos elegidas') : 'Aún no has elegido fotos.';
+  var tr = $('#pn-vtira');
+  if (tr) tr.innerHTML = '<button class="pn-vadd" data-act="vid-agregar" type="button"><b>+</b><span>Agregar fotos</span></button>' + vidIds.map(function(id, i){ return '<div class="pn-vt" draggable="true" data-i="' + i + '"><img draggable="false" alt="" src="' + (cur.tk[id] ? esc(src(cur.tk[id])) : '') + '"><i>' + (i + 1) + '</i><button type="button" data-act="vid-quitar" data-i="' + i + '" aria-label="Quitar">×</button></div>'; }).join('');
+  var inf = $('#pn-vinfo'); if (inf) inf.textContent = n ? n + (n === 1 ? ' diapositiva' : ' diapositivas') + ' · ' + mmss(n * vidSeg) + ' de duración' : 'Aún no hay fotos. Toca «Agregar fotos» en la tira de abajo.';
+  var chip = function(id, t, v){ var e = $(id); if (e) e.innerHTML = '<small>' + t + '</small>' + v; };
+  chip('#pn-cf', 'Formato', VFMT[vidForm]); chip('#pn-cr', 'Ritmo', VRIT[vidSeg] || 'Normal'); chip('#pn-cp', 'Partículas', vidPart ? 'Sí' : 'No');
+  clearTimeout(vidDeb); vidEsc = null; vidDeb = setTimeout(vidPrepara, 350); vidCtl();
+}
+function vidCtl(){
+  var d = vidEsc ? vidEsc.duracion : vidIds.length * vidSeg, sk = $('#pn-vseek'), tm = $('#pn-vtm'), pb = $('#pn-vplay');
+  if (sk && document.activeElement !== sk) sk.value = d ? Math.round(vidT / d * 1000) : 0;
+  if (tm) tm.textContent = mmss(vidT) + ' / ' + mmss(d);
+  if (pb) pb.textContent = vidPlay ? '❚❚' : '▶';
 }
 function vidIniciar(){
-  vidRefrescar();
+  vidStop(); vidRefrescar();
   cargarSlideshow().then(function(){ if (!window.Slideshow.soportado()) vidEstado('Tu navegador no puede crear el video. Usa Chrome o Edge actualizados en la computadora.'); }).catch(function(e){ vidEstado(e.message); });
 }
-async function vidCargar(){
-  var faltan = vidIds.filter(function(id){ return !vidCache[id]; }), tk = {};
+async function vidCargar(ids, prog, abort){
+  var faltan = ids.filter(function(id){ return !vidCache[id]; }), tk = {};
   for (var i = 0; i < faltan.length; i += 100) { var r = await api('/api/admin/sign', { photos: faltan.slice(i, i + 100) }); Object.assign(tk, r.fotos || {}); }
   for (var k = 0; k < faltan.length; k++) {
-    if (vidCancel) throw new Error('cancelado');
-    vidEstado('Leyendo foto ' + (k + 1) + ' de ' + faltan.length + '…'); vidBarra(k / Math.max(1, faltan.length) * 0.25);
+    if (abort()) throw new Error('cancelado');
+    prog(k, faltan.length);
     if (!tk[faltan[k]]) throw new Error('No se pudo acceder a una de las fotos.');
-    vidCache[faltan[k]] = await window.Slideshow.cargarFoto(src(tk[faltan[k]]));
+    var ft = await window.Slideshow.cargarFoto(src(tk[faltan[k]]));
+    if (abort()) { try { ft.bmp.close(); } catch(e) {} throw new Error('cancelado'); }
+    vidCache[faltan[k]] = ft;
   }
-  return vidIds.map(function(id){ return vidCache[id]; });
+  return ids.map(function(id){ return vidCache[id]; });
 }
-async function vidPrev(){
-  if (vidBusy) return;
-  if (vidIds.length < 2) return aviso('Elige al menos 2 fotos.');
-  try { await cargarSlideshow(); vidBusy = true; vidCancel = false; vidStop(); var fotos = await vidCargar(); } catch(e) { vidBusy = false; return vidEstado(e.message === 'cancelado' ? '' : e.message); }
-  vidBusy = false; vidBarra(0); vidEstado('Vista previa en pequeño. El video final sale en alta calidad.');
-  var vert = vidForm !== 'h', W = vert ? 270 : 480, H = vert ? 480 : 270, cv = $('#pn-vcv'); if (!cv) return; cv.width = W; cv.height = H;
-  var esc2 = window.Slideshow.crearEscena(fotos, W, H, vidSeg, { particulas: vidPart }), cx = cv.getContext('2d'), t0 = performance.now(), mi = ++vidTok;
-  (function f(){ if (mi !== vidTok || !document.body.contains(cv)) return; esc2.dibujar(cx, ((performance.now() - t0) / 1000) % esc2.duracion); requestAnimationFrame(f); })();
+function vidDibuja(){
+  var cv = $('#pn-vcv'); if (!cv) return;
+  var cx = cv.getContext('2d');
+  if (!vidEsc) { cx.fillStyle = '#000'; cx.fillRect(0, 0, cv.width, cv.height); return; }
+  vidEsc.dibujar(cx, Math.min(vidT, vidEsc.duracion - 0.001)); vidCtl();
+}
+async function vidPrepara(){
+  var cv = $('#pn-vcv'); if (!cv || vidBusy) return;
+  var mi = ++vidLoadTok, ids = vidIds.slice();
+  if (ids.length < 2) { vidEsc = null; vidT = 0; vidDibuja(); vidCtl(); vidEstado(ids.length ? 'Agrega al menos una foto más.' : ''); return; }
+  try {
+    await cargarSlideshow();
+    var fotos = await vidCargar(ids, function(k, n){ vidEstado('Preparando vista previa… foto ' + (k + 1) + ' de ' + n); vidBarra((k + 1) / n); }, function(){ return mi !== vidLoadTok; });
+    if (mi !== vidLoadTok) return;
+    var vert = vidForm !== 'h', W = vert ? 360 : 640, H = vert ? 640 : 360;
+    cv.width = W; cv.height = H;
+    vidEsc = window.Slideshow.crearEscena(fotos, W, H, vidSeg, { particulas: vidPart });
+    vidT = Math.min(vidT, vidEsc.duracion - 0.01); vidBarra(0); vidEstado(''); vidDibuja(); vidCtl();
+  } catch(e) { if (e && e.message === 'cancelado') return; vidBarra(0); vidEstado(e && e.message ? e.message : 'No se pudo preparar la vista previa.'); }
+}
+function vidPlayToggle(){
+  if (vidPlay) return vidStop();
+  if (vidIds.length < 2) return aviso('Agrega al menos 2 fotos.');
+  if (!vidEsc) return aviso('La vista previa se está preparando, espera un momento.');
+  vidPlay = true; vidLast = performance.now(); vidCtl();
+  (function f(now){
+    if (!vidPlay || !vidEsc || !document.body.contains($('#pn-vcv'))) { vidPlay = false; vidCtl(); return; }
+    vidT += (now - vidLast) / 1000; vidLast = now; if (vidT >= vidEsc.duracion) vidT = 0;
+    vidDibuja(); vidRaf = requestAnimationFrame(f);
+  })(vidLast);
 }
 async function vidGenerar(){
   if (vidBusy) return;
-  if (vidIds.length < 2) return aviso('Elige al menos 2 fotos.');
+  if (vidIds.length < 2) return aviso('Agrega al menos 2 fotos.');
   if (vidIds.length > 60) return aviso('Para cuidar la memoria, usa 60 fotos o menos por video.');
-  var g = gal(galId), btn = $('#pn-vgen'), can = $('#pn-vcan');
+  var g = gal(galId), btn = $('#pn-vgen'), can = $('#pn-vcan'), fin = '';
   try {
     await cargarSlideshow(); if (!window.Slideshow.soportado()) throw new Error('Tu navegador no puede crear el video. Usa Chrome o Edge actualizados en la computadora.');
-    vidBusy = true; vidCancel = false; vidStop(); btn.disabled = true; can.hidden = false;
-    var fotos = await vidCargar(), fmts = vidForm === 'ambos' ? ['v', 'h'] : [vidForm];
+    vidStop(); vidLoadTok++; vidBusy = true; vidCancel = false; btn.disabled = true; can.hidden = false;
+    var fotos = await vidCargar(vidIds.slice(), function(k, n){ vidEstado('Leyendo foto ' + (k + 1) + ' de ' + n + '…'); vidBarra(k / Math.max(1, n) * 0.25); }, function(){ return vidCancel; });
+    var fmts = vidForm === 'ambos' ? ['v', 'h'] : [vidForm];
     for (var q = 0; q < fmts.length; q++) {
       var vert = fmts[q] === 'v', W = vert ? 1080 : 1920, H = vert ? 1920 : 1080, esc2 = window.Slideshow.crearEscena(fotos, W, H, vidSeg, { particulas: vidPart });
       vidEstado('Creando el video ' + (vert ? 'vertical' : 'horizontal') + '… no cierres esta pestaña.');
       var blob = await window.Slideshow.exportar(esc2, { fps: 30, bitrate: 8e6, cancelado: function(){ return vidCancel; }, progreso: function(x){ vidBarra(0.25 + 0.75 * (q + x) / fmts.length); vidEstado('Creando el video ' + (vert ? 'vertical' : 'horizontal') + '… ' + Math.round(x * 100) + '%'); } });
       var u = URL.createObjectURL(blob), l = document.createElement('a'); l.href = u; l.download = 'slideshow-' + slug(g ? g.title : 'galeria') + '-' + (vert ? 'vertical' : 'horizontal') + '.mp4'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000);
     }
-    vidBarra(1); vidEstado('Listo. El video se descargó en tu computadora.');
-  } catch(e) { vidBarra(0); vidEstado(e && e.message === 'cancelado' ? 'Cancelado.' : 'No se pudo crear el video: ' + (e && e.message ? e.message : 'error')); }
+    vidBarra(1); fin = 'Listo. El video se descargó en tu computadora.';
+  } catch(e) { vidBarra(0); fin = e && e.message === 'cancelado' ? 'Cancelado.' : 'No se pudo crear el video: ' + (e && e.message ? e.message : 'error'); }
   vidBusy = false; var b2 = $('#pn-vgen'), c2 = $('#pn-vcan'); if (b2) b2.disabled = false; if (c2) c2.hidden = true;
+  if (vista === 'detalle' && tab === 'video') await vidPrepara();
+  vidEstado(fin);
 }
 function fechaCad(g){ return g.expires_at ? String(g.expires_at).slice(0, 10) : ''; }
 function pintarDetalle(){
@@ -766,12 +813,16 @@ async function accion(a, el){
     var v0 = el.dataset.v, fl = cur.fotos;
     if (v0 === 'fin') vidIds = fl.filter(function(x){ return x.photo_type === 'final'; }).map(function(x){ return x.id; });
     else if (v0 === 'sel') vidIds = fl.filter(function(x){ return x.photo_type === 'selection'; }).map(function(x){ return x.id; });
-    else if (v0 === 'orden') { var m0 = {}; vidIds.forEach(function(x){ m0[x] = 1; }); vidIds = fl.filter(function(x){ return m0[x.id]; }).map(function(x){ return x.id; }); }
     else vidIds = [];
-    vidStop(); return vidRefrescar();
+    vidStop(); vidT = 0; return vidRefrescar();
   }
-  if (a === 'vid-fmt') { vidForm = el.dataset.v; vidStop(); return pintar(); }
-  if (a === 'vid-prev') return vidPrev();
+  if (a === 'vid-agregar') return $('#pn-dvp').showModal();
+  if (a === 'vid-cerrar') return $('#pn-dvp').close();
+  if (a === 'vid-quitar') { vidIds.splice(+el.dataset.i, 1); vidStop(); return vidRefrescar(); }
+  if (a === 'vid-fmt') { vidForm = vidForm === 'v' ? 'h' : vidForm === 'h' ? 'ambos' : 'v'; vidStop(); return vidRefrescar(); }
+  if (a === 'vid-ritmo') { vidSeg = vidSeg === 2.5 ? 1.5 : vidSeg === 1.5 ? 3.5 : 2.5; vidStop(); vidT = 0; return vidRefrescar(); }
+  if (a === 'vid-part') { vidPart = !vidPart; vidStop(); return vidRefrescar(); }
+  if (a === 'vid-play') return vidPlayToggle();
   if (a === 'vid-gen') return vidGenerar();
   if (a === 'vid-cancel') { vidCancel = true; return vidEstado('Cancelando…'); }
   if (a === 'abrir') return abrirDetalle(id);
@@ -927,10 +978,13 @@ window.iniciarPanel = async function(photographer, cliente){
   dv.addEventListener('touchstart', function(e){ vx0 = e.touches[0].clientX; }, { passive: true });
   dv.addEventListener('touchend', function(e){ if (vx0 === null) return; var dx = e.changedTouches[0].clientX - vx0; vx0 = null; if (Math.abs(dx) > 50) pasarVer(dx < 0 ? 1 : -1); });
   dv.addEventListener('keydown', function(e){ if (e.key === 'ArrowLeft') pasarVer(-1); if (e.key === 'ArrowRight') pasarVer(1); });
+  root.addEventListener('dragstart', function(e){ var t = e.target.closest && e.target.closest('.pn-vt'); if (!t) return; vidDrag = +t.dataset.i; try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(vidDrag)); } catch(x) {} });
+  root.addEventListener('dragover', function(e){ var t = e.target.closest && e.target.closest('.pn-vt'); if (!t || vidDrag < 0) return; e.preventDefault(); root.querySelectorAll('.pn-vt.ov').forEach(function(x){ x.classList.remove('ov'); }); t.classList.add('ov'); });
+  root.addEventListener('drop', function(e){ var t = e.target.closest && e.target.closest('.pn-vt'); if (!t || vidDrag < 0) return; e.preventDefault(); var j = +t.dataset.i, i = vidDrag; vidDrag = -1; if (i === j) return vidRefrescar(); var x = vidIds.splice(i, 1)[0]; vidIds.splice(j, 0, x); vidStop(); vidRefrescar(); });
+  root.addEventListener('dragend', function(){ vidDrag = -1; root.querySelectorAll('.pn-vt.ov').forEach(function(x){ x.classList.remove('ov'); }); });
+  root.addEventListener('input', function(e){ if (e.target.id !== 'pn-vseek' || !vidEsc) return; vidT = e.target.value / 1000 * vidEsc.duracion; vidDibuja(); });
   root.addEventListener('change', async function(e){
     if (e.target.id === 'pn-lg-c' || e.target.id === 'pn-lg-o') { var fl = e.target.files && e.target.files[0]; e.target.value = ''; return subirLogo(fl, e.target.id === 'pn-lg-c' ? 'claro' : 'oscuro'); }
-    if (e.target.id === 'pn-vs') { vidSeg = parseFloat(e.target.value) || 2.5; vidStop(); return vidRefrescar(); }
-    if (e.target.id === 'pn-vp') { vidPart = e.target.checked; return vidStop(); }
     if (e.target.id === 'pn-cu-ay') { try { localStorage.setItem('pn-ay', e.target.checked ? 'on' : 'off'); } catch(x) {} return aplicarTema(); }
     var s = e.target.closest('select[data-ord]'); if (s && s.value) return ordenar(s.dataset.ord, s.value);
     if (e.target.id === 'pn-fesc') { fEsc = e.target.value; return pintar(); }
