@@ -77,7 +77,7 @@ async function cargarFoto(url){
 // ---------- Escena: dibuja el cuadro del tiempo t (segundos) ----------
 function ease(p){ p = clamp(p, 0, 1); return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
 var INTRO = 2.8;
-function duracionTotal(n, seg, estilo, intro){ var d = seg || 2.5; return n * d + (estilo === 'pantalla' ? Math.max(0, Math.max(d, 3.2) - d) : 0) + (intro ? INTRO : 0); }
+function duracionTotal(n, seg, estilo, intro){ var d = seg || 2.5; if (estilo === 'prisma') return Math.floor(n / 2) * 2 * d + (intro ? INTRO : 0); return n * d + (estilo === 'pantalla' ? Math.max(0, Math.max(d, 3.2) - d) : 0) + (intro ? INTRO : 0); }
 // Copia desenfocada de la foto (lienzo pequeño; al agrandarlo se ve suave)
 function fondoDesenf(f, w, h, zoom, radio){
   var s = 6, c = lienzo(w / s, h / s), x = c.getContext('2d');
@@ -87,6 +87,7 @@ function fondoDesenf(f, w, h, zoom, radio){
 }
 function crearEscena(fotos, W, H, seg, op){
   op = op || {};
+  if (op.estilo === 'prisma') return crearEscenaPrisma(fotos, W, H, seg, op);
   var estilo = op.estilo === 'pantalla' ? 'pantalla' : 'papel';
   var n = fotos.length, vertical = H > W, u = Math.min(W, H) / 1080, D = seg || 2.5, Tr = Math.min(estilo === 'pantalla' ? 0.7 : 1.1, D * (estilo === 'pantalla' ? 0.42 : 0.55));
   var dur = [], ini = [], tot = 0;
@@ -330,6 +331,102 @@ function crearEscena(fotos, W, H, seg, op){
     if (neg > 0) { cx.fillStyle = 'rgba(8,6,4,' + neg.toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
   }
   return { W: W, H: H, duracion: duracion, dibujar: dibujar, n: n, seg: D, estilo: estilo };
+}
+
+// ---------- Plantilla «Prisma»: dos fotos por pantalla con corte inclinado ----------
+// Horizontal (16:9): las dos fotos van lado a lado. Vertical (9:16): una arriba y otra abajo.
+function crearEscenaPrisma(fotos, W, H, seg, op){
+  var np = Math.floor(fotos.length / 2), D = seg || 2.5, Dp = 2 * D, vert = H > W, u = Math.min(W, H) / 1080, Tr = Math.min(0.42, Dp * 0.14);
+  var I = op.intro ? INTRO : 0, logo = op.logo || null, acento = op.acento || '#C9A877';
+  var tit = String(op.titulo || '').trim(), sub = String(op.subtitulo || '').trim(), conBanner = !!(tit || sub);
+  var bh = conBanner ? (vert ? 0.135 * H : 0.215 * H) : 0, sl = 0.028 * Math.min(W, H) * (vert ? 1.2 : 1.6);
+  var m = /^#?([0-9a-f]{6})$/i.exec(acento), lum = m ? (0.299 * parseInt(m[1].slice(0, 2), 16) + 0.587 * parseInt(m[1].slice(2, 4), 16) + 0.114 * parseInt(m[1].slice(4, 6), 16)) : 200, tinta = lum > 150 ? '#1b1712' : '#fbf7ee';
+  var famT = '"Cormorant Garamond", Georgia, serif', famS = 'Jost, "Helvetica Neue", Arial, sans-serif';
+  var tot = np * Dp, duracion = tot + I, fondos = {};
+  function lerp(a, b, p){ return a + (b - a) * p; }
+  function fondo(i, rw, rh){
+    var k = i + '|' + Math.round(rw) + 'x' + Math.round(rh); if (fondos[k]) return fondos[k];
+    var c = fondoDesenf(fotos[i], rw, rh, 1.3, Math.max(2, Math.round(6 * u))); fondos[k] = c;
+    var ks = Object.keys(fondos); if (ks.length > 24) delete fondos[ks[0]];
+    return c;
+  }
+  // Foto i en el rectángulo (cubre; si la forma no combina, se ve completa sobre su fondo desenfocado). El modo no cambia durante el movimiento.
+  function foto(cx, i, rx, ry, rw, rh, zoom){
+    if (rw < 2 || rh < 2) return;
+    var f = fotos[i], asp = f.w / f.h, b0 = i < 2 ? bh : 0, ra = vert ? W / ((H - b0) / 2) : (W / 2) / (H - b0);
+    cx.save(); cx.beginPath(); cx.rect(rx, ry, rw, rh); cx.clip();
+    cx.translate(rx + rw / 2, ry + rh / 2); cx.scale(zoom, zoom); cx.translate(-rw / 2, -rh / 2); cx.imageSmoothingQuality = 'high';
+    if (Math.abs(asp / ra - 1) <= 0.45) cubrir(cx, f.bmp, f.w, f.h, 0, 0, rw, rh);
+    else {
+      cx.drawImage(fondo(i, rw, rh), 0, 0, rw, rh); cx.fillStyle = 'rgba(0,0,0,.14)'; cx.fillRect(0, 0, rw, rh);
+      var k = Math.min(rw / f.w, rh / f.h), pw = f.w * k, ph = f.h * k; cx.drawImage(f.bmp, (rw - pw) / 2, (rh - ph) / 2, pw, ph);
+    }
+    cx.restore();
+  }
+  function banner(cx, y0){
+    if (!conBanner) return;
+    cx.save(); cx.translate(0, y0); cx.fillStyle = acento; cx.fillRect(0, 0, W, bh);
+    cx.fillStyle = tinta; cx.textAlign = 'center'; cx.textBaseline = 'alphabetic';
+    var fs = bh * (sub ? 0.42 : 0.5), T = tit.toUpperCase(); cx.font = '600 ' + fs + 'px ' + famT; try { cx.letterSpacing = (fs * 0.06) + 'px'; } catch (e) {}
+    while (cx.measureText(T).width > W * 0.88 && fs > 14) { fs *= 0.95; cx.font = '600 ' + fs + 'px ' + famT; }
+    var yt = sub ? bh * 0.5 : bh * 0.6; if (T) cx.fillText(T, W / 2, yt); try { cx.letterSpacing = '0px'; } catch (e) {}
+    if (sub) { var fs2 = Math.min(bh * 0.17, W * 0.032); cx.font = '500 ' + fs2 + 'px ' + famS; try { cx.letterSpacing = (fs2 * 0.18) + 'px'; } catch (e) {} cx.globalAlpha = 0.85; cx.fillText(sub.toUpperCase(), W / 2, yt + fs2 * 2.1); try { cx.letterSpacing = '0px'; } catch (e) {} }
+    cx.restore();
+  }
+  // Un par completo en su tiempo local lt. sal = avance de salida (0..1) para subir el banner.
+  function par(cx, k, lt, sal){
+    var iA = 2 * k, iB = 2 * k + 1, h = clamp(lt / Dp, 0, 1.2), ban = k === 0 && conBanner;
+    var yTop = ban ? bh * salida((lt - 0.1) / 0.4) : 0, entrando = k === 0 && lt < 0.85, alto = H - yTop;
+    var ini = vert ? yTop + alto / 2 : W / 2, fin = vert ? H : W, d = ini + 0.018 * (vert ? alto : W) * Math.sin(lt * 1.1 + k);
+    if (k === 0) d = lerp(fin + 2 * sl, ini, salida((lt - (conBanner ? 0.4 : 0.3)) / 0.45));
+    var zA = 1 + 0.06 * h, zB = 1 + 0.06 * h;
+    cx.save(); cx.beginPath();
+    if (vert) { cx.moveTo(0, yTop); cx.lineTo(W, yTop); cx.lineTo(W, d - sl); cx.lineTo(0, d + sl); } else { cx.moveTo(0, yTop); cx.lineTo(d + sl, yTop); cx.lineTo(d - sl, H); cx.lineTo(0, H); }
+    cx.closePath(); cx.clip();
+    if (vert) foto(cx, iA, 0, yTop, W, Math.max(2, Math.min(d, H) - yTop), zA); else foto(cx, iA, 0, yTop, Math.max(2, Math.min(d, W)), alto, zA);
+    cx.restore();
+    if (d < fin + sl) {
+      cx.save(); cx.beginPath();
+      if (vert) { cx.moveTo(0, d + sl); cx.lineTo(W, d - sl); cx.lineTo(W, H); cx.lineTo(0, H); } else { cx.moveTo(d + sl, yTop); cx.lineTo(W, yTop); cx.lineTo(W, H); cx.lineTo(d - sl, H); }
+      cx.closePath(); cx.clip();
+      if (vert) foto(cx, iB, 0, d, W, entrando ? alto / 2 : Math.max(2, H - d), zB); else foto(cx, iB, d, yTop, entrando ? W / 2 : Math.max(2, W - d), alto, zB);
+      cx.restore();
+      cx.save(); cx.strokeStyle = 'rgba(255,255,255,.95)'; cx.lineWidth = Math.max(2, 0.006 * Math.min(W, H)); cx.beginPath();
+      if (vert) { cx.moveTo(0, d + sl); cx.lineTo(W, d - sl); } else { cx.moveTo(d + sl, yTop); cx.lineTo(d - sl, H); }
+      cx.stroke(); cx.restore();
+    }
+    if (ban) banner(cx, -bh * 1.1 * sal + (yTop - bh));
+  }
+  function intro(cx, t){
+    var g = cx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, Math.max(W, H) * 0.7); g.addColorStop(0, '#1d1813'); g.addColorStop(1, '#0b0806'); cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+    var a = clamp((t - 0.25) / 0.8, 0, 1), e = ease(a); cx.save(); cx.globalAlpha = e; cx.translate(W / 2, H / 2); cx.scale(0.94 + 0.06 * e, 0.94 + 0.06 * e);
+    if (logo && logo.bmp) { var lw = (vert ? 0.62 : 0.32) * W, lh = lw * logo.h / logo.w, mh = H * (vert ? 0.3 : 0.4); if (lh > mh) { lw *= mh / lh; lh = mh; } cx.imageSmoothingQuality = 'high'; cx.drawImage(logo.bmp, -lw / 2, -lh / 2, lw, lh); }
+    else if (op.nombre) { var fs = (vert ? W * 0.085 : H * 0.1); cx.fillStyle = '#E9D9B8'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.font = '300 ' + fs + 'px "Cormorant Garamond", Georgia, serif'; try { cx.letterSpacing = (fs * 0.12) + 'px'; } catch (e2) {} cx.fillText(String(op.nombre).toUpperCase(), 0, 0); }
+    cx.restore();
+  }
+  function dibujar(cx, t){
+    t = clamp(t, 0, duracion - 0.0001);
+    cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = 1; cx.filter = 'none'; cx.fillStyle = '#000'; cx.fillRect(0, 0, W, H);
+    var fil = 'filter' in cx, tt = t - I, k = 0, lt = 0;
+    if (tt >= 0) { k = Math.min(np - 1, Math.floor(tt / Dp)); lt = tt - k * Dp; }
+    if (tt < 0) intro(cx, t);
+    else if (k > 0 && lt < Tr) {
+      var p = ease(lt / Tr), bl = Math.sin(Math.PI * p) * 16 * u, sk = 0.22 * Math.sin(Math.PI * p);
+      var mover = function(dd, fn){
+        cx.save(); if (fil && bl > 0.6) cx.filter = 'blur(' + bl.toFixed(1) + 'px)';
+        if (vert) cx.transform(1, sk, 0, 1, 0, -sk * W / 2 + dd); else cx.transform(1, 0, sk, 1, -sk * H / 2 + dd, 0);
+        fn(); cx.restore();
+      }, L = (vert ? H : W) * 1.12;
+      mover(-p * L, function(){ par(cx, k - 1, lt + Dp, p); });
+      mover((1 - p) * L, function(){ par(cx, k, lt, 0); });
+    } else {
+      if (k === 0 && I > 0 && lt < 0.4) { intro(cx, t); cx.globalAlpha = ease(lt / 0.4); }
+      par(cx, k, lt, 0); cx.globalAlpha = 1;
+    }
+    var fin = duracion - t, neg = Math.max(clamp(1 - fin / 0.6, 0, 1), I > 0 ? 0 : clamp(1 - t / 0.25, 0, 1));
+    if (neg > 0) { cx.fillStyle = 'rgba(0,0,0,' + neg.toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
+  }
+  return { W: W, H: H, duracion: duracion, dibujar: dibujar, n: fotos.length, seg: D, estilo: 'prisma' };
 }
 
 // ---------- Exportar a MP4 ----------
