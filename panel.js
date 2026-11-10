@@ -240,7 +240,7 @@ var ICO = {
   impresiones: '<path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/>',
   compartir: '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 11l7.6-4M8.2 13l7.6 4"/>',
   video: '<rect x="3" y="6" width="14" height="12" rx="2"/><path d="M17 10l4-2v8l-4-2z"/>', inicio: '<path d="M4 11l8-7 8 7v9H4z"/>', galerias: '<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>',
-  clientes: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6M16 4.5a3.5 3.5 0 010 7M18.5 14c2 .8 3 2.700 3 6"/>', cotiz: '<path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/>', agenda: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  clientes: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6M16 4.5a3.5 3.5 0 010 7M18.5 14c2 .8 3 2.700 3 6"/>', cotiz: '<path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/>', grupos: '<circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 19c0-3.500 2.500-5 6-5s6 1.500 6 5M15 14.200c3.500-.5 6 .800 6 4.800"/>', agenda: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   atras: '<path d="M15 5l-7 7 7 7"/>', salir: '<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>', cuenta: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>'
 };
 function ico(n){ return '<svg class="pn-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICO[n] || '') + '</svg>'; }
@@ -250,10 +250,10 @@ function pintarLado(){
   var a = root.querySelector('aside'), g = vista === 'detalle' ? gal(galId) : null, h;
   if (g) {
     h = logo() + '<button data-act="atras" class="atras mo">' + ico('atras') + 'Galerías</button>' +
-      '<button data-v="inicio" class="nd">' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias" class="nd on">' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes" class="nd">' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz" class="nd">' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda" class="nd">' + ico('agenda') + '<span>Agenda</span></button>' +
+      '<button data-v="inicio" class="nd">' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias" class="nd on">' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes" class="nd">' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz" class="nd">' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda" class="nd">' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos" class="nd">' + ico('grupos') + '<span>Grupos</span></button>' +
       TABS.map(function(t){ return '<button data-act="tab" data-t="' + t[0] + '" class="ta' + (tab === t[0] ? ' on' : '') + '">' + ico(t[0]) + '<span>' + t[1] + '</span></button>'; }).join('');
   } else {
-    h = logo() + '<button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias"' + (vista === 'galerias' ? ' class="on"' : '') + '>' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes"' + (vista === 'clientes' ? ' class="on"' : '') + '>' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz"' + (vista === 'cotiz' ? ' class="on"' : '') + '>' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda"' + (vista === 'agenda' ? ' class="on"' : '') + '>' + ico('agenda') + '<span>Agenda</span></button>';
+    h = logo() + '<button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias"' + (vista === 'galerias' ? ' class="on"' : '') + '>' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes"' + (vista === 'clientes' ? ' class="on"' : '') + '>' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz"' + (vista === 'cotiz' ? ' class="on"' : '') + '>' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda"' + (vista === 'agenda' ? ' class="on"' : '') + '>' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos"' + (vista === 'grupos' ? ' class="on"' : '') + '>' + ico('grupos') + '<span>Grupos de graduación</span></button>';
   }
   var tm = temaGuardado();
   h += '<div class="pie"><button data-v="cuenta"' + (vista === 'cuenta' ? ' class="on"' : '') + '>' + ico('cuenta') + '<span>Mi cuenta</span></button><div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button></div>';
@@ -268,6 +268,7 @@ function pintar(){
   if (vista === 'clientes') return pintarClientes();
   if (vista === 'cotiz') return pintarCotiz();
   if (vista === 'agenda') return pintarAgenda();
+  if (vista === 'grupos') return pintarGrupos();
   pintarDetalle();
 }
 
@@ -348,7 +349,7 @@ function pintarCuenta(){
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 02:10</p></div>';
+ + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 04:00</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -1322,7 +1323,51 @@ async function negInicio(){
 }
 
 /* ---------- Acciones y formularios ---------- */
+
+/* ---------- Grupos de graduación ---------- */
+var GR = { lista: [], miembros: [], ok: true, cargado: false, abierto: null };
+var GR_URL = 'https://alexandergeerre.github.io/galeria/grupo.html?g=';
+var GR_TIERS = [[1, 350], [3, 300], [5, 260], [7, 240], [8, 225], [9, 200], [10, 180], [11, 165], [12, 150]];
+function grPrecio(t, n){ var p = t[0][1], i; for (i = 0; i < t.length; i++) if (n >= t[i][0]) p = t[i][1]; return p; }
+function grToken(){ var a = new Uint8Array(18), s = '', i, c = 'abcdefghjkmnpqrstuvwxyz23456789'; (window.crypto || window.msCrypto).getRandomValues(a); for (i = 0; i < a.length; i++) s += c[a[i] % c.length]; return s; }
+async function grCargar(){
+  var g = await db.from('groups').select('*').order('created_at', { ascending: false });
+  GR.ok = !g.error; GR.lista = g.data || [];
+  var m = GR.ok ? await db.from('group_members').select('*').order('created_at') : { data: [] };
+  GR.miembros = m.data || []; GR.cargado = true;
+}
+async function pintarGrupos(){
+  $('#pn-main').innerHTML = '<h1>Grupos de graduación</h1><p class="pn-s">Cargando…</p>'; await grCargar();
+  var h = '<h1>Grupos de graduación</h1><p class="pn-s">Crea un enlace por colegio. Cada estudiante se anota con su nombre y contacto, y el precio baja solo mientras más se anotan.</p><div class="pn-row"><button class="pn-btn" data-act="n-gr-nuevo">+ Nuevo grupo</button></div>';
+  if (!GR.ok) return $('#pn-main').innerHTML = h + '<div class="pn-card"><h2>Falta un paso</h2><p class="pn-s">Hay que ejecutar <b>etapa13.sql</b> en Supabase (SQL Editor, pegar y Run). Después recarga el panel.</p></div>';
+  if (!GR.lista.length) h += '<div class="pn-card"><p class="pn-s">Aún no hay grupos. Crea el primero con el botón de arriba.</p></div>';
+  GR.lista.forEach(function(g){
+    var ms = GR.miembros.filter(function(m){ return m.group_id === g.id; }), n = ms.length, t = g.tiers || GR_TIERS, pr = grPrecio(t, n), fin = t[t.length - 1], ab = GR.abierto === g.id;
+    h += '<div class="pn-card"><h3>' + esc(g.name) + (g.status === 'closed' ? ' <span class="pn-s">(cerrado)</span>' : '') + '</h3><p class="pn-s">' + (g.event_date ? 'Graduación: ' + esc(fFmt(g.event_date)) + ' · ' : '') + (g.deadline ? 'Se cierra el ' + esc(fFmt(g.deadline)) + ' · ' : '') + '<b>' + n + '</b> anotados · precio hoy <b>' + qFmt(pr) + '</b>' + (n < fin[0] ? ' · faltan ' + (fin[0] - n) + ' para ' + qFmt(fin[1]) : ' · ¡meta lograda!') + '</p>' +
+      '<div class="pn-row"><button class="pn-btn" data-act="n-gr-copiar" data-id="' + g.id + '">Copiar enlace</button><a class="pn-btn sec" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block" href="' + esc(waLink('', 'Hola 👋 Anótate al paquete de graduación de ' + g.name + ' (' + g.includes + '). Mientras más se anotan, más baja el precio: ' + GR_URL + g.token)) + '">Compartir por WhatsApp</a><button class="pn-btn sec" data-act="n-gr-ver" data-id="' + g.id + '">' + (ab ? 'Ocultar lista' : 'Ver lista (' + n + ')') + '</button><button class="pn-btn sec" data-act="n-gr-est" data-id="' + g.id + '">' + (g.status === 'closed' ? 'Reabrir' : 'Cerrar grupo') + '</button><button class="pn-btn sec" data-act="n-gr-del" data-id="' + g.id + '">Eliminar</button></div>';
+    if (ab) h += (n ? '<div style="overflow:auto"><table class="pn-tb"><tr><th>#</th><th>Estudiante</th><th>Contacto</th><th>Grado</th><th></th></tr>' + ms.map(function(m, i){ return '<tr><td>' + (i + 1) + '</td><td>' + esc(m.name) + '</td><td>' + esc(m.phone) + '</td><td>' + esc(m.grade || '') + '</td><td class="pn-ac"><a class="pn-btn sec" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block" href="' + esc(waLink(m.phone)) + '">WhatsApp</a> <button class="pn-btn sec" data-act="n-gr-qm" data-id="' + m.id + '">Quitar</button></td></tr>'; }).join('') + '</table></div><p class="pn-s">Total a cobrar con el precio de hoy: <b>' + qFmt(pr * n) + '</b></p>' : '<p class="pn-s">Todavía no se anota nadie.</p>');
+    h += '</div>';
+  });
+  $('#pn-main').innerHTML = h;
+}
+async function grGuardar(e){
+  e.preventDefault(); var nm = $('#n-gn').value.trim(); if (!nm) return aviso('Escribe el nombre del colegio.');
+  var d = { photographer_id: ph.id, name: nm, event_date: $('#n-gf').value || null, deadline: $('#n-gl').value || null, token: grToken() + grToken().slice(0, 4) };
+  var r = await db.from('groups').insert(d).select('id').single();
+  if (r.error) return aviso(/groups/i.test(r.error.message) ? 'Falta ejecutar etapa13.sql en Supabase.' : r.error.message);
+  $('#n-dgr').close(); e.target.reset(); aviso('Grupo creado'); GR.abierto = r.data.id; pintarGrupos();
+}
+async function grAccion(a, el){
+  var g = GR.lista.filter(function(x){ return x.id === el.dataset.id; })[0];
+  if (a === 'n-gr-nuevo') return $('#n-dgr').showModal();
+  if (a === 'n-gr-ver') { GR.abierto = GR.abierto === el.dataset.id ? null : el.dataset.id; return pintarGrupos(); }
+  if (a === 'n-gr-copiar' && g) { var u = GR_URL + g.token; try { await navigator.clipboard.writeText(u); aviso('Enlace copiado'); } catch (x) { prompt('Copia este enlace:', u); } return; }
+  if (a === 'n-gr-est' && g) { var r = await db.from('groups').update({ status: g.status === 'closed' ? 'open' : 'closed' }).eq('id', g.id); if (r.error) return aviso(r.error.message); return pintarGrupos(); }
+  if (a === 'n-gr-del' && g) { if (!confirm('¿Eliminar este grupo y todos sus anotados?')) return; var r2 = await db.from('groups').delete().eq('id', g.id); if (r2.error) return aviso(r2.error.message); return pintarGrupos(); }
+  if (a === 'n-gr-qm') { if (!confirm('¿Quitar a este estudiante de la lista?')) return; var r3 = await db.from('group_members').delete().eq('id', el.dataset.id); if (r3.error) return aviso(r3.error.message); return pintarGrupos(); }
+}
 function negAccion(a, el){
+  if (a.indexOf('n-gr-') === 0) return grAccion(a, el);
   if (a === 'n-ir') { vista = el.dataset.v; return pintar(); }
   if (a === 'n-cli-nuevo') return cliAbrir(null);
   if (a === 'n-cli-edit') return cliAbrir(el.dataset.id);
@@ -1345,7 +1390,8 @@ function negAccion(a, el){
 }
 function negHtml(){
   var F = function(id, t, ty, ex){ return '<label class="pn-s" for="' + id + '" style="display:block;margin-top:.6rem">' + t + '</label><input type="' + (ty || 'text') + '" id="' + id + '" ' + (ex || '') + '>'; };
-  return '<dialog id="n-dcli"><h2>Cliente</h2><form id="n-fcli">' + F('n-cn', 'Nombre', 'text', 'maxlength="80"') + F('n-ct', 'Teléfono / WhatsApp', 'tel', 'maxlength="30"') + F('n-ce', 'Correo', 'email', 'maxlength="80"') + '<label class="pn-s" for="n-cno" style="display:block;margin-top:.6rem">Notas</label><textarea id="n-cno" rows="3" maxlength="300" style="width:100%"></textarea><div class="pn-row"><button class="pn-btn" type="submit">Guardar</button><button class="pn-btn sec" type="button" data-act="n-cerrar">Cancelar</button><button class="pn-btn sec" type="button" id="n-cdel" data-act="n-cli-del" hidden>Eliminar</button></div></form></dialog>' +
+  return '<dialog id="n-dgr"><h2>Nuevo grupo de graduación</h2><form id="n-fgr">' + F('n-gn', 'Colegio o instituto', 'text', 'maxlength="80"') + F('n-gf', 'Fecha de la graduación (opcional)', 'date') + F('n-gl', 'Fecha límite para anotarse (opcional)', 'date') + '<p class="pn-s">Incluye 8 fotos digitales + 8 impresas. El precio empieza en Q350 y baja hasta Q150 con 12 estudiantes.</p><div class="pn-row"><button class="pn-btn" type="submit">Crear grupo</button><button class="pn-btn sec" type="button" data-act="n-cerrar">Cancelar</button></div></form></dialog>' +
+    '<dialog id="n-dcli"><h2>Cliente</h2><form id="n-fcli">' + F('n-cn', 'Nombre', 'text', 'maxlength="80"') + F('n-ct', 'Teléfono / WhatsApp', 'tel', 'maxlength="30"') + F('n-ce', 'Correo', 'email', 'maxlength="80"') + '<label class="pn-s" for="n-cno" style="display:block;margin-top:.6rem">Notas</label><textarea id="n-cno" rows="3" maxlength="300" style="width:100%"></textarea><div class="pn-row"><button class="pn-btn" type="submit">Guardar</button><button class="pn-btn sec" type="button" data-act="n-cerrar">Cancelar</button><button class="pn-btn sec" type="button" id="n-cdel" data-act="n-cli-del" hidden>Eliminar</button></div></form></dialog>' +
     '<dialog id="n-dcot"><h2>Cotización</h2><form id="n-fcot"><label class="pn-s" for="n-qcl" style="display:block">Cliente</label><select id="n-qcl"></select>' + F('n-qnm', 'Nombre que aparece en la cotización', 'text', 'maxlength="80"') + '<label class="pn-s" for="n-qtp" style="display:block;margin-top:.6rem">Tipo de evento</label><select id="n-qtp"></select>' + F('n-qfe', 'Fecha del evento', 'date') + F('n-qlu', 'Lugar', 'text', 'maxlength="80"') +
     '<div class="pn-dos">' + '<div>' + F('n-qdg', 'Fotografías digitales', 'number', 'min="0"') + '</div><div>' + F('n-qim', 'Fotografías impresas', 'number', 'min="0"') + '</div></div><label class="pn-s" for="n-qvi" style="display:block;margin-top:.6rem">Video</label><select id="n-qvi"><option value="ninguno">Sin video</option><option value="resumen">Video resumen</option><option value="completo">Video completo</option></select><div class="pn-dos"><div>' + F('n-qds', 'Descuento (%)', 'number', 'min="0" max="90" step="1"') + '</div><div>' + F('n-qva', 'Válida (días)', 'number', 'min="1"') + '</div></div>' + F('n-qto', 'Total para el cliente (Q)', 'number', 'min="0" step="1"') + '<p class="pn-s" id="n-qde"></p><p class="pn-s" id="n-qgn" style="padding:.5rem .8rem;border:1px dashed var(--l);border-radius:10px"></p><p class="pn-s">El total se calcula solo con tus precios; puedes cambiarlo. El cliente solo ve cantidades y el total.</p><div class="pn-row"><button class="pn-btn" type="submit">Guardar y ver imagen</button><button class="pn-btn sec" type="button" data-act="n-cerrar">Cancelar</button><button class="pn-btn sec" type="button" id="n-qdel" data-act="n-qdel" hidden>Eliminar</button></div></form></dialog>' +
     '<dialog id="n-dver" style="width:min(46rem,96vw)"><h2 id="n-vti"></h2><div class="pn-nvr"><canvas id="n-vcv" style="width:100%;max-width:340px;border-radius:10px;border:1px solid var(--l)"></canvas><div><p class="pn-s">Diseño</p><div class="pn-row" id="n-dbt"></div><p class="pn-s">Estado</p><select id="n-vst"><option value="draft">Borrador</option><option value="sent">Enviada</option><option value="accepted">Aceptada</option><option value="rejected">Rechazada</option></select>' +
@@ -1356,7 +1402,7 @@ function negIniciar(){
   if (window.__PN_TEST) window.__PN_TEST = { cotLienzo: cotLienzo, DIS: DIS, cotLogos: cotLogos, neg: neg, pqPrecio: pqPrecio };
   root.querySelector('.pn').insertAdjacentHTML('beforeend', negHtml());
   root.addEventListener('click', function(e){ var a = e.target.closest('[data-act^="n-"]'); if (a) negAccion(a.dataset.act, a); });
-  root.addEventListener('submit', function(e){ if (e.target.id === 'n-fcli') cliGuardar(e); else if (e.target.id === 'n-fcot') cotGuardar(e); else if (e.target.id === 'n-fev') evGuardar(e); });
+  root.addEventListener('submit', function(e){ if (e.target.id === 'n-fcli') cliGuardar(e); else if (e.target.id === 'n-fcot') cotGuardar(e); else if (e.target.id === 'n-fev') evGuardar(e); else if (e.target.id === 'n-fgr') grGuardar(e); });
   root.addEventListener('change', async function(e){ if (e.target.id === 'n-vst' && neg.cotImg) { var r = await db.from('quotes').update({ status: e.target.value }).eq('id', neg.cotImg.id); if (r.error) return aviso(r.error.message); neg.cotImg.status = e.target.value; aviso('Estado actualizado'); } });
   root.addEventListener('input', function(e){ var id = e.target.id; if (id === 'n-qdg') cotRecalc('dg'); else if (id === 'n-qim') { neg.qMan.imp = true; cotRecalc(); } else if (id === 'n-qto') { neg.qMan.tot = true; cotRecalc(); } else if (id === 'n-qds') { neg.qMan.tot = false; cotRecalc(); } });
   root.addEventListener('change', function(e){ if (e.target.id === 'n-qvi') cotRecalc(); });

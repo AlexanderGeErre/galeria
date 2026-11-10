@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Paquete de graduación</title>
+<link rel="icon" href="imagenes/logo-icono.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--f:#FAF8F5;--c:#F0EDE8;--t:#2B2623;--s:#7d756d;--l:#E6E0D8;--a:#B08968;--ok:#3f7a52;--err:#A32D2D;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--f:#161514;--c:#211f1d;--t:#F1ECE4;--s:#a39a91;--l:#322f2b;--a:#C9A27A;--ok:#8fd19e;--err:#E58C8C;color-scheme:dark}}
+*{box-sizing:border-box;margin:0}[hidden]{display:none!important}
+body{background:var(--f);color:var(--t);font-family:'Jost',system-ui,sans-serif;line-height:1.55;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+h1,h2,.pr{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;line-height:1.1}
+button,input{font:inherit;color:inherit}button{cursor:pointer}
+.w{max-width:34rem;margin:0 auto;padding:1.6rem 1.2rem 3rem}
+.lg{display:block;margin:0 auto 1.2rem;width:min(15rem,62vw);height:auto}.lgD{display:none}
+@media(prefers-color-scheme:dark){.lgL{display:none}.lgD{display:block}}
+.top{text-align:center}.top .k{letter-spacing:.2em;font-size:.78rem;text-transform:uppercase;color:var(--a)}
+.top h1{font-size:clamp(2rem,8vw,2.8rem);margin:.4rem 0 .3rem}.top p{color:var(--s)}
+.card{background:var(--c);border:1px solid var(--l);border-radius:18px;padding:1.3rem 1.2rem;margin-top:1.2rem}
+.hoy{text-align:center}.hoy .l{color:var(--s);font-size:.9rem}.pr{font-size:4.4rem;color:var(--a);margin:.1rem 0}.hoy .u{color:var(--s);font-size:.95rem}
+.barra{height:10px;border-radius:999px;background:var(--l);overflow:hidden;margin:1.1rem 0 .5rem}.barra i{display:block;height:100%;background:var(--a);border-radius:999px;transition:width .5s}
+.msg{text-align:center;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:1.3rem}.meta{color:var(--ok)}
+.tab{width:100%;border-collapse:collapse;font-size:.95rem;margin-top:.6rem}.tab td{padding:.45rem .2rem;border-bottom:1px solid var(--l)}.tab td:last-child{text-align:right;font-weight:500}.tab tr.on td{color:var(--a);font-weight:600}
+h2{font-size:1.6rem;margin-bottom:.2rem}
+label{display:block;font-size:.88rem;color:var(--s);margin:.8rem 0 .25rem}
+input[type=text],input[type=tel]{width:100%;padding:.8rem 1rem;border:1px solid var(--l);background:var(--f);border-radius:12px}
+.chk{display:flex;gap:.6rem;align-items:flex-start;margin-top:1rem;font-size:.85rem;color:var(--s)}.chk input{margin-top:.25rem}
+.btn{width:100%;margin-top:1.1rem;background:var(--t);color:var(--f);border:0;border-radius:999px;padding:.9rem 1.5rem;font-weight:500}.btn:disabled{opacity:.6}
+.err{color:var(--err);min-height:1.3em;margin-top:.6rem;font-size:.92rem}
+.lst{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.7rem}.lst span{border:1px solid var(--l);border-radius:999px;padding:.2rem .75rem;font-size:.9rem}
+.ok h2{color:var(--ok)}.nota{font-size:.82rem;color:var(--s);text-align:center;margin-top:1.4rem}
+</style>
+</head>
+<body>
+<div class="w">
+  <img class="lg lgL" data-n="logo-oscuro" data-i="0" src="imagenes/logo-oscuro.png" alt=""><img class="lg lgD" data-n="logo-claro" data-i="0" src="imagenes/logo-claro.png" alt="">
+  <div id="cargando" class="top"><p>Cargando…</p></div>
+  <div id="nada" class="top" hidden><h1>Enlace no válido</h1><p>Pídele al colegio o a tu fotógrafo que te comparta el enlace de nuevo.</p></div>
+  <div id="g" hidden>
+    <div class="top"><div class="k">Paquete de graduación</div><h1 id="nom"></h1><p id="fec"></p></div>
+    <div class="card hoy"><div class="l">Precio por estudiante hoy</div><div class="pr" id="pr"></div><div class="u" id="inc"></div>
+      <div class="barra"><i id="bar" style="width:0"></i></div><div class="msg" id="msg"></div>
+    </div>
+    <div class="card"><h2>Así baja el precio</h2><p class="nota" style="text-align:left;margin:0">Mientras más estudiantes se anotan, el precio baja para todos.</p><table class="tab" id="tab"></table></div>
+    <div class="card" id="cf"><h2>Anótate</h2><p class="nota" style="text-align:left;margin:0" id="lim"></p>
+      <form id="f" novalidate>
+        <label for="n">Nombre completo del estudiante</label><input type="text" id="n" autocomplete="name" maxlength="60">
+        <label for="t">WhatsApp o teléfono de contacto</label><input type="tel" id="t" autocomplete="tel" inputmode="tel" maxlength="16">
+        <label for="gr">Grado o sección (opcional)</label><input type="text" id="gr" maxlength="40">
+        <label class="chk"><input type="checkbox" id="ok"> <span>Acepto que mi nombre y teléfono se usen solo para coordinar mi sesión de fotos. Si el estudiante es menor de edad, lo completa su madre, padre o encargado. Los demás solo verán el nombre y la inicial del apellido.</span></label>
+        <div class="err" id="er" role="alert"></div>
+        <button class="btn" id="bt" type="submit">Anotarme</button>
+      </form>
+    </div>
+    <div class="card ok" id="lis" hidden><h2>Ya están anotados</h2><div class="lst" id="ls"></div></div>
+    <div class="card ok" id="ya" hidden><h2>¡Listo, quedaste anotado!</h2><p id="yat"></p></div>
+    <div class="card" id="cer" hidden><h2>Este grupo ya cerró</h2><p class="nota" style="text-align:left;margin:0">Ya no se reciben más anotaciones. Escríbele a tu fotógrafo si tienes dudas.</p></div>
+    <p class="nota" id="est"></p>
+  </div>
+</div>
+<script>
+(function(){
+  var W = 'https://galerias-api.alexandergeerre.workers.dev';
+  var LX = ['.png', '.svg', '.png.jpg', '.jpg.jpg', '.jpg', '.jpeg', '.webp', '.png.png'];
+  document.addEventListener('error', function(e){ var t = e.target; if (!t || t.tagName !== 'IMG' || !t.dataset || !t.dataset.n) return; var i = +t.dataset.i + 1; if (i < LX.length) { t.dataset.i = i; t.src = 'imagenes/' + t.dataset.n + LX[i]; } else t.style.visibility = 'hidden'; }, true);
+  function $(s){ return document.querySelector(s); }
+  var tk = new URLSearchParams(location.search).get('g') || '', D = null, K = 'grupo-' + tk;
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function Q(n){ return 'Q' + Number(n).toLocaleString('es-GT'); }
+  function fecha(d, o){ return new Date(d + 'T12:00:00').toLocaleDateString('es-GT', o); }
+  function api(p, b){ return fetch(W + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) }).then(function(r){ return r.json().catch(function(){ return { ok: false }; }); }); }
+  function yo(){ try { return localStorage.getItem(K); } catch (e) { return null; } }
+  function pinta(d){
+    D = d; $('#cargando').hidden = true; $('#g').hidden = false; document.title = 'Graduación · ' + d.nombre;
+    $('#nom').textContent = d.nombre; $('#fec').textContent = d.fecha ? 'Graduación: ' + fecha(d.fecha, { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    $('#pr').textContent = Q(d.precio); $('#inc').textContent = d.incluye + ' · entrega en memoria USB';
+    var pc = Math.min(100, Math.round(d.total / d.minimo * 100)); $('#bar').style.width = pc + '%';
+    var m = $('#msg'); m.className = 'msg';
+    if (d.total >= d.minimo) { m.className = 'msg meta'; m.textContent = '¡Meta lograda! Somos ' + d.total + ' y el precio ya es de ' + Q(d.precio_final) + ' cada uno.'; }
+    else if (d.total === 0) m.textContent = 'Sé el primero en anotarte. Con ' + d.minimo + ' estudiantes el paquete baja a ' + Q(d.precio_final) + ' cada uno.';
+    else m.textContent = 'Somos ' + d.total + '. Con ' + d.minimo + ' estudiantes el paquete baja a ' + Q(d.precio_final) + ' cada uno. ¡Faltan ' + (d.minimo - d.total) + '!';
+    var t = d.tabla; $('#tab').innerHTML = t.map(function(r, i){ var h = i + 1 < t.length ? t[i + 1][0] - 1 : null, rg = i + 1 >= t.length ? r[0] + ' o más' : (h === r[0] ? '' + r[0] : r[0] + ' a ' + h), on = d.total >= r[0] && (i + 1 >= t.length || d.total < t[i + 1][0]); return '<tr' + (on ? ' class="on"' : '') + '><td>' + rg + ' estudiantes</td><td>' + Q(r[1]) + '</td></tr>'; }).join('');
+    $('#lim').textContent = d.limite ? 'Puedes anotarte hasta el ' + fecha(d.limite, { day: 'numeric', month: 'long' }) + '.' : '';
+    $('#lis').hidden = !d.nombres.length; $('#ls').innerHTML = d.nombres.map(function(n){ return '<span>' + esc(n) + '</span>'; }).join('');
+    var ya = yo(); $('#cf').hidden = d.cerrado || !!ya; $('#cer').hidden = !d.cerrado;
+    $('#ya').hidden = !ya; if (ya) $('#yat').textContent = 'Hoy el paquete está en ' + Q(d.precio) + ' por estudiante. El precio final se confirma al cierre del grupo y tu fotógrafo se comunicará contigo por WhatsApp.';
+    $('#est').textContent = d.estudio || '';
+  }
+  function carga(){ if (!/^[A-Za-z0-9-]{16,64}$/.test(tk)) { $('#cargando').hidden = true; $('#nada').hidden = false; return; }
+    api('/api/group/info', { t: tk }).then(function(d){ if (d && d.ok) pinta(d); else { $('#cargando').hidden = true; $('#nada').hidden = false; } }); }
+  $('#f').addEventListener('submit', function(e){
+    e.preventDefault(); var er = $('#er'); er.textContent = '';
+    var n = $('#n').value.trim(), t = $('#t').value.trim();
+    if (n.length < 3) return er.textContent = 'Escribe el nombre completo.';
+    if (t.replace(/\D/g, '').length < 8) return er.textContent = 'Escribe un teléfono válido.';
+    if (!$('#ok').checked) return er.textContent = 'Marca la casilla para continuar.';
+    var b = $('#bt'); b.disabled = true; b.textContent = 'Anotando…';
+    api('/api/group/join', { t: tk, name: n, phone: t, grade: $('#gr').value.trim() }).then(function(d){
+      b.disabled = false; b.textContent = 'Anotarme';
+      if (d && d.ok) { try { localStorage.setItem(K, '1'); } catch (x) {} pinta(d); window.scrollTo(0, 0); return; }
+      var m = { repetido: 'Ese teléfono ya está anotado en este grupo.', cerrado: 'Este grupo ya cerró.', demasiados: 'Demasiados intentos. Espera un rato e inténtalo de nuevo.', datos: 'Revisa tus datos.', lleno: 'El grupo está lleno.' };
+      er.textContent = m[d && d.error] || 'No se pudo anotar. Inténtalo de nuevo.';
+      if (d && d.error === 'repetido') { try { localStorage.setItem(K, '1'); } catch (x) {} carga(); }
+    }).catch(function(){ b.disabled = false; b.textContent = 'Anotarme'; er.textContent = 'Sin conexión. Inténtalo de nuevo.'; });
+  });
+  carga(); setInterval(function(){ if (!document.hidden) carga(); }, 60000);
+})();
+</script>
+</body>
+</html>
