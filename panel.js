@@ -348,7 +348,7 @@ function pintarCuenta(){
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 01:30</p></div>';
+ + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 01:50</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -1237,24 +1237,24 @@ function cotLienzo(cv, c, dis){
     t('Tu cotización', 80, 310, '400 34px ' + SAN, ac, 'left', 6); fit('Preparada para ' + c.client_name, 80, 410, 76, tx, 'left', W - 160, SER);
     t(linea, 80, 475, '300 34px ' + SAN, mu, 'left'); if (c.location) t(c.location, 80, 522, '300 34px ' + SAN, mu, 'left');
     x.fillRect(80, 580, W - 160, 2);
-    t(String(c.digital_count), 80, 790, '500 180px ' + SER, tx, 'left'); t('fotografías digitales', 80, 855, '300 34px ' + SAN, mu, 'left');
-    if (c.print_count) { t(String(c.print_count), 600, 790, '500 180px ' + SER, tx, 'left'); t('fotografías impresas', 600, 855, '300 34px ' + SAN, mu, 'left'); }
+    t(String(c.digital_count), 80, 790, '300 168px ' + SAN, tx, 'left'); t('fotografías digitales', 80, 855, '300 34px ' + SAN, mu, 'left');
+    if (c.print_count) { t(String(c.print_count), 600, 790, '300 168px ' + SAN, tx, 'left'); t('fotografías impresas', 600, 855, '300 34px ' + SAN, mu, 'left'); }
     if (vid) chipVideo(80, 940, 'left');
-    x.fillRect(80, 1000, W - 160, 2); t('TOTAL', 80, 1100, '400 34px ' + SAN, mu, 'left', 8); t(qFmt(c.total), W - 80, 1110, '500 120px ' + SER, ac, 'right');
-    if (c.discount_pct > 0 && c.subtotal > c.total) t('Precio regular ' + qFmt(c.subtotal) + '  ·  Descuento ' + c.discount_pct + '%', W - 80, 1150, '300 27px ' + SAN, mu, 'right');
-    t(nota, 80, 1170, 'italic 500 38px ' + SER, ac, 'left'); t(pie, 80, 1218, '300 26px ' + SAN, mu, 'left'); contacto(80, 1285, ac, 'left');
+    x.fillRect(80, 1000, W - 160, 2); t('TOTAL', 80, 1100, '400 34px ' + SAN, mu, 'left', 8); t(qFmt(c.total), W - 80, 1110, '300 108px ' + SAN, ac, 'right');
+    if (c.discount_pct > 0 && c.subtotal > c.total) t('Precio regular ' + qFmt(c.subtotal) + '  ·  Descuento ' + c.discount_pct + '%', 80, 1140, '300 27px ' + SAN, mu, 'left');
+    t(nota, 80, 1190, 'italic 500 38px ' + SER, ac, 'left'); t(pie, 80, 1234, '300 26px ' + SAN, mu, 'left'); contacto(80, 1298, ac, 'left');
   } else {
     logo(W / 2, 70, 420, 150, 'center'); t('FOTOGRAFÍA Y VIDEOGRAFÍA PROFESIONAL', W / 2, 260, '400 22px ' + SAN, mu, 'center', 6);
     x.fillStyle = ac; x.fillRect(W / 2 - 40, 300, 80, 3);
-    t('Cotización para', W / 2, 380, '300 34px ' + SAN, mu, 'center', 2); fit(c.client_name, W / 2, 470, 92, tx, 'center', W - 200, SER);
-    t(linea, W / 2, 540, '300 34px ' + SAN, mu, 'center'); if (c.location) t(c.location, W / 2, 585, '300 34px ' + SAN, mu, 'center');
+    t('Cotización para', W / 2, 372, '300 34px ' + SAN, mu, 'center', 2); fit(c.client_name, W / 2, 460, 92, tx, 'center', W - 200, SER);
+    t(linea, W / 2, 528, '300 34px ' + SAN, mu, 'center'); if (c.location) t(c.location, W / 2, 573, '300 34px ' + SAN, mu, 'center');
     var cw = 210, dx = c.print_count ? W / 2 - cw : W / 2, ix = W / 2 + cw;
-    t(String(c.digital_count), dx, 750, '500 160px ' + SER, tx, 'center'); t('digitales', dx, 805, '300 34px ' + SAN, mu, 'center');
-    if (c.print_count) { t(String(c.print_count), ix, 750, '500 160px ' + SER, tx, 'center'); t('impresas', ix, 805, '300 34px ' + SAN, mu, 'center'); }
-    if (vid) chipVideo(W / 2, 885, 'center');
-    t('T O T A L', W / 2, 985, '400 26px ' + SAN, mu, 'center', 4); t(qFmt(c.total), W / 2, 1080, '500 120px ' + SER, ac, 'center');
-    if (c.discount_pct > 0 && c.subtotal > c.total) t('Precio regular ' + qFmt(c.subtotal) + '   ·   Descuento ' + c.discount_pct + '%', W / 2, 1112, '300 27px ' + SAN, mu, 'center');
-    t(nota, W / 2, 1146, 'italic 500 38px ' + SER, ac, 'center'); t(pie, W / 2, 1194, '300 26px ' + SAN, mu, 'center'); contacto(0, 1252, ac, 'center');
+    t(String(c.digital_count), dx, 735, '300 150px ' + SAN, tx, 'center'); t('digitales', dx, 790, '300 34px ' + SAN, mu, 'center');
+    if (c.print_count) { t(String(c.print_count), ix, 735, '300 150px ' + SAN, tx, 'center'); t('impresas', ix, 790, '300 34px ' + SAN, mu, 'center'); }
+    if (vid) chipVideo(W / 2, 870, 'center');
+    t('T O T A L', W / 2, 962, '400 26px ' + SAN, mu, 'center', 4); t(qFmt(c.total), W / 2, 1062, '300 108px ' + SAN, ac, 'center');
+    if (c.discount_pct > 0 && c.subtotal > c.total) t('Precio regular ' + qFmt(c.subtotal) + '   ·   Descuento ' + c.discount_pct + '%', W / 2, 1110, '300 27px ' + SAN, mu, 'center');
+    t(nota, W / 2, 1156, 'italic 500 38px ' + SER, ac, 'center'); t(pie, W / 2, 1200, '300 26px ' + SAN, mu, 'center'); contacto(0, 1252, ac, 'center');
   }
 }
 async function cotAccion(a, el){
