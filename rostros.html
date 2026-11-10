@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Prueba de rostros · Alexander Ge Erre</title>
+<title>Selección con IA · Alexander Ge Erre</title>
 <link rel="icon" href="imagenes/logo-icono.png">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -32,20 +32,21 @@ button,input,select{font:inherit;color:inherit}button{cursor:pointer}
 .bar{position:fixed;left:0;right:0;bottom:0;background:var(--c);border-top:1px solid var(--l);padding:.8rem 1.2rem;z-index:5}
 .bar .row{max-width:70rem;margin:0 auto}
 details summary{cursor:pointer;font-weight:500}
-.per.exc{opacity:.55}.per label.x{display:block;font-size:.85rem;color:var(--s);margin-top:.5rem}.th .q{position:relative}.th .q b{position:absolute;right:3px;top:3px;background:rgba(0,0,0,.65);color:#fff;border-radius:50%;width:20px;height:20px;text-align:center;line-height:19px;font-size:.8rem;cursor:pointer;font-weight:400}.th .q.off img{opacity:.25}.th .q i{position:absolute;left:4px;bottom:4px;background:var(--err);color:#fff;font-size:.65rem;font-style:normal;border-radius:6px;padding:0 5px}
+.per.exc{opacity:.55}.per label.x{display:block;font-size:.85rem;color:var(--s);margin-top:.5rem}.th .q{position:relative}.th .q b{position:absolute;right:3px;top:3px;background:rgba(0,0,0,.65);color:#fff;border-radius:50%;width:20px;height:20px;text-align:center;line-height:19px;font-size:.8rem;cursor:pointer;font-weight:400}.th .q.off img{opacity:.25}.th .q i{position:absolute;left:4px;bottom:4px;white-space:nowrap;line-height:1.4;background:var(--err);color:#fff;font-size:.65rem;font-style:normal;border-radius:6px;padding:0 5px}
 .err{color:var(--err)}.ok{color:var(--ok)}
 select{padding:.4rem .6rem;border-radius:10px;border:1px solid var(--l);background:var(--c)}
 .res{display:flex;flex-wrap:wrap;gap:1.4rem;margin-top:.6rem}.res b{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;display:block;line-height:1}
+body.emb{padding:.2rem .2rem 1rem}body.emb #cab{display:none}
 </style>
 </head>
 <body>
 <div class="w">
-  <h1>Prueba de reconocimiento de rostros</h1>
-  <p class="s">Prototipo para probar con tus fotos. <b>No sube nada</b>: todo se analiza en tu computadora y las fotos no salen de ella.</p>
+  <div id="cab"><h1>Selección de fotografías asistida por IA</h1>
+  <p class="s">Sube las fotos de un evento y la IA las agrupa por persona. Tú revisas, les pones nombre y se arma una galería para cada quien. <b>Versión de prueba:</b> no sube nada, todo se analiza en tu computadora y las fotos no salen de ella.</p></div>
 
   <div class="card">
     <h3>1. Elige las fotos del evento</h3>
-    <p class="s">Hasta unas 300 fotos. Selecciónalas todas juntas desde tu carpeta.</p>
+    <p class="s">Selecciona juntas las fotos desde tu carpeta (puedes subir 500 o más; entre más fotos, más tarda) y toca «Analizar rostros».</p>
     <div class="row" style="margin-top:.7rem"><input type="file" id="fi" accept="image/*" multiple>
       <button class="btn" id="go" disabled>Analizar rostros</button><button class="btn sec" id="stop" hidden>Detener</button></div>
     <div id="pg" hidden><div class="barra"><i id="pb"></i></div><div class="s" id="pt"></div></div>
@@ -67,14 +68,14 @@ select{padding:.4rem .6rem;border-radius:10px;border:1px solid var(--l);backgrou
     </div>
 
     <h2>2. Personas encontradas</h2>
-    <p class="s">Escribe el nombre de cada una. Toca un rostro para seleccionarlo y muévelo a otra persona si se confundió, o usa "Combinar" si una persona quedó dividida en dos.</p>
+    <p class="s">Escribe el nombre de cada una. Si dos personas se confundieron, toca el rostro y muévelo; si una persona quedó dividida en dos, usa «Combinar».</p>
     <div class="grid" id="per"></div>
 
     <details class="card" id="dsc"><summary id="dst"></summary><p class="s">Rostros que no pasaron el filtro. Si alguno te sirve, selecciónalo y asígnalo a una persona.</p><div class="fc" id="dsf"></div></details>
     <details class="card" id="sin"><summary id="sit"></summary><p class="s">Fotos donde ningún rostro pasó el filtro.</p><div class="th" id="sif"></div></details>
 
-    <h2>3. Crear las galerías</h2>
-    <p class="s">En la versión final, este botón crea una galería por persona, dentro de la galería general del evento, con su enlace propio. En esta prueba solo muestra cómo quedarían.</p>
+    <h2 id="h3">3. Revisa cada galería</h2>
+    <p class="s">Muestra cómo quedaría una galería por persona dentro de la galería general del evento, cada una con su enlace propio. En esta versión de prueba todavía no se crean.</p>
     <div class="row"><button class="btn" id="mk">Crear galerías (prueba)</button><button class="btn sec" id="csv" hidden>Descargar lista (CSV)</button></div>
     <div id="gal"></div>
   </div>
@@ -92,7 +93,10 @@ select{padding:.4rem .6rem;border-radius:10px;border:1px solid var(--l);backgrou
     estr: { score: .8, min: 100, sharp: 70, l0: 60, l1: 215, yaw: .28 }
   };
   var DIST = .5, MAXLADO = 1280;
+  var EMB = /[?&]embed=1/.test(location.search), ARCH = [];
+  if (EMB) { document.body.classList.add('emb'); $s3(); }
   var S = { quitar: {}, fotos: [], rostros: [], personas: [], sel: {}, nid: 1, parar: false, listo: false };
+  function $s3(){ var h = document.getElementById('h3'); if (h) { h.textContent = 'Vista previa de las galerías'; h.nextElementSibling.textContent = 'Aquí ves cómo quedaría la galería de cada persona. Toca la × de una foto para quitarla de esa galería. Cuando todo esté bien, usa el botón «Crear galería» de arriba.'; document.getElementById('mk').textContent = 'Ver cómo quedarán las galerías'; } }
   function $(s){ return document.querySelector(s); }
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function cola(){ return new Promise(function(r){ setTimeout(r, 0); }); }
@@ -147,6 +151,7 @@ select{padding:.4rem .6rem;border-radius:10px;border:1px solid var(--l);backgrou
     throw ultimo || new Error('modelos');
   }
   async function analizar(files){
+    ARCH = files.slice();
     S.fotos = []; S.rostros = []; S.personas = []; S.sel = {}; S.quitar = {}; S.parar = false; S.listo = false; $('#er').textContent = ''; $('#out').hidden = true;
     $('#pg').hidden = false; $('#go').disabled = true; $('#stop').hidden = false; $('#pt').textContent = 'Cargando la inteligencia artificial (la primera vez tarda un poco)…'; $('#pb').style.width = '0';
     try { await cargarModelos(); } catch (e) { $('#er').textContent = 'No se pudo cargar la inteligencia artificial. Revisa tu conexión a internet e inténtalo de nuevo.'; $('#pg').hidden = true; $('#go').disabled = false; $('#stop').hidden = true; return; }
@@ -219,7 +224,7 @@ select{padding:.4rem .6rem;border-radius:10px;border:1px solid var(--l);backgrou
   function fotosGal(pid){ return fotosDe(pid).filter(function(f){ return !S.quitar[pid + ':' + f.id]; }); }
   function galerias(){
     var exc = {}; S.rostros.forEach(function(r){ var p = S.personas.filter(function(q){ return q.id === r.persona; })[0]; if (p && p.excl) exc[r.foto] = 1; });
-    var h = activas().map(function(p){ var fs = fotosDe(p.id), n = fotosGal(p.id).length; return '<div class="card"><h3>' + esc(nombre(p)) + '</h3><p class="s">' + n + ' de ' + fs.length + ' foto' + (fs.length === 1 ? '' : 's') + ' · enlace propio en la versión final. Toca la × para quitar una foto de esta galería.</p><div class="th">' + fs.map(function(f){ var off = S.quitar[p.id + ':' + f.id]; return '<div class="q' + (off ? ' off' : '') + '"><img src="' + f.thumb + '" alt=""><b data-q="' + p.id + ':' + f.id + '">' + (off ? '↺' : '×') + '</b>' + (exc[f.id] ? '<i>sale una persona excluida</i>' : '') + '</div>'; }).join('') + '</div></div>'; }).join('');
+    var h = activas().map(function(p){ var fs = fotosDe(p.id), n = fotosGal(p.id).length; return '<div class="card"><h3>' + esc(nombre(p)) + '</h3><p class="s">' + n + ' de ' + fs.length + ' foto' + (fs.length === 1 ? '' : 's') + ' · enlace propio en la versión final. Toca la × para quitar una foto de esta galería.</p><div class="th">' + fs.map(function(f){ var off = S.quitar[p.id + ':' + f.id]; return '<div class="q' + (off ? ' off' : '') + '"><img src="' + f.thumb + '" alt=""><b data-q="' + p.id + ':' + f.id + '">' + (off ? '↺' : '×') + '</b>' + (exc[f.id] ? '<i title="Sale una persona excluida">⚠ excluida</i>' : '') + '</div>'; }).join('') + '</div></div>'; }).join('');
     var multi = S.fotos.filter(function(f){ var s = {}; S.rostros.forEach(function(r){ if (r.foto === f.id && r.persona != null) { var p = S.personas.filter(function(q){ return q.id === r.persona; })[0]; if (p && !p.excl) s[r.persona] = 1; } }); return Object.keys(s).length > 1; }).length;
     var ne = S.personas.length - activas().length, nx = Object.keys(exc).length;
     $('#gal').innerHTML = '<p class="s ok" style="margin-top:1rem">Se crearían ' + activas().length + ' galerías' + (ne ? ' (' + ne + ' persona' + (ne === 1 ? ' excluida' : 's excluidas') + ')' : '') + '. ' + multi + ' foto' + (multi === 1 ? ' sale' : 's salen') + ' con varias personas y ' + (multi === 1 ? 'iría' : 'irían') + ' a la galería de cada una.' + (nx ? '</p><p class="s err">' + nx + ' foto' + (nx === 1 ? '' : 's') + ' de las galerías tienen a una persona excluida: revísalas y quítalas con la × si hace falta.' : '') + '</p>' + h; $('#csv').hidden = false;
@@ -246,7 +251,12 @@ select{padding:.4rem .6rem;border-radius:10px;border:1px solid var(--l);backgrou
   document.addEventListener('input', function(e){ var n = e.target.dataset && e.target.dataset.n; if (n) { S.personas.filter(function(p){ return p.id === +n; })[0].nombre = e.target.value; } });
   document.addEventListener('change', function(e){ var d = e.target.dataset || {}; if (d.n) pintarSinPerder(); if (d.ex) { S.personas.filter(function(p){ return p.id === +d.ex; })[0].excl = e.target.checked; pintar(); } });
   function pintarSinPerder(){ pintar(); }
-  window.__RT = { agrupar: agrupar, razones: razones, NIV: NIV, S: S, recalcular: recalcular, pintar: pintar };
+  function resumen(){
+    var exc = {}, fotos = {};
+    var per = S.personas.map(function(p){ return { id: p.id, nombre: nombre(p), sinNombre: !p.nombre.trim(), excl: !!p.excl, fotos: fotosDe(p.id).filter(function(f){ return !S.quitar[p.id + ':' + f.id]; }).map(function(f){ return f.id; }), todas: fotosDe(p.id).map(function(f){ return f.id; }) }; });
+    return { listo: S.listo, total: S.fotos.length, archivos: ARCH, personas: per };
+  }
+  window.__RT = { resumen: resumen, getFiles: function(){ return ARCH; }, agrupar: agrupar, razones: razones, NIV: NIV, S: S, recalcular: recalcular, pintar: pintar };
   if (typeof faceapi === 'undefined') $('#er').textContent = 'No se pudo cargar la librería de reconocimiento. Revisa tu conexión a internet y recarga la página.';
 })();
 </script>

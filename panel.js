@@ -10,7 +10,7 @@ var EXTS = ['.png.jpg', '.jpg.jpg', '.jpg', '.png', '.jpeg', '.webp', '.png.png'
 var LOGO_EXTS = ['.png', '.svg', '.png.jpg', '.jpg.jpg', '.jpg', '.jpeg', '.webp', '.png.png'];
 function exts(n){ return /^logo-/.test(n) ? LOGO_EXTS : EXTS; }
 // Nombres de logo por el FONDO donde se usan: logo-oscuro = carbón (sobre fondo claro), logo-claro = dorado (sobre fondo oscuro)
-var PAL_TIPO = { 'Boda': 'marfil', 'Quinceañera': 'vino', 'Graduación': 'azul', 'Baby shower': 'oliva', 'Cumpleaños': 'arena', 'Fiesta infantil': 'azul', 'Sesión familiar': 'oliva', 'Sesión de retrato': 'blanco', 'Revelación de género': 'arena', 'Revelación': 'arena', 'Evento corporativo': 'blanco' };
+var PAL_TIPO = { 'Boda': 'marfil', 'Quinceañera': 'vino', 'Graduación': 'azul', 'Clausura': 'azul', 'Baby shower': 'oliva', 'Cumpleaños': 'arena', 'Fiesta infantil': 'azul', 'Sesión familiar': 'oliva', 'Sesión de retrato': 'blanco', 'Revelación de género': 'arena', 'Revelación': 'arena', 'Evento corporativo': 'blanco' };
 var PAL_VIEJA = { beige: 'marfil', noche: 'azul', negro: 'arena' };
 var db, ph, root, gals = [], favs = {}, vista = 'inicio', galId = null, tab = 'panel', busca = '', fEst = '', cur = null;
 
@@ -33,6 +33,7 @@ var CSS = '.pn-pb{position:absolute;right:6px;bottom:34px;z-index:2;display:flex
 '.pn-s{color:var(--s);font-size:.9rem}.pn-row{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;margin:.8rem 0}.pn-row input[type=text]{flex:1;min-width:12rem}.pn-row select{width:auto}' +
 '.pn-cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));border:1px solid var(--l);border-radius:14px;background:var(--c);margin:.6rem 0 1.6rem}.pn-cifras div{padding:1rem 1.2rem;border-right:1px solid var(--l)}.pn-cifras div:last-child{border:0}' +
 '.pn-cifras b{font-family:"Cormorant Garamond",serif;font-size:2rem;font-weight:500;display:block;line-height:1.1}' +
+'.pn-as-p{display:flex;flex-wrap:wrap;gap:.5rem;list-style:none;padding:0;margin:1rem 0}.pn-as-p li{border:1px solid var(--l);border-radius:999px;padding:.3rem .9rem;font-size:.9rem;color:var(--s)}.pn-as-p li.on{border-color:var(--a);color:var(--t);font-weight:500}.pn-as-p li.ok{color:var(--a)}' +
 '.pn-rej{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}.pn-tar{background:none;border:0;text-align:left;padding:0;color:inherit;cursor:pointer;font:inherit}' +
 '.pn-tar .cv{aspect-ratio:3/2;background:var(--l);border-radius:10px;overflow:hidden;display:grid;place-items:center;transition:transform .25s,box-shadow .25s}.pn-tar:hover .cv{transform:translateY(-3px);box-shadow:0 12px 28px rgba(43,38,35,.14)}' +
 '.pn-tar .cv>img{width:100%;height:100%;object-fit:cover}.pn-tar .cv .pn-il{width:45%;mix-blend-mode:normal;filter:none}.pn-tar.nuevo .cv{border:1px dashed var(--s);background:none;font-size:2rem;color:var(--s)}' +
@@ -267,7 +268,7 @@ function pintarLado(){
       '<button data-v="inicio" class="nd">' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias" class="nd on">' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes" class="nd">' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz" class="nd">' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda" class="nd">' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos" class="nd">' + ico('grupos') + '<span>Grupos</span></button><button data-v="ia" class="nd">' + ico('ia') + '<span>IA</span></button>' +
       TABS.map(function(t){ return '<button data-act="tab" data-t="' + t[0] + '" class="ta' + (tab === t[0] ? ' on' : '') + '">' + ico(t[0]) + '<span>' + t[1] + '</span></button>'; }).join('');
   } else {
-    h = logo() + '<button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias"' + (vista === 'galerias' ? ' class="on"' : '') + '>' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes"' + (vista === 'clientes' ? ' class="on"' : '') + '>' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz"' + (vista === 'cotiz' ? ' class="on"' : '') + '>' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda"' + (vista === 'agenda' ? ' class="on"' : '') + '>' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos"' + (vista === 'grupos' ? ' class="on"' : '') + '>' + ico('grupos') + '<span>Grupos de graduación</span></button><button data-v="ia"' + (vista === 'ia' ? ' class="on"' : '') + '>' + ico('ia') + '<span>Selección con IA</span></button>';
+    h = logo() + '<button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias"' + (vista === 'galerias' || vista === 'asist' ? ' class="on"' : '') + '>' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes"' + (vista === 'clientes' ? ' class="on"' : '') + '>' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz"' + (vista === 'cotiz' ? ' class="on"' : '') + '>' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda"' + (vista === 'agenda' ? ' class="on"' : '') + '>' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos"' + (vista === 'grupos' ? ' class="on"' : '') + '>' + ico('grupos') + '<span>Grupos de graduación</span></button><button data-v="ia"' + (vista === 'ia' ? ' class="on"' : '') + '>' + ico('ia') + '<span>Selección con IA</span></button>';
   }
   var tm = temaGuardado();
   h += '<div class="pie"><button data-v="cuenta"' + (vista === 'cuenta' ? ' class="on"' : '') + '>' + ico('cuenta') + '<span>Mi cuenta</span></button><div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button></div>';
@@ -283,7 +284,8 @@ function pintar(){
   if (vista === 'cotiz') return pintarCotiz();
   if (vista === 'agenda') return pintarAgenda();
   if (vista === 'grupos') return pintarGrupos();
-  if (vista === 'ia') return pintarIA();
+  if (vista === 'ia') { asistReset(); vista = 'asist'; }
+  if (vista === 'asist') return pintarAsist();
   pintarDetalle();
 }
 
@@ -308,7 +310,7 @@ function pintarLista(){
   var l = gals.filter(function(g){ return (!fEst || g.status === fEst) && (!busca || g.title.toLowerCase().indexOf(busca.toLowerCase()) >= 0); });
   var op = Object.keys(ESTADOS).map(function(k){ return '<option value="' + k + '"' + (k === fEst ? ' selected' : '') + '>' + ESTADOS[k] + '</option>'; }).join('');
   $('#pn-main').innerHTML = '<h1>Galerías de clientes</h1><p class="pn-s ay">Aquí están las galerías que entregas. Crea una, sube las fotos y comparte el enlace con tu cliente.</p><div class="pn-row"><input type="text" id="pn-q" placeholder="Buscar por nombre" value="' + esc(busca) + '"><select id="pn-fe"><option value="">Todos los estados</option>' + op + '</select></div>' +
-    '<div class="pn-rej"><button class="pn-tar nuevo" data-act="nueva"><div class="cv">+</div><h3>Agregar galería</h3></button>' + l.map(tarjeta).join('') + '</div>' +
+    '<div class="pn-rej"><button class="pn-tar nuevo" data-act="nueva"><div class="cv">+</div><h3>Agregar galería</h3></button><button class="pn-tar nuevo" data-act="asist"><div class="cv">✦</div><h3>Nueva galería asistida por IA</h3></button>' + l.map(tarjeta).join('') + '</div>' +
     (gals.length ? '' : '<div class="pn-card pn-vacio" style="margin-top:1.4rem">' + ilus('admin-vacio') + '<div><b>Aún no hay galerías</b><p class="pn-s">Crea la primera con el botón de arriba.</p></div></div>');
   $('#pn-q').addEventListener('input', function(e){ busca = e.target.value; pintarLista(); var q = $('#pn-q'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); });
   $('#pn-fe').addEventListener('change', function(e){ fEst = e.target.value; pintarLista(); });
@@ -327,7 +329,9 @@ async function abrirDetalle(id, conservar){
   var cvT = null, gg = gal(id); if (gg && gg.cover_key) { var cs = await api('/api/admin/cover-sign', { gallery: id }).catch(function(){ return null; }); cvT = cs && cs.t; }
   var es = await api('/api/admin/scenes', { gallery: id }).catch(function(){ return { escenas: [] }; });
   var ip = await api('/api/admin/prints', { gallery: id }).catch(function(){ return { picks: [] }; });
-  cur = { fotos: fotos, favs: f.data || [], vistas: vRows ? vRows.length : (v.count || 0), vrows: vRows, tk: tk, cover: cvT, escenas: (es && es.escenas) || [], conFecha: conFecha, imp: (ip && Array.isArray(ip.picks)) ? ip.picks : [], impErr: ip && ip.ok === false ? (ip.detalle || ip.error || 'error') : '' };
+  var spm = {}, esIds = ((es && es.escenas) || []).map(function(x){ return x.id; });
+  if (esIds.length) { var spr = await db.from('scene_photos').select('scene_id,photo_id').in('scene_id', esIds).limit(5000); if (!spr.error) (spr.data || []).forEach(function(x){ spm[x.scene_id + ':' + x.photo_id] = 1; }); }
+  cur = { sp: spm, fotos: fotos, favs: f.data || [], vistas: vRows ? vRows.length : (v.count || 0), vrows: vRows, tk: tk, cover: cvT, escenas: (es && es.escenas) || [], conFecha: conFecha, imp: (ip && Array.isArray(ip.picks)) ? ip.picks : [], impErr: ip && ip.ok === false ? (ip.detalle || ip.error || 'error') : '' };
   pintar();
 }
 
@@ -364,7 +368,7 @@ function pintarCuenta(){
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 18:00</p></div>';
+ + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 19:30</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -586,7 +590,7 @@ function pintarDetalle0(){
         return '<figure class="pn-ph"><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (cuenta[x.id] ? ' · ♥ ' + cuenta[x.id] : '') + '</figcaption></figure>';
       }).join('') + '</div>' : '<p class="pn-s">Aún no hay fotos de selección.</p>');
   } else if (tab === 'detalles') {
-    var TIPOS = ['Boda', 'Graduación', 'Quinceañera', 'Baby shower', 'Cumpleaños', 'Fiesta infantil', 'Sesión familiar', 'Sesión de retrato', 'Evento corporativo', 'Revelación de género', 'Otro'];
+    var TIPOS = ['Boda', 'Clausura', 'Graduación', 'Quinceañera', 'Baby shower', 'Cumpleaños', 'Fiesta infantil', 'Sesión familiar', 'Sesión de retrato', 'Evento corporativo', 'Revelación de género', 'Otro'];
     cuerpo = '<div class="pn-card"><label class="pn-s">Nombre de la galería</label><input type="text" id="pn-dt" value="' + esc(g.title) + '"><label class="pn-s" style="display:block;margin-top:.9rem">Fecha del evento</label><input type="date" id="pn-dd" value="' + esc(g.event_date || '') + '">' +
       '<label class="pn-s" style="display:block;margin-top:.9rem">Tipo de galería</label><select id="pn-dtp"><option value="">Sin tipo</option>' + TIPOS.map(function(t){ return '<option' + (g.gallery_type === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select>' +
       '<label class="pn-s" style="display:block;margin-top:.9rem">Ubicación</label><input type="text" id="pn-dub" maxlength="80" value="' + esc(g.location || '') + '">' +
@@ -719,7 +723,7 @@ var ERR = { muy_grande: 'pesa más de 45 MB', formato: 'formato no permitido (us
 
 // ---------- Cola de subida en segundo plano ----------
 var cola = { trabajos: [], activos: 0, total: 0, hechas: 0, fallos: [], gids: {} };
-function subiendo(){ return cola.activos > 0 || cola.trabajos.length > 0; }
+function subiendo(){ return cola.activos > 0 || cola.trabajos.length > 0 || !!(AS && AS.creando); }
 window.addEventListener('beforeunload', function(e){ if (subiendo()) { e.preventDefault(); e.returnValue = ''; } });
 function pintarCola(){
   var el = document.getElementById('pn-up'); if (!el) return;
@@ -753,6 +757,7 @@ async function subirUna(t){
     }
     if (!okp && t.tipo === 'selection') { try { await api('/api/admin/delete-photos', { photos: [d.photo.id] }); } catch (e) {} throw new Error('no se pudo guardar la versión con marca de agua, vuelve a subirla'); }
   }
+  return d.photo ? d.photo.id : null;
 }
 async function correrCola(){
   while (cola.trabajos.length) {
@@ -779,7 +784,7 @@ async function subirTodo(){
 
 function escenasCard(g, sel, fin){
   var es = cur.escenas || [], todas = sel.concat(fin);
-  var cuenta = function(id){ return todas.filter(function(x){ return x.scene_id === id; }).length; };
+  var cuenta = function(id){ return todas.filter(function(x){ return x.scene_id === id || spTiene(id, x.id); }).length; };
   var filas = es.map(function(e){ return '<div class="pn-fila"><span>' + esc(e.name) + ' · ' + cuenta(e.id) + ' fotos' + (e.hidden ? ' · solo con su enlace' : '') + '</span><span><button class="pn-btn sec" data-act="esc-renombrar" data-id="' + e.id + '">Renombrar</button> <button class="pn-btn sec" data-act="esc-borrar" data-id="' + e.id + '">Eliminar</button></span></div>'; }).join('');
   var opts = '<option value="">Todas las fotos</option><option value="_none"' + (fEsc === '_none' ? ' selected' : '') + '>Sin escena</option>' + es.map(function(e){ return '<option value="' + e.id + '"' + (fEsc === e.id ? ' selected' : '') + '>' + esc(e.name) + '</option>'; }).join('');
   return '<div class="pn-card"><h2>Escenas</h2><p class="pn-s">Divide la galería en secciones, por ejemplo una por estudiante. Cada escena tiene su propio enlace (en la pestaña Compartir).</p>' + filas +
@@ -807,7 +812,8 @@ function escenasEnlaces(fila){
 var EXP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>';
 var ORDENES = [['nombre', 'Nombre del archivo'], ['nombre-inv', 'Nombre del archivo (inverso)'], ['carga', 'Tiempo de carga (primero las más antiguas)'], ['carga-inv', 'Tiempo de carga (primero las más recientes)'], ['azar', 'Aleatorio']];
 function impCuenta(){ var m = {}; (cur && Array.isArray(cur.imp) ? cur.imp : []).forEach(function(x){ m[x.photo_id] = (m[x.photo_id] || 0) + 1; }); return m; }
-function filtrarEsc(l){ var ic = fImp ? impCuenta() : null; return l.filter(function(x){ return (!fEsc || (fEsc === '_none' ? !x.scene_id : x.scene_id === fEsc)) && (!ic || ic[x.id]); }); }
+function spTiene(sid, pid){ return !!(cur && cur.sp && cur.sp[sid + ':' + pid]); }
+function filtrarEsc(l){ var ic = fImp ? impCuenta() : null; return l.filter(function(x){ return (!fEsc || (fEsc === '_none' ? !x.scene_id : (x.scene_id === fEsc || spTiene(fEsc, x.id)))) && (!ic || ic[x.id]); }); }
 function seccionFotos(tipo, titulo, lista, g){
   lista = filtrarEsc(lista);
   var ic = impCuenta(), nImp = Object.keys(ic).length;
@@ -903,6 +909,11 @@ async function accion(a, el){
   if (a === 'tab') { tab = el.dataset.t; return pintar(); }
   if (a === 'copiar') { copiar(el.dataset.t); el.textContent = 'Copiado'; return; }
   if (a === 'nueva') return $('#pn-dnueva').showModal();
+  if (a === 'asist') { asistReset(); vista = 'asist'; return pintar(); }
+  if (a === 'as-sig') return asistSig();
+  if (a === 'as-atras') { if (AS.creando) return; AS.paso = 1; return pintarAsist(); }
+  if (a === 'as-crear') return asistCrear();
+  if (a === 'as-cancel') { if (AS.creando) return aviso('Espera a que termine la subida.'); vista = 'galerias'; return pintar(); }
   if (a === 'subir') return subirTodo();
   if (a === 'entregar') { if (await seguro('¿Marcar como entregada? El cliente podrá descargar las finales.')) cambiar({ status: 'delivered', selection_enabled: false, downloads_enabled: true }, 'Galería entregada'); return; }
   if (a === 'reabrir') return cambiar({ status: 'selection', selection_enabled: true, downloads_enabled: false }, 'Selección reabierta');
@@ -1026,7 +1037,7 @@ async function accion(a, el){
 var neg = { ok: true, clientes: [], cots: [], evs: [], mes: new Date(), cargado: false, cotEd: null, cliEd: null, evEd: null, cotImg: null, cotDis: 1, qMan: { imp: false, tot: false } };
 var COT_ST = { draft: 'Borrador', sent: 'Enviada', accepted: 'Aceptada', rejected: 'Rechazada' };
 var EV_K = { sesion: 'Sesión', evento: 'Evento', entrega: 'Entrega', otro: 'Otro' };
-var TIPOS_EV = ['Boda', 'Graduación', 'Quinceañera', 'Baby shower', 'Cumpleaños', 'Fiesta infantil', 'Sesión familiar', 'Sesión de retrato', 'Evento corporativo', 'Revelación de género', 'Otro'];
+var TIPOS_EV = ['Boda', 'Clausura', 'Graduación', 'Quinceañera', 'Baby shower', 'Cumpleaños', 'Fiesta infantil', 'Sesión familiar', 'Sesión de retrato', 'Evento corporativo', 'Revelación de género', 'Otro'];
 function qFmt(n){ return 'Q ' + Number(n || 0).toLocaleString('es-GT', { maximumFractionDigits: 2 }); }
 function fFmt(d, o){ if (!d) return ''; var x = typeof d === 'string' && d.length === 10 ? new Date(d + 'T12:00:00') : new Date(d); return x.toLocaleDateString('es-GT', o || { day: 'numeric', month: 'long', year: 'numeric' }); }
 function hFmt(d){ return new Date(d).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' }); }
@@ -1382,11 +1393,101 @@ async function negInicio(){
 
 /* ---------- Acciones y formularios ---------- */
 
-/* ---------- Galerías con IA ---------- */
-function pintarIA(){
-  $('#pn-main').innerHTML = '<h1>Selección de fotografías asistida por IA</h1>' + '<p class="pn-s ay">Sube las fotos de un evento y la inteligencia artificial las agrupa por persona. Tú revisas, le pones nombre a cada una y se arma una galería para cada quien, con su enlace propio.</p>' +
-    '<div class="pn-card"><h3>Cómo funciona</h3><ol class="pn-s" style="padding-left:1.2rem;line-height:1.8"><li>Elige las fotos del evento. Se analizan en tu computadora y no se suben a ningún lado.</li><li>Revisa las personas encontradas, ponles nombre y corrige cualquier confusión.</li><li>Excluye a quien no quiera fotos y quita las fotos que no quieras entregar.</li><li>Mira cómo quedarían las galerías.</li></ol>' +
-    '<div class="pn-row"><a class="pn-btn" style="text-decoration:none;display:inline-block" href="rostros.html" target="_blank" rel="noopener">Abrir la herramienta</a></div><p class="pn-s">Úsala desde la computadora. Esta versión es de prueba: todavía no crea las galerías reales y sirve para comprobar qué tan bien reconoce a las personas.</p></div>';
+/* ---------- Galería asistida por IA ---------- */
+var AS = { paso: 1, tipo: 'Clausura', nombre: '', fecha: '', creando: false };
+var AS_TIPOS = ['Clausura', 'Graduación', 'Fin de curso', 'Evento escolar', 'Quinceañera', 'Boda', 'Cumpleaños', 'Otro'];
+function asistReset(){ AS.paso = 1; AS.tipo = 'Clausura'; AS.nombre = ''; AS.fecha = ''; AS.creando = false; }
+function asistPasos(){
+  var n = ['Datos del evento', 'Fotos y rostros', 'Crear galería'];
+  return '<ol class="pn-as-p">' + n.map(function(t, i){ return '<li class="' + (AS.paso === i + 1 ? 'on' : AS.paso > i + 1 ? 'ok' : '') + '"><b>' + (i + 1) + '</b> ' + t + '</li>'; }).join('') + '</ol>';
+}
+function pintarAsist(){
+  var h = '<h1>Nueva galería asistida por IA</h1><p class="pn-s ay">La inteligencia artificial reconoce a cada persona en tus fotos y arma una carpeta por persona dentro de la galería, cada una con su propio enlace.</p>' + asistPasos();
+  if (AS.paso === 1) {
+    h += '<div class="pn-card"><h3>1. Datos del evento</h3><label class="pn-s" for="pn-as-t">Tipo de evento</label><select id="pn-as-t">' + AS_TIPOS.map(function(t){ return '<option' + (t === AS.tipo ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select>' +
+      '<label class="pn-s" for="pn-as-n" style="display:block;margin-top:.9rem">Nombre de la galería (por ejemplo, el colegio)</label><input type="text" id="pn-as-n" maxlength="80" placeholder="Ej. Colegio San José" value="' + esc(AS.nombre) + '">' +
+      '<label class="pn-s" for="pn-as-f" style="display:block;margin-top:.9rem">Fecha del evento</label><input type="date" id="pn-as-f" value="' + esc(AS.fecha) + '">' +
+      '<div class="pn-row" style="margin-top:1rem"><button class="pn-btn" data-act="as-sig">Siguiente</button><button class="pn-btn sec" data-act="as-cancel">Cancelar</button></div></div>';
+  } else {
+    h += '<div class="pn-card"><h3>2. Elige las fotos, revisa los rostros y ponles nombre</h3><p class="pn-s">Elige todas las fotos del evento y toca «Analizar». El análisis se hace en tu computadora, una foto a la vez; con cientos de fotos puede tardar varios minutos, no cierres esta pestaña. Después escribe el nombre de cada persona. Cuando todo esté listo, toca «Crear galería y subir fotos».</p></div>' +
+      '<iframe id="pn-as-if" src="rostros.html?embed=1" title="Reconocimiento de rostros" style="width:100%;height:78vh;border:1px solid var(--l);border-radius:14px;background:var(--f);margin-top:1rem"></iframe>' +
+      '<div class="pn-card" id="pn-as-ct"><h3>3. Crear la galería</h3><p class="pn-s">Se crea la galería «' + esc(AS.nombre) + '» con una carpeta por persona. Cada carpeta tiene su enlace propio y solo se abre con ese enlace. Las fotos donde salen varias personas van a la carpeta de cada una. Las fotos de quien excluyas no se suben.</p>' +
+      '<div class="pn-row"><button class="pn-btn" data-act="as-crear">Crear galería y subir fotos</button><button class="pn-btn sec" data-act="as-atras">Atrás</button><button class="pn-btn sec" data-act="as-cancel">Cancelar</button></div><div id="pn-as-est" class="pn-s"></div></div>';
+  }
+  $('#pn-main').innerHTML = h;
+}
+function asistSig(){
+  AS.tipo = $('#pn-as-t').value; AS.nombre = $('#pn-as-n').value.trim(); AS.fecha = $('#pn-as-f').value || '';
+  if (!AS.nombre) return aviso('Escribe el nombre de la galería.');
+  AS.paso = 2; pintarAsist();
+}
+function asistEstado(t, pct){
+  var e = document.getElementById('pn-as-est'); if (!e) return;
+  e.innerHTML = esc(t) + (pct == null ? '' : '<div class="pn-up-b" style="margin-top:.5rem"><i style="width:' + Math.round(pct * 100) + '%"></i></div>');
+}
+async function asistCrear(){
+  if (AS.creando) return;
+  var ifr = document.getElementById('pn-as-if'), RT = ifr && ifr.contentWindow && ifr.contentWindow.__RT;
+  if (!RT || !RT.resumen) return aviso('La herramienta todavía no termina de cargar. Espera un momento.');
+  var R = RT.resumen();
+  if (!R.listo || !R.total) return aviso('Primero elige las fotos y toca «Analizar».');
+  var act = R.personas.filter(function(p){ return !p.excl && p.fotos.length; });
+  if (!act.length) return aviso('No hay personas con fotos para crear carpetas. Revisa los nombres o la exigencia.');
+  var sn = act.filter(function(p){ return p.sinNombre; }).length;
+  if (sn && !await seguro('Hay ' + sn + ' persona' + (sn === 1 ? '' : 's') + ' sin nombre; se llamarán «Persona 1», «Persona 2»… ¿Continuar?', 'Sí, continuar')) return;
+  /* plan de subida: que carpeta le toca a cada foto */
+  var dueños = {}, vistas = {};
+  R.personas.forEach(function(p){ p.todas.forEach(function(i){ vistas[i] = 1; }); });
+  act.forEach(function(p){ p.fotos.forEach(function(i){ (dueños[i] = dueños[i] || []).push(p); }); });
+  var plan = [], omitidas = 0;
+  for (var i = 0; i < R.total; i++) {
+    if (dueños[i]) plan.push({ i: i, own: dueños[i] });
+    else if (vistas[i]) omitidas++;
+    else plan.push({ i: i, own: [] });
+  }
+  var sinCarp = plan.filter(function(x){ return !x.own.length; }).length;
+  if (!await seguro('Se creará «' + AS.nombre + '» con ' + act.length + ' carpetas y se subirán ' + plan.length + ' fotos' + (omitidas ? ' (' + omitidas + ' no se suben: son de personas excluidas o quitadas)' : '') + (sinCarp ? '. ' + sinCarp + ' fotos sin rostro claro quedarán en la galería general' : '') + '. No cierres esta pestaña hasta que termine.', 'Crear')) return;
+  AS.creando = true; var archivos = R.archivos;
+  try {
+    asistEstado('Creando la galería…', 0);
+    var r = null, titulo = AS.nombre;
+    for (var k = 0; k < 4; k++) {
+      r = await db.from('galleries').insert({ photographer_id: ph.id, client_id: null, title: titulo, slug: slug(titulo) + '-' + codigo().slice(0, 4).toLowerCase(), access_code: codigo(), event_date: AS.fecha || null, status: 'selection', selection_enabled: true, downloads_enabled: false, watermark_text: marcaBase(), watermark_opacity: 35, gallery_type: AS.tipo }).select('id').single();
+      if (!r.error || r.error.code !== '23505') break;
+    }
+    if (r.error) throw new Error(r.error.message);
+    var gid = r.data.id, esc2 = {};
+    for (var q = 0; q < act.length; q++) {
+      asistEstado('Creando carpetas… ' + (q + 1) + ' de ' + act.length, q / act.length);
+      var rc = await api('/api/admin/scene', { gallery: gid, action: 'create', name: act[q].nombre });
+      if (!rc.ok) throw new Error('No se pudo crear la carpeta de ' + act[q].nombre);
+      esc2[act[q].id] = rc.escena.id;
+      await api('/api/admin/scene', { gallery: gid, action: 'update', id: rc.escena.id, hidden: true });
+    }
+    var extras = [], fallos = [], hechas = 0, sig = 0, tot = plan.length;
+    async function hilo(){
+      while (sig < plan.length) {
+        var t = plan[sig++], f = archivos[t.i];
+        try {
+          var pid = await subirUna({ file: f, tipo: 'selection', marca: null, gid: gid, cal: 'media', texto: marcaBase(), esc: t.own.length ? esc2[t.own[0].id] : '' });
+          if (pid) t.own.slice(1).forEach(function(p){ extras.push({ scene_id: esc2[p.id], photo_id: pid, photographer_id: ph.id }); });
+          else if (t.own.length > 1) fallos.push(f.name + ': no se pudo ligar a varias carpetas');
+        } catch (e) { fallos.push(f.name + ': ' + (e.message || 'error')); }
+        hechas++; asistEstado('Subiendo fotos… ' + hechas + ' de ' + tot, hechas / tot);
+      }
+    }
+    await Promise.all([hilo(), hilo(), hilo()]);
+    var errSp = '';
+    for (var c = 0; c < extras.length; c += 400) {
+      var ri = await db.from('scene_photos').insert(extras.slice(c, c + 400));
+      if (ri.error) { errSp = ri.error.message; break; }
+    }
+    AS.creando = false;
+    await cargarGalerias(); vista = 'detalle'; await abrirDetalle(gid);
+    aviso(errSp ? 'Galería creada, pero las fotos con varias personas no se pudieron ligar (¿ya ejecutaste etapa14.sql?).' : fallos.length ? 'Galería creada. ' + fallos.length + ' foto(s) no se subieron: ' + fallos.slice(0, 2).join('; ') : 'Galería creada con ' + act.length + ' carpetas. Los enlaces están en la pestaña Compartir.');
+  } catch (e) {
+    AS.creando = false; asistEstado('Algo falló: ' + (e.message || 'error') + '. Si la galería ya se creó, búscala en «Galerías de clientes» y revisa qué fotos faltan.');
+  }
 }
 /* ---------- Grupos de graduación ---------- */
 var GR = { lista: [], miembros: [], ok: true, cargado: false, abierto: null };

@@ -120,7 +120,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   function exts(n){ return /^logo-/.test(n) ? LOGO_EXTS : EXTS; }
   // Nombres de los archivos de logo (por el FONDO donde se usan, según los subió el estudio):
   //   logo-oscuro = logo carbón, se ve sobre fondo CLARO   |   logo-claro = logo dorado, se ve sobre fondo OSCURO
-  var PAL_TIPO = { 'Boda': 'marfil', 'Quinceañera': 'vino', 'Graduación': 'azul', 'Baby shower': 'oliva', 'Cumpleaños': 'arena', 'Fiesta infantil': 'azul', 'Sesión familiar': 'oliva', 'Sesión de retrato': 'blanco', 'Evento corporativo': 'blanco' };
+  var PAL_TIPO = { 'Boda': 'marfil', 'Quinceañera': 'vino', 'Graduación': 'azul', 'Clausura': 'azul', 'Baby shower': 'oliva', 'Cumpleaños': 'arena', 'Fiesta infantil': 'azul', 'Sesión familiar': 'oliva', 'Sesión de retrato': 'blanco', 'Evento corporativo': 'blanco' };
   var PAL_VIEJA = { beige: 'marfil', noche: 'azul', negro: 'arena' };
   var PAL_OK = ['arena', 'marfil', 'blanco', 'oliva', 'vino', 'azul'];
   function paletaDe(g){ var p = g && g.paleta; if (p && p !== 'auto') { p = PAL_VIEJA[p] || p; if (PAL_OK.indexOf(p) >= 0) return p; } return (g && PAL_TIPO[g.tipo]) || 'arena'; }
