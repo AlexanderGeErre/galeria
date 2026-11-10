@@ -10,7 +10,7 @@ var EXTS = ['.png.jpg', '.jpg.jpg', '.jpg', '.png', '.jpeg', '.webp', '.png.png'
 var LOGO_EXTS = ['.png', '.svg', '.png.jpg', '.jpg.jpg', '.jpg', '.jpeg', '.webp', '.png.png'];
 function exts(n){ return /^logo-/.test(n) ? LOGO_EXTS : EXTS; }
 // Nombres de logo por el FONDO donde se usan: logo-oscuro = carbón (sobre fondo claro), logo-claro = dorado (sobre fondo oscuro)
-var PAL_TIPO = { 'Boda': 'marfil', 'Quinceañera': 'vino', 'Graduación': 'azul', 'Baby shower': 'oliva', 'Cumpleaños': 'arena', 'Fiesta infantil': 'azul', 'Sesión familiar': 'oliva', 'Sesión de retrato': 'blanco', 'Revelación': 'arena', 'Evento corporativo': 'blanco' };
+var PAL_TIPO = { 'Boda': 'marfil', 'Quinceañera': 'vino', 'Graduación': 'azul', 'Baby shower': 'oliva', 'Cumpleaños': 'arena', 'Fiesta infantil': 'azul', 'Sesión familiar': 'oliva', 'Sesión de retrato': 'blanco', 'Revelación de género': 'arena', 'Revelación': 'arena', 'Evento corporativo': 'blanco' };
 var PAL_VIEJA = { beige: 'marfil', noche: 'azul', negro: 'arena' };
 var db, ph, root, gals = [], favs = {}, vista = 'inicio', galId = null, tab = 'panel', busca = '', fEst = '', cur = null;
 
@@ -60,6 +60,7 @@ var CSS = '.pn-pb{position:absolute;right:6px;bottom:34px;z-index:2;display:flex
 '.pn main{padding:2.8rem clamp(1.2rem,5vw,4rem);max-width:1180px}.pn h1{font-size:clamp(2.2rem,4vw,3.2rem);letter-spacing:-.01em;margin-bottom:.3rem}.pn h2{font-size:1.6rem}' +
 '.pn-card{border:1px solid var(--l);border-radius:14px;box-shadow:none;padding:1.2rem 1.4rem}' +
 '.pn-franja,.pn-cifras{border:1px solid var(--l);border-radius:14px;box-shadow:none}.pn-cifras b{font-size:2.1rem}' +
+'.pn-ac a.pn-btn{background:none;border:1px solid var(--l);border-radius:999px;font-size:.72rem;padding:.1rem .5rem;color:var(--t)}.pn-cacep{margin:1rem 0}.pn-cacep p{display:flex;justify-content:space-between;gap:1rem;align-items:center;margin:.4rem 0}' +
 '.pn-btn{transition:transform .15s,opacity .2s,box-shadow .2s}.pn-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 16px rgba(43,38,35,.16)}.pn-btn:active{transform:scale(.97)}' +
 '.pn-rej{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:26px}.pn-tar .cv{border-radius:16px}.pn-tar h3{margin-top:.7rem}' +
 '.pn-ph img,.pn-tar .cv>img,.pn-pbtn img{opacity:0;transition:opacity .6s ease,transform .5s ease;background:linear-gradient(100deg,var(--l) 30%,var(--p) 50%,var(--l) 70%);background-size:200% 100%}.pn-ph img.ld,.pn-tar .cv>img.ld,.pn-pbtn img.ld{opacity:1}.pn-ph,.pn-tar .cv{background:linear-gradient(100deg,var(--l) 30%,var(--p) 50%,var(--l) 70%);background-size:200% 100%;animation:pnSh 1.5s infinite;border-radius:10px}.pn-ph img{border-radius:10px}.pn-ph:hover img.ld{transform:scale(1.03)}.pn-ph{overflow:hidden}' +
@@ -170,6 +171,18 @@ document.addEventListener('error', function(e){
 document.addEventListener('load', function(e){ var t = e.target; if (t && t.tagName === 'IMG' && t.closest && t.closest('.pn')) t.classList.add('ld'); }, true);
 document.addEventListener('error', function(e){ var t = e.target; if (t && t.tagName === 'IMG' && t.closest && t.closest('.pn') && !t.dataset.n) t.classList.add('ld'); }, true);
 function marcarCargadas(){ if (root) root.querySelectorAll('img').forEach(function(i){ if (i.complete) i.classList.add('ld'); }); }
+function seguro(msg, txt){
+  return new Promise(function(res){
+    var d = document.createElement('dialog'); d.style.cssText = 'width:min(24rem,92vw);text-align:center';
+    d.innerHTML = '<h2 style="font-size:1.4rem">¿Estás seguro?</h2><p class="pn-s" style="margin:.6rem 0 1.2rem"></p><div class="pn-row" style="justify-content:center"><button class="pn-btn" data-r="1"></button><button class="pn-btn sec" data-r="0">Cancelar</button></div>';
+    d.querySelector('p').textContent = msg; d.querySelector('[data-r="1"]').textContent = txt || (/^¿(Eliminar|Quitar)/.test(msg) ? 'Sí, eliminar' : 'Sí, continuar');
+    var fin = function(v){ if (fin.hecho) return; fin.hecho = true; try { d.close(); } catch (x) {} d.remove(); res(v); };
+    d.addEventListener('click', function(e){ var b = e.target.closest('[data-r]'); if (b) fin(b.dataset.r === '1'); });
+    d.addEventListener('cancel', function(){ fin(false); });
+    d.addEventListener('close', function(){ fin(false); });
+    (root.querySelector('.pn') || root).appendChild(d); d.showModal();
+  });
+}
 function aviso(t){ var d = document.createElement('div'); d.className = 'pn-toast'; d.textContent = t; (root.querySelector('.pn') || root).appendChild(d); setTimeout(function(){ d.remove(); }, 4200); }
 function slug(s){ return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'galeria'; }
 function codigo(){ var a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', c = ''; for (var i = 0; i < 8; i++) c += a[Math.floor(Math.random() * a.length)]; return c; }
@@ -349,7 +362,7 @@ function pintarCuenta(){
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 04:00</p></div>';
+ + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 06:30</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -568,7 +581,7 @@ function pintarDetalle0(){
         return '<figure class="pn-ph"><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(x.filename) + (cuenta[x.id] ? ' · ♥ ' + cuenta[x.id] : '') + '</figcaption></figure>';
       }).join('') + '</div>' : '<p class="pn-s">Aún no hay fotos de selección.</p>');
   } else if (tab === 'detalles') {
-    var TIPOS = ['Boda', 'Graduación', 'Quinceañera', 'Baby shower', 'Cumpleaños', 'Fiesta infantil', 'Sesión familiar', 'Sesión de retrato', 'Evento corporativo', 'Revelación', 'Otro'];
+    var TIPOS = ['Boda', 'Graduación', 'Quinceañera', 'Baby shower', 'Cumpleaños', 'Fiesta infantil', 'Sesión familiar', 'Sesión de retrato', 'Evento corporativo', 'Revelación de género', 'Otro'];
     cuerpo = '<div class="pn-card"><label class="pn-s">Nombre de la galería</label><input type="text" id="pn-dt" value="' + esc(g.title) + '"><label class="pn-s" style="display:block;margin-top:.9rem">Fecha del evento</label><input type="date" id="pn-dd" value="' + esc(g.event_date || '') + '">' +
       '<label class="pn-s" style="display:block;margin-top:.9rem">Tipo de galería</label><select id="pn-dtp"><option value="">Sin tipo</option>' + TIPOS.map(function(t){ return '<option' + (g.gallery_type === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select>' +
       '<label class="pn-s" style="display:block;margin-top:.9rem">Ubicación</label><input type="text" id="pn-dub" maxlength="80" value="' + esc(g.location || '') + '">' +
@@ -886,7 +899,7 @@ async function accion(a, el){
   if (a === 'copiar') { copiar(el.dataset.t); el.textContent = 'Copiado'; return; }
   if (a === 'nueva') return $('#pn-dnueva').showModal();
   if (a === 'subir') return subirTodo();
-  if (a === 'entregar') { if (confirm('¿Marcar como entregada? El cliente podrá descargar las finales.')) cambiar({ status: 'delivered', selection_enabled: false, downloads_enabled: true }, 'Galería entregada'); return; }
+  if (a === 'entregar') { if (await seguro('¿Marcar como entregada? El cliente podrá descargar las finales.')) cambiar({ status: 'delivered', selection_enabled: false, downloads_enabled: true }, 'Galería entregada'); return; }
   if (a === 'reabrir') return cambiar({ status: 'selection', selection_enabled: true, downloads_enabled: false }, 'Selección reabierta');
   if (a === 'salir') return window.cerrarSesion();
   if (a === 'pal-panel') { try { localStorage.setItem('pn-pal', el.dataset.v); } catch(e) {} aplicarTema(); return pintar(); }
@@ -911,7 +924,7 @@ async function accion(a, el){
   if (a === 'sel-ninguna') { marcadas = new Set(); return pintar(); }
   if (a === 'borrar-sel') {
     var ids = Array.from(marcadas); if (!ids.length) return;
-    if (!confirm('¿Eliminar ' + ids.length + (ids.length === 1 ? ' foto' : ' fotos') + '? No se puede deshacer.')) return;
+    if (!await seguro('¿Eliminar ' + ids.length + (ids.length === 1 ? ' foto' : ' fotos') + '? No se puede deshacer.')) return;
     aviso('Eliminando…'); var okn = 0;
     for (var i = 0; i < ids.length; i += 100) { var rr = await api('/api/admin/delete-photos', { photos: ids.slice(i, i + 100) }); if (rr.ok) okn += rr.borradas || 0; else break; }
     if (g && ids.indexOf(g.cover_photo_id) >= 0) g.cover_photo_id = null;
@@ -928,7 +941,7 @@ async function accion(a, el){
     ee.name = nm.trim().slice(0, 80); return pintar();
   }
   if (a === 'esc-borrar') {
-    if (!confirm('¿Eliminar esta escena? Sus fotos no se borran: quedan sin escena.')) return;
+    if (!await seguro('¿Eliminar esta escena? Sus fotos no se borran: quedan sin escena.')) return;
     var rd = await api('/api/admin/scene', { gallery: galId, action: 'delete', id: id }); if (!rd.ok) return aviso('No se pudo eliminar.');
     cur.fotos.forEach(function(x){ if (x.scene_id === id) x.scene_id = null; }); cur.escenas = cur.escenas.filter(function(x){ return x.id !== id; }); if (fEsc === id) fEsc = ''; return pintar();
   }
@@ -989,7 +1002,7 @@ async function accion(a, el){
     return abrirDetalle(galId, true);
   }
   if (a === 'borrar-foto') {
-    if (!confirm('¿Eliminar esta foto? No se puede deshacer.')) return;
+    if (!await seguro('¿Eliminar esta foto? No se puede deshacer.')) return;
     try { $('#pn-dver').close(); } catch(e) {}
     var r = await api('/api/admin/delete-photos', { photos: [id] });
     if (!r.ok) return aviso('No se pudo eliminar.');
@@ -1008,7 +1021,7 @@ async function accion(a, el){
 var neg = { ok: true, clientes: [], cots: [], evs: [], mes: new Date(), cargado: false, cotEd: null, cliEd: null, evEd: null, cotImg: null, cotDis: 1, qMan: { imp: false, tot: false } };
 var COT_ST = { draft: 'Borrador', sent: 'Enviada', accepted: 'Aceptada', rejected: 'Rechazada' };
 var EV_K = { sesion: 'Sesión', evento: 'Evento', entrega: 'Entrega', otro: 'Otro' };
-var TIPOS_EV = ['Boda', 'Graduación', 'Quinceañera', 'Baby shower', 'Cumpleaños', 'Fiesta infantil', 'Sesión familiar', 'Sesión de retrato', 'Evento corporativo', 'Revelación', 'Otro'];
+var TIPOS_EV = ['Boda', 'Graduación', 'Quinceañera', 'Baby shower', 'Cumpleaños', 'Fiesta infantil', 'Sesión familiar', 'Sesión de retrato', 'Evento corporativo', 'Revelación de género', 'Otro'];
 function qFmt(n){ return 'Q ' + Number(n || 0).toLocaleString('es-GT', { maximumFractionDigits: 2 }); }
 function fFmt(d, o){ if (!d) return ''; var x = typeof d === 'string' && d.length === 10 ? new Date(d + 'T12:00:00') : new Date(d); return x.toLocaleDateString('es-GT', o || { day: 'numeric', month: 'long', year: 'numeric' }); }
 function hFmt(d){ return new Date(d).toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' }); }
@@ -1058,9 +1071,12 @@ async function pintarCotiz(){
   $('#pn-main').innerHTML = '<h1>Cotizaciones</h1><p class="pn-s">Cargando…</p>'; await negCargar();
   var sum = { sent: 0, accepted: 0 }; neg.cots.forEach(function(c){ if (c.status === 'sent') sum.sent += Number(c.total); if (c.status === 'accepted') sum.accepted += Number(c.total); });
   var filas = neg.cots.map(function(c){
-    return '<tr><td><b>N.º ' + String(c.num).padStart(4, '0') + '</b><br><span class="pn-s">' + esc(fFmt(c.created_at, { day: 'numeric', month: 'short' })) + '</span></td><td><b>' + esc(c.client_name) + '</b><br><span class="pn-s">' + esc([c.event_type, c.event_date ? fFmt(c.event_date) : ''].filter(Boolean).join(' · ')) + '</span></td><td>' + c.digital_count + ' digitales' + (c.print_count ? ' · ' + c.print_count + ' impresas' : '') + '</td><td><b>' + qFmt(c.total) + '</b></td><td><span class="pn-pill">' + esc(COT_ST[c.status] || c.status) + '</span></td><td class="pn-ac"><button class="pn-btn sec" data-act="n-cot-ver" data-id="' + c.id + '">Abrir</button></td></tr>';
+    return '<tr><td><b>N.º ' + String(c.num).padStart(4, '0') + '</b><br><span class="pn-s">' + esc(fFmt(c.created_at, { day: 'numeric', month: 'short' })) + '</span></td><td><b>' + esc(c.client_name) + '</b><br><span class="pn-s">' + esc([c.event_type, c.event_date ? fFmt(c.event_date) : ''].filter(Boolean).join(' · ')) + '</span></td><td>' + c.digital_count + ' digitales' + (c.print_count ? ' · ' + c.print_count + ' impresas' : '') + '</td><td><b>' + qFmt(c.total) + '</b></td><td><span class="pn-pill">' + esc(COT_ST[c.status] || c.status) + '</span>' + (c.status === 'accepted' && c.event_date ? '<br><b class="pn-cta">' + cuenta(c.event_date) + '</b>' : '') + '</td><td class="pn-ac"><button class="pn-btn sec" data-act="n-cot-ver" data-id="' + c.id + '">Abrir</button></td></tr>';
   }).join('');
-  $('#pn-main').innerHTML = '<h1>Cotizaciones</h1><div class="pn-row"><button class="pn-btn" data-act="n-cot-nueva">+ Nueva cotización</button></div>' +
+  var hoyD = new Date(); hoyD.setHours(0, 0, 0, 0);
+  var acep = neg.cots.filter(function(c){ return c.status === 'accepted' && c.event_date && new Date(c.event_date + 'T12:00:00') >= hoyD; }).sort(function(a, b){ return a.event_date < b.event_date ? -1 : 1; });
+  var cacep = acep.length ? '<div class="pn-card pn-cacep"><h3>Eventos de cotizaciones aceptadas</h3>' + acep.map(function(c){ return '<p><span><b>' + esc(c.client_name) + '</b> · ' + esc(c.event_type || '') + '<br><span class="pn-s">' + esc(fFmt(c.event_date, { weekday: 'long', day: 'numeric', month: 'long' })) + (c.location ? ' · ' + esc(c.location) : '') + '</span></span><b class="pn-cta">' + cuenta(c.event_date) + '</b></p>'; }).join('') + '</div>' : '';
+  $('#pn-main').innerHTML = '<h1>Cotizaciones</h1><div class="pn-row"><button class="pn-btn" data-act="n-cot-nueva">+ Nueva cotización</button></div>' + (neg.ok ? cacep : '') +
     (!neg.ok ? negFalta() : '<div class="pn-cifras"><div><b>' + neg.cots.length + '</b><span class="pn-s">Cotizaciones</span></div><div><b>' + qFmt(sum.sent) + '</b><span class="pn-s">Enviadas, por responder</span></div><div><b>' + qFmt(sum.accepted) + '</b><span class="pn-s">Aceptadas</span></div></div>' +
     (neg.cots.length ? '<div class="pn-card" style="padding:0;overflow:auto;margin-top:1rem"><table class="pn-tb"><tr><th>N.º</th><th>Cliente</th><th>Incluye</th><th>Total</th><th>Estado</th><th></th></tr>' + filas + '</table></div>' : '<div class="pn-card" style="margin-top:1rem"><p class="pn-s">Todavía no hay cotizaciones. Crea la primera y obtén una imagen lista para enviar por WhatsApp.</p></div>')) + (neg.ok ? prHtml() : '');
 }
@@ -1107,7 +1123,7 @@ function cotAbrir(id, clienteId){
   if (c) { var g0 = cotSug(); neg.qMan.tot = !(c.total > 0) ? false : (c.total !== g0.fin); }
   $('#n-qdel').hidden = !c; if (!c) cotRecalc('dg'); else cotRecalc(); $('#n-dcot').showModal();
 }
-function cotDisEv(tipo){ var k; for (k in DIS) if (DIS[k].ev === tipo) return +k; return 1; }
+function cotDisEv(){ return 4; }
 async function cotGuardar(e){
   e.preventDefault();
   var d = { client_id: $('#n-qcl').value || null, client_name: $('#n-qnm').value.trim(), event_type: $('#n-qtp').value, event_date: $('#n-qfe').value || null, location: $('#n-qlu').value.trim() || null,
@@ -1147,26 +1163,52 @@ async function prGuardar(reset){
   ph.pricing = cfg; aviso(reset ? 'Precios iniciales restaurados' : 'Precios guardados'); pintarCotiz();
 }
 function cotVer(id){
-  var c = neg.cots.filter(function(x){ return x.id === id; })[0]; if (!c) return; neg.cotImg = c; neg.cotDis = c.design || 1;
+  var c = neg.cots.filter(function(x){ return x.id === id; })[0]; if (!c) return; neg.cotImg = c; neg.cotDis = disNorm(c.design);
   $('#n-vti').textContent = 'Cotización N.º ' + String(c.num).padStart(4, '0') + ' · ' + c.client_name;
   $('#n-vst').value = c.status; cotDibujar(); $('#n-dver').showModal();
 }
 /* ---------- Diseños de cotización ---------- */
-var DIS = {
-  1: { n: 'Clásica', bg: '#F6EFE3', tx: '#1c1a17', mu: '#7b7366', ac: '#B8946A' },
-  2: { n: 'Editorial', bg: '#FFFFFF', tx: '#1c1a17', mu: '#7b7366', ac: '#B8946A', lay: 'e' },
-  3: { n: 'Oscura', bg: '#14110e', tx: '#F2EFEA', mu: '#a99f8f', ac: '#B8946A', dark: 1 },
-  4: { n: 'Boda', ev: 'Boda', bg: '#FBF7F0', tx: '#2b2623', mu: '#8b8174', ac: '#B8946A', o: 'boda' },
-  5: { n: 'Graduación', ev: 'Graduación', bg: '#0f2238', tx: '#F4F1EA', mu: '#9fb0c4', ac: '#D9B26B', dark: 1, o: 'grad' },
-  6: { n: 'Quinceañera', ev: 'Quinceañera', bg: '#45131f', tx: '#FBEFEA', mu: '#d3aaa5', ac: '#E8BFA4', dark: 1, o: 'quince' },
-  7: { n: 'Baby shower', ev: 'Baby shower', bg: '#F2F1E6', tx: '#2f3526', mu: '#7b8468', ac: '#7F9060', o: 'baby' },
-  8: { n: 'Cumpleaños', ev: 'Cumpleaños', bg: '#FFF5E6', tx: '#3a2a1c', mu: '#8d7760', ac: '#D9772A', o: 'fiesta' },
-  9: { n: 'Fiesta infantil', ev: 'Fiesta infantil', bg: '#EAF3FB', tx: '#1d3350', mu: '#5f7894', ac: '#3F86D1', o: 'globos' },
-  10: { n: 'Familiar', ev: 'Sesión familiar', bg: '#F1E6D7', tx: '#3a2a20', mu: '#8a7461', ac: '#A56A47', o: 'arcos' },
-  11: { n: 'Retrato', ev: 'Sesión de retrato', bg: '#FFFFFF', tx: '#111111', mu: '#777777', ac: '#111111', o: 'marco' },
-  12: { n: 'Corporativo', ev: 'Evento corporativo', bg: '#0E2A33', tx: '#EAF4F5', mu: '#8fb0b6', ac: '#4FB3BF', dark: 1, o: 'geo' },
-  13: { n: 'Revelación', ev: 'Revelación', bg: '#FBF5F5', tx: '#3a2b30', mu: '#9a8388', ac: '#C0788C', o: 'revela' }
+var ESTILOS = { 1: 'Clásica', 4: 'Elegante', 2: 'Editorial', 3: 'Oscura' };
+var EMB_T = {
+  boda: { n: 'Boda', ac: '#B8946A', cl: '#FBF7F0', dk: '#16110d', dac: '#C9A67A', el: { bg: '#FBF7F0', tx: '#2b2623', mu: '#8b8174', ac: '#B8946A', o: 'boda' } },
+  grad: { n: 'Graduación', ac: '#B88A2E', cl: '#F4F1EA', dk: '#0b0f16', dac: '#D9B26B', el: { bg: '#0f2238', tx: '#F4F1EA', mu: '#9fb0c4', ac: '#D9B26B', dark: 1, o: 'grad' } },
+  quince: { n: 'Quinceañera', ac: '#B9705F', cl: '#FBF1EE', dk: '#1c0a10', dac: '#E8BFA4', el: { bg: '#45131f', tx: '#FBEFEA', mu: '#d3aaa5', ac: '#E8BFA4', dark: 1, o: 'quince' } },
+  baby: { n: 'Baby shower', ac: '#7F9060', cl: '#F4F3E8', dk: '#171c13', dac: '#A9BC86', el: { bg: '#F2F1E6', tx: '#2f3526', mu: '#7b8468', ac: '#7F9060', o: 'baby' } },
+  cumple: { n: 'Cumpleaños', ac: '#D9772A', cl: '#FFF7EA', dk: '#221610', dac: '#F0A15A', el: { bg: '#FFF5E6', tx: '#3a2a1c', mu: '#8d7760', ac: '#D9772A', o: 'fiesta' } },
+  fiesta: { n: 'Fiesta infantil', ac: '#3F86D1', cl: '#EEF5FC', dk: '#0d1726', dac: '#6FA9E6', el: { bg: '#EAF3FB', tx: '#1d3350', mu: '#5f7894', ac: '#3F86D1', o: 'globos' } },
+  familiar: { n: 'Sesión familiar', ac: '#A56A47', cl: '#F6EEE3', dk: '#1d130d', dac: '#CF9A78', el: { bg: '#F1E6D7', tx: '#3a2a20', mu: '#8a7461', ac: '#A56A47', o: 'arcos' } },
+  retrato: { n: 'Sesión de retrato', ac: '#222222', cl: '#F5F5F3', dk: '#0b0b0b', dac: '#D9D4CB', el: { bg: '#FFFFFF', tx: '#111111', mu: '#777777', ac: '#111111', o: 'marco' } },
+  corp: { n: 'Evento corporativo', ac: '#2E8F9B', cl: '#EEF5F6', dk: '#07161b', dac: '#4FB3BF', el: { bg: '#0E2A33', tx: '#EAF4F5', mu: '#8fb0b6', ac: '#4FB3BF', dark: 1, o: 'geo' } },
+  revela: { n: 'Revelación de género', ac: '#C0788C', cl: '#FBF5F5', dk: '#1c1418', dac: '#E39AB0', el: { bg: '#FBF5F5', tx: '#3a2b30', mu: '#9a8388', ac: '#C0788C', o: 'revela' } },
+  otro: { n: 'Otro', ac: '#B8946A', cl: '#F6EFE3', dk: '#14110e', dac: '#B8946A', el: { bg: '#F6EFE3', tx: '#1c1a17', mu: '#7b7366', ac: '#B8946A' } }
 };
+function tipoClave(t){ t = String(t || ''); return t === 'Boda' ? 'boda' : t === 'Graduación' ? 'grad' : t === 'Quinceañera' ? 'quince' : t === 'Baby shower' ? 'baby' : t === 'Cumpleaños' ? 'cumple' : t === 'Fiesta infantil' ? 'fiesta' : t === 'Sesión familiar' ? 'familiar' : t === 'Sesión de retrato' ? 'retrato' : t === 'Evento corporativo' ? 'corp' : /^Revelaci/.test(t) ? 'revela' : 'otro'; }
+function disNorm(d){ d = +d || 0; return d >= 1 && d <= 3 ? d : 4; }
+function tema(dis, tipo){
+  var k = tipoClave(tipo), E = EMB_T[k], d = disNorm(dis), T;
+  if (d === 1) T = { bg: E.cl, tx: '#26211d', mu: '#7b7366', ac: E.ac, mc: 1 };
+  else if (d === 2) T = { bg: '#FFFFFF', tx: '#1c1a17', mu: '#7b7366', ac: E.ac, lay: 'e' };
+  else if (d === 3) T = { bg: E.dk, tx: '#F2EFEA', mu: '#a99f8f', ac: E.dac, dark: 1, mc: 3 };
+  else T = Object.assign({}, E.el);
+  T.k = k; T.d = d; return T;
+}
+/* Emblema de cada tipo de evento: se dibuja en un cuadro de 200x200 centrado en (cx, cy) */
+function emblema(x, k, cx, cy, s, col, lw, alpha){
+  x.save(); x.globalAlpha = alpha == null ? 1 : alpha; x.translate(cx, cy); x.scale(s / 100, s / 100); x.strokeStyle = col; x.fillStyle = col; x.lineWidth = lw; x.lineJoin = 'round'; x.lineCap = 'round';
+  var A = function(px, py, rx, ry){ x.beginPath(); x.ellipse(px, py, rx, ry == null ? rx : ry, 0, 0, 7); x.stroke(); }, L = function(a, b, c, d){ x.beginPath(); x.moveTo(a, b); x.lineTo(c, d); x.stroke(); };
+  if (k === 'boda') { A(-30, 12, 54); A(30, 12, 54); x.beginPath(); x.moveTo(30, -66); x.lineTo(42, -52); x.lineTo(30, -38); x.lineTo(18, -52); x.closePath(); x.stroke(); }
+  else if (k === 'grad') { x.beginPath(); x.moveTo(0, -55); x.lineTo(96, -18); x.lineTo(0, 19); x.lineTo(-96, -18); x.closePath(); x.stroke(); x.beginPath(); x.moveTo(-58, 0); x.lineTo(-58, 42); x.quadraticCurveTo(0, 76, 58, 42); x.lineTo(58, 0); x.stroke(); L(96, -18, 96, 40); A(96, 50, 7); }
+  else if (k === 'quince') { x.beginPath(); x.moveTo(-80, 46); x.lineTo(-92, -30); x.lineTo(-46, 8); x.lineTo(0, -58); x.lineTo(46, 8); x.lineTo(92, -30); x.lineTo(80, 46); x.closePath(); x.stroke(); L(-80, 66, 80, 66); A(-92, -34, 7); A(0, -64, 8); A(92, -34, 7); }
+  else if (k === 'baby') { x.beginPath(); x.moveTo(-14, -90); x.quadraticCurveTo(0, -106, 14, -90); x.lineTo(14, -74); x.lineTo(-14, -74); x.closePath(); x.stroke(); x.beginPath(); x.rect(-32, -74, 64, 14); x.stroke(); x.beginPath(); x.moveTo(-34, -46); x.quadraticCurveTo(-34, -60, -20, -60); x.lineTo(20, -60); x.quadraticCurveTo(34, -60, 34, -46); x.lineTo(34, 78); x.quadraticCurveTo(34, 94, 18, 94); x.lineTo(-18, 94); x.quadraticCurveTo(-34, 94, -34, 78); x.closePath(); x.stroke(); L(14, -20, 34, -20); L(14, 6, 34, 6); L(14, 32, 34, 32); }
+  else if (k === 'cumple') { x.beginPath(); x.rect(-76, 14, 152, 56); x.stroke(); x.beginPath(); x.rect(-54, -22, 108, 36); x.stroke(); x.beginPath(); x.moveTo(-76, 34); x.quadraticCurveTo(-57, 50, -38, 34); x.quadraticCurveTo(-19, 18, 0, 34); x.quadraticCurveTo(19, 50, 38, 34); x.quadraticCurveTo(57, 18, 76, 34); x.stroke(); [-28, 0, 28].forEach(function(p){ L(p, -22, p, -52); x.beginPath(); x.ellipse(p, -64, 6, 11, 0, 0, 7); x.fill(); }); L(-96, 70, 96, 70); }
+  else if (k === 'fiesta') { [[-54, -34, 33, 42], [0, -54, 33, 42], [54, -34, 33, 42]].forEach(function(b){ A(b[0], b[1], b[2], b[3]); x.beginPath(); x.moveTo(b[0], b[1] + b[3]); x.quadraticCurveTo(b[0] * .4 + 10, 70, 0, 94); x.stroke(); }); }
+  else if (k === 'familiar') { x.beginPath(); x.moveTo(0, 78); x.bezierCurveTo(-118, -2, -64, -88, 0, -34); x.bezierCurveTo(64, -88, 118, -2, 0, 78); x.closePath(); x.stroke(); x.beginPath(); x.moveTo(-32, 10); x.lineTo(0, -16); x.lineTo(32, 10); x.stroke(); x.beginPath(); x.rect(-23, 10, 46, 32); x.stroke(); }
+  else if (k === 'retrato') { x.beginPath(); x.rect(-92, -42, 184, 118); x.stroke(); x.beginPath(); x.moveTo(-36, -42); x.lineTo(-26, -64); x.lineTo(26, -64); x.lineTo(36, -42); x.stroke(); A(0, 18, 40); A(0, 18, 22); A(66, -20, 4); }
+  else if (k === 'corp') { x.beginPath(); x.rect(-76, -8, 42, 88); x.stroke(); x.beginPath(); x.rect(-22, -62, 46, 142); x.stroke(); x.beginPath(); x.rect(34, -30, 42, 110); x.stroke(); L(-100, 80, 100, 80); [-40, -20].forEach(function(yy){ L(-10, yy, 12, yy); }); [0, 24, 48].forEach(function(yy){ L(-10, yy, 12, yy); }); L(-64, 20, -44, 20); L(-64, 46, -44, 46); L(46, 0, 64, 0); L(46, 26, 64, 26); L(46, 52, 64, 52); }
+  else if (k === 'revela') { x.strokeStyle = '#D9779A'; A(-46, -22, 32); L(-46, 10, -46, 66); L(-68, 40, -24, 40); x.strokeStyle = '#4F93D6'; A(46, 12, 32); L(69, -11, 96, -38); L(96, -38, 72, -38); L(96, -38, 96, -14); }
+  else { A(0, 0, 84); x.beginPath(); for (var i = 0; i < 6; i++) { var a = i * Math.PI / 3; x.lineTo(Math.cos(a) * 34, Math.sin(a) * 34); } x.closePath(); x.stroke(); for (var j = 0; j < 6; j++) { var b = j * Math.PI / 3; L(Math.cos(b) * 34, Math.sin(b) * 34, Math.cos(b + 1.05) * 84, Math.sin(b + 1.05) * 84); } }
+  x.restore();
+}
 var WA_NUM = '+502 4465-8195';
 function waNumero(){ var p = String(ph.wa_phone || '').replace(/\D/g, ''); return /^502\d{8}$/.test(p) ? '+502 ' + p.slice(3, 7) + '-' + p.slice(7) : WA_NUM; }
 function cotImgCarga(lista){ return new Promise(function(ok){ var i = 0; (function sig(){ if (i >= lista.length) return ok(null); var im = new Image(); im.onload = function(){ ok(im); }; im.onerror = function(){ i++; sig(); }; if (/^https?:/.test(lista[i])) im.crossOrigin = 'anonymous'; im.src = lista[i]; })(); }); }
@@ -1179,14 +1221,14 @@ function cotLogos(){
 function cotDibujar(){
   var cv = $('#n-vcv'), c = neg.cotImg; if (!cv || !c) return;
   cotLienzo(cv, c, neg.cotDis);
-  var ids = [1, 2, 3], sp = cotDisEv(c.event_type); if (sp > 3) ids.push(sp); if (neg.cotDis > 3 && ids.indexOf(neg.cotDis) < 0) ids.push(neg.cotDis);
-  $('#n-dbt').innerHTML = ids.map(function(i){ return '<button class="pn-btn sec" data-act="n-cot-dis" data-d="' + i + '">' + esc(DIS[i].n) + '</button>'; }).join('');
+  var ids = [1, 4, 2, 3];
+  $('#n-dbt').innerHTML = ids.map(function(i){ return '<button class="pn-btn sec" data-act="n-cot-dis" data-d="' + i + '">' + esc(ESTILOS[i]) + '</button>'; }).join('');
   root.querySelectorAll('[data-act=n-cot-dis]').forEach(function(b){ b.classList.toggle('on', +b.dataset.d === neg.cotDis); });
   var f = document.fonts ? Promise.all([document.fonts.load('500 40px "Cormorant Garamond"'), document.fonts.load('300 30px Jost')]).catch(function(){}) : Promise.resolve();
   Promise.all([f, cotLogos()]).then(function(r){ neg.logosR = r[1]; var d = $('#n-dver'); if (d && d.open && neg.cotImg) cotLienzo($('#n-vcv'), neg.cotImg, neg.cotDis); });
 }
 function cotLienzo(cv, c, dis){
-  var W = 1080, H = 1350; cv.width = W; cv.height = H; var x = cv.getContext('2d'), T = DIS[dis] || DIS[1];
+  var W = 1080, H = 1350; cv.width = W; cv.height = H; var x = cv.getContext('2d'), T = tema(dis, c.event_type);
   var SER = '"Cormorant Garamond", Georgia, serif', SAN = 'Jost, Inter, Arial, sans-serif', tx = T.tx, mu = T.mu, ac = T.ac;
   x.fillStyle = T.bg; x.fillRect(0, 0, W, H);
   function t(s, px, py, font, col, al, sp){ x.font = font; x.fillStyle = col; x.textAlign = al || 'left'; try { x.letterSpacing = (sp || 0) + 'px'; } catch (e) {} x.fillText(s, px, py); try { x.letterSpacing = '0px'; } catch (e) {} }
@@ -1201,10 +1243,10 @@ function cotLienzo(cv, c, dis){
   function globo(cx, cy, col){ x.strokeStyle = tx; x.globalAlpha = .35; x.lineWidth = 2; x.beginPath(); x.moveTo(cx, cy + 62); x.quadraticCurveTo(cx - 16, cy + 120, cx + 6, cy + 170); x.stroke(); x.globalAlpha = 1; x.fillStyle = col; x.beginPath(); x.ellipse(cx, cy, 48, 60, 0, 0, 7); x.fill(); x.fillStyle = 'rgba(255,255,255,.35)'; x.beginPath(); x.ellipse(cx - 16, cy - 20, 9, 16, .5, 0, 7); x.fill(); x.fillStyle = col; x.beginPath(); x.moveTo(cx, cy + 58); x.lineTo(cx - 9, cy + 74); x.lineTo(cx + 9, cy + 74); x.fill(); }
   /* fondo / adornos */
   var o = T.o;
+  if (T.mc === 1) { marco(40, ac, 2); marco(54, ac, 1); } else if (T.mc === 3) { marco(40, ac, 1.5); }
   if (o === 'boda') { marco(40, ac, 2); marco(54, ac, 1); sprig(80, 110, 150, 0.7, ac); sprig(W - 80, 110, 150, Math.PI - 0.7, ac); sprig(80, H - 200, 150, -0.7, ac); sprig(W - 80, H - 200, 150, Math.PI + 0.7, ac); }
-  else if (o === 'grad') { marco(40, ac, 2); marco(54, ac, 1); x.save(); x.globalAlpha = .13; x.fillStyle = ac; x.translate(W / 2, 800); x.beginPath(); x.moveTo(0, -150); x.lineTo(330, 0); x.lineTo(0, 150); x.lineTo(-330, 0); x.closePath(); x.fill(); x.beginPath(); x.moveTo(-190, 60); x.lineTo(-190, 190); x.quadraticCurveTo(0, 270, 190, 190); x.lineTo(190, 60); x.quadraticCurveTo(0, 150, -190, 60); x.fill(); x.fillRect(300, 0, 6, 190); x.restore(); }
-  else if (o === 'quince') { rr(40, 40, W - 80, H - 80, 36); x.strokeStyle = ac; x.lineWidth = 2; x.stroke(); rr(56, 56, W - 112, H - 112, 24); x.lineWidth = 1; x.stroke(); var rq = seed(7), qi; for (qi = 0; qi < 26; qi++) { var sx = rq() * W, sy = rq() * H; if (sx > 190 && sx < W - 190) continue; estrella(sx, sy, 8 + rq() * 12, ac); }
-    x.save(); x.globalAlpha = .08; x.fillStyle = ac; x.translate(W / 2, 800); x.beginPath(); x.moveTo(-300, 140); x.lineTo(-340, -120); x.lineTo(-170, 0); x.lineTo(0, -200); x.lineTo(170, 0); x.lineTo(340, -120); x.lineTo(300, 140); x.closePath(); x.fill(); x.restore(); }
+  else if (o === 'grad') { marco(40, ac, 2); marco(54, ac, 1);  }
+  else if (o === 'quince') { rr(40, 40, W - 80, H - 80, 36); x.strokeStyle = ac; x.lineWidth = 2; x.stroke(); rr(56, 56, W - 112, H - 112, 24); x.lineWidth = 1; x.stroke(); var rq = seed(7), qi; for (qi = 0; qi < 26; qi++) { var sx = rq() * W, sy = rq() * H; if (sx > 190 && sx < W - 190) continue; estrella(sx, sy, 8 + rq() * 12, ac); } }
   else if (o === 'baby') { x.save(); x.globalAlpha = .28; x.fillStyle = ac; x.beginPath(); x.arc(W - 210, 170, 90, 0, 7); x.fill(); x.fillStyle = T.bg; x.beginPath(); x.arc(W - 170, 150, 80, 0, 7); x.fill(); x.restore(); var rb = seed(11), bi; for (bi = 0; bi < 12; bi++) { var bx = 60 + rb() * (W - 120), by = 60 + rb() * 330; if (bx > 330 && bx < 760 && by > 130) continue; estrella(bx, by, 9 + rb() * 9, ac); }
     x.globalAlpha = .22; nube(60, H - 80, 1.4, ac); nube(W - 290, H - 50, 1.6, ac); x.globalAlpha = 1; marco(44, ac, 2); }
   else if (o === 'fiesta') { var rf = seed(5), cols = [ac, '#E6B84A', '#D96C7A', '#5BA9C9', '#8CB36A'], fi; for (fi = 0; fi < 90; fi++) { var fx = rf() * W, fy = rf() * H; if (fx > 150 && fx < W - 150 && fy > 150 && fy < H - 150) continue; x.save(); x.translate(fx, fy); x.rotate(rf() * 6); x.fillStyle = cols[fi % 5]; if (fi % 3) x.fillRect(-9, -4, 18, 8); else { x.beginPath(); x.arc(0, 0, 7, 0, 7); x.fill(); } x.restore(); } }
@@ -1212,7 +1254,8 @@ function cotLienzo(cv, c, dis){
   else if (o === 'arcos') { x.strokeStyle = ac; x.lineWidth = 3; [560, 470, 380].forEach(function(r, i){ x.globalAlpha = .28 - i * .06; x.beginPath(); x.arc(W / 2, H + 40, r, Math.PI, 0); x.stroke(); }); x.globalAlpha = .07; x.fillStyle = ac; x.beginPath(); x.arc(W / 2, H + 40, 380, Math.PI, 0); x.fill(); x.globalAlpha = 1; }
   else if (o === 'marco') { marco(44, tx, 2); x.fillStyle = tx; x.fillRect(W / 2 - 30, 44 - 2, 60, 6); x.fillRect(W / 2 - 30, H - 48, 60, 6); }
   else if (o === 'geo') { x.save(); x.strokeStyle = ac; x.globalAlpha = .22; x.lineWidth = 2; var gi; for (gi = 0; gi < 9; gi++) { x.beginPath(); x.moveTo(W - 40 - gi * 34, 40); x.lineTo(W - 40, 40 + gi * 34); x.stroke(); x.beginPath(); x.moveTo(40 + gi * 34, H - 40); x.lineTo(40, H - 40 - gi * 34); x.stroke(); } x.restore(); x.fillStyle = ac; x.fillRect(80, 100, 6, 70); }
-  else if (o === 'revela') { x.save(); x.globalAlpha = .3; x.fillStyle = '#E7A9BC'; x.beginPath(); x.arc(0, 0, 270, 0, 7); x.fill(); x.fillStyle = '#9DC1E3'; x.beginPath(); x.arc(W, H, 290, 0, 7); x.fill(); x.restore(); x.save(); x.globalAlpha = .05; t('?', W / 2, 960, 'italic 600 760px ' + SER, ac, 'center'); x.restore(); }
+  else if (o === 'revela') { x.save(); x.globalAlpha = .3; x.fillStyle = '#E7A9BC'; x.beginPath(); x.arc(0, 0, 270, 0, 7); x.fill(); x.fillStyle = '#9DC1E3'; x.beginPath(); x.arc(W, H, 290, 0, 7); x.fill(); x.restore(); }
+  emblema(x, T.k, W / 2, 790, 340, ac, 3.6, T.dark ? .2 : .17);
   /* logo + WhatsApp */
   var LG = neg.logosR ? (T.dark ? neg.logosR.oscuro : neg.logosR.claro) : null, estudio = ph.studio_name || 'Alexander Ge Erre';
   function logo(cx, top, maxW, maxH, al){ if (!LG) { t(estudio, al === 'left' ? cx : cx, top + maxH * .7, '500 ' + Math.round(maxH * .55) + 'px ' + SER, tx, al || 'center'); return; } var s = Math.min(maxW / LG.naturalWidth, maxH / LG.naturalHeight), w = LG.naturalWidth * s, h = LG.naturalHeight * s; x.drawImage(LG, al === 'left' ? cx : cx - w / 2, top + (maxH - h) / 2, w, h); }
@@ -1246,7 +1289,7 @@ function cotLienzo(cv, c, dis){
     t(nota, 80, 1198, 'italic 500 38px ' + SER, ac, 'left'); t(pie, 80, 1240, '300 26px ' + SAN, mu, 'left'); contacto(80, 1300, ac, 'left');
   } else {
     logo(W / 2, 70, 420, 150, 'center'); t('FOTOGRAFÍA Y VIDEOGRAFÍA PROFESIONAL', W / 2, 260, '400 22px ' + SAN, mu, 'center', 6);
-    x.fillStyle = ac; x.fillRect(W / 2 - 40, 300, 80, 3);
+    if (T.d === 4) emblema(x, T.k, W / 2, 310, 36, ac, 4.6, .95); else { x.fillStyle = ac; x.fillRect(W / 2 - 40, 300, 80, 3); }
     t('Cotización para', W / 2, 372, '300 34px ' + SAN, mu, 'center', 2); fit(c.client_name, W / 2, 460, 92, tx, 'center', W - 200, SER);
     t(linea, W / 2, 528, '300 34px ' + SAN, mu, 'center'); if (c.location) t(c.location, W / 2, 573, '300 34px ' + SAN, mu, 'center');
     var cw = 210, dx = c.print_count ? W / 2 - cw : W / 2, ix = W / 2 + cw;
@@ -1266,13 +1309,23 @@ async function cotAccion(a, el){
   if (a === 'n-cot-wa') { var cl = c.client_id ? cliPorId(c.client_id) : null; window.open(cl && cl.phone ? waLink(cl.phone, cotTexto(c)) : 'https://wa.me/?text=' + encodeURIComponent(cotTexto(c)), '_blank'); return; }
   if (a === 'n-cot-edit') { $('#n-dver').close(); return cotAbrir(c.id); }
   if (a === 'n-cot-agenda') { if (!c.event_date) return aviso('Pon la fecha del evento en la cotización.'); $('#n-dver').close(); return evAbrir(null, { title: c.event_type + ' · ' + c.client_name, fecha: c.event_date, lugar: c.location, client: c.client_id, kind: 'evento' }); }
-  if (a === 'n-cot-del') { if (!confirm('¿Eliminar esta cotización?')) return; var r = await db.from('quotes').delete().eq('id', c.id); if (r.error) return aviso(r.error.message); $('#n-dver').close(); await negCargar(true); pintar(); return aviso('Cotización eliminada'); }
+  if (a === 'n-cot-del') { if (!await seguro('¿Eliminar esta cotización?')) return; var r = await db.from('quotes').delete().eq('id', c.id); if (r.error) return aviso(r.error.message); $('#n-dver').close(); await negCargar(true); pintar(); return aviso('Cotización eliminada'); }
 }
 
 /* ---------- Agenda ---------- */
 function pad(n){ return String(n).padStart(2, '0'); }
 function dKey(d){ return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
-function cuenta(iso){ var h = new Date(); h.setHours(0, 0, 0, 0); var f = new Date(iso); f.setHours(0, 0, 0, 0); var n = Math.round((f - h) / 86400000); if (n === 0) return 'Es hoy'; if (n === 1) return 'Es mañana'; if (n > 1) return 'Faltan ' + n + ' días'; return n === -1 ? 'Fue ayer' : 'Hace ' + (-n) + ' días'; }
+
+async function cotAAgenda(c, avisar){
+  if (!c.event_date) { if (avisar) aviso('Aceptada. Pon la fecha del evento en la cotización para agendarlo.'); return; }
+  var titulo = (c.event_type || 'Evento') + ' · ' + c.client_name, dia = c.event_date;
+  var ya = neg.evs.filter(function(e){ return e.title === titulo && dKey(new Date(e.starts_at)) === dia; })[0], r;
+  if (ya) { if (ya.confirmed) return; r = await db.from('events').update({ confirmed: true }).eq('id', ya.id); }
+  else r = await db.from('events').insert({ photographer_id: ph.id, title: titulo, kind: 'evento', client_id: c.client_id || null, starts_at: new Date(dia + 'T09:00:00').toISOString(), location: c.location || null, notes: 'Cotización N.º ' + String(c.num).padStart(4, '0'), confirmed: true });
+  if (r.error) return aviso(/confirmed/i.test(r.error.message) ? 'Falta ejecutar etapa12.sql en Supabase (ver instrucciones).' : r.error.message);
+  await negCargar(true); if (avisar) aviso(ya ? 'Evento confirmado en tu agenda' : 'Evento agregado a tu agenda como confirmado');
+}
+function cuenta(iso){ var h = new Date(); h.setHours(0, 0, 0, 0); var f = new Date(typeof iso === 'string' && iso.length === 10 ? iso + 'T12:00:00' : iso); f.setHours(0, 0, 0, 0); var n = Math.round((f - h) / 86400000); if (n === 0) return 'Es hoy'; if (n === 1) return 'Es mañana'; if (n > 1) return 'Faltan ' + n + ' días'; return n === -1 ? 'Fue ayer' : 'Hace ' + (-n) + ' días'; }
 async function pintarAgenda(){
   $('#pn-main').innerHTML = '<h1>Agenda</h1><p class="pn-s">Cargando…</p>'; await negCargar();
   var m = neg.mes, y = m.getFullYear(), mo = m.getMonth(), prim = new Date(y, mo, 1), off = (prim.getDay() + 6) % 7, dias = new Date(y, mo + 1, 0).getDate(), hoy = dKey(new Date());
@@ -1363,10 +1416,10 @@ async function grAccion(a, el){
   if (a === 'n-gr-ver') { GR.abierto = GR.abierto === el.dataset.id ? null : el.dataset.id; return pintarGrupos(); }
   if (a === 'n-gr-copiar' && g) { var u = GR_URL + g.token; try { await navigator.clipboard.writeText(u); aviso('Enlace copiado'); } catch (x) { prompt('Copia este enlace:', u); } return; }
   if (a === 'n-gr-est' && g) { var r = await db.from('groups').update({ status: g.status === 'closed' ? 'open' : 'closed' }).eq('id', g.id); if (r.error) return aviso(r.error.message); return pintarGrupos(); }
-  if (a === 'n-gr-del' && g) { if (!confirm('¿Eliminar este grupo y todos sus anotados?')) return; var r2 = await db.from('groups').delete().eq('id', g.id); if (r2.error) return aviso(r2.error.message); return pintarGrupos(); }
-  if (a === 'n-gr-qm') { if (!confirm('¿Quitar a este estudiante de la lista?')) return; var r3 = await db.from('group_members').delete().eq('id', el.dataset.id); if (r3.error) return aviso(r3.error.message); return pintarGrupos(); }
+  if (a === 'n-gr-del' && g) { if (!await seguro('¿Eliminar este grupo y todos sus anotados?')) return; var r2 = await db.from('groups').delete().eq('id', g.id); if (r2.error) return aviso(r2.error.message); return pintarGrupos(); }
+  if (a === 'n-gr-qm') { if (!await seguro('¿Quitar a este estudiante de la lista?')) return; var r3 = await db.from('group_members').delete().eq('id', el.dataset.id); if (r3.error) return aviso(r3.error.message); return pintarGrupos(); }
 }
-function negAccion(a, el){
+async function negAccion(a, el){
   if (a.indexOf('n-gr-') === 0) return grAccion(a, el);
   if (a === 'n-ir') { vista = el.dataset.v; return pintar(); }
   if (a === 'n-cli-nuevo') return cliAbrir(null);
@@ -1379,12 +1432,12 @@ function negAccion(a, el){
   if (a === 'n-ics-todo') { var l = neg.evs.filter(function(e){ return new Date(e.starts_at) >= new Date(new Date().toDateString()); }); if (!l.length) return aviso('No hay eventos próximos.'); return icsBajar(l, 'agenda-alexander'); }
   if (a === 'n-ics-uno') { var e1 = neg.evs.filter(function(x){ return x.id === el.dataset.id; })[0]; if (e1) icsBajar([e1], 'evento-' + slug(e1.title)); return; }
   if (a === 'n-ics-este') { var e2 = neg.evs.filter(function(x){ return x.id === neg.evEd; })[0]; if (e2) icsBajar([e2], 'evento-' + slug(e2.title)); return; }
-  if (a === 'n-cli-del') { if (!confirm('¿Eliminar este cliente? Sus galerías no se borran.')) return; return db.from('clients').delete().eq('id', neg.cliEd).then(async function(r){ if (r.error) return aviso(r.error.message); $('#n-dcli').close(); await negCargar(true); pintar(); }); }
-  if (a === 'n-ev-del') { if (!confirm('¿Eliminar este evento?')) return; return db.from('events').delete().eq('id', neg.evEd).then(async function(r){ if (r.error) return aviso(r.error.message); $('#n-dev').close(); await negCargar(true); pintar(); }); }
-  if (a === 'n-qdel') { if (!confirm('¿Eliminar esta cotización?')) return; return db.from('quotes').delete().eq('id', neg.cotEd).then(async function(r){ if (r.error) return aviso(r.error.message); $('#n-dcot').close(); await negCargar(true); pintar(); }); }
+  if (a === 'n-cli-del') { if (!await seguro('¿Eliminar este cliente? Sus galerías no se borran.')) return; return db.from('clients').delete().eq('id', neg.cliEd).then(async function(r){ if (r.error) return aviso(r.error.message); $('#n-dcli').close(); await negCargar(true); pintar(); }); }
+  if (a === 'n-ev-del') { if (!await seguro('¿Eliminar este evento?')) return; return db.from('events').delete().eq('id', neg.evEd).then(async function(r){ if (r.error) return aviso(r.error.message); $('#n-dev').close(); await negCargar(true); pintar(); }); }
+  if (a === 'n-qdel') { if (!await seguro('¿Eliminar esta cotización?')) return; return db.from('quotes').delete().eq('id', neg.cotEd).then(async function(r){ if (r.error) return aviso(r.error.message); $('#n-dcot').close(); await negCargar(true); pintar(); }); }
   if (a === 'n-usar-sug') { neg.qMan.tot = false; return cotRecalc(); }
   if (a === 'n-pr-save') return prGuardar(false);
-  if (a === 'n-pr-reset') { if (!confirm('¿Volver a los precios iniciales?')) return; return prGuardar(true); }
+  if (a === 'n-pr-reset') { if (!await seguro('¿Volver a los precios iniciales?')) return; return prGuardar(true); }
   if (a === 'n-cerrar') { var dg = el.closest('dialog'); if (dg) dg.close(); return; }
   if (a.indexOf('n-cot-') === 0) return cotAccion(a, el);
 }
@@ -1399,11 +1452,11 @@ function negHtml(){
     '<dialog id="n-dev"><h2>Evento</h2><form id="n-fev">' + F('n-eti', 'Título', 'text', 'maxlength="100"') + '<label class="pn-s" for="n-eki" style="display:block;margin-top:.6rem">Tipo</label><select id="n-eki"><option value="evento">Evento</option><option value="sesion">Sesión</option><option value="entrega">Entrega</option><option value="otro">Otro</option></select><label class="pn-s" for="n-ecl" style="display:block;margin-top:.6rem">Cliente</label><select id="n-ecl"></select><div class="pn-dos"><div>' + F('n-efe', 'Fecha', 'date') + '</div><div>' + F('n-eho', 'Hora', 'time') + '</div></div>' + F('n-edu', 'Duración (horas)', 'number', 'min="0" step="0.5"') + F('n-elu', 'Lugar', 'text', 'maxlength="100"') + '<label class="pn-s" for="n-eno" style="display:block;margin-top:.6rem">Notas</label><textarea id="n-eno" rows="2" maxlength="300" style="width:100%"></textarea><label style="display:flex;gap:.6rem;align-items:center;margin-top:.8rem"><input type="checkbox" id="n-eco"> <span>Evento confirmado (el cliente ya reservó)</span></label><div class="pn-row"><button class="pn-btn" type="submit">Guardar</button><button class="pn-btn sec" type="button" data-act="n-cerrar">Cancelar</button><button class="pn-btn sec" type="button" id="n-ics1" data-act="n-ics-este" hidden>Agregar a mi calendario (.ics)</button><button class="pn-btn sec" type="button" id="n-edel" data-act="n-ev-del" hidden>Eliminar</button></div></form></dialog>';
 }
 function negIniciar(){
-  if (window.__PN_TEST) window.__PN_TEST = { cotLienzo: cotLienzo, DIS: DIS, cotLogos: cotLogos, neg: neg, pqPrecio: pqPrecio };
+  if (window.__PN_TEST) window.__PN_TEST = { cotLienzo: cotLienzo, tema: tema, emblema: emblema, cotLogos: cotLogos, neg: neg, pqPrecio: pqPrecio };
   root.querySelector('.pn').insertAdjacentHTML('beforeend', negHtml());
   root.addEventListener('click', function(e){ var a = e.target.closest('[data-act^="n-"]'); if (a) negAccion(a.dataset.act, a); });
   root.addEventListener('submit', function(e){ if (e.target.id === 'n-fcli') cliGuardar(e); else if (e.target.id === 'n-fcot') cotGuardar(e); else if (e.target.id === 'n-fev') evGuardar(e); else if (e.target.id === 'n-fgr') grGuardar(e); });
-  root.addEventListener('change', async function(e){ if (e.target.id === 'n-vst' && neg.cotImg) { var r = await db.from('quotes').update({ status: e.target.value }).eq('id', neg.cotImg.id); if (r.error) return aviso(r.error.message); neg.cotImg.status = e.target.value; aviso('Estado actualizado'); } });
+  root.addEventListener('change', async function(e){ if (e.target.id === 'n-vst' && neg.cotImg) { var r = await db.from('quotes').update({ status: e.target.value }).eq('id', neg.cotImg.id); if (r.error) return aviso(r.error.message); neg.cotImg.status = e.target.value; aviso('Estado actualizado'); if (e.target.value === 'accepted') await cotAAgenda(neg.cotImg, true); } });
   root.addEventListener('input', function(e){ var id = e.target.id; if (id === 'n-qdg') cotRecalc('dg'); else if (id === 'n-qim') { neg.qMan.imp = true; cotRecalc(); } else if (id === 'n-qto') { neg.qMan.tot = true; cotRecalc(); } else if (id === 'n-qds') { neg.qMan.tot = false; cotRecalc(); } });
   root.addEventListener('change', function(e){ if (e.target.id === 'n-qvi') cotRecalc(); });
   root.addEventListener('close', function(e){ if (e.target.id === 'n-dver' && (vista === 'cotiz')) negCargar(true).then(pintarCotiz); }, true);
