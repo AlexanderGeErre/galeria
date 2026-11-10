@@ -142,7 +142,8 @@ async function cargarFoto(url){
 // ---------- Escena: dibuja el cuadro del tiempo t (segundos) ----------
 function ease(p){ p = clamp(p, 0, 1); return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
 var INTRO = 2.8;
-function duracionTotal(n, seg, estilo, intro){ var d = seg || 2.5; if (estilo === 'carriles') return Math.max(9, n * d * 0.75) + (intro ? INTRO : 0); if (estilo === 'prisma') return Math.floor(n / 2) * 2 * d + (intro ? INTRO : 0); return n * d + (estilo === 'pantalla' ? Math.max(0, Math.max(d, 3.2) - d) : 0) + (intro ? INTRO : 0); }
+function dcPostales(n){ return clamp((clamp(n * 1.5 + 2, 10, 45) - 1.4) / n, 0.9, 3.2); }
+function duracionTotal(n, seg, estilo, intro){ var d = seg || 2.5; if (estilo === 'postales') return n * dcPostales(n) + 1.4 + (intro ? INTRO : 0); if (estilo === 'carriles') return clamp(n * 1.7, 12, 45) + (intro ? INTRO : 0); if (estilo === 'prisma') return Math.floor(n / 2) * 2 * d + (intro ? INTRO : 0); return n * d + (estilo === 'pantalla' ? Math.max(0, Math.max(d, 3.2) - d) : 0) + (intro ? INTRO : 0); }
 // Desenfoque propio (no depende del navegador: funciona igual en iPhone y Android). Tres pasadas de promedio = suavidad tipo gaussiano.
 function desenfocar(c, r){
   var x = c.getContext('2d'), w = c.width, h = c.height, d = x.getImageData(0, 0, w, h), p = d.data, t = new Uint8ClampedArray(p.length), n = 3;
@@ -175,6 +176,7 @@ function crearEscena(fotos, W, H, seg, op){
   op = op || {};
   if (op.estilo === 'prisma') return crearEscenaPrisma(fotos, W, H, seg, op);
   if (op.estilo === 'carriles') return crearEscenaCarriles(fotos, W, H, seg, op);
+  if (op.estilo === 'postales') return crearEscenaPostales(fotos, W, H, seg, op);
   var estilo = op.estilo === 'pantalla' ? 'pantalla' : 'papel';
   var n = fotos.length, vertical = H > W, u = Math.min(W, H) / 1080, D = seg || 2.5, Tr = Math.min(estilo === 'pantalla' ? 0.7 : 1.1, D * (estilo === 'pantalla' ? 0.42 : 0.55));
   var dur = [], ini = [], tot = 0;
@@ -551,46 +553,90 @@ function crearEscenaPrisma(fotos, W, H, seg, op){
 }
 
 
-// ---------- Carriles: tres filas de fotos que avanzan en direcciones alternas (derecha, izquierda, derecha) ----------
-// Cada foto tiene el ancho que le corresponde a su forma (vertical angosta, horizontal ancha), así casi nunca se corta a nadie.
+// ---------- Foco de interés: rostros si los hay; si no, la zona más llamativa (contraste + color) ----------
+function foco(f){
+  if (f._foco) return f._foco;
+  var u = carasClave(f), r;
+  if (u) r = { x: (u.x + u.w / 2) / f.w, y: (u.y + u.h / 2) / f.h, cara: true, u: u };
+  else {
+    r = { x: 0.5, y: 0.45, cara: false, u: null };
+    try {
+      var sw = 48, sh = Math.max(8, Math.round(48 * f.h / f.w)), c = lienzo(sw, sh), x = c.getContext('2d'); x.drawImage(f.bmp, 0, 0, sw, sh);
+      var d = x.getImageData(0, 0, sw, sh).data, L = new Float32Array(sw * sh), S = new Float32Array(sw * sh), i, j, px, mx = 0, vals = [];
+      for (i = 0; i < sw * sh; i++) { var R = d[i * 4], G = d[i * 4 + 1], B = d[i * 4 + 2], mxc = Math.max(R, G, B), mnc = Math.min(R, G, B); L[i] = 0.299 * R + 0.587 * G + 0.114 * B; S[i] = mxc ? (mxc - mnc) / mxc : 0; }
+      var W2 = new Float32Array(sw * sh);
+      for (j = 1; j < sh - 1; j++) for (i = 1; i < sw - 1; i++) {
+        px = j * sw + i; var g = Math.abs(L[px + 1] - L[px - 1]) + Math.abs(L[px + sw] - L[px - sw]);
+        var dx = (i / sw - 0.5) * 2, dy = (j / sh - 0.5) * 2, centro = 1 - 0.45 * Math.min(1, Math.sqrt(dx * dx + dy * dy));
+        W2[px] = (g / 255 + S[px] * 0.6) * centro; vals.push(W2[px]);
+      }
+      vals.sort(function(a, b){ return a - b; }); var th = vals[Math.floor(vals.length * 0.82)] || 0, sx = 0, sy = 0, st = 0;
+      for (j = 1; j < sh - 1; j++) for (i = 1; i < sw - 1; i++) { px = j * sw + i; if (W2[px] >= th) { var w = W2[px]; sx += i * w; sy += j * w; st += w; } }
+      if (st > 0) { r = { x: (sx / st) / sw, y: (sy / st) / sh, cara: false, u: null }; if (f.h > f.w * 1.05) r.y = clamp(r.y * 0.5 + 0.1, 0.18, 0.42); }
+    } catch (e) {}
+  }
+  f._foco = r; return r;
+}
+// Ventana de recorte (en píxeles de la foto) para una celda w×h: z = acercamiento, q = avance 0..1 de 0 a 1, dir = dirección del movimiento
+function ventanaFoco(f, w, h, z, q, dir){
+  var fc = foco(f), k = Math.max(w / f.w, h / f.h) * z, sw = w / k, sh = h / k, mx = sw * 0.07, my = sh * 0.07, lo = 0, hi = f.w - sw, sx, sy, cy;
+  if (fc.u) {
+    lo = clamp(fc.u.x + fc.u.w + mx - sw, 0, f.w - sw); hi = clamp(fc.u.x - mx, 0, f.w - sw);
+    if (lo > hi) { var mid = (lo + hi) / 2; lo = hi = mid; }
+    cy = fc.u.y + fc.u.h / 2 - sh * 0.4;
+  } else cy = fc.y * f.h - sh * 0.5;
+  sy = clamp(cy, 0, f.h - sh);
+  if (fc.u) { if (fc.u.y < sy + my) sy = clamp(fc.u.y - my, 0, f.h - sh); }
+  // el movimiento va de un extremo permitido al otro
+  var a = dir > 0 ? hi : lo, b = dir > 0 ? lo : hi; sx = a + (b - a) * q;
+  if (!fc.u) { var cxn = fc.x * f.w - sw / 2; lo = clamp(cxn - sw * 0.12, 0, f.w - sw); hi = clamp(cxn + sw * 0.12, 0, f.w - sw); a = dir > 0 ? hi : lo; b = dir > 0 ? lo : hi; sx = a + (b - a) * q; }
+  return { sx: sx, sy: sy, sw: sw, sh: sh };
+}
+
+// ---------- Tres bandas: arriba y abajo se deslizan a un lado, la del medio al otro (con acercamiento) ----------
 function crearEscenaCarriles(fotos, W, H, seg, op){
-  var n = fotos.length, D = seg || 2.5, u = Math.min(W, H) / 1080, I = op.intro ? INTRO : 0, logo = op.logo || null, acento = op.acento || '#C9A877';
+  var n = fotos.length, u = Math.min(W, H) / 1080, I = op.intro ? INTRO : 0, logo = op.logo || null, acento = op.acento || '#C9A877';
   var tit = String(op.titulo || '').trim(), sub = String(op.subtitulo || '').trim(), conTit = !!(tit || sub);
-  var m = /^#?([0-9a-f]{6})$/i.exec(acento), lum = m ? (0.299 * parseInt(m[1].slice(0, 2), 16) + 0.587 * parseInt(m[1].slice(2, 4), 16) + 0.114 * parseInt(m[1].slice(4, 6), 16)) : 200;
-  var famS = 'Jost, "Helvetica Neue", Arial, sans-serif', dur = Math.max(9, n * D * 0.75), duracion = dur + I;
-  var th = conTit ? 0.085 * H : 0, gap = 14 * u, pad = 14 * u, rh = (H - th - pad * 2 - gap * 2) / 3, rad = 20 * u;
-  var vel = W * 0.95 / (3 * D) * (H > W ? 1 : 0.8), DIR = [1, -1, 1];
-  // Cada fila usa todas las fotos, empezando en un punto distinto, para que se vean variadas
-  var filas = [0, 1, 2].map(function(r){
-    var ini = Math.floor(n * r / 3), cel = [], x = 0, i, f, a, w;
-    for (i = 0; i < n; i++) { f = fotos[(ini + i) % n]; a = clamp(f.w / f.h, 0.62, 1.75); w = rh * a; cel.push({ i: (ini + i) % n, x: x, w: w, a: a }); x += w + gap; }
-    return { cel: cel, P: x };
-  });
-  function celda(cx, c, x, y, par){
-    var f = fotos[c.i], cw = c.w, z = 1.07;
-    if (x > W + 4 || x + cw < -4) return;
-    cx.save(); rr(cx, x, y, cw, rh, rad); cx.clip();
-    cx.imageSmoothingQuality = 'high';
-    var real = f.w / f.h, enc = Math.abs(real / c.a - 1) < 0.02;
-    cx.translate(x + cw / 2 + par * cw * 0.035, y + rh / 2); cx.scale(z, z); cx.translate(-cw / 2, -rh / 2);
-    if (enc) cx.drawImage(f.bmp, 0, 0, cw, rh);
-    else if (cabeCaras(f, cw, rh)) cubrirCarasF(cx, f, 0, 0, cw, rh);
-    else { cx.drawImage(fondoDesenf(f, cw, rh, 1.3, Math.max(2, Math.round(6 * u))), 0, 0, cw, rh); var k = Math.min(cw / f.w, rh / f.h); cx.drawImage(f.bmp, (cw - f.w * k) / 2, (rh - f.h * k) / 2, f.w * k, f.h * k); }
+  var m = /^#?([0-9a-f]{6})$/i.exec(acento), lum = m ? (0.299 * parseInt(m[1].slice(0, 2), 16) + 0.587 * parseInt(m[1].slice(2, 4), 16) + 0.114 * parseInt(m[1].slice(4, 6), 16)) : 200, tinta = lum > 150 ? '#1b1712' : '#fbf7ee';
+  var famS = 'Jost, "Helvetica Neue", Arial, sans-serif';
+  // La cantidad de fotos decide la velocidad: el video dura entre 12 y 45 s y cada banda reparte ese tiempo entre sus fotos
+  var maxL = Math.ceil(n / 3), dur = clamp(n * 1.7, 12, 45), Dp = clamp(dur / maxL, 1.9, 9), duracion = dur + I;
+  var th = 0, g = 12 * u, bh = (H - th - 2 * g) / 3, DIR = [1, -1, 1];
+  var listas = [0, 1, 2].map(function(r){ var L = []; for (var i = r; i < n; i += 3) L.push(i); if (!L.length) L.push(r % n); return L; });
+  function rr(c, x, y, w, h, r){ c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  function celda(cx, i, x, y, w, h, z, q, dir){
+    if (x > W || x + w < 0) return;
+    var f = fotos[i], v = ventanaFoco(f, w, h, z, q, dir);
+    cx.save(); cx.beginPath(); cx.rect(x, y, w, h); cx.clip(); cx.imageSmoothingQuality = 'high'; cx.drawImage(f.bmp, v.sx, v.sy, v.sw, v.sh, x, y, w, h); cx.restore();
+  }
+  function banda(cx, r, y, tt){
+    var L = listas[r], mL = L.length, s = tt + r * Dp / 3, ent = ease(clamp((tt - 0.12 * r) / 1.1, 0, 1)), dir = DIR[r];
+    var idx = Math.floor(s / Dp), ph = s - idx * Dp, Tt = Math.min(0.95, Dp * 0.3), uu = mL > 1 ? clamp((ph - (Dp - Tt)) / Tt, 0, 1) : 0, q = clamp(ph / Dp, 0, 1);
+    var cur = L[idx % mL], nxt = L[(idx + 1) % mL], e = ease(uu), zb = r === 1 ? 1.04 + 0.24 * (idx % 2 ? 1 - q : q) : 1.12, zn = r === 1 ? 1.04 : 1.12;
+    cx.save(); cx.beginPath(); cx.rect(0, y, W, bh); cx.clip(); cx.fillStyle = acento; cx.fillRect(0, y, W, bh);
+    var off = -dir * W * (1 - ent), curX = dir * e * (W + g) + off, nxtX = curX - dir * (W + g);
+    celda(cx, cur, curX, y, W, bh, zb, q, dir);
+    if (uu > 0) celda(cx, nxt, nxtX, y, W, bh, zn, 0, dir);
     cx.restore();
   }
-  function rr(c, x, y, w, h, r){ c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
-  function titulo(cx, al){
+  // Rótulo de inicio: nombre, tipo de evento y año sobre las fotos; aparece, se queda unos segundos y desaparece
+  function rotulo(cx, tt){
     if (!conTit) return;
-    cx.save(); cx.globalAlpha = al; var fs = th * 0.36, y = th * 0.6 + pad * 0.3; cx.textBaseline = 'alphabetic';
-    cx.fillStyle = '#f4efe6'; cx.textAlign = 'left'; cx.font = '600 ' + fs + 'px ' + famS; try { cx.letterSpacing = (fs * 0.16) + 'px'; } catch (e) {}
-    var T = tit.toUpperCase(); while (cx.measureText(T).width > W * 0.62 && fs > 12) { fs *= 0.95; cx.font = '600 ' + fs + 'px ' + famS; } cx.fillText(T, pad * 1.4, y);
-    cx.textAlign = 'right'; cx.fillStyle = acento; cx.font = '500 ' + (th * 0.27) + 'px ' + famS; try { cx.letterSpacing = (th * 0.04) + 'px'; } catch (e) {} cx.fillText(sub.toUpperCase(), W - pad * 1.4, y);
-    try { cx.letterSpacing = '0px'; } catch (e) {}
-    cx.fillStyle = acento; cx.globalAlpha = al * 0.9; cx.fillRect(pad * 1.4, th - 4 * u, 46 * u, 3 * u);
+    var a = ease(clamp((tt - 0.15) / 0.7, 0, 1)) * (1 - ease(clamp((tt - 2.7) / 0.8, 0, 1))); if (a <= 0.002) return;
+    cx.save(); cx.fillStyle = 'rgba(10,8,6,' + (0.52 * a).toFixed(3) + ')'; cx.fillRect(0, 0, W, H);
+    var T = tit.toUpperCase(), S = sub.toUpperCase(), fs = Math.min(W * 0.1, H * 0.06), up = (1 - ease(clamp((tt - 0.15) / 0.9, 0, 1))) * 26 * u, cy = H / 2 + up;
+    cx.globalAlpha = a; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.shadowColor = 'rgba(0,0,0,.45)'; cx.shadowBlur = 18 * u;
+    cx.font = '700 ' + fs + 'px ' + famS; try { cx.letterSpacing = (fs * 0.12) + 'px'; } catch (e) {}
+    while (cx.measureText(T).width > W * 0.84 && fs > 14) { fs *= 0.95; cx.font = '700 ' + fs + 'px ' + famS; }
+    cx.fillStyle = '#fbf7ee'; if (T) cx.fillText(T, W / 2, cy - (S ? fs * 0.55 : 0));
+    cx.shadowBlur = 0; if (T && S) { cx.fillStyle = acento; cx.fillRect(W / 2 - 34 * u, cy + fs * 0.02, 68 * u, 3 * u); }
+    var f2 = fs * 0.5; cx.font = '500 ' + f2 + 'px ' + famS; try { cx.letterSpacing = (f2 * 0.2) + 'px'; } catch (e) {}
+    while (cx.measureText(S).width > W * 0.84 && f2 > 10) { f2 *= 0.95; cx.font = '500 ' + f2 + 'px ' + famS; }
+    cx.shadowBlur = 14 * u; cx.fillStyle = '#fbf7ee'; if (S) cx.fillText(S, W / 2, cy + fs * 0.62); try { cx.letterSpacing = '0px'; } catch (e) {}
     cx.restore();
   }
   function intro(cx, t){
-    var g = cx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, Math.max(W, H) * 0.7); g.addColorStop(0, '#1d1813'); g.addColorStop(1, '#0b0806'); cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+    var gr = cx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, Math.max(W, H) * 0.7); gr.addColorStop(0, '#1d1813'); gr.addColorStop(1, '#0b0806'); cx.fillStyle = gr; cx.fillRect(0, 0, W, H);
     var a = clamp((t - 0.25) / 0.8, 0, 1), e = ease(a); cx.save(); cx.globalAlpha = e; cx.translate(W / 2, H / 2); cx.scale(0.94 + 0.06 * e, 0.94 + 0.06 * e);
     if (logo && logo.bmp) { var lw = (H > W ? 0.62 : 0.32) * W, lh = lw * logo.h / logo.w, mh = H * (H > W ? 0.3 : 0.4); if (lh > mh) { lw *= mh / lh; lh = mh; } cx.imageSmoothingQuality = 'high'; cx.drawImage(logo.bmp, -lw / 2, -lh / 2, lw, lh); }
     else if (op.nombre) { var fs = (H > W ? W * 0.085 : H * 0.1); cx.fillStyle = '#E9D9B8'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.font = '300 ' + fs + 'px "Cormorant Garamond", Georgia, serif'; try { cx.letterSpacing = (fs * 0.12) + 'px'; } catch (e2) {} cx.fillText(String(op.nombre).toUpperCase(), 0, 0); }
@@ -598,23 +644,79 @@ function crearEscenaCarriles(fotos, W, H, seg, op){
   }
   function dibujar(cx, t){
     t = clamp(t, 0, duracion - 0.0001);
-    cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = 1; cx.filter = 'none'; cx.fillStyle = '#0b0a09'; cx.fillRect(0, 0, W, H);
+    cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = 1; cx.filter = 'none'; cx.fillStyle = acento; cx.fillRect(0, 0, W, H);
     var tt = t - I; if (tt < 0) { intro(cx, t); return; }
-    for (var r = 0; r < 3; r++) {
-      var F = filas[r], y = th + pad + r * (rh + gap), en = ease(clamp((tt - 0.1 * r) / 1.1, 0, 1)), ex = -DIR[r] * W * (1 - en), off = DIR[r] * vel * tt, base = ((off % F.P) + F.P) % F.P;
-      cx.save(); cx.globalAlpha = clamp(en * 1.6, 0, 1);
-      for (var rep = -2; rep <= 2; rep++) F.cel.forEach(function(c){
-        var x = c.x + rep * F.P + base - F.P * 0 + ex - (F.P > W ? 0 : 0);
-        // la fila corre en su dirección: se coloca la tira desplazada y repetida
-        var xx = x - F.P * 0.0; var cen = xx + c.w / 2, par = clamp((cen - W / 2) / W, -1, 1) * -DIR[r];
-        celda(cx, c, xx, y, par);
-      });
-      cx.restore();
-    }
-    titulo(cx, ease(clamp((tt - 0.3) / 0.8, 0, 1)));
+    for (var r = 0; r < 3; r++) banda(cx, r, th + r * (bh + g), tt);
+    rotulo(cx, tt);
     var fin = duracion - t; if (fin < 0.6) { cx.fillStyle = 'rgba(11,10,9,' + clamp(1 - fin / 0.6, 0, 1).toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
   }
-  return { W: W, H: H, duracion: duracion, dibujar: dibujar, n: n, seg: D, estilo: 'carriles' };
+  return { W: W, H: H, duracion: duracion, dibujar: dibujar, n: n, seg: Dp, estilo: 'carriles' };
+}
+
+// ---------- Postales: las fotos caen una a una como tarjetas con borde blanco sobre un fondo de papel ----------
+function crearEscenaPostales(fotos, W, H, seg, op){
+  var n = fotos.length, u = Math.min(W, H) / 1080, I = op.intro ? INTRO : 0, logo = op.logo || null, acento = op.acento || '#C9A877';
+  var tit = String(op.titulo || '').trim(), sub = String(op.subtitulo || '').trim();
+  var famS = 'Jost, "Helvetica Neue", Arial, sans-serif', famT = '"Cormorant Garamond", Georgia, serif';
+  var Dc = dcPostales(n), duracion = n * Dc + 1.4 + I, vert = H >= W;
+  var rnd = (function(s){ return function(){ s = (s * 1664525 + 1013904223) % 4294967296; return s / 4294967296; }; })((op.semilla || 7) * 99991 + 13);
+  var cards = fotos.map(function(f, k){
+    var a = clamp(f.w / f.h, 0.72, 1.45), maxW = vert ? 0.74 * W : 0.42 * W, maxH = (vert ? 0.46 : 0.62) * H, pw = Math.min(maxW, maxH * a), ph = pw / a, b = pw * 0.045, bb = pw * 0.15;
+    return { i: k, pw: pw, ph: ph, b: b, bb: bb, cw: pw + 2 * b, ch: ph + b + bb, cx: W / 2 + (rnd() - 0.5) * W * (vert ? 0.2 : 0.34), cy: H * (vert ? 0.54 : 0.55) + (rnd() - 0.5) * H * 0.06, rot: (rnd() < 0.5 ? -1 : 1) * (0.03 + rnd() * 0.07), side: rnd() < 0.5 ? -1 : 1, cinta: k % 2 === 0 };
+  });
+  // Fondo de papel con grano suave (se prepara una sola vez)
+  var fondo = null;
+  function papel(){
+    if (fondo) return fondo; fondo = lienzo(W, H); var x = fondo.getContext('2d'), g = x.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#f3ede1'); g.addColorStop(1, '#e4dac8'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+    var v = x.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.3, W / 2, H / 2, Math.max(W, H) * 0.75); v.addColorStop(0, 'rgba(255,255,255,.18)'); v.addColorStop(1, 'rgba(90,65,30,.16)'); x.fillStyle = v; x.fillRect(0, 0, W, H);
+    var rg = (function(s){ return function(){ s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; }; })(5);
+    for (var i = 0; i < W * H / 260; i++) { x.fillStyle = 'rgba(90,70,40,' + (0.02 + rg() * 0.04).toFixed(3) + ')'; x.fillRect(rg() * W, rg() * H, 1.3, 1.3); }
+    return fondo;
+  }
+  function bote(p){ // caída con un pequeño rebote
+    if (p >= 1) return 1; if (p < 0.72) { var q = p / 0.72; return q * q; } var q2 = (p - 0.72) / 0.28; return 1 - 0.035 * Math.sin(q2 * Math.PI);
+  }
+  function tarjeta(cx, c, t0, tt){
+    var age = tt - t0; if (age < 0) return;
+    var p = clamp(age / 0.75, 0, 1), landed = ease(clamp(age / 0.75, 0, 1)), vivas = 4, salida = clamp((age - vivas * Dc) / 0.9, 0, 1), es = ease(salida);
+    if (salida >= 1) return;
+    var f = fotos[c.i], dy = -(1 - bote(p)) * H * 0.85, rot = c.rot * (1 + 1.4 * (1 - landed)), esc = 1.1 - 0.1 * landed, ex = c.side * W * 0.7 * es;
+    cx.save(); cx.globalAlpha = (1 - es) * clamp(p * 4, 0, 1); cx.translate(c.cx + ex, c.cy + dy + es * H * 0.05); cx.rotate(rot + c.side * es * 0.25); cx.scale(esc, esc);
+    cx.shadowColor = 'rgba(55,36,12,' + (0.12 + 0.2 * landed).toFixed(3) + ')'; cx.shadowBlur = (14 + 26 * landed) * u; cx.shadowOffsetY = (6 + 14 * landed) * u;
+    cx.fillStyle = '#fdfbf7'; cx.fillRect(-c.cw / 2, -c.ch / 2, c.cw, c.ch); cx.shadowColor = 'transparent'; cx.shadowBlur = 0; cx.shadowOffsetY = 0;
+    var v = ventanaFoco(f, c.pw, c.ph, 1, 0.5, 1); cx.save(); cx.beginPath(); cx.rect(-c.cw / 2 + c.b, -c.ch / 2 + c.b, c.pw, c.ph); cx.clip(); cx.imageSmoothingQuality = 'high'; cx.drawImage(f.bmp, v.sx, v.sy, v.sw, v.sh, -c.cw / 2 + c.b, -c.ch / 2 + c.b, c.pw, c.ph); cx.restore();
+    // pie de la postal
+    var fs = c.bb * 0.36, yb = -c.ch / 2 + c.b + c.ph + c.bb * 0.6; cx.fillStyle = '#6b5a45'; cx.textAlign = 'left'; cx.textBaseline = 'middle'; cx.font = 'italic 500 ' + fs + 'px ' + famT;
+    var cap = tit || sub || ''; while (cx.measureText(cap).width > c.pw * 0.68 && fs > 8) { fs *= 0.95; cx.font = 'italic 500 ' + fs + 'px ' + famT; } cx.fillText(cap, -c.cw / 2 + c.b, yb);
+    cx.textAlign = 'right'; cx.font = '500 ' + (c.bb * 0.26) + 'px ' + famS; try { cx.letterSpacing = (c.bb * 0.03) + 'px'; } catch (e) {} cx.fillStyle = '#a08c6b'; cx.fillText(('0' + (c.i + 1)).slice(-2) + ' / ' + ('0' + n).slice(-2), c.cw / 2 - c.b, yb); try { cx.letterSpacing = '0px'; } catch (e) {}
+    if (c.cinta) { cx.save(); cx.translate(0, -c.ch / 2); cx.rotate(-0.06); cx.globalAlpha *= 0.82; cx.fillStyle = acento; cx.fillRect(-c.cw * 0.14, -c.cw * 0.03, c.cw * 0.28, c.cw * 0.07); cx.restore(); }
+    cx.restore();
+  }
+  function cabecera(cx, al){
+    if (!tit && !sub) return; cx.save(); cx.globalAlpha = al; cx.textAlign = 'center'; cx.textBaseline = 'alphabetic';
+    var fs = H * 0.03; cx.fillStyle = '#3a2f22'; cx.font = '600 ' + fs + 'px ' + famS; try { cx.letterSpacing = (fs * 0.22) + 'px'; } catch (e) {}
+    var T = tit.toUpperCase(); while (cx.measureText(T).width > W * 0.86 && fs > 12) { fs *= 0.95; cx.font = '600 ' + fs + 'px ' + famS; } cx.fillText(T, W / 2, H * 0.075);
+    try { cx.letterSpacing = '0px'; } catch (e) {} cx.fillStyle = '#8a6d3b'; cx.font = 'italic 500 ' + (H * 0.026) + 'px ' + famT; cx.fillText(sub, W / 2, H * 0.075 + H * 0.034);
+    cx.fillStyle = acento; cx.fillRect(W / 2 - 24 * u, H * 0.075 + H * 0.05, 48 * u, 3 * u); cx.restore();
+  }
+  function intro(cx, t){
+    var gr = cx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, Math.max(W, H) * 0.7); gr.addColorStop(0, '#1d1813'); gr.addColorStop(1, '#0b0806'); cx.fillStyle = gr; cx.fillRect(0, 0, W, H);
+    var a = clamp((t - 0.25) / 0.8, 0, 1), e = ease(a); cx.save(); cx.globalAlpha = e; cx.translate(W / 2, H / 2); cx.scale(0.94 + 0.06 * e, 0.94 + 0.06 * e);
+    if (logo && logo.bmp) { var lw = (H > W ? 0.62 : 0.32) * W, lh = lw * logo.h / logo.w, mh = H * (H > W ? 0.3 : 0.4); if (lh > mh) { lw *= mh / lh; lh = mh; } cx.imageSmoothingQuality = 'high'; cx.drawImage(logo.bmp, -lw / 2, -lh / 2, lw, lh); }
+    else if (op.nombre) { var fs = (H > W ? W * 0.085 : H * 0.1); cx.fillStyle = '#E9D9B8'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.font = '300 ' + fs + 'px ' + famT; try { cx.letterSpacing = (fs * 0.12) + 'px'; } catch (e2) {} cx.fillText(String(op.nombre).toUpperCase(), 0, 0); }
+    cx.restore();
+  }
+  function dibujar(cx, t){
+    t = clamp(t, 0, duracion - 0.0001);
+    cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = 1; cx.filter = 'none'; cx.shadowColor = 'transparent';
+    var tt = t - I; if (tt < 0) { intro(cx, t); return; }
+    cx.drawImage(papel(), 0, 0); cabecera(cx, ease(clamp(tt / 0.8, 0, 1)));
+    cx.save(); cx.translate(Math.sin(tt * 0.35) * 6 * u, Math.cos(tt * 0.3) * 5 * u);
+    for (var k = 0; k < n; k++) tarjeta(cx, cards[k], 0.5 + k * Dc, tt);
+    cx.restore();
+    var fin = duracion - t; if (fin < 0.7) { cx.fillStyle = 'rgba(243,237,225,' + clamp(1 - fin / 0.7, 0, 1).toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
+  }
+  return { W: W, H: H, duracion: duracion, dibujar: dibujar, n: n, seg: Dc, estilo: 'postales' };
 }
 
 // ---------- Exportar a MP4 ----------
