@@ -78,7 +78,7 @@ input[type=text],input[type=tel]{width:100%;padding:.8rem 1rem;border:1px solid 
   function pinta(d){
     D = d; $('#cargando').hidden = true; $('#g').hidden = false; document.title = 'Graduación · ' + d.nombre;
     $('#nom').textContent = d.nombre; $('#fec').textContent = d.fecha ? 'Graduación: ' + fecha(d.fecha, { day: 'numeric', month: 'long', year: 'numeric' }) : '';
-    $('#pr').textContent = Q(d.precio); $('#inc').textContent = d.incluye + ' · entrega en memoria USB';
+    $('#pr').textContent = Q(d.precio); $('#inc').textContent = d.incluye + ' · entrega en catálogo digital';
     var pc = Math.min(100, Math.round(d.total / d.minimo * 100)); $('#bar').style.width = pc + '%';
     var m = $('#msg'); m.className = 'msg';
     if (d.total >= d.minimo) { m.className = 'msg meta'; m.textContent = '¡Meta lograda! Somos ' + d.total + ' y el precio ya es de ' + Q(d.precio_final) + ' cada uno.'; }
