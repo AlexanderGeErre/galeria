@@ -60,6 +60,7 @@ var CSS = '.pn-pb{position:absolute;right:6px;bottom:34px;z-index:2;display:flex
 '.pn main{padding:2.8rem clamp(1.2rem,5vw,4rem);max-width:1180px}.pn h1{font-size:clamp(2.2rem,4vw,3.2rem);letter-spacing:-.01em;margin-bottom:.3rem}.pn h2{font-size:1.6rem}' +
 '.pn-card{border:1px solid var(--l);border-radius:14px;box-shadow:none;padding:1.2rem 1.4rem}' +
 '.pn-franja,.pn-cifras{border:1px solid var(--l);border-radius:14px;box-shadow:none}.pn-cifras b{font-size:2.1rem}' +
+'@media(min-width:1100px){.pn main{max-width:1560px;margin:0 auto}}' +
 '.pn-ac a.pn-btn{background:none;border:1px solid var(--l);border-radius:999px;font-size:.72rem;padding:.1rem .5rem;color:var(--t)}.pn-cacep{margin:1rem 0}.pn-cacep p{display:flex;justify-content:space-between;gap:1rem;align-items:center;margin:.4rem 0}' +
 '.pn-btn{transition:transform .15s,opacity .2s,box-shadow .2s}.pn-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 16px rgba(43,38,35,.16)}.pn-btn:active{transform:scale(.97)}' +
 '.pn-rej{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:26px}.pn-tar .cv{border-radius:16px}.pn-tar h3{margin-top:.7rem}' +
@@ -362,7 +363,7 @@ function pintarCuenta(){
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 06:30</p></div>';
+ + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 07:00</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
