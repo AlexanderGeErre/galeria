@@ -109,7 +109,7 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
 <div id="vPanel" hidden></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="panel.js?v=20261110l"></script>
+<script src="panel.js?v=20261110t"></script>
 <script>if ("serviceWorker" in navigator) window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });</script>
 <script>
 (function(){
@@ -139,7 +139,7 @@ input{width:100%;padding:.75rem .9rem;border:1px solid var(--cp);background:tran
     if (/password/i.test(m) && /least/i.test(m)) return 'La contraseña debe tener al menos 8 caracteres.';
     if (/not confirmed/i.test(m)) return 'Primero confirma tu correo con el enlace que te enviamos.';
     if (/rate limit/i.test(m)) return 'Demasiados intentos. Espera unos minutos.';
-    if (/permission denied/i.test(m)) return 'Falta un permiso en Supabase (permission denied). Avísale a Claude.';
+    if (/permission denied/i.test(m)) return 'Falta activar una actualización de la base de datos. Revisa que hayas ejecutado todos los archivos .sql en Supabase.';
     return m;
   }
   function slugify(s){

@@ -157,7 +157,7 @@ CSS += '.pn-ph.vsel{cursor:pointer}.pn-ph.vsel.on img{outline:3px solid var(--a)
 '.pn-vprev{background:#0c0a08;border-radius:12px;padding:.8rem;display:grid;place-items:center;min-height:12rem}.pn-vprev canvas{max-width:100%;height:auto;border-radius:6px;background:#000}.pn-vb{height:6px;border-radius:99px;background:var(--l);overflow:hidden;margin:.7rem 0}.pn-vb i{display:block;height:100%;width:0;background:var(--a);transition:width .2s}';
 
 CSS += '.pn-ved{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,380px);gap:1.4rem;align-items:start;margin-bottom:1.2rem}' +
-'.pn-vtabs{display:flex;gap:.3rem;border-bottom:1px solid var(--l);margin:.4rem 0 .9rem}.pn-vtabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--s);font:inherit;padding:.55rem .9rem;cursor:pointer;margin-bottom:-1px}.pn-vtabs button.on{color:var(--t);border-bottom-color:var(--a);font-weight:500}.pn-vpane[hidden]{display:none}.pn-vtam .pn-opt{flex:1 1 9rem}.pn-vtam .ar{display:block;border:2px solid currentColor;border-radius:3px;margin-bottom:.5rem;opacity:.7}.pn-vtam .ar.v{width:1.1rem;height:1.95rem}.pn-vtam .ar.h{width:2.2rem;height:1.25rem}.pn-vtam .ar.b{width:2.2rem;height:1.25rem;border-style:double;border-width:5px}.pn-vchips{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:1rem 0}.pn-vchip{background:var(--c);border:1px solid var(--l);border-radius:12px;padding:.9rem .6rem;color:var(--t);font:inherit;cursor:pointer;text-align:center;line-height:1.3}.pn-vchip small{display:block;color:var(--s);font-size:.74rem;margin-bottom:.15rem}.pn-vchip.pri{background:var(--a);color:var(--f);border-color:var(--a)}.pn-vchip.pri small{color:inherit;opacity:.8}.pn-vchip:disabled{opacity:.6;cursor:wait}' +
+'.pn-vtabs{display:flex;gap:.3rem;border-bottom:1px solid var(--l);margin:.4rem 0 .9rem}.pn-vtabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--s);font:inherit;padding:.55rem .9rem;cursor:pointer;margin-bottom:-1px}.pn-vtabs button.on{color:var(--t);border-bottom-color:var(--a);font-weight:500}.pn-vpane[hidden]{display:none}.pn-vtam .pn-opt{flex:1 1 9rem}.pn-vtam .ar{display:block;border:2px solid currentColor;border-radius:3px;margin-bottom:.5rem;opacity:.7}.pn-vtam .ar.v{width:1.1rem;height:1.95rem}.pn-vtam .ar.h{width:2.2rem;height:1.25rem}.ar.s{width:1.6rem;height:1.6rem}.pn-vtam .ar.b{width:2.2rem;height:1.25rem;border-style:double;border-width:5px}.pn-vchips{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:1rem 0}.pn-vchip{background:var(--c);border:1px solid var(--l);border-radius:12px;padding:.9rem .6rem;color:var(--t);font:inherit;cursor:pointer;text-align:center;line-height:1.3}.pn-vchip small{display:block;color:var(--s);font-size:.74rem;margin-bottom:.15rem}.pn-vchip.pri{background:var(--a);color:var(--f);border-color:var(--a)}.pn-vchip.pri small{color:inherit;opacity:.8}.pn-vchip:disabled{opacity:.6;cursor:wait}' +
 '.pn-vpl{background:#0c0a08;border-radius:14px;overflow:hidden}.pn-vpl .pn-vprev{border-radius:0;min-height:0}.pn-vpl canvas{max-height:62vh;width:auto;max-width:100%}.pn-vctl{display:flex;align-items:center;gap:.7rem;padding:.6rem .9rem;color:#eee;background:#161310}.pn-vctl button{background:none;border:0;color:#fff;font-size:1.05rem;cursor:pointer;width:2rem;height:2rem}.pn-vctl input{flex:1;min-width:0;accent-color:var(--a)}.pn-vctl span{font-size:.78rem;font-variant-numeric:tabular-nums;white-space:nowrap}' +
 '.pn-vtira{display:flex;gap:.6rem;overflow-x:auto;padding:.3rem 0 .7rem}.pn-vt,.pn-vadd{flex:0 0 auto;width:84px;height:112px;border-radius:8px;position:relative;overflow:hidden}.pn-vadd{border:1.5px dashed var(--l);background:var(--c);color:var(--s);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;cursor:pointer;font:inherit;font-size:.78rem}.pn-vadd b{font-size:1.4rem;font-weight:300}.pn-vt img{width:100%;height:100%;object-fit:cover;display:block;cursor:grab}.pn-vt i{position:absolute;left:4px;top:4px;background:rgba(0,0,0,.6);color:#fff;font-style:normal;font-size:.68rem;border-radius:99px;padding:0 .4rem}.pn-vt button{position:absolute;right:3px;top:3px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;cursor:pointer;line-height:1;padding:0}.pn-vt.ov{outline:2px solid var(--a)}.pn-vl{position:absolute;left:4px;bottom:4px;background:var(--a);color:var(--f);font-style:normal;font-size:.6rem;font-weight:700;border-radius:99px;padding:.05rem .4rem}.pn-vl.no{opacity:.45}' +
 '@media(max-width:760px){.pn-ved{grid-template-columns:minmax(0,1fr)}}';
@@ -238,7 +238,7 @@ var TITULOS = { panel: 'Descripción general', detalles: 'Detalles', fotos: 'Fot
 function ayudasOn(){ try { return localStorage.getItem('pn-ay') !== 'off'; } catch(e) { return true; } }
 function marcaBase(){ return (ph && (ph.watermark_default || ph.studio_name)) || 'Estudio'; }
 function temaGuardado(){ try { return localStorage.getItem('pn-tema') || 'auto'; } catch(e) { return 'auto'; } }
-var PAL_PANEL = [['arena', 'Arena y carbón', 'La más parecida a Pic-Time, con dorado como acento'], ['marfil', 'Marfil cálido', 'Cálida y cercana'], ['blanco', 'Blanco galería', 'Sobria, casi sin color'], ['oliva', 'Oliva y arena', 'Natural y tranquila'], ['vino', 'Vino y crema', 'Elegante y cálida'], ['azul', 'Azul noche', 'Moderna y tecnológica']];
+var PAL_PANEL = [['arena', 'Arena y carbón', 'Elegante y neutra, con dorado como acento'], ['marfil', 'Marfil cálido', 'Cálida y cercana'], ['blanco', 'Blanco galería', 'Sobria, casi sin color'], ['oliva', 'Oliva y arena', 'Natural y tranquila'], ['vino', 'Vino y crema', 'Elegante y cálida'], ['azul', 'Azul noche', 'Moderna y tecnológica']];
 var PAL_PANEL_COL = {'arena': ['#FAFAF8', '#B8946A', '#1A1A1A'], 'marfil': ['#F7F3EC', '#A67C52', '#1C1917'], 'blanco': ['#FFFFFF', '#1F1F1F', '#121212'], 'oliva': ['#F6F5F0', '#6F7F5E', '#161A17'], 'vino': ['#FBF8F5', '#8C3B3B', '#1B1516'], 'azul': ['#F6F7F9', '#3F5B8C', '#14171C']};
 function palPanel(){ var v = 'arena'; try { v = localStorage.getItem('pn-pal') || 'arena'; } catch(e) {} return PAL_PANEL.some(function(x){ return x[0] === v; }) ? v : 'arena'; }
 function aplicarTema(){
@@ -254,7 +254,7 @@ var ICO = {
   impresiones: '<path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/>',
   compartir: '<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 11l7.6-4M8.2 13l7.6 4"/>',
   video: '<rect x="3" y="6" width="14" height="12" rx="2"/><path d="M17 10l4-2v8l-4-2z"/>', inicio: '<path d="M4 11l8-7 8 7v9H4z"/>', galerias: '<rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/>',
-  clientes: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6M16 4.5a3.5 3.5 0 010 7M18.5 14c2 .8 3 2.700 3 6"/>', cotiz: '<path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/>', grupos: '<circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 19c0-3.500 2.500-5 6-5s6 1.500 6 5M15 14.200c3.500-.5 6 .800 6 4.800"/>', agenda: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  clientes: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6M16 4.5a3.5 3.5 0 010 7M18.5 14c2 .8 3 2.700 3 6"/>', cotiz: '<path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/>', ia: '<path d="M12 3l1.800 4.700L18.500 9.500 13.800 11.300 12 16l-1.800-4.700L5.500 9.500l4.700-1.800z"/><path d="M18 15l.800 2.200L21 18l-2.200.800L18 21l-.800-2.200L15 18l2.200-.800z"/>', grupos: '<circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 19c0-3.500 2.500-5 6-5s6 1.500 6 5M15 14.200c3.500-.5 6 .800 6 4.800"/>', agenda: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   atras: '<path d="M15 5l-7 7 7 7"/>', salir: '<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>', cuenta: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>'
 };
 function ico(n){ return '<svg class="pn-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICO[n] || '') + '</svg>'; }
@@ -264,10 +264,10 @@ function pintarLado(){
   var a = root.querySelector('aside'), g = vista === 'detalle' ? gal(galId) : null, h;
   if (g) {
     h = logo() + '<button data-act="atras" class="atras mo">' + ico('atras') + 'Galerías</button>' +
-      '<button data-v="inicio" class="nd">' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias" class="nd on">' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes" class="nd">' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz" class="nd">' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda" class="nd">' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos" class="nd">' + ico('grupos') + '<span>Grupos</span></button>' +
+      '<button data-v="inicio" class="nd">' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias" class="nd on">' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes" class="nd">' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz" class="nd">' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda" class="nd">' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos" class="nd">' + ico('grupos') + '<span>Grupos</span></button><button data-v="ia" class="nd">' + ico('ia') + '<span>IA</span></button>' +
       TABS.map(function(t){ return '<button data-act="tab" data-t="' + t[0] + '" class="ta' + (tab === t[0] ? ' on' : '') + '">' + ico(t[0]) + '<span>' + t[1] + '</span></button>'; }).join('');
   } else {
-    h = logo() + '<button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias"' + (vista === 'galerias' ? ' class="on"' : '') + '>' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes"' + (vista === 'clientes' ? ' class="on"' : '') + '>' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz"' + (vista === 'cotiz' ? ' class="on"' : '') + '>' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda"' + (vista === 'agenda' ? ' class="on"' : '') + '>' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos"' + (vista === 'grupos' ? ' class="on"' : '') + '>' + ico('grupos') + '<span>Grupos de graduación</span></button>';
+    h = logo() + '<button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias"' + (vista === 'galerias' ? ' class="on"' : '') + '>' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes"' + (vista === 'clientes' ? ' class="on"' : '') + '>' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz"' + (vista === 'cotiz' ? ' class="on"' : '') + '>' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda"' + (vista === 'agenda' ? ' class="on"' : '') + '>' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos"' + (vista === 'grupos' ? ' class="on"' : '') + '>' + ico('grupos') + '<span>Grupos de graduación</span></button><button data-v="ia"' + (vista === 'ia' ? ' class="on"' : '') + '>' + ico('ia') + '<span>Selección con IA</span></button>';
   }
   var tm = temaGuardado();
   h += '<div class="pie"><button data-v="cuenta"' + (vista === 'cuenta' ? ' class="on"' : '') + '>' + ico('cuenta') + '<span>Mi cuenta</span></button><div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button></div>';
@@ -283,6 +283,7 @@ function pintar(){
   if (vista === 'cotiz') return pintarCotiz();
   if (vista === 'agenda') return pintarAgenda();
   if (vista === 'grupos') return pintarGrupos();
+  if (vista === 'ia') return pintarIA();
   pintarDetalle();
 }
 
@@ -291,7 +292,7 @@ async function pintarInicio(){
   var pend = gals.filter(function(g){ return g.status === 'selection_sent'; });
   var act = pend.length ? pend.map(function(g){ return '<p><button class="pn-btn sec" data-act="abrir" data-id="' + g.id + '">' + esc(g.title) + '</button> envió su selección</p>'; }).join('')
     : '<div class="pn-vacio">' + ilus('admin-al-dia') + '<div><b>Todo al día</b><p class="pn-s">No hay selecciones nuevas por revisar.</p></div></div>';
-  $('#pn-main').innerHTML = '<h1>Hola, ' + esc(ph.studio_name) + '</h1><div class="pn-row"><input type="text" id="pn-q" placeholder="Buscar galerías"><button class="pn-btn" data-act="nueva">+ Crear galería</button></div>' +
+  $('#pn-main').innerHTML = '<h1>Hola, ' + esc(ph.studio_name) + '</h1><p class="pn-s ay">Un resumen de tu estudio. Desde aquí creas una galería nueva o revisas lo que necesita tu atención.</p><div class="pn-row"><input type="text" id="pn-q" placeholder="Buscar galerías"><button class="pn-btn" data-act="nueva">+ Crear galería</button></div>' +
     '<h2>Resumen</h2><div class="pn-cifras"><div><b>' + gals.length + '</b><span class="pn-s">Galerías</span></div><div><b>' + ent + '</b><span class="pn-s">Entregadas</span></div><div><b id="pn-nv">–</b><span class="pn-s">Vistas</span></div><div><b id="pn-nv7">–</b><span class="pn-s">Vistas 7 días</span></div><div><b id="pn-nf">–</b><span class="pn-s">Favoritas</span></div><div><b id="pn-np">–</b><span class="pn-s">Fotos</span></div></div>' +
     '<div id="pn-neg"></div><h2>Actividad reciente</h2><div class="pn-card">' + act + '</div><h2>Galerías recientes</h2><div class="pn-rej">' + gals.slice(0, 4).map(tarjeta).join('') + '</div>';
   $('#pn-q').addEventListener('keydown', function(e){ if (e.key === 'Enter') { busca = e.target.value; vista = 'galerias'; pintar(); } });
@@ -306,7 +307,7 @@ async function pintarInicio(){
 function pintarLista(){
   var l = gals.filter(function(g){ return (!fEst || g.status === fEst) && (!busca || g.title.toLowerCase().indexOf(busca.toLowerCase()) >= 0); });
   var op = Object.keys(ESTADOS).map(function(k){ return '<option value="' + k + '"' + (k === fEst ? ' selected' : '') + '>' + ESTADOS[k] + '</option>'; }).join('');
-  $('#pn-main').innerHTML = '<h1>Galerías de clientes</h1><div class="pn-row"><input type="text" id="pn-q" placeholder="Buscar por nombre" value="' + esc(busca) + '"><select id="pn-fe"><option value="">Todos los estados</option>' + op + '</select></div>' +
+  $('#pn-main').innerHTML = '<h1>Galerías de clientes</h1><p class="pn-s ay">Aquí están las galerías que entregas. Crea una, sube las fotos y comparte el enlace con tu cliente.</p><div class="pn-row"><input type="text" id="pn-q" placeholder="Buscar por nombre" value="' + esc(busca) + '"><select id="pn-fe"><option value="">Todos los estados</option>' + op + '</select></div>' +
     '<div class="pn-rej"><button class="pn-tar nuevo" data-act="nueva"><div class="cv">+</div><h3>Agregar galería</h3></button>' + l.map(tarjeta).join('') + '</div>' +
     (gals.length ? '' : '<div class="pn-card pn-vacio" style="margin-top:1.4rem">' + ilus('admin-vacio') + '<div><b>Aún no hay galerías</b><p class="pn-s">Crea la primera con el botón de arriba.</p></div></div>');
   $('#pn-q').addEventListener('input', function(e){ busca = e.target.value; pintarLista(); var q = $('#pn-q'); q.focus(); q.setSelectionRange(q.value.length, q.value.length); });
@@ -363,7 +364,7 @@ function pintarCuenta(){
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 07:00</p></div>';
+ + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 16:00</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -417,14 +418,14 @@ function plegar(abierta){
 var vidIds = [], vidForm = 'v', vidSeg = 2.5, vidPart = true, vidCache = {}, vidTok = 0, vidBusy = false, vidCancel = false;
 function cargarSlideshow(){
   if (window.Slideshow) return Promise.resolve();
-  return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = 'slideshow.js?v=4'; sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró slideshow.js en GitHub. Súbelo junto a panel.js.')); }; document.head.appendChild(sc); });
+  return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = 'slideshow.js?v=10'; sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró slideshow.js en GitHub. Súbelo junto a panel.js.')); }; document.head.appendChild(sc); });
 }
 function vidEstado(t){ var e = $('#pn-vst'); if (e) e.textContent = t || ''; }
 function vidBarra(x){ var b = $('#pn-vbar'); if (b) b.style.width = Math.round(clampN(x) * 100) + '%'; }
 function clampN(x){ return Math.max(0, Math.min(1, x)); }
 function vidStop(){ vidPlay = false; cancelAnimationFrame(vidRaf); vidCtl(); }
 function vidLiberar(){ if (vidBusy) return; vidStop(); vidLoadTok++; vidEsc = null; vidLogo = undefined; Object.keys(vidCache).forEach(function(k){ try { vidCache[k].bmp.close(); } catch(e) {} }); vidCache = {}; }
-var vidPest = 0, vidEstilo = 'papel', vidTit = null, vidSub = null, vidAcento = -1, vidMarca = true, vidLogo, vidTrans = 'variadas', vidTransP = 'variadas', vidSem = Math.floor(Math.random() * 4e9);
+var vidPest = 0, vidEstilo = 'papel', vidTit = null, vidSub = null, vidAcento = -1, vidMarca = true, vidEA = '', vidEB = '', vidLogo, vidTrans = 'variadas', vidTransP = 'variadas', vidSem = Math.floor(Math.random() * 4e9);
 function cargarLogoVideo(){
   var dato = ph.logo_para_oscuro || ph.logo_para_claro, lista = dato ? [dato] : exts('logo-claro').map(function(e){ return 'imagenes/logo-claro' + e; });
   return new Promise(function(ok){
@@ -435,12 +436,12 @@ function cargarLogoVideo(){
   });
 }
 var vidEsc = null, vidT = 0, vidPlay = false, vidRaf = 0, vidLast = 0, vidDeb = 0, vidDrag = -1, vidLoadTok = 0;
-var VDIM = { v: [1080, 1920, 'vertical'], h: [1920, 1080, 'horizontal'] };
+var VDIM = { v: [1080, 1920, 'vertical'], h: [1920, 1080, 'horizontal'], s: [1080, 1080, 'cuadrado'] };
 function vidSubDef(g){ var y = String(g.event_date || g.created_at || '').slice(0, 4); return [g.gallery_type, y].filter(Boolean).join(' · '); }
 function vidPalAuto(g){ var pa = PAL_VIEJA[g.palette] || g.palette; return PAL_PANEL_COL[pa] ? pa : (PAL_TIPO[g.gallery_type] || 'arena'); }
 function vidPalNom(k){ for (var i = 0; i < PAL_PANEL.length; i++) if (PAL_PANEL[i][0] === k) return PAL_PANEL[i][1]; return ''; }
-function vidOp(){ var g = gal(galId) || {}; return { semilla: vidSem, particulas: vidPart, estilo: vidEstilo, transicion: vidEstilo === 'pantalla' ? vidTrans : vidTransP, intro: vidMarca, logo: vidLogo || null, nombre: (ph && ph.studio_name) || '', acento: PAL_PANEL_COL[vidAcento < 0 ? vidPalAuto(g) : PAL_PANEL[vidAcento][0]][1], titulo: vidTit !== null ? vidTit : (g.title || ''), subtitulo: vidSub !== null ? vidSub : vidSubDef(g) }; }
-var VFMT = { v: 'Vertical 9:16', h: 'Horizontal 16:9', ambos: 'Los dos' }, VRIT = { 3.5: 'Lento', 2.5: 'Normal', 1.5: 'Rápido' };
+function vidOp(){ var g = gal(galId) || {}; return { semilla: vidSem, particulas: vidPart, estilo: vidEstilo, transicion: vidEstilo === 'pantalla' ? vidTrans : vidTransP, intro: vidMarca, logo: vidLogo || null, nombre: (ph && ph.studio_name) || '', acento: PAL_PANEL_COL[vidAcento < 0 ? vidPalAuto(g) : PAL_PANEL[vidAcento][0]][1], titulo: vidTit !== null ? vidTit : (g.title || ''), subtitulo: vidSub !== null ? vidSub : vidSubDef(g), etqA: vidEA, etqB: vidEB }; }
+var VFMT = { v: 'Vertical 9:16', h: 'Horizontal 16:9', s: 'Cuadrado 1:1', ambos: 'Los tres' }, VRIT = { 3.5: 'Lento', 2.5: 'Normal', 1.5: 'Rápido' };
 function mmss(x){ x = Math.max(0, Math.round(x)); return ('0' + Math.floor(x / 60)).slice(-2) + ':' + ('0' + (x % 60)).slice(-2); }
 function vidHtml(g, sel, fin){
   var todas = fin.concat(sel);
@@ -448,17 +449,17 @@ function vidHtml(g, sel, fin){
   return '<div class="pn-ved"><div class="pn-vizq"><p class="pn-s" id="pn-vinfo" style="margin-top:0"></p>' +
     '<div class="pn-vtabs" id="pn-vtabs" role="tablist"><button type="button" data-act="vid-pest" data-v="0">Estilo</button><button type="button" data-act="vid-pest" data-v="1">Tamaño</button><button type="button" data-act="vid-pest" data-v="2">Marca</button><button type="button" data-act="vid-pest" data-v="3">Ajustes</button></div>' +
     '<div class="pn-vpane" data-p="0">' +
-    '<div class="pn-opts" id="pn-ve"><button class="pn-opt" type="button" data-act="vid-estilo" data-v="papel"><b>Álbum de luz</b><span>Marco inclinado, fondo animado, destellos y partículas</span></button><button class="pn-opt" type="button" data-act="vid-estilo" data-v="pantalla"><b>Marea</b><span>Foto a pantalla completa, con portada con el nombre del evento</span></button><button class="pn-opt" type="button" data-act="vid-estilo" data-v="prisma"><b>Prisma</b><span>Dos fotos por pantalla con corte inclinado; el título sube al inicio y luego todo se amplía</span></button></div>' +
+    '<div class="pn-opts" id="pn-ve"><button class="pn-opt" type="button" data-act="vid-estilo" data-v="papel"><b>Álbum de luz</b><span>Marco inclinado, fondo animado, destellos y partículas</span></button><button class="pn-opt" type="button" data-act="vid-estilo" data-v="pantalla"><b>Marea</b><span>Foto a pantalla completa, con portada con el nombre del evento</span></button><button class="pn-opt" type="button" data-act="vid-estilo" data-v="carriles"><b>Carriles</b><span>Tres filas de fotos que avanzan en direcciones alternas; cada foto con su forma, sin cortar a nadie</span></button><button class="pn-opt" type="button" data-act="vid-estilo" data-v="prisma"><b>Prisma</b><span>Dos fotos por pantalla con corte inclinado; el título sube al inicio y luego todo se amplía</span></button></div>' +
     '</div>' +
     '<div class="pn-vpane" data-p="1">' +
-    '<div class="pn-opts pn-vtam" id="pn-vf"><button class="pn-opt" type="button" data-act="vid-fmt" data-v="v"><i class="ar v"></i><b>Vertical 9:16</b><span>Reels, historias y celular</span></button><button class="pn-opt" type="button" data-act="vid-fmt" data-v="h"><i class="ar h"></i><b>Horizontal 16:9</b><span>Pantalla, TV y YouTube</span></button><button class="pn-opt" type="button" data-act="vid-fmt" data-v="ambos"><i class="ar b"></i><b>Los dos</b><span>Genera un archivo de cada uno</span></button></div>' +
+    '<div class="pn-opts pn-vtam" id="pn-vf"><button class="pn-opt" type="button" data-act="vid-fmt" data-v="v"><i class="ar v"></i><b>Vertical 9:16</b><span>Reels, historias y celular</span></button><button class="pn-opt" type="button" data-act="vid-fmt" data-v="h"><i class="ar h"></i><b>Horizontal 16:9</b><span>Pantalla, TV y YouTube</span></button><button class="pn-opt" type="button" data-act="vid-fmt" data-v="s"><i class="ar s"></i><b>Cuadrado 1:1</b><span>Publicaciones de Instagram y Facebook</span></button><button class="pn-opt" type="button" data-act="vid-fmt" data-v="ambos"><i class="ar b"></i><b>Los tres</b><span>Genera un archivo de cada uno</span></button></div>' +
     '</div>' +
     '<div class="pn-vpane" data-p="2">' +
     '<div class="pn-opts" id="pn-vm"><button class="pn-opt" type="button" data-act="vid-marca" data-v="si"><b>Con mi logo</b><span>Empieza con tu logo, para ti y tus redes</span></button><button class="pn-opt" type="button" data-act="vid-marca" data-v="no"><b>Sin logo</b><span>Empieza directo con las fotos, para tu cliente</span></button></div>' +
     '</div>' +
     '<div class="pn-vpane" data-p="3">' +
     '<div class="pn-vchips"><button class="pn-vchip" type="button" data-act="vid-ritmo" id="pn-cr"></button><button class="pn-vchip" type="button" data-act="vid-trans" id="pn-ct"></button><button class="pn-vchip" type="button" data-act="vid-part" id="pn-cp"></button><button class="pn-vchip" type="button" data-act="vid-acento" id="pn-ca"></button></div>' +
-    '<div id="pn-vtx" hidden><label class="pn-s" for="pn-vtt" id="pn-vtl">Título de la portada</label><input type="text" id="pn-vtt" maxlength="60"><label class="pn-s" for="pn-vts" id="pn-vsl" style="display:block;margin-top:.6rem">Subtítulo (tipo de evento y año)</label><input type="text" id="pn-vts" maxlength="60"></div>' +
+    '<div id="pn-vtx" hidden><label class="pn-s" for="pn-vtt" id="pn-vtl">Título de la portada</label><input type="text" id="pn-vtt" maxlength="60"><label class="pn-s" for="pn-vts" id="pn-vsl" style="display:block;margin-top:.6rem">Subtítulo (tipo de evento y año)</label><input type="text" id="pn-vts" maxlength="60"><div id="pn-vte" hidden><label class="pn-s" for="pn-vea" style="display:block;margin-top:.6rem">Etiqueta de la foto izquierda/superior (opcional)</label><input type="text" id="pn-vea" maxlength="16" placeholder="Ej.: ANTES (opcional)"><label class="pn-s" for="pn-veb" style="display:block;margin-top:.6rem">Etiqueta de la foto derecha/inferior (opcional)</label><input type="text" id="pn-veb" maxlength="16" placeholder="Ej.: AHORA (opcional)"><p class="pn-s ay">Si no las llenas, las fotos salen sin etiquetas.</p></div></div>' +
     '</div>' +
     '<div class="pn-vchips"><button class="pn-vchip pri" style="grid-column:1/-1" type="button" data-act="vid-gen" id="pn-vgen"><small>Sin música</small>Generar y descargar MP4</button></div>' +
     '<div class="pn-vb"><i id="pn-vbar"></i></div><p class="pn-s" id="pn-vst"></p><div class="pn-row"><button class="pn-btn sec" data-act="vid-cancel" type="button" id="pn-vcan" hidden>Cancelar</button></div>' +
@@ -479,9 +480,9 @@ function vidRefrescar(){ vidPestana(); root.querySelectorAll('#pn-vf .pn-opt').f
   var inf = $('#pn-vinfo'); if (inf) inf.textContent = n ? (vidEstilo === 'prisma' ? Math.floor(n / 2) + (Math.floor(n / 2) === 1 ? ' par' : ' pares') + (n % 2 ? ' (la última foto sobra: falta su pareja)' : '') : n + (n === 1 ? ' diapositiva' : ' diapositivas')) + ' · ' + mmss(window.Slideshow ? window.Slideshow.duracionTotal(n, vidSeg, vidEstilo, vidMarca) : n * vidSeg) + ' de duración' : 'Aún no hay fotos. Toca «Agregar fotos» en la tira de abajo.';
   var chip = function(id, t, v){ var e = $(id); if (e) e.innerHTML = '<small>' + t + '</small>' + v; };
   root.querySelectorAll('#pn-ve .pn-opt').forEach(function(o){ o.classList.toggle('on', o.dataset.v === vidEstilo); }); root.querySelectorAll('#pn-vm .pn-opt').forEach(function(o){ o.classList.toggle('on', (o.dataset.v === 'si') === vidMarca); }); chip('#pn-cr', 'Ritmo', VRIT[vidSeg] || 'Normal'); chip('#pn-cp', 'Partículas', vidPart ? 'Sí' : 'No');
-  var cpp = $('#pn-cp'); if (cpp) cpp.hidden = vidEstilo !== 'papel'; var cta = $('#pn-ct'); if (cta) cta.hidden = vidEstilo === 'prisma'; var cac = $('#pn-ca'); if (cac) { cac.hidden = vidEstilo !== 'prisma'; cac.innerHTML = '<small>Color del título</small>' + (vidAcento < 0 ? 'Automático · ' + vidPalNom(vidPalAuto(gal(galId) || {})) : PAL_PANEL[vidAcento][1]); }
+  var cpp = $('#pn-cp'); if (cpp) cpp.hidden = vidEstilo !== 'papel'; var cta = $('#pn-ct'); if (cta) cta.hidden = vidEstilo === 'prisma' || vidEstilo === 'carriles'; var cac = $('#pn-ca'); if (cac) { cac.hidden = vidEstilo !== 'prisma' && vidEstilo !== 'carriles'; cac.innerHTML = '<small>Color del título</small>' + (vidAcento < 0 ? 'Automático · ' + vidPalNom(vidPalAuto(gal(galId) || {})) : PAL_PANEL[vidAcento][1]); }
   chip('#pn-ct', 'Transiciones', vidEstilo === 'pantalla' ? { variadas: 'Variadas', desliza: 'Deslizar de lado', disuelve: 'Disolver' }[vidTrans] : { variadas: 'Variadas (todas las direcciones)', der: 'Hacia la derecha', izq: 'Hacia la izquierda', arriba: 'Hacia arriba', abajo: 'Hacia abajo' }[vidTransP]);
-  var tx = $('#pn-vtx'); if (tx) { tx.hidden = vidEstilo === 'papel'; var g0 = gal(galId) || {}, o0 = vidOp(); if ($('#pn-vtt') && document.activeElement !== $('#pn-vtt')) $('#pn-vtt').value = o0.titulo; if ($('#pn-vts') && document.activeElement !== $('#pn-vts')) $('#pn-vts').value = o0.subtitulo; }
+  var tx = $('#pn-vtx'); if (tx) { tx.hidden = vidEstilo === 'papel'; var g0 = gal(galId) || {}, o0 = vidOp(); if ($('#pn-vtt') && document.activeElement !== $('#pn-vtt')) $('#pn-vtt').value = o0.titulo; if ($('#pn-vts') && document.activeElement !== $('#pn-vts')) $('#pn-vts').value = o0.subtitulo; var te = $('#pn-vte'); if (te) { te.hidden = vidEstilo !== 'prisma'; if ($('#pn-vea') && document.activeElement !== $('#pn-vea')) $('#pn-vea').value = vidEA; if ($('#pn-veb') && document.activeElement !== $('#pn-veb')) $('#pn-veb').value = vidEB; } }
   clearTimeout(vidDeb); vidEsc = null; vidDeb = setTimeout(vidPrepara, 350); vidCtl();
 }
 function vidCtl(){
@@ -521,6 +522,8 @@ async function vidPrepara(){
     await cargarSlideshow(); if (vidMarca && vidLogo === undefined) vidLogo = await cargarLogoVideo();
     var fotos = await vidCargar(ids, function(k, n){ vidEstado('Preparando vista previa… foto ' + (k + 1) + ' de ' + n); vidBarra((k + 1) / n); }, function(){ return mi !== vidLoadTok; });
     if (mi !== vidLoadTok) return;
+    await window.Slideshow.detectarCaras(fotos, function(k, n){ vidEstado('Detectando rostros… foto ' + (k + 1) + ' de ' + n); vidBarra((k + 1) / n); }, function(){ return mi !== vidLoadTok; });
+    if (mi !== vidLoadTok) return;
     var dm = VDIM[vidForm] || VDIM.v, sc = 640 / Math.max(dm[0], dm[1]), W = Math.round(dm[0] * sc), H = Math.round(dm[1] * sc);
     cv.width = W; cv.height = H;
     vidEsc = window.Slideshow.crearEscena(fotos, W, H, vidSeg, vidOp());
@@ -548,12 +551,13 @@ async function vidGenerar(){
     vidStop(); vidLoadTok++; vidBusy = true; vidCancel = false; btn.disabled = true; can.hidden = false;
     if (vidMarca && vidLogo === undefined) vidLogo = await cargarLogoVideo();
     var fotos = await vidCargar(vidIds.slice(), function(k, n){ vidEstado('Leyendo foto ' + (k + 1) + ' de ' + n + '…'); vidBarra(k / Math.max(1, n) * 0.25); }, function(){ return vidCancel; });
-    var fmts = vidForm === 'ambos' ? ['v', 'h'] : [vidForm];
+    await window.Slideshow.detectarCaras(fotos, function(k, n){ vidEstado('Detectando rostros… foto ' + (k + 1) + ' de ' + n); vidBarra(0.25 + k / Math.max(1, n) * 0.05); }, function(){ return vidCancel; });
+    var fmts = vidForm === 'ambos' ? ['v', 'h', 's'] : [vidForm];
     for (var q = 0; q < fmts.length; q++) {
       var dm2 = VDIM[fmts[q]] || VDIM.v, W = dm2[0], H = dm2[1], esc2 = window.Slideshow.crearEscena(fotos, W, H, vidSeg, vidOp());
       vidEstado('Creando el video ' + dm2[2] + '… no cierres esta pestaña.');
       var blob = await window.Slideshow.exportar(esc2, { fps: 30, bitrate: 8e6, cancelado: function(){ return vidCancel; }, progreso: function(x){ vidBarra(0.25 + 0.75 * (q + x) / fmts.length); vidEstado('Creando el video ' + dm2[2] + '… ' + Math.round(x * 100) + '%'); } });
-      var u = URL.createObjectURL(blob), l = document.createElement('a'); l.href = u; l.download = 'slideshow-' + slug(g ? g.title : 'galeria') + '-' + (vidEstilo === 'pantalla' ? 'pantalla-' : vidEstilo === 'prisma' ? 'prisma-' : '') + dm2[2] + (vidMarca ? '' : '-sin-logo') + '.mp4'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000);
+      var u = URL.createObjectURL(blob), l = document.createElement('a'); l.href = u; l.download = 'slideshow-' + slug(g ? g.title : 'galeria') + '-' + (vidEstilo === 'pantalla' ? 'pantalla-' : vidEstilo === 'prisma' ? 'prisma-' : vidEstilo === 'carriles' ? 'carriles-' : '') + dm2[2] + (vidMarca ? '' : '-sin-logo') + '.mp4'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000);
     }
     vidSem = Math.floor(Math.random() * 4e9); vidBarra(1); fin = 'Listo. El video se descargó en tu computadora.';
   } catch(e) { vidBarra(0); fin = e && e.message === 'cancelado' ? 'Cancelado.' : 'No se pudo crear el video: ' + (e && e.message ? e.message : 'error'); }
@@ -883,7 +887,7 @@ async function accion(a, el){
   if (a === 'vid-agregar') return $('#pn-dvp').showModal();
   if (a === 'vid-cerrar') return $('#pn-dvp').close();
   if (a === 'vid-quitar') { vidIds.splice(+el.dataset.i, 1); vidStop(); return vidRefrescar(); }
-  if (a === 'vid-estilo') { vidEstilo = el.dataset.v === 'pantalla' ? 'pantalla' : el.dataset.v === 'prisma' ? 'prisma' : 'papel'; vidStop(); vidT = 0; return vidRefrescar(); }
+  if (a === 'vid-estilo') { vidEstilo = el.dataset.v === 'pantalla' ? 'pantalla' : el.dataset.v === 'prisma' ? 'prisma' : el.dataset.v === 'carriles' ? 'carriles' : 'papel'; vidStop(); vidT = 0; return vidRefrescar(); }
   if (a === 'vid-acento') { vidAcento = vidAcento + 1 >= PAL_PANEL.length ? -1 : vidAcento + 1; vidStop(); return vidRefrescar(); }
   if (a === 'vid-trans') { if (vidEstilo === 'pantalla') vidTrans = { variadas: 'desliza', desliza: 'disuelve', disuelve: 'variadas' }[vidTrans]; else vidTransP = { variadas: 'der', der: 'izq', izq: 'arriba', arriba: 'abajo', abajo: 'variadas' }[vidTransP]; vidStop(); vidT = 0; return vidRefrescar(); }
   if (a === 'vid-marca') { vidMarca = el.dataset.v !== 'no'; vidStop(); vidT = 0; return vidRefrescar(); }
@@ -1050,7 +1054,7 @@ async function pintarClientes(){
       (c.phone ? '<a class="pn-btn sec" target="_blank" rel="noopener" href="' + esc(waLink(c.phone)) + '">WhatsApp</a> ' : '') +
       '<button class="pn-btn sec" data-act="n-cot-nueva" data-id="' + c.id + '">Cotizar</button> <button class="pn-btn sec" data-act="n-cli-edit" data-id="' + c.id + '">Editar</button></td></tr>';
   }).join('');
-  $('#pn-main').innerHTML = '<h1>Clientes</h1><div class="pn-row"><input type="text" id="pn-nq" placeholder="Buscar por nombre o teléfono" value="' + esc(busca) + '"><button class="pn-btn" data-act="n-cli-nuevo">+ Nuevo cliente</button></div>' +
+  $('#pn-main').innerHTML = '<h1>Clientes</h1><p class="pn-s ay">Tu lista de clientes con su contacto e historial. Agrégalos aquí, cotízales o escríbeles por WhatsApp.</p><div class="pn-row"><input type="text" id="pn-nq" placeholder="Buscar por nombre o teléfono" value="' + esc(busca) + '"><button class="pn-btn" data-act="n-cli-nuevo">+ Nuevo cliente</button></div>' +
     (!neg.ok ? negFalta() : (l.length ? '<div class="pn-card" style="padding:0;overflow:auto"><table class="pn-tb"><tr><th>Cliente</th><th>Contacto</th><th>Historial</th><th></th></tr>' + filas + '</table></div>' : '<div class="pn-card"><p class="pn-s">Aún no hay clientes. Se crean solos al hacer una galería, o agrégalos aquí.</p></div>'));
   var s = $('#pn-nq'); if (s) s.addEventListener('input', function(e){ busca = e.target.value; clearTimeout(s._t); s._t = setTimeout(pintarClientes, 250); });
 }
@@ -1077,7 +1081,7 @@ async function pintarCotiz(){
   var hoyD = new Date(); hoyD.setHours(0, 0, 0, 0);
   var acep = neg.cots.filter(function(c){ return c.status === 'accepted' && c.event_date && new Date(c.event_date + 'T12:00:00') >= hoyD; }).sort(function(a, b){ return a.event_date < b.event_date ? -1 : 1; });
   var cacep = acep.length ? '<div class="pn-card pn-cacep"><h3>Eventos de cotizaciones aceptadas</h3>' + acep.map(function(c){ return '<p><span><b>' + esc(c.client_name) + '</b> · ' + esc(c.event_type || '') + '<br><span class="pn-s">' + esc(fFmt(c.event_date, { weekday: 'long', day: 'numeric', month: 'long' })) + (c.location ? ' · ' + esc(c.location) : '') + '</span></span><b class="pn-cta">' + cuenta(c.event_date) + '</b></p>'; }).join('') + '</div>' : '';
-  $('#pn-main').innerHTML = '<h1>Cotizaciones</h1><div class="pn-row"><button class="pn-btn" data-act="n-cot-nueva">+ Nueva cotización</button></div>' + (neg.ok ? cacep : '') +
+  $('#pn-main').innerHTML = '<h1>Cotizaciones</h1><p class="pn-s ay">Crea una cotización con el precio calculado automáticamente y envíala por WhatsApp. Cuando el cliente acepte, márcala como aceptada y el evento pasa solo a tu agenda.</p><div class="pn-row"><button class="pn-btn" data-act="n-cot-nueva">+ Nueva cotización</button></div>' + (neg.ok ? cacep : '') +
     (!neg.ok ? negFalta() : '<div class="pn-cifras"><div><b>' + neg.cots.length + '</b><span class="pn-s">Cotizaciones</span></div><div><b>' + qFmt(sum.sent) + '</b><span class="pn-s">Enviadas, por responder</span></div><div><b>' + qFmt(sum.accepted) + '</b><span class="pn-s">Aceptadas</span></div></div>' +
     (neg.cots.length ? '<div class="pn-card" style="padding:0;overflow:auto;margin-top:1rem"><table class="pn-tb"><tr><th>N.º</th><th>Cliente</th><th>Incluye</th><th>Total</th><th>Estado</th><th></th></tr>' + filas + '</table></div>' : '<div class="pn-card" style="margin-top:1rem"><p class="pn-s">Todavía no hay cotizaciones. Crea la primera y obtén una imagen lista para enviar por WhatsApp.</p></div>')) + (neg.ok ? prHtml() : '');
 }
@@ -1335,7 +1339,7 @@ async function pintarAgenda(){
   for (var d = 1; d <= dias; d++) { var k = y + '-' + pad(mo + 1) + '-' + pad(d); cel += '<div class="dy' + (k === hoy ? ' hoy' : '') + '"><span>' + d + '</span>' + (porDia[k] || []).map(function(e){ return '<button data-act="n-ev-edit" data-id="' + e.id + '" class="ev k-' + e.kind + (e.confirmed ? '' : ' pend') + '">' + (e.confirmed ? '✓ ' : '') + esc(hFmt(e.starts_at)) + ' ' + esc(e.title) + '</button>'; }).join('') + '</div>'; }
   var prox = neg.evs.filter(function(e){ return new Date(e.starts_at) >= new Date(new Date().toDateString()); }).slice(0, 6);
   var sigc = prox.filter(function(e){ return e.confirmed; })[0];
-  $('#pn-main').innerHTML = '<h1>Agenda</h1><div class="pn-row"><button class="pn-btn" data-act="n-ev-nuevo">+ Nuevo evento</button><button class="pn-btn sec" data-act="n-ics-todo">Descargar agenda (.ics)</button></div>' +
+  $('#pn-main').innerHTML = '<h1>Agenda</h1><p class="pn-s ay">Tus eventos y sesiones. Los confirmados muestran cuánto falta. Si aceptas una cotización con fecha, el evento se agrega solo.</p><div class="pn-row"><button class="pn-btn" data-act="n-ev-nuevo">+ Nuevo evento</button><button class="pn-btn sec" data-act="n-ics-todo">Descargar agenda (.ics)</button></div>' +
     (!neg.ok ? negFalta() : '<div class="pn-mes"><button class="pn-btn sec" data-act="n-mes" data-d="-1">‹</button><b>' + esc(m.toLocaleDateString('es-GT', { month: 'long', year: 'numeric' }).replace(/^./, function(c){ return c.toUpperCase(); })) + '</b><button class="pn-btn sec" data-act="n-mes" data-d="1">›</button></div>' +
     (sigc ? '<div class="pn-card pn-sig"><div><span class="pn-s">Próximo evento confirmado</span><h3>' + esc(sigc.title) + '</h3><span class="pn-s">' + esc(fFmt(sigc.starts_at, { weekday: 'long', day: 'numeric', month: 'long' })) + ' · ' + esc(hFmt(sigc.starts_at)) + (sigc.location ? ' · ' + esc(sigc.location) : '') + '</span></div><div class="pn-cdn"><b>' + cuenta(sigc.starts_at).replace(/^Faltan /, '').replace(/^Es /, '') + '</b></div></div>' : '') + '<div class="pn-cal"><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>' + cel + '</div>' +
     '<h2>Próximos</h2><div class="pn-card">' + (prox.length ? prox.map(function(e){ return '<p><b>' + esc(fFmt(e.starts_at, { weekday: 'long', day: 'numeric', month: 'long' })) + ' · ' + esc(hFmt(e.starts_at)) + '</b> — ' + esc(e.title) + (e.location ? ' <span class="pn-s">(' + esc(e.location) + ')</span>' : '') + ' <span class="pn-pill">' + (e.confirmed ? 'Confirmado' : 'Por confirmar') + '</span> <b class="pn-cta">' + cuenta(e.starts_at) + '</b> <button class="pn-btn sec" data-act="n-ics-uno" data-id="' + e.id + '">.ics</button></p>'; }).join('') : '<p class="pn-s">No hay eventos próximos.</p>') + '</div>');
@@ -1378,6 +1382,12 @@ async function negInicio(){
 
 /* ---------- Acciones y formularios ---------- */
 
+/* ---------- Galerías con IA ---------- */
+function pintarIA(){
+  $('#pn-main').innerHTML = '<h1>Selección de fotografías asistida por IA</h1>' + '<p class="pn-s ay">Sube las fotos de un evento y la inteligencia artificial las agrupa por persona. Tú revisas, le pones nombre a cada una y se arma una galería para cada quien, con su enlace propio.</p>' +
+    '<div class="pn-card"><h3>Cómo funciona</h3><ol class="pn-s" style="padding-left:1.2rem;line-height:1.8"><li>Elige las fotos del evento. Se analizan en tu computadora y no se suben a ningún lado.</li><li>Revisa las personas encontradas, ponles nombre y corrige cualquier confusión.</li><li>Excluye a quien no quiera fotos y quita las fotos que no quieras entregar.</li><li>Mira cómo quedarían las galerías.</li></ol>' +
+    '<div class="pn-row"><a class="pn-btn" style="text-decoration:none;display:inline-block" href="rostros.html" target="_blank" rel="noopener">Abrir la herramienta</a></div><p class="pn-s">Úsala desde la computadora. Esta versión es de prueba: todavía no crea las galerías reales y sirve para comprobar qué tan bien reconoce a las personas.</p></div>';
+}
 /* ---------- Grupos de graduación ---------- */
 var GR = { lista: [], miembros: [], ok: true, cargado: false, abierto: null };
 var GR_URL = 'https://alexandergeerre.github.io/galeria/grupo.html?g=';
@@ -1392,7 +1402,7 @@ async function grCargar(){
 }
 async function pintarGrupos(){
   $('#pn-main').innerHTML = '<h1>Grupos de graduación</h1><p class="pn-s">Cargando…</p>'; await grCargar();
-  var h = '<h1>Grupos de graduación</h1><p class="pn-s">Crea un enlace por colegio. Cada estudiante se anota con su nombre y contacto, y el precio baja solo mientras más se anotan.</p><div class="pn-row"><button class="pn-btn" data-act="n-gr-nuevo">+ Nuevo grupo</button></div>';
+  var h = '<h1>Grupos de graduación</h1><p class="pn-s ay">Crea un enlace por colegio y compártelo. Cada estudiante se anota con su nombre y contacto, y el precio baja mientras más se anotan.</p><div class="pn-row"><button class="pn-btn" data-act="n-gr-nuevo">+ Nuevo grupo</button></div>';
   if (!GR.ok) return $('#pn-main').innerHTML = h + '<div class="pn-card"><h2>Falta un paso</h2><p class="pn-s">Hay que ejecutar <b>etapa13.sql</b> en Supabase (SQL Editor, pegar y Run). Después recarga el panel.</p></div>';
   if (!GR.lista.length) h += '<div class="pn-card"><p class="pn-s">Aún no hay grupos. Crea el primero con el botón de arriba.</p></div>';
   GR.lista.forEach(function(g){
@@ -1498,6 +1508,7 @@ window.iniciarPanel = async function(photographer, cliente){
   root.addEventListener('drop', function(e){ var t = e.target.closest && e.target.closest('.pn-vt'); if (!t || vidDrag < 0) return; e.preventDefault(); var j = +t.dataset.i, i = vidDrag; vidDrag = -1; if (i === j) return vidRefrescar(); var x = vidIds.splice(i, 1)[0]; vidIds.splice(j, 0, x); vidStop(); vidRefrescar(); });
   root.addEventListener('dragend', function(){ vidDrag = -1; root.querySelectorAll('.pn-vt.ov').forEach(function(x){ x.classList.remove('ov'); }); });
   root.addEventListener('input', function(e){
+    if (e.target.id === 'pn-vea' || e.target.id === 'pn-veb') { if (e.target.id === 'pn-vea') vidEA = e.target.value; else vidEB = e.target.value; vidStop(); clearTimeout(vidDeb); vidEsc = null; vidDeb = setTimeout(vidPrepara, 500); return; }
     if (e.target.id === 'pn-vtt' || e.target.id === 'pn-vts') { if (e.target.id === 'pn-vtt') vidTit = e.target.value; else vidSub = e.target.value; vidStop(); clearTimeout(vidDeb); vidEsc = null; vidDeb = setTimeout(vidPrepara, 500); return; }
     if (e.target.id !== 'pn-vseek' || !vidEsc) return; vidT = e.target.value / 1000 * vidEsc.duracion; vidDibuja(); });
   root.addEventListener('change', async function(e){
