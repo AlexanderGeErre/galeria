@@ -190,6 +190,7 @@ CSS += '.fs-tools{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justi
 '.fs .pn-ph img{aspect-ratio:2/3}.fs .pn-ph .pn-ck{bottom:auto;top:6px}.fs .pn-pb{bottom:6px}' +
 '.fs .pn-grid.mx{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px}.fs-strip{gap:12px}.fs-strip .pn-ph{flex:0 0 94px;width:94px}.fs-add{flex:0 0 140px;aspect-ratio:auto;height:141px;width:140px}.fs-strip .fs-add{flex:0 0 140px}' +
 '@media(max-width:640px){.fs-tools{justify-content:flex-start}.fs-seg{margin-left:0;width:100%;justify-content:space-between}.fs .pn-grid.mx{grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}}';
+CSS += '.fs-strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:0 12px;grid-auto-rows:0;grid-template-rows:auto;overflow:hidden;padding:0}.fs-strip .pn-ph{flex:none;width:auto}.fs-strip .fs-add,.fs-add{flex:none;width:100%;height:auto;aspect-ratio:2/3}@media(max-width:640px){.fs-strip{grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:0 8px}}';
 CSS += '.pn main{min-width:0}.vs{margin-bottom:1.2rem;min-width:0;max-width:100%}.vs-tb,.vs-pv,.vs-tx{min-width:0}.vs-ctl,.vs-pv .pn-vb{max-width:100%}.vs-tb{background:var(--c);border:1px solid var(--l);border-radius:16px 16px 0 0;border-bottom:0;padding:.7rem 1.4rem;gap:.2rem 1.6rem}.vs-chip{background:none;border:0;padding:.4rem 0;color:var(--s);font:inherit;font-size:.9rem;cursor:pointer;text-align:left}.vs-chip small{display:inline;font-size:inherit;margin-right:.3rem;color:var(--s)}.vs-chip[hidden]{display:none}.vs-chip:hover{color:var(--t)}' +
 '.vs-tx{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:.6rem 1.2rem;background:var(--c);border:1px solid var(--l);border-top:0;padding:.2rem 1.4rem .9rem}.vs-tx[hidden]{display:none}.vs-tx input{width:100%}' +
 '.vs-pv{border-radius:0 0 16px 16px;min-height:0;padding:1.6rem 1rem 1.4rem}.vs-ctl{width:min(34rem,100%);border-radius:99px;background:#1d1915}.vs-pv .pn-vb{width:min(34rem,100%)}.vs-pv #pn-vst{color:#c9bfb3;text-transform:none;letter-spacing:0;font-size:.82rem}.vs-pv #pn-vinfo{color:#a89f94;font-size:.78rem}.vs-act{display:flex;gap:.7rem;margin-top:.4rem}.vs-act .pn-btn{border-radius:99px;padding:.7rem 2rem}' +
@@ -452,7 +453,7 @@ function pintarCuenta(){
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 00:55</p></div>';
+ + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 01:10</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -1031,7 +1032,7 @@ function fotosVista(g, sel, fin){
       var mostrar = modoSel ? lst : lst.slice(0, fMas);
       body = '<div class="pn-grid mx">' + (unica ? add : '') + mostrar.map(function(x){ return figFoto(x, g, ic); }).join('') + '</div>' + (!modoSel && lst.length > fMas ? '<p class="pn-s" style="text-align:center;margin-top:1rem"><button class="pn-vt" style="display:inline;width:auto;margin:0;text-decoration:underline" data-act="mas-fotos" type="button">Mostrar más (' + (lst.length - fMas) + ')</button></p>' : '');
     } else {
-      body = '<div class="fs-strip">' + add + lst.slice(0, 30).map(function(x){ return figFoto(x, g, ic); }).join('') + '</div>';
+      body = '<div class="fs-strip">' + add + lst.slice(0, 40).map(function(x){ return figFoto(x, g, ic); }).join('') + '</div>';
     }
     var mas = unica ? '' : '<button class="fs-more" type="button" data-act="fs-abrir" data-id="' + (abierta ? '' : sc.id) + '">' + (abierta ? 'Ver menos ⌃' : (lst.length ? 'Ver todas ⌄' : '')) + '</button>';
     return '<section class="fs-sc' + (abierta && !unica ? ' open' : '') + '">' + head + body + mas + '</section>';
