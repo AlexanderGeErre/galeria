@@ -143,6 +143,72 @@ async function cargarFoto(url){
 function ease(p){ p = clamp(p, 0, 1); return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
 var INTRO = 2.8;
 function dcPostales(n){ return clamp((clamp(n * 1.5 + 2, 10, 45) - 1.4) / n, 0.9, 3.2); }
+// ---------- Marca: lema + usuario bajo el logo (inicio) y pantalla de cierre con contacto ----------
+var OUTRO = 3.6;
+function pieMarca(cx, W, H, op, logo){
+  var lema = op.lema, usr = op.usuario;
+  if (!lema && !usr) return;
+  var vert = H > W, lh;
+  if (logo && logo.bmp) { var lw = (vert ? 0.62 : 0.32) * W; lh = lw * logo.h / logo.w; var mh = H * (vert ? 0.3 : 0.4); if (lh > mh) lh = mh; } else lh = (vert ? W * 0.085 : H * 0.1);
+  var y = lh / 2 + (vert ? H * 0.03 : H * 0.05);
+  cx.save(); cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  if (lema) {
+    var fs = vert ? W * 0.036 : H * 0.042;
+    cx.fillStyle = 'rgba(233,217,184,.92)'; cx.font = '500 ' + fs + 'px "Cormorant Garamond", Georgia, serif';
+    try { cx.letterSpacing = (fs * 0.3) + 'px'; } catch (e) {}
+    cx.fillText(String(lema).toUpperCase(), 0, y + fs * 0.5);
+    try { cx.letterSpacing = '0px'; } catch (e) {}
+    y += fs * 2.1;
+  }
+  if (usr) {
+    var f2 = vert ? W * 0.03 : H * 0.036;
+    cx.fillStyle = 'rgba(184,148,106,.95)'; cx.font = '400 ' + f2 + 'px Jost, "Helvetica Neue", Arial, sans-serif';
+    try { cx.letterSpacing = (f2 * 0.08) + 'px'; } catch (e) {}
+    cx.fillText(String(usr), 0, y + f2 * 0.5);
+    try { cx.letterSpacing = '0px'; } catch (e) {}
+  }
+  cx.restore();
+}
+function dibujarCierre(cx, W, H, op, a){
+  var logo = op.logo || null, b = Math.min(W, H) / 1080 * (H > W ? 1.5 : 1.2), serif = '"Cormorant Garamond", Georgia, serif', sans = 'Jost, "Helvetica Neue", Arial, sans-serif';
+  var cont = (op.contactos || []).filter(function(c){ return c && c[1]; });
+  var lw = 0, lh = 0; if (logo && logo.bmp) { lw = Math.min(0.5 * W, 330 * b); lh = lw * logo.h / logo.w; var mh = 170 * b; if (lh > mh) { lw *= mh / lh; lh = mh; } }
+  var fG = 64 * b, fT = 28 * b, rowH = 62 * b;
+  var sinG = op.gracias === '', total = (sinG ? 0 : fG + 34 * b) + (lh ? lh + 26 * b : 0) + 3 * b + 22 * b + fT + (cont.length ? 46 * b + cont.length * rowH : 0);
+  var y = H / 2 - total / 2;
+  cx.save(); cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = a;
+  var g = cx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, Math.max(W, H) * 0.7); g.addColorStop(0, '#1d1813'); g.addColorStop(1, '#0b0806'); cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+  cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  if (!sinG) { cx.fillStyle = '#E9D9B8'; cx.font = '300 ' + fG + 'px ' + serif; cx.fillText(op.gracias || 'Gracias', W / 2, y + fG / 2); y += fG + 34 * b; }
+  if (lh) { cx.imageSmoothingQuality = 'high'; cx.drawImage(logo.bmp, W / 2 - lw / 2, y, lw, lh); y += lh + 26 * b; }
+  cx.fillStyle = '#B8946A'; cx.fillRect(W / 2 - 18 * b, y, 36 * b, 3 * b); y += 3 * b + 22 * b;
+  if (op.lema) { cx.fillStyle = 'rgba(233,217,184,.92)'; cx.font = '500 ' + fT + 'px ' + serif; try { cx.letterSpacing = (fT * 0.3) + 'px'; } catch (e) {} cx.fillText(String(op.lema).toUpperCase(), W / 2, y + fT / 2); try { cx.letterSpacing = '0px'; } catch (e) {} }
+  y += fT;
+  if (cont.length) {
+    y += 46 * b;
+    cont.forEach(function(c){
+      var fl = 20 * b, fv = 34 * b, lab = String(c[0]).toUpperCase(), val = String(c[1]);
+      cx.textAlign = 'left'; cx.font = '500 ' + fl + 'px ' + sans; try { cx.letterSpacing = (fl * 0.22) + 'px'; } catch (e) {} var wl = cx.measureText(lab).width; try { cx.letterSpacing = '0px'; } catch (e) {}
+      cx.font = '400 ' + fv + 'px ' + sans; var wv = cx.measureText(val).width, gap = 22 * b, x0 = W / 2 - (wl + gap + wv) / 2, ym = y + rowH / 2;
+      cx.font = '500 ' + fl + 'px ' + sans; try { cx.letterSpacing = (fl * 0.22) + 'px'; } catch (e) {} cx.fillStyle = 'rgba(168,150,117,.95)'; cx.fillText(lab, x0, ym); try { cx.letterSpacing = '0px'; } catch (e) {}
+      cx.font = '400 ' + fv + 'px ' + sans; cx.fillStyle = '#E9D9B8'; cx.fillText(val, x0 + wl + gap, ym); y += rowH;
+    });
+  }
+  cx.restore();
+}
+function crearEscena(fotos, W, H, seg, op){
+  op = op || {}; var e = crearEscenaBase(fotos, W, H, seg, op);
+  if (!op.cierre) return e;
+  var dBase = e.duracion, total = dBase + OUTRO;
+  var r = {}; for (var k in e) r[k] = e[k];
+  r.duracion = total;
+  r.dibujar = function(cx, t){
+    if (t < dBase) return e.dibujar(cx, t);
+    e.dibujar(cx, dBase - 0.0001);
+    var a = ease(clamp((t - dBase) / 0.8, 0, 1)); dibujarCierre(cx, W, H, op, a);
+  };
+  return r;
+}
 function duracionTotal(n, seg, estilo, intro){ var d = seg || 2.5; if (estilo === 'postales') return n * dcPostales(n) + 1.4 + (intro ? INTRO : 0); if (estilo === 'carriles') return clamp(n * 1.7, 12, 45) + (intro ? INTRO : 0); if (estilo === 'prisma') return Math.floor(n / 2) * 2 * d + (intro ? INTRO : 0); return n * d + (estilo === 'pantalla' ? Math.max(0, Math.max(d, 3.2) - d) : 0) + (intro ? INTRO : 0); }
 // Desenfoque propio (no depende del navegador: funciona igual en iPhone y Android). Tres pasadas de promedio = suavidad tipo gaussiano.
 function desenfocar(c, r){
@@ -172,7 +238,7 @@ function fondoDesenf(f, w, h, zoom, radio){
   try { desenfocar(c, r); } catch (e) {}
   return c;
 }
-function crearEscena(fotos, W, H, seg, op){
+function crearEscenaBase(fotos, W, H, seg, op){
   op = op || {};
   if (op.estilo === 'prisma') return crearEscenaPrisma(fotos, W, H, seg, op);
   if (op.estilo === 'carriles') return crearEscenaCarriles(fotos, W, H, seg, op);
@@ -378,6 +444,7 @@ function crearEscena(fotos, W, H, seg, op){
       try { cx.letterSpacing = (fs * 0.12) + 'px'; } catch (e2) {}
       cx.fillText(String(op.nombre).toUpperCase(), 0, 0);
     }
+    pieMarca(cx, W, H, op, logo);
     cx.restore();
   }
 
@@ -524,6 +591,7 @@ function crearEscenaPrisma(fotos, W, H, seg, op){
     var a = clamp((t - 0.25) / 0.8, 0, 1), e = ease(a); cx.save(); cx.globalAlpha = e; cx.translate(W / 2, H / 2); cx.scale(0.94 + 0.06 * e, 0.94 + 0.06 * e);
     if (logo && logo.bmp) { var lw = (vert ? 0.62 : 0.32) * W, lh = lw * logo.h / logo.w, mh = H * (vert ? 0.3 : 0.4); if (lh > mh) { lw *= mh / lh; lh = mh; } cx.imageSmoothingQuality = 'high'; cx.drawImage(logo.bmp, -lw / 2, -lh / 2, lw, lh); }
     else if (op.nombre) { var fs = (vert ? W * 0.085 : H * 0.1); cx.fillStyle = '#E9D9B8'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.font = '300 ' + fs + 'px "Cormorant Garamond", Georgia, serif'; try { cx.letterSpacing = (fs * 0.12) + 'px'; } catch (e2) {} cx.fillText(String(op.nombre).toUpperCase(), 0, 0); }
+    pieMarca(cx, W, H, op, logo);
     cx.restore();
   }
   function dibujar(cx, t){
@@ -671,6 +739,7 @@ function crearEscenaCarriles(fotos, W, H, seg, op){
     var a = clamp((t - 0.25) / 0.8, 0, 1), e = ease(a); cx.save(); cx.globalAlpha = e; cx.translate(W / 2, H / 2); cx.scale(0.94 + 0.06 * e, 0.94 + 0.06 * e);
     if (logo && logo.bmp) { var lw = (H > W ? 0.62 : 0.32) * W, lh = lw * logo.h / logo.w, mh = H * (H > W ? 0.3 : 0.4); if (lh > mh) { lw *= mh / lh; lh = mh; } cx.imageSmoothingQuality = 'high'; cx.drawImage(logo.bmp, -lw / 2, -lh / 2, lw, lh); }
     else if (op.nombre) { var fs = (H > W ? W * 0.085 : H * 0.1); cx.fillStyle = '#E9D9B8'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.font = '300 ' + fs + 'px "Cormorant Garamond", Georgia, serif'; try { cx.letterSpacing = (fs * 0.12) + 'px'; } catch (e2) {} cx.fillText(String(op.nombre).toUpperCase(), 0, 0); }
+    pieMarca(cx, W, H, op, logo);
     cx.restore();
   }
   function dibujar(cx, t){
@@ -695,7 +764,7 @@ function crearEscenaPostales(fotos, W, H, seg, op){
   var rnd = (function(s){ return function(){ s = (s * 1664525 + 1013904223) % 4294967296; return s / 4294967296; }; })((op.semilla || 7) * 99991 + 13);
   var cards = fotos.map(function(f, k){
     var a = clamp(f.w / f.h, 0.72, 1.45), maxW = vert ? 0.74 * W : 0.42 * W, maxH = (vert ? 0.46 : 0.62) * H, pw = Math.min(maxW, maxH * a), ph = pw / a, b = pw * 0.045, bb = pw * 0.15;
-    return { i: k, pw: pw, ph: ph, b: b, bb: bb, cw: pw + 2 * b, ch: ph + b + bb, cx: W / 2 + (rnd() - 0.5) * W * (vert ? 0.2 : 0.34), cy: H * (vert ? 0.54 : 0.55) + (rnd() - 0.5) * H * 0.06, rot: (rnd() < 0.5 ? -1 : 1) * (0.03 + rnd() * 0.07), side: rnd() < 0.5 ? -1 : 1, cinta: k % 2 === 0 };
+    return { i: k, pw: pw, ph: ph, b: b, bb: bb, cw: pw + 2 * b, ch: ph + b + bb, cx: W / 2 + (rnd() - 0.5) * W * (vert ? 0.2 : 0.34), cy: H * (vert ? 0.54 : 0.55) + (rnd() - 0.5) * H * 0.06, rot: (rnd() < 0.5 ? -1 : 1) * (0.03 + rnd() * 0.07), side: rnd() < 0.5 ? -1 : 1, cinta: k % 2 === 0, dir: Math.floor(rnd() * 3) };
   });
   // Fondo de papel con grano suave (se prepara una sola vez)
   var fondo = null;
@@ -713,8 +782,8 @@ function crearEscenaPostales(fotos, W, H, seg, op){
     var age = tt - t0; if (age < 0) return;
     var p = clamp(age / 0.75, 0, 1), landed = ease(clamp(age / 0.75, 0, 1)), vivas = 4, salida = clamp((age - vivas * Dc) / 0.9, 0, 1), es = ease(salida);
     if (salida >= 1) return;
-    var f = fotos[c.i], dy = -(1 - bote(p)) * H * 0.85, rot = c.rot * (1 + 1.4 * (1 - landed)), esc = 1.1 - 0.1 * landed, ex = c.side * W * 0.7 * es;
-    cx.save(); cx.globalAlpha = (1 - es) * clamp(p * 4, 0, 1); cx.translate(c.cx + ex, c.cy + dy + es * H * 0.05); cx.rotate(rot + c.side * es * 0.25); cx.scale(esc, esc);
+    var f = fotos[c.i], q0 = 1 - bote(p), dy = c.dir === 0 ? -q0 * H * 0.85 : 0, dx = c.dir === 1 ? -q0 * W * 0.95 : c.dir === 2 ? q0 * W * 0.95 : 0, rot = c.rot * (1 + 1.4 * (1 - landed)), esc = 1.1 - 0.1 * landed, ex = c.side * W * 0.7 * es;
+    cx.save(); cx.globalAlpha = (1 - es) * clamp(p * 4, 0, 1); cx.translate(c.cx + ex + dx, c.cy + dy + es * H * 0.05); cx.rotate(rot + c.side * es * 0.25); cx.scale(esc, esc);
     cx.shadowColor = 'rgba(55,36,12,' + (0.12 + 0.2 * landed).toFixed(3) + ')'; cx.shadowBlur = (14 + 26 * landed) * u; cx.shadowOffsetY = (6 + 14 * landed) * u;
     cx.fillStyle = '#fdfbf7'; cx.fillRect(-c.cw / 2, -c.ch / 2, c.cw, c.ch); cx.shadowColor = 'transparent'; cx.shadowBlur = 0; cx.shadowOffsetY = 0;
     var v = ventanaFoco(f, c.pw, c.ph, 1, 0.5, 1); cx.save(); cx.beginPath(); cx.rect(-c.cw / 2 + c.b, -c.ch / 2 + c.b, c.pw, c.ph); cx.clip(); cx.imageSmoothingQuality = 'high'; cx.drawImage(f.bmp, v.sx, v.sy, v.sw, v.sh, -c.cw / 2 + c.b, -c.ch / 2 + c.b, c.pw, c.ph); cx.restore();
@@ -737,6 +806,7 @@ function crearEscenaPostales(fotos, W, H, seg, op){
     var a = clamp((t - 0.25) / 0.8, 0, 1), e = ease(a); cx.save(); cx.globalAlpha = e; cx.translate(W / 2, H / 2); cx.scale(0.94 + 0.06 * e, 0.94 + 0.06 * e);
     if (logo && logo.bmp) { var lw = (H > W ? 0.62 : 0.32) * W, lh = lw * logo.h / logo.w, mh = H * (H > W ? 0.3 : 0.4); if (lh > mh) { lw *= mh / lh; lh = mh; } cx.imageSmoothingQuality = 'high'; cx.drawImage(logo.bmp, -lw / 2, -lh / 2, lw, lh); }
     else if (op.nombre) { var fs = (H > W ? W * 0.085 : H * 0.1); cx.fillStyle = '#E9D9B8'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.font = '300 ' + fs + 'px ' + famT; try { cx.letterSpacing = (fs * 0.12) + 'px'; } catch (e2) {} cx.fillText(String(op.nombre).toUpperCase(), 0, 0); }
+    pieMarca(cx, W, H, op, logo);
     cx.restore();
   }
   function dibujar(cx, t){
