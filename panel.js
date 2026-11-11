@@ -72,6 +72,23 @@ var CSS = '.pn-pb{position:absolute;right:6px;bottom:34px;z-index:2;display:flex
 '.pn-skel{height:3.2rem;width:60%;border-radius:12px;margin:1rem 0;background:linear-gradient(100deg,var(--l) 30%,var(--p) 50%,var(--l) 70%);background-size:200% 100%;animation:pnSh 1.5s infinite}.pn-skel.w1{width:35%;height:2.4rem}.pn-skel.h2{height:9rem;width:100%}' +
 '.pn-toast{animation:pnIn .3s both}@media(prefers-reduced-motion:reduce){.pn *{animation:none!important;transition:none!important}.pn-ph img,.pn-tar .cv>img,.pn-pbtn img{opacity:1}}' +
 '#pn-up{position:fixed;right:18px;bottom:18px;z-index:80;width:min(22rem,calc(100vw - 36px));background:var(--c);border:1px solid var(--l);border-radius:16px;box-shadow:0 12px 40px rgba(43,38,35,.22);padding:.9rem 1rem}.pn-up-t{display:flex;justify-content:space-between;gap:.6rem}.pn-up-b{height:6px;border-radius:99px;background:var(--l);overflow:hidden;margin:.6rem 0}.pn-up-b i{display:block;height:100%;background:var(--a);transition:width .3s}#pn-up ul{margin:.4rem 0 .5rem 1.1rem;padding:0;font-size:.8rem;color:#b5453f}#pn-up p{margin:0 0 .3rem}' +
+'.pn-rej{align-items:start}.pn-tabs{border-bottom-color:var(--t)}' +
+'.pn-k{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--s);margin:0 0 .7rem}' +
+'.pn-fm{display:grid;grid-template-columns:220px minmax(0,1fr);gap:2.4rem;align-items:start;margin-top:.2rem}.pn-carp{position:sticky;top:1rem}' +
+'.pn-cr{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;width:100%;background:none;border:0;border-top:1px solid var(--l);border-left:2px solid transparent;border-radius:0;padding:.72rem .3rem .72rem .7rem;font:inherit;color:var(--s);cursor:pointer;text-align:left}.pn-cr:last-of-type{border-bottom:1px solid var(--l)}' +
+'.pn-cr b{font-weight:400}.pn-cr i{font-style:normal;font-variant-numeric:tabular-nums;font-size:.9rem}.pn-cr.on{color:var(--t);border-left-color:var(--a)}.pn-cr.on b{font-weight:600}.pn-cr:hover{color:var(--t)}' +
+'.pn-ncarp{display:flex;gap:.4rem;margin-top:1rem}.pn-ncarp input{flex:1;min-width:0;font-size:.9rem}.pn-ncarp button{width:2.5rem;padding:0}' +
+'.pn-fh{display:flex;flex-wrap:wrap;align-items:center;gap:.8rem 1rem;margin-bottom:1.1rem}.pn-fh h2{margin:0;font-size:2rem}.pn-fh h2 em{font-style:normal;color:var(--s)}.pn-fh .sp{margin-left:auto;display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}' +
+'.pn-seg{display:inline-flex;background:var(--p);border-radius:999px;padding:3px}.pn-seg button{border:0;background:none;color:var(--s);border-radius:999px;padding:.42rem 1rem;font:inherit;font-size:.88rem;cursor:pointer}.pn-seg button.on{background:var(--c);color:var(--t);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.14)}' +
+'.pn-tb{position:absolute;left:6px;right:auto;bottom:34px;width:fit-content;height:auto;display:block;line-height:1.5;z-index:2;font-size:.64rem;letter-spacing:.04em;border-radius:999px;padding:1px 8px;background:rgba(255,255,255,.93);color:#2B2623}.pn-tb.f{background:#2B2623;color:#fff}' +
+'.pn-grid.mx{grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px}.pn-vaci{border:1px dashed var(--l);border-radius:16px;padding:2.4rem 1rem;text-align:center}' +
+'.pn-rc{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.7rem;margin:.4rem 0}.pn-rcl{position:relative;display:flex;align-items:center;gap:.75rem;border:1px solid var(--l);border-radius:12px;padding:.85rem 1rem;cursor:pointer;background:var(--c)}' +
+'.pn-rcl input{position:absolute;opacity:0;pointer-events:none}.pn-rcl .d{flex:none;width:22px;height:22px;border-radius:50%;background:var(--p);display:grid;place-items:center}.pn-rcl input:checked+.d:after{content:"";width:8px;height:8px;border-radius:50%;background:var(--t)}.pn-rcl:has(input:checked){border-color:var(--t)}.pn-rcl small{display:block;color:var(--s);font-size:.8rem}' +
+'.pn-ev{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.85rem 0;border-top:1px solid var(--l)}.pn-ev:first-of-type{border-top:0}.pn-ev .d{display:block;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--s)}.pn-ev .t{display:block;font-family:"Cormorant Garamond",Georgia,serif;font-size:1.4rem;line-height:1.2}' +
+'.pn-pl{background:var(--p);border-radius:999px;padding:.25rem .85rem;font-size:.82rem;white-space:nowrap}' +
+'#pn-as-chip{position:fixed;left:240px;bottom:18px;z-index:70;background:var(--t);color:var(--f);border:0;border-radius:999px;padding:.6rem 1.1rem;font:inherit;font-size:.88rem;cursor:pointer;box-shadow:0 8px 28px rgba(43,38,35,.25)}#pn-as-chip[hidden]{display:none}' +
+'.pn-as-p{align-items:center;gap:.9rem}.pn-as-p li{border:0;padding:0;display:flex;align-items:center;gap:.5rem}.pn-as-p li b{width:24px;height:24px;border-radius:50%;border:1px solid var(--l);display:grid;place-items:center;font-weight:400;font-size:.78rem}.pn-as-p li.on b{background:var(--t);color:var(--f);border-color:var(--t)}.pn-as-p li.ok b{background:var(--a);color:#fff;border-color:var(--a)}.pn-as-p li+li:before{content:"";width:40px;border-top:1px solid var(--l);margin-right:.5rem}' +
+'@media(max-width:760px){.pn-fm{grid-template-columns:minmax(0,1fr)}.pn-carp{position:static}}' +
 '@media(max-width:760px){.pn aside .nd{display:none}.pn aside .ta{display:flex}.pn aside .atras.mo{display:flex}.pn-tabs{display:none}.pn{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr}.pn main{min-width:0;overflow-x:hidden}.pn input[type=file]{max-width:100%}.pn aside{position:sticky;top:0;z-index:30;height:auto;align-self:start;min-height:0;flex-direction:row;flex-wrap:nowrap;overflow-x:auto;align-items:center;gap:.2rem;padding:.5rem .6rem;border-right:0;border-bottom:1px solid var(--l)}.pn aside>*{flex:0 0 auto;white-space:nowrap}.pn aside .marca,.pn aside .gt,.pn aside .sep,.pn aside .pn-pill{display:none}.pn aside .pie{margin:0 0 0 .6rem;display:flex;gap:.3rem;align-items:center}.pn-tema{margin:0}.pn main{padding:1rem .9rem 4rem}.pn h1{font-size:2rem}.pn-cifras{grid-template-columns:1fr 1fr}.pn-cifras div{border-bottom:1px solid var(--l)}.pn-franja span{border-right:0;border-bottom:1px solid var(--l);width:100%}.pn-orden{margin-left:0;width:100%}.pn-orden select{flex:1;min-width:0;max-width:100%}.pn-orden{flex-wrap:wrap}.pn-grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}.pn-grid.fr .pn-ph{flex:0 0 84px}.pn-rej{grid-template-columns:repeat(2,1fr);gap:12px}.pn-card{padding:.9rem}.pn-row{gap:.5rem}.pn-row input[type=text]{min-width:0;width:100%}.pn-btn{padding:.5rem .9rem}#pn-dver .pn-vb{flex-wrap:wrap}.pn-lado{flex-direction:column;align-items:stretch}.pn-copia{flex-wrap:wrap}.pn-copia input{min-width:0;width:100%}.pn-opt{max-width:none;flex:1 1 100%}.pn-tabs{overflow-x:auto;flex-wrap:nowrap}}' +
 '.pn-ph .pn-ck{top:auto;left:6px;bottom:28px;width:26px;height:26px;opacity:0;transition:opacity .2s}.pn-ph:hover .pn-ck,.pn-ph .pn-ck:not(.off),.pn-ph.mk .pn-ck{opacity:1}.pn-ph .pn-ck.off{background:rgba(0,0,0,.35);border-color:#fff}@media(hover:none){.pn-ph .pn-ck{opacity:.9}.pn-ph .pn-ex{opacity:.85}}.pn-ph .pn-ex{position:absolute;top:6px;right:6px;z-index:2;width:28px;height:28px;border:0;border-radius:4px;background:rgba(40,40,40,.72);color:#fff;display:grid;place-items:center;cursor:pointer;opacity:0;transition:opacity .2s;padding:0}.pn-ph:hover .pn-ex,.pn-ph .pn-ex:focus-visible{opacity:1}.pn-ph .pn-ex svg{width:16px;height:16px}.pn-pb{bottom:28px}.pn-ph:hover img.ld{transform:none}#pn-dver{width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:0;border:0;border-radius:0;background:var(--f);text-align:left;overflow:hidden}#pn-dver::backdrop{background:var(--f)}.pn-vh{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.9rem 1.4rem;border-bottom:1px solid var(--l);height:64px;box-sizing:border-box}.pn-vt2{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.04em}.pn-vac{display:flex;align-items:center;gap:.4rem;flex:0 0 auto}.pn-vac button{background:none;border:0;color:var(--t);font:inherit;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;padding:.5rem .7rem;border-radius:6px}.pn-vac button:hover{background:var(--p)}#pn-vx{font-size:1.3rem;padding:.2rem .6rem}.pn-vm{height:calc(100vh - 64px);display:grid;place-items:center;padding:1.2rem 4.5rem;box-sizing:border-box}#pn-dver .pn-vm img{max-width:100%;max-height:calc(100vh - 64px - 2.4rem);width:auto;height:auto;border-radius:0;display:block;margin:0}.pn-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;background:none;border:0;color:var(--s);font-size:3rem;line-height:1;cursor:pointer;padding:.5rem 1rem}.pn-nav:hover{color:var(--t)}.pn-nav.l{left:.4rem}.pn-nav.r{right:.4rem}@media(max-width:760px){.pn-vh{padding:.6rem .8rem;height:auto;flex-wrap:wrap}.pn-vac button{padding:.4rem .5rem;font-size:.68rem}.pn-vm{height:calc(100vh - 110px);padding:.6rem .2rem}#pn-dver .pn-vm img{max-height:calc(100vh - 130px)}.pn-nav{font-size:2.2rem;padding:.3rem .5rem;opacity:.7}}';
 
@@ -232,10 +249,10 @@ function tarjeta(g){
   return '<button class="pn-tar" data-act="abrir" data-id="' + g.id + '"><div class="cv">' + cv + '</div><h3>' + esc(g.title) + '</h3><p class="pn-s">' + esc(g.event_date || '') + '</p><span class="pn-pill">' + esc(ESTADOS[g.status] || g.status) + '</span></button>';
 }
 
-var TABS = [['panel', 'Panel de control'], ['detalles', 'Detalles'], ['fotos', 'Fotos y medios'], ['diseno', 'Diseño'], ['config', 'Configuración'], ['favoritas', 'Favoritas'], ['impresiones', 'Impresiones'], ['video', 'Video'], ['compartir', 'Compartir']];
+var TABS = [['panel', 'Panel de control'], ['detalles', 'Detalles'], ['fotos', 'Fotos y escenas'], ['diseno', 'Diseño'], ['config', 'Configuración'], ['favoritas', 'Favoritas'], ['impresiones', 'Impresiones'], ['video', 'Video'], ['compartir', 'Compartir']];
 var ESTILOS = [['clasico', 'Clásico', 'Fotos con su proporción original'], ['uniforme', 'Uniforme', 'Cuadrícula ordenada, todas del mismo tamaño'], ['amplio', 'Amplio', 'Fotos grandes, menos por fila']];
 var PALETAS = [['auto', 'Automática (según el evento)', '#FAFAF8', '#B8946A', '#1A1A1A'], ['arena', 'Arena y carbón', '#FAFAF8', '#B8946A', '#1A1A1A'], ['marfil', 'Marfil cálido', '#F7F3EC', '#A67C52', '#1C1917'], ['blanco', 'Blanco galería', '#FFFFFF', '#1F1F1F', '#121212'], ['oliva', 'Oliva y arena', '#F6F5F0', '#6F7F5E', '#161A17'], ['vino', 'Vino y crema', '#FBF8F5', '#8C3B3B', '#1B1516'], ['azul', 'Azul noche', '#F6F7F9', '#3F5B8C', '#14171C']];
-var TITULOS = { panel: 'Descripción general', detalles: 'Detalles', fotos: 'Fotos y medios', diseno: 'Diseño', config: 'Configuración de la galería', favoritas: 'Favoritas de los clientes', impresiones: 'Fotos para imprimir', compartir: 'Compartir', video: 'Video de fotos' };
+var TITULOS = { panel: 'Descripción general', detalles: 'Detalles', fotos: 'Fotos y escenas', diseno: 'Diseño', config: 'Configuración de la galería', favoritas: 'Favoritas de los clientes', impresiones: 'Fotos para imprimir', compartir: 'Compartir', video: 'Video de fotos' };
 function ayudasOn(){ try { return localStorage.getItem('pn-ay') !== 'off'; } catch(e) { return true; } }
 function marcaBase(){ return (ph && (ph.watermark_default || ph.studio_name)) || 'Estudio'; }
 function temaGuardado(){ try { return localStorage.getItem('pn-tema') || 'auto'; } catch(e) { return 'auto'; } }
@@ -275,6 +292,7 @@ function pintarLado(){
   a.innerHTML = h;
 }
 function pintar(){
+  AS.show = false;
   if (!(vista === 'detalle' && tab === 'video')) vidLiberar();
   pintarLado(); aplicarTema(); setTimeout(marcarCargadas, 0);
   if (vista === 'cuenta') return pintarCuenta();
@@ -317,7 +335,7 @@ function pintarLista(){
 }
 
 async function abrirDetalle(id, conservar){
-  galId = id; vista = 'detalle'; if (!conservar) { vidLiberar(); vidIds = []; vidTit = null; vidSub = null; vidAcento = -1; tab = 'panel'; fEsc = ''; fImp = false; modoSel = false; marcadas = new Set(); } cur = null; pintar();
+  galId = id; vista = 'detalle'; if (!conservar) { vidLiberar(); vidIds = []; vidTit = null; vidSub = null; vidAcento = -1; tab = 'panel'; fEsc = ''; fTipo = ''; fMas = 48; fImp = false; modoSel = false; marcadas = new Set(); } cur = null; pintar();
   var p = await db.from('photos').select('id,filename,photo_type,file_size,sort_order,scene_id').eq('gallery_id', id).order('sort_order').order('filename').limit(1000);
   var f = await db.from('favorites').select('photo_id,visitor_token').eq('gallery_id', id).limit(1000);
   var v = await db.from('gallery_views').select('created_at,visitor_token').eq('gallery_id', id).order('created_at', { ascending: false }).limit(1000), vRows = null;
@@ -368,7 +386,7 @@ function pintarCuenta(){
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 19:30</p></div>';
+ + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 10 nov 2026, 22:30</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -422,7 +440,7 @@ function plegar(abierta){
 var vidIds = [], vidForm = 'v', vidSeg = 2.5, vidPart = true, vidCache = {}, vidTok = 0, vidBusy = false, vidCancel = false;
 function cargarSlideshow(){
   if (window.Slideshow) return Promise.resolve();
-  return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = 'slideshow.js?v=12'; sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró slideshow.js en GitHub. Súbelo junto a panel.js.')); }; document.head.appendChild(sc); });
+  return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = 'slideshow.js?v=13'; sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró slideshow.js en GitHub. Súbelo junto a panel.js.')); }; document.head.appendChild(sc); });
 }
 function vidEstado(t){ var e = $('#pn-vst'); if (e) e.textContent = t || ''; }
 function vidBarra(x){ var b = $('#pn-vbar'); if (b) b.style.width = Math.round(clampN(x) * 100) + '%'; }
@@ -597,10 +615,10 @@ function pintarDetalle0(){
       '<label class="pn-s" style="display:block;margin-top:.9rem">Descripción (la ve el cliente bajo el título)</label><textarea id="pn-dde" rows="3" maxlength="300" style="width:100%">' + esc(g.description || '') + '</textarea>' +
       '<div class="pn-row"><button class="pn-btn" data-act="guardar-detalles">Guardar</button></div></div>';
   } else if (tab === 'fotos') {
-    cuerpo = '<dialog id="pn-dsub"><h2>Subir fotos</h2><div class="pn-row"><label><input type="radio" name="pn-dest" value="selection" checked> Selección (se reducen según la calidad de Configuración)</label><label><input type="radio" name="pn-dest" value="final"> Finales (originales, hasta 45 MB)</label></div>' +
+    cuerpo = '<dialog id="pn-dsub"><h2>Subir fotos</h2><div class="pn-rc"><label class="pn-rcl"><input type="radio" name="pn-dest" value="selection" checked><span class="d"></span><span><b>Selección</b><small>Se reducen según la calidad de Configuración</small></span></label><label class="pn-rcl"><input type="radio" name="pn-dest" value="final"><span class="d"></span><span><b>Finales</b><small>Originales, hasta 45 MB</small></span></label></div>' +
       (cur.escenas && cur.escenas.length ? '<div class="pn-marcaui"><label class="pn-s" for="pn-esc">Escena de destino</label><select id="pn-esc"><option value="">Sin escena</option>' + cur.escenas.map(function(e){ return '<option value="' + e.id + '"' + (fEsc === e.id ? ' selected' : '') + '>' + esc(e.name) + '</option>'; }).join('') + '</select></div>' : '') + '<p class="pn-s pn-marcaui" id="pn-mbox">De cada foto se guardan dos versiones: limpia y con marca de agua. En Configuración eliges cuál ve tu cliente.</p>' +
       '<div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-subir" type="button">Cancelar</button></div></dialog>' +
-      escenasCard(g, sel, fin) + barraSel(sel, fin) + (fImp ? '' : seccionFotos('selection', 'Selección', sel, g)) + seccionFotos('final', 'Finales', fin, g);
+      fotosVista(g, sel, fin);
   } else if (tab === 'diseno') {
     var cvId = g.cover_photo_id || (sel[0] && sel[0].id), cv = cvId && cur.tk[cvId];
     var cvSrc = cur.cover ? src(cur.cover) : (cv ? src(cv) : '');
@@ -730,7 +748,7 @@ function pintarCola(){
   if (!cola.total) { el.hidden = true; return; }
   el.hidden = false;
   var fin = !subiendo(), pct = Math.round(cola.hechas / cola.total * 100);
-  el.innerHTML = '<div class="pn-up-t"><b>' + (fin ? 'Subida terminada' : 'Subiendo fotos…') + '</b><span>' + cola.hechas + ' de ' + cola.total + '</span></div>' +
+  el.innerHTML = '<div class="pn-up-t"><b>' + (fin ? 'Subida terminada' : (cola.titulo || 'Subiendo fotos…')) + '</b><span>' + cola.hechas + ' de ' + cola.total + '</span></div>' +
     '<div class="pn-up-b"><i style="width:' + pct + '%"></i></div>' +
     (fin ? '' : '<p class="pn-s">Puedes seguir trabajando en el panel. No cierres esta pestaña hasta que termine.</p>') +
     (cola.fallos.length ? '<ul>' + cola.fallos.slice(-5).map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '') +
@@ -814,6 +832,32 @@ var ORDENES = [['nombre', 'Nombre del archivo'], ['nombre-inv', 'Nombre del arch
 function impCuenta(){ var m = {}; (cur && Array.isArray(cur.imp) ? cur.imp : []).forEach(function(x){ m[x.photo_id] = (m[x.photo_id] || 0) + 1; }); return m; }
 function spTiene(sid, pid){ return !!(cur && cur.sp && cur.sp[sid + ':' + pid]); }
 function filtrarEsc(l){ var ic = fImp ? impCuenta() : null; return l.filter(function(x){ return (!fEsc || (fEsc === '_none' ? !x.scene_id : (x.scene_id === fEsc || spTiene(fEsc, x.id)))) && (!ic || ic[x.id]); }); }
+var fTipo = '', fMas = 48;
+function figFoto(x, g, ic){
+  var tipo = x.photo_type, esPort = g.cover_photo_id === x.id;
+  return '<figure class="pn-ph' + (esPort ? ' cv' : '') + (marcadas.has(x.id) ? ' mk' : '') + (ic[x.id] ? ' pimp' : '') + '">' + (ic[x.id] ? '<span class="pn-pb" title="Marcada para imprimir">' + ico('impresiones') + (ic[x.id] > 1 ? '<i>' + ic[x.id] + '</i>' : '') + '</span>' : '') + '<span class="pn-ck' + (modoSel ? '' : ' off') + '" data-act="marcar" data-id="' + x.id + '">' + (marcadas.has(x.id) ? '✓' : '') + '</span>' +
+    '<span class="pn-tb' + (tipo === 'final' ? ' f' : '') + '">' + (tipo === 'final' ? 'Final' : 'Selección') + '</span>' +
+    '<img data-act="' + (modoSel ? 'marcar' : 'ver') + '" data-id="' + x.id + '" loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '">' +
+    '<figcaption>' + esc(x.filename) + (esPort ? ' · Portada' : '') + (tipo === 'final' ? ' · ' + mb(x.file_size || 0) : '') + '</figcaption>' +
+    '<button class="pn-ex" data-act="ver" data-id="' + x.id + '" type="button" aria-label="Ampliar" title="Ampliar">' + EXP + '</button></figure>';
+}
+function listaVisible(){ return filtrarEsc(cur.fotos.filter(function(x){ return !fTipo || x.photo_type === fTipo; })); }
+function fotosVista(g, sel, fin){
+  var es = cur.escenas || [], todas = cur.fotos, ic = impCuenta(), nImp = Object.keys(ic).length;
+  var cnt = function(f){ return todas.filter(function(x){ return f === '' ? true : f === '_none' ? !x.scene_id : (x.scene_id === f || spTiene(f, x.id)); }).length; };
+  var row = function(id, nombre){ return '<button class="pn-cr' + (fEsc === id ? ' on' : '') + '" data-act="carp" data-id="' + id + '" type="button"><b>' + nombre + '</b><i>' + cnt(id) + '</i></button>'; };
+  var nav = '<nav class="pn-carp"><p class="pn-k">Escenas</p>' + row('', 'Todas las fotos') + es.map(function(e){ return row(e.id, esc(e.name)); }).join('') + (es.length && cnt('_none') ? row('_none', 'Sin escena') : '') +
+    '<div class="pn-ncarp"><input type="text" id="pn-nesc" maxlength="80" placeholder="Nueva escena"><button class="pn-btn" data-act="esc-crear" type="button" aria-label="Agregar escena">+</button></div></nav>';
+  var cEsc = es.filter(function(x){ return x.id === fEsc; })[0], nombreC = fEsc === '_none' ? 'Sin escena' : cEsc ? cEsc.name : 'Todas las fotos';
+  var lista = listaVisible(), nS = filtrarEsc(sel).length, nF = filtrarEsc(fin).length, mostrar = modoSel ? lista : lista.slice(0, fMas);
+  var seg = '<div class="pn-seg" role="group" aria-label="Tipo de foto">' + [['', 'Todas ' + (nS + nF)], ['selection', 'Selección ' + nS], ['final', 'Finales ' + nF]].map(function(t){ return '<button type="button" data-act="ftipo" data-v="' + t[0] + '" class="' + (fTipo === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
+  var ord = lista.length > 1 ? '<span class="pn-orden"><label class="pn-s">Clasificar</label><select data-ord="' + (fTipo || 'todas') + '"><option value="">Elegir orden…</option>' + ORDENES.filter(function(o){ return cur.conFecha || o[0].indexOf('carga') < 0; }).map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select></span>' : '';
+  var cab = '<div class="pn-fh"><h2><em>' + esc(g.title) + ' ›</em> ' + esc(nombreC) + '</h2>' + (cEsc ? '<span><button class="pn-btn sec" data-act="esc-renombrar" data-id="' + cEsc.id + '" type="button">Renombrar</button> <button class="pn-btn sec" data-act="esc-borrar" data-id="' + cEsc.id + '" type="button">Eliminar</button></span>' : '') + '</div>' +
+    '<div class="pn-fh">' + seg + (nImp || fImp ? '<button class="pn-btn ' + (fImp ? '' : 'sec') + '" data-act="filtro-imp" type="button">' + ico('impresiones') + ' Para imprimir (' + nImp + ')' + (fImp ? ' ✕' : '') + '</button>' : '') + '<span class="sp">' + ord + '<button class="pn-btn" data-act="abrir-subir" data-tipo="' + (fTipo === 'final' ? 'final' : 'selection') + '" type="button">+ Subir fotos</button></span></div>';
+  var cuerpo = lista.length ? '<div class="pn-grid mx">' + mostrar.map(function(x){ return figFoto(x, g, ic); }).join('') + '</div>' + (!modoSel && lista.length > fMas ? '<p class="pn-s" style="text-align:center;margin-top:1.4rem">Mostrando ' + fMas + ' de ' + lista.length + ' · <button class="pn-vt" style="display:inline;width:auto;margin:0;text-decoration:underline" data-act="mas-fotos" type="button">Mostrar más</button></p>' : '')
+    : '<div class="pn-vaci"><p class="pn-s">' + (fImp ? 'Ninguna foto final está marcada para imprimir.' : 'Aún no hay fotos aquí.') + '</p></div>';
+  return '<div class="pn-fm">' + nav + '<section>' + cab + barraSel(sel, fin) + cuerpo + '</section></div>';
+}
 function seccionFotos(tipo, titulo, lista, g){
   lista = filtrarEsc(lista);
   var ic = impCuenta(), nImp = Object.keys(ic).length;
@@ -833,7 +877,7 @@ function seccionFotos(tipo, titulo, lista, g){
     (mas ? '<button class="pn-vt" data-act="vertodo" data-tipo="' + tipo + '"><span>' + (ab ? 'Ver menos ⌃' : 'Ver todo ⌄') + '</span></button>' : '');
 }
 async function ordenar(tipo, modo){
-  var lista = cur.fotos.filter(function(x){ return x.photo_type === tipo; });
+  var lista = cur.fotos.filter(function(x){ return tipo === 'todas' || x.photo_type === tipo; });
   var cmpN = function(a, b){ return String(a.filename).localeCompare(String(b.filename), undefined, { numeric: true }); };
   if (modo === 'nombre') lista.sort(cmpN);
   else if (modo === 'nombre-inv') lista.sort(function(a, b){ return cmpN(b, a); });
@@ -863,7 +907,8 @@ async function mostrarVer(){
 }
 function abrirVer(id){
   var f = cur.fotos.filter(function(x){ return x.id === id; })[0]; if (!f) return;
-  vl = cur.fotos.filter(function(x){ return x.photo_type === f.photo_type; });
+  vl = tab === 'fotos' ? listaVisible() : cur.fotos.filter(function(x){ return x.photo_type === f.photo_type; });
+  if (vl.indexOf(f) < 0) vl = cur.fotos.filter(function(x){ return x.photo_type === f.photo_type; });
   vix = vl.indexOf(f); $('#pn-dver').showModal(); mostrarVer();
 }
 function pasarVer(d){ if (!vl.length) return; vix = (vix + d + vl.length) % vl.length; mostrarVer(); }
@@ -909,11 +954,13 @@ async function accion(a, el){
   if (a === 'tab') { tab = el.dataset.t; return pintar(); }
   if (a === 'copiar') { copiar(el.dataset.t); el.textContent = 'Copiado'; return; }
   if (a === 'nueva') return $('#pn-dnueva').showModal();
-  if (a === 'asist') { asistReset(); vista = 'asist'; return pintar(); }
+  if (a === 'asist') { asistReset(); vista = 'asist'; if (AS.activo) AS.paso = 2; return pintar(); }
+  if (a === 'as-cont') { var bm = AS.borr && AS.borr.meta; if (!bm) return; AS.tipo = bm.tipo || 'Clausura'; AS.nombre = bm.nombre || ''; AS.fecha = bm.fecha || ''; AS.restaurar = true; AS.paso = 2; return pintarAsist(); }
+  if (a === 'as-desc') { await idbDel('as-draft'); await idbDel('as-meta'); AS.borr = null; return pintarAsist(); }
   if (a === 'as-sig') return asistSig();
   if (a === 'as-atras') { if (AS.creando) return; AS.paso = 1; return pintarAsist(); }
   if (a === 'as-crear') return asistCrear();
-  if (a === 'as-cancel') { if (AS.creando) return aviso('Espera a que termine la subida.'); vista = 'galerias'; return pintar(); }
+  if (a === 'as-cancel') { if (AS.creando) return aviso('Espera a que termine la subida.'); if (AS.activo && !await seguro('Se cierra el asistente. El avance (rostros y nombres) queda guardado en este navegador para continuar después. ¿Cerrar?', 'Sí, cerrar')) return; asistCerrar(); vista = 'galerias'; return pintar(); }
   if (a === 'subir') return subirTodo();
   if (a === 'entregar') { if (await seguro('¿Marcar como entregada? El cliente podrá descargar las finales.')) cambiar({ status: 'delivered', selection_enabled: false, downloads_enabled: true }, 'Galería entregada'); return; }
   if (a === 'reabrir') return cambiar({ status: 'selection', selection_enabled: true, downloads_enabled: false }, 'Selección reabierta');
@@ -922,7 +969,7 @@ async function accion(a, el){
   if (a === 'tema') { try { localStorage.setItem('pn-tema', el.dataset.t); } catch(e) {} return pintar(); }
   if (a === 'bloqueo') return cambiar({ finals_locked: !g.finals_locked }, g.finals_locked ? 'Fotos liberadas: el cliente ya las ve sin marca de agua' : 'Finales bloqueadas con marca de agua');
   if (a === 'ver') return abrirVer(el.dataset.id);
-  if (a === 'cerrar-cola') { cola.total = 0; cola.hechas = 0; cola.fallos = []; return pintarCola(); }
+  if (a === 'cerrar-cola') { cola.total = 0; cola.hechas = 0; cola.fallos = []; cola.titulo = ''; return pintarCola(); }
   if (a === 'abrir-subir') { var rd = root.querySelector('input[name=pn-dest][value=' + (el.dataset.tipo === 'final' ? 'final' : 'selection') + ']'); if (rd) { rd.checked = true; mostrarMarca(); } return $('#pn-dsub').showModal(); }
   if (a === 'cerrar-subir') return $('#pn-dsub').close();
   if (a === 'wa') return window.open('https://wa.me/?text=' + encodeURIComponent(el.dataset.t), '_blank');
@@ -966,6 +1013,9 @@ async function accion(a, el){
     var rk = await api('/api/admin/scene', { gallery: galId, action: 'update', id: id, access_code: cd }); if (!rk.ok) return aviso('No se pudo guardar el código.');
     cur.escenas.filter(function(x){ return x.id === id; })[0].access_code = cd; return aviso('Código guardado');
   }
+  if (a === 'carp') { fEsc = el.dataset.id || ''; marcadas = new Set(); fMas = 48; return pintar(); }
+  if (a === 'ftipo') { fTipo = el.dataset.v || ''; fMas = 48; return pintar(); }
+  if (a === 'mas-fotos') { fMas += 48; return pintar(); }
   if (a === 'vertodo') { abiertas[el.dataset.tipo] = !abiertas[el.dataset.tipo]; return pintar(); }
   if (a === 'modo') return cambiar({ access_mode: el.dataset.v }, el.dataset.v === 'abierto' ? 'Ahora el enlace entra sin clave' : 'Ahora el enlace pide código');
   if (a === 'guardar-codigo') {
@@ -1388,38 +1438,74 @@ async function negInicio(){
   await negCargar(); if (!neg.ok) return '';
   var prox = neg.evs.filter(function(e){ return new Date(e.starts_at) >= new Date(new Date().toDateString()); }).slice(0, 3);
   var pend = neg.cots.filter(function(c){ return c.status === 'sent'; });
-  return '<h2>Tu agenda y cotizaciones</h2><div class="pn-dos"><div class="pn-card"><h3>Próximos eventos</h3>' + (prox.length ? prox.map(function(e){ return '<p><b>' + esc(fFmt(e.starts_at, { weekday: 'short', day: 'numeric', month: 'short' })) + ' · ' + esc(hFmt(e.starts_at)) + '</b><br>' + (e.confirmed ? '✓ ' : '') + esc(e.title) + '<br><span class="pn-cta">' + cuenta(e.starts_at) + '</span></p>'; }).join('') : '<p class="pn-s">Nada agendado.</p>') + '<button class="pn-btn sec" data-act="n-ir" data-v="agenda">Ver agenda</button></div><div class="pn-card"><h3>Cotizaciones por responder</h3>' + (pend.length ? pend.slice(0, 3).map(function(c){ return '<p><b>' + esc(c.client_name) + '</b> · ' + qFmt(c.total) + '</p>'; }).join('') : '<p class="pn-s">No hay cotizaciones pendientes.</p>') + '<button class="pn-btn sec" data-act="n-ir" data-v="cotiz">Ver cotizaciones</button></div></div>';
+  return '<h2>Tu agenda y cotizaciones</h2><div class="pn-dos"><div class="pn-card"><h3>Próximos eventos</h3>' + (prox.length ? prox.map(function(e){ return '<div class="pn-ev"><div><span class="d">' + esc(fFmt(e.starts_at, { weekday: 'short', day: 'numeric', month: 'short' })) + ' · ' + esc(hFmt(e.starts_at)) + '</span><span class="t">' + (e.confirmed ? '✓ ' : '') + esc(e.title) + '</span></div><span class="pn-pl">' + cuenta(e.starts_at) + '</span></div>'; }).join('') : '<p class="pn-s">Nada agendado.</p>') + '<button class="pn-btn sec" data-act="n-ir" data-v="agenda">Ver agenda</button></div><div class="pn-card"><h3>Cotizaciones por responder</h3>' + (pend.length ? pend.slice(0, 3).map(function(c){ return '<p><b>' + esc(c.client_name) + '</b> · ' + qFmt(c.total) + '</p>'; }).join('') : '<p class="pn-s">No hay cotizaciones pendientes.</p>') + '<button class="pn-btn sec" data-act="n-ir" data-v="cotiz">Ver cotizaciones</button></div></div>';
 }
 
 /* ---------- Acciones y formularios ---------- */
 
 /* ---------- Galería asistida por IA ---------- */
-var AS = { paso: 1, tipo: 'Clausura', nombre: '', fecha: '', creando: false };
+var AS = { paso: 1, tipo: 'Clausura', nombre: '', fecha: '', creando: false, activo: false, show: false, restaurar: false, borr: null };
+function idbAbrir(){ return new Promise(function(res, rej){ var r = indexedDB.open('galeria-ia', 1); r.onupgradeneeded = function(){ r.result.createObjectStore('kv'); }; r.onsuccess = function(){ res(r.result); }; r.onerror = function(){ rej(r.error); }; }); }
+function idbGet(k){ return idbAbrir().then(function(d){ return new Promise(function(res){ var q = d.transaction('kv').objectStore('kv').get(k); q.onsuccess = function(){ res(q.result || null); }; q.onerror = function(){ res(null); }; }); }).catch(function(){ return null; }); }
+function idbSet(k, v){ return idbAbrir().then(function(d){ return new Promise(function(res){ var t = d.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = function(){ res(true); }; t.onerror = function(){ res(false); }; }); }).catch(function(){ return false; }); }
+function idbDel(k){ return idbAbrir().then(function(d){ return new Promise(function(res){ var t = d.transaction('kv', 'readwrite'); t.objectStore('kv').delete(k); t.oncomplete = function(){ res(true); }; t.onerror = function(){ res(false); }; }); }).catch(function(){ return false; }); }
+async function asistCargarBorrador(){
+  var m = await idbGet('as-meta'), d = await idbGet('as-draft');
+  AS.borr = (m && d && d.fotos && d.fotos.length) ? { meta: m, fotos: d.fotos.length, personas: (d.personas || []).length, ts: d.ts || m.ts } : null;
+  if (vista === 'asist' && AS.paso === 1) pintarAsist();
+}
+function asistLoop(){
+  var h = document.getElementById('pn-as-hold'); if (!h) { AS.loop = false; return; }
+  var ph = document.getElementById('pn-as-ph');
+  if (AS.show && ph) { var r = ph.getBoundingClientRect(); h.style.cssText = 'position:fixed;left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height + 'px;z-index:5;visibility:visible'; }
+  else h.style.cssText = 'position:fixed;left:-20000px;top:0;width:1100px;height:800px;visibility:hidden;pointer-events:none';
+  requestAnimationFrame(asistLoop);
+}
+function asistIframe(){
+  if (document.getElementById('pn-as-if')) return;
+  var h = document.getElementById('pn-as-hold'); if (!h) { h = document.createElement('div'); h.id = 'pn-as-hold'; document.body.appendChild(h); }
+  var tm = temaGuardado();
+  h.innerHTML = '<iframe id="pn-as-if" src="rostros.html?embed=1' + (tm === 'light' ? '&tema=luz' : tm === 'dark' ? '&tema=osc' : '') + (AS.restaurar ? '&borrador=1' : '') + '" title="Reconocimiento de rostros" style="width:100%;height:100%;border:0;background:transparent"></iframe>';
+  AS.activo = true; if (!AS.loop) { AS.loop = true; requestAnimationFrame(asistLoop); }
+  if (!AS.chipT) AS.chipT = setInterval(asistChip, 800);
+}
+function asistCerrar(){ var h = document.getElementById('pn-as-hold'); if (h) h.remove(); AS.activo = false; AS.restaurar = false; AS.show = false; var c = document.getElementById('pn-as-chip'); if (c) c.hidden = true; }
+function asistChip(){
+  var c = document.getElementById('pn-as-chip'); if (!c) return;
+  if (!AS.activo || vista === 'asist' || AS.creando) { c.hidden = true; return; }
+  var txt = '', ifr = document.getElementById('pn-as-if');
+  try { var d = ifr.contentDocument, pg = d.getElementById('pg'); txt = pg && !pg.hidden ? d.getElementById('pt').textContent : (d.getElementById('out') && !d.getElementById('out').hidden ? 'Análisis listo · pon los nombres' : 'Galería con IA en pausa'); } catch (e) { txt = 'Galería con IA'; }
+  c.textContent = txt + ' · Volver'; c.hidden = false;
+}
 var AS_TIPOS = ['Clausura', 'Graduación', 'Fin de curso', 'Evento escolar', 'Quinceañera', 'Boda', 'Cumpleaños', 'Otro'];
-function asistReset(){ AS.paso = 1; AS.tipo = 'Clausura'; AS.nombre = ''; AS.fecha = ''; AS.creando = false; }
+function asistReset(){ if (AS.activo) { return; } AS.paso = 1; AS.tipo = 'Clausura'; AS.nombre = ''; AS.fecha = ''; AS.creando = false; AS.restaurar = false; asistCargarBorrador(); }
 function asistPasos(){
-  var n = ['Datos del evento', 'Fotos y rostros', 'Crear galería'];
-  return '<ol class="pn-as-p">' + n.map(function(t, i){ return '<li class="' + (AS.paso === i + 1 ? 'on' : AS.paso > i + 1 ? 'ok' : '') + '"><b>' + (i + 1) + '</b> ' + t + '</li>'; }).join('') + '</ol>';
+  var n = ['Evento', 'Fotos y nombres', 'Crear galería'];
+  return '<ol class="pn-as-p">' + n.map(function(t, i){ return '<li class="' + (AS.paso === i + 1 ? 'on' : AS.paso > i + 1 ? 'ok' : '') + '"><b>' + (AS.paso > i + 1 ? '✓' : i + 1) + '</b> ' + t + '</li>'; }).join('') + '</ol>';
 }
 function pintarAsist(){
-  var h = '<h1>Nueva galería asistida por IA</h1><p class="pn-s ay">La inteligencia artificial reconoce a cada persona en tus fotos y arma una carpeta por persona dentro de la galería, cada una con su propio enlace.</p>' + asistPasos();
+  var h = '<h1>Nueva galería asistida por IA</h1><p class="pn-s ay">La inteligencia artificial reconoce a cada persona en tus fotos y arma una escena por persona dentro de la galería, cada una con su propio enlace.</p>' + asistPasos();
   if (AS.paso === 1) {
-    h += '<div class="pn-card"><h3>1. Datos del evento</h3><label class="pn-s" for="pn-as-t">Tipo de evento</label><select id="pn-as-t">' + AS_TIPOS.map(function(t){ return '<option' + (t === AS.tipo ? ' selected' : '') + '>' + t + '</option>'; }).join('') + '</select>' +
-      '<label class="pn-s" for="pn-as-n" style="display:block;margin-top:.9rem">Nombre de la galería (por ejemplo, el colegio)</label><input type="text" id="pn-as-n" maxlength="80" placeholder="Ej. Colegio San José" value="' + esc(AS.nombre) + '">' +
-      '<label class="pn-s" for="pn-as-f" style="display:block;margin-top:.9rem">Fecha del evento</label><input type="date" id="pn-as-f" value="' + esc(AS.fecha) + '">' +
+    if (AS.borr) h += '<div class="pn-card"><h3>Tienes un avance guardado</h3><p class="pn-s">«' + esc(AS.borr.meta.nombre || 'Sin nombre') + '» · ' + AS.borr.fotos + ' fotos analizadas · ' + AS.borr.personas + ' personas' + (AS.borr.ts ? ' · guardado ' + new Date(AS.borr.ts).toLocaleString('es', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '') + '. Al continuar, tendrás que volver a elegir las mismas fotos para poder subirlas.</p><div class="pn-row"><button class="pn-btn" data-act="as-cont">Continuar donde me quedé</button><button class="pn-btn sec" data-act="as-desc">Descartar y empezar de cero</button></div></div>';
+    h += '<div class="pn-card"><h3>1. Datos del evento</h3><p class="pn-k">Tipo de evento</p><div class="pn-rc" id="pn-as-t">' + AS_TIPOS.map(function(t){ return '<label class="pn-rcl"><input type="radio" name="pn-as-tp" value="' + t + '"' + (t === AS.tipo ? ' checked' : '') + '><span class="d"></span><span>' + t + '</span></label>'; }).join('') + '</div>' +
+      '<label class="pn-s" for="pn-as-n" style="display:block;margin:1rem 0 .4rem">Nombre de la galería (por ejemplo, el colegio)</label><input type="text" id="pn-as-n" maxlength="80" placeholder="Ej. Colegio San José" value="' + esc(AS.nombre) + '">' +
+      '<label class="pn-s" for="pn-as-f" style="display:block;margin:1rem 0 .4rem">Fecha del evento</label><input type="date" id="pn-as-f" value="' + esc(AS.fecha) + '">' +
       '<div class="pn-row" style="margin-top:1rem"><button class="pn-btn" data-act="as-sig">Siguiente</button><button class="pn-btn sec" data-act="as-cancel">Cancelar</button></div></div>';
   } else {
-    h += '<div class="pn-card"><h3>2. Elige las fotos, revisa los rostros y ponles nombre</h3><p class="pn-s">Elige todas las fotos del evento y toca «Analizar». El análisis se hace en tu computadora, una foto a la vez; con cientos de fotos puede tardar varios minutos, no cierres esta pestaña. Después escribe el nombre de cada persona. Cuando todo esté listo, toca «Crear galería y subir fotos».</p></div>' +
-      '<iframe id="pn-as-if" src="rostros.html?embed=1" title="Reconocimiento de rostros" style="width:100%;height:78vh;border:1px solid var(--l);border-radius:14px;background:var(--f);margin-top:1rem"></iframe>' +
-      '<div class="pn-card" id="pn-as-ct"><h3>3. Crear la galería</h3><p class="pn-s">Se crea la galería «' + esc(AS.nombre) + '» con una carpeta por persona. Cada carpeta tiene su enlace propio y solo se abre con ese enlace. Las fotos donde salen varias personas van a la carpeta de cada una. Las fotos de quien excluyas no se suben.</p>' +
+    h += '<div class="pn-card"><h3>Elige las fotos, revisa los rostros y ponles nombre</h3><p class="pn-s">Elige todas las fotos del evento y toca «Analizar». El análisis se hace en tu computadora, una foto a la vez; con cientos de fotos puede tardar varios minutos, no cierres esta pestaña. Después escribe el nombre de cada persona. Puedes cambiar de pantalla: el análisis sigue en segundo plano y tu avance se guarda solo en este navegador. Cuando todo esté listo, toca «Crear galería y subir fotos».</p></div>' +
+      '<div id="pn-as-ph" style="height:calc(100vh - 9rem);min-height:560px;margin-top:.6rem"></div>' +
+      '<div class="pn-card" id="pn-as-ct"><h3>Crear la galería</h3><p class="pn-s">Se crea la galería «' + esc(AS.nombre) + '» con una escena por persona. Cada escena tiene su enlace propio y solo se abre con ese enlace. Las fotos donde salen varias personas van a la escena de cada una. Las fotos de quien excluyas no se suben.</p>' +
       '<div class="pn-row"><button class="pn-btn" data-act="as-crear">Crear galería y subir fotos</button><button class="pn-btn sec" data-act="as-atras">Atrás</button><button class="pn-btn sec" data-act="as-cancel">Cancelar</button></div><div id="pn-as-est" class="pn-s"></div></div>';
   }
   $('#pn-main').innerHTML = h;
+  if (AS.paso === 2) { AS.show = true; asistIframe(); }
 }
+function fechaOk(v){ return /^\d{4}-\d{2}-\d{2}$/.test(v) && v >= '2000-01-01' && v <= '2100-12-31'; }
 function asistSig(){
-  AS.tipo = $('#pn-as-t').value; AS.nombre = $('#pn-as-n').value.trim(); AS.fecha = $('#pn-as-f').value || '';
+  var rt = root.querySelector('input[name=pn-as-tp]:checked'); AS.tipo = rt ? rt.value : AS.tipo; AS.nombre = $('#pn-as-n').value.trim(); AS.fecha = $('#pn-as-f').value || '';
   if (!AS.nombre) return aviso('Escribe el nombre de la galería.');
-  AS.paso = 2; pintarAsist();
+  if (AS.fecha && !fechaOk(AS.fecha)) return aviso('Revisa la fecha: el año debe tener 4 dígitos (entre 2000 y 2100).');
+  AS.paso = 2; idbSet('as-meta', { tipo: AS.tipo, nombre: AS.nombre, fecha: AS.fecha, ts: Date.now() }); pintarAsist();
 }
 function asistEstado(t, pct){
   var e = document.getElementById('pn-as-est'); if (!e) return;
@@ -1431,25 +1517,30 @@ async function asistCrear(){
   if (!RT || !RT.resumen) return aviso('La herramienta todavía no termina de cargar. Espera un momento.');
   var R = RT.resumen();
   if (!R.listo || !R.total) return aviso('Primero elige las fotos y toca «Analizar».');
+  if (!R.archivos.some(Boolean)) return aviso('Vuelve a elegir las mismas fotos del evento («Reconectar fotos») para poder subirlas.');
   var act = R.personas.filter(function(p){ return !p.excl && p.fotos.length; });
-  if (!act.length) return aviso('No hay personas con fotos para crear carpetas. Revisa los nombres o la exigencia.');
+  if (!act.length) return aviso('No hay personas con fotos para crear escenas. Revisa los nombres o la exigencia.');
   var sn = act.filter(function(p){ return p.sinNombre; }).length;
   if (sn && !await seguro('Hay ' + sn + ' persona' + (sn === 1 ? '' : 's') + ' sin nombre; se llamarán «Persona 1», «Persona 2»… ¿Continuar?', 'Sí, continuar')) return;
-  /* plan de subida: que carpeta le toca a cada foto */
+  /* plan de subida: que escena le toca a cada foto */
   var dueños = {}, vistas = {};
   R.personas.forEach(function(p){ p.todas.forEach(function(i){ vistas[i] = 1; }); });
   act.forEach(function(p){ p.fotos.forEach(function(i){ (dueños[i] = dueños[i] || []).push(p); }); });
   var plan = [], omitidas = 0;
+  var sinArch = 0;
   for (var i = 0; i < R.total; i++) {
+    if (!R.archivos[i]) { sinArch++; continue; }
     if (dueños[i]) plan.push({ i: i, own: dueños[i] });
     else if (vistas[i]) omitidas++;
     else plan.push({ i: i, own: [] });
   }
   var sinCarp = plan.filter(function(x){ return !x.own.length; }).length;
-  if (!await seguro('Se creará «' + AS.nombre + '» con ' + act.length + ' carpetas y se subirán ' + plan.length + ' fotos' + (omitidas ? ' (' + omitidas + ' no se suben: son de personas excluidas o quitadas)' : '') + (sinCarp ? '. ' + sinCarp + ' fotos sin rostro claro quedarán en la galería general' : '') + '. No cierres esta pestaña hasta que termine.', 'Crear')) return;
+  if (!await seguro('Se creará «' + AS.nombre + '» con ' + act.length + ' escenas y se subirán ' + plan.length + ' fotos' + (omitidas ? ' (' + omitidas + ' no se suben: son de personas excluidas o quitadas)' : '') + (sinArch ? ' (' + sinArch + ' no se suben porque no volviste a elegir esos archivos)' : '') + (sinCarp ? '. ' + sinCarp + ' fotos sin rostro claro quedarán en la galería general' : '') + '. No cierres esta pestaña hasta que termine.', 'Crear')) return;
+  if (cola.activos || cola.trabajos.length) return aviso('Espera a que termine la subida que está en curso.');
   AS.creando = true; var archivos = R.archivos;
+  cola.total = plan.length; cola.hechas = 0; cola.fallos = []; cola.gids = {}; cola.titulo = 'Creando «' + AS.nombre + '»…'; pintarCola();
   try {
-    asistEstado('Creando la galería…', 0);
+    asistEstado('Listo: la galería se está creando y las fotos se suben en segundo plano. Puedes cambiar de pantalla y seguir trabajando; mira el avance en el recuadro de abajo a la derecha. No cierres esta pestaña hasta que termine.');
     var r = null, titulo = AS.nombre;
     for (var k = 0; k < 4; k++) {
       r = await db.from('galleries').insert({ photographer_id: ph.id, client_id: null, title: titulo, slug: slug(titulo) + '-' + codigo().slice(0, 4).toLowerCase(), access_code: codigo(), event_date: AS.fecha || null, status: 'selection', selection_enabled: true, downloads_enabled: false, watermark_text: marcaBase(), watermark_opacity: 35, gallery_type: AS.tipo }).select('id').single();
@@ -1458,12 +1549,13 @@ async function asistCrear(){
     if (r.error) throw new Error(r.error.message);
     var gid = r.data.id, esc2 = {};
     for (var q = 0; q < act.length; q++) {
-      asistEstado('Creando carpetas… ' + (q + 1) + ' de ' + act.length, q / act.length);
+      cola.titulo = 'Creando escenas… ' + (q + 1) + ' de ' + act.length; pintarCola();
       var rc = await api('/api/admin/scene', { gallery: gid, action: 'create', name: act[q].nombre });
-      if (!rc.ok) throw new Error('No se pudo crear la carpeta de ' + act[q].nombre);
+      if (!rc.ok) throw new Error('No se pudo crear la escena de ' + act[q].nombre);
       esc2[act[q].id] = rc.escena.id;
       await api('/api/admin/scene', { gallery: gid, action: 'update', id: rc.escena.id, hidden: true });
     }
+    cola.titulo = 'Subiendo fotos de «' + AS.nombre + '»…'; pintarCola();
     var extras = [], fallos = [], hechas = 0, sig = 0, tot = plan.length;
     async function hilo(){
       while (sig < plan.length) {
@@ -1471,9 +1563,9 @@ async function asistCrear(){
         try {
           var pid = await subirUna({ file: f, tipo: 'selection', marca: null, gid: gid, cal: 'media', texto: marcaBase(), esc: t.own.length ? esc2[t.own[0].id] : '' });
           if (pid) t.own.slice(1).forEach(function(p){ extras.push({ scene_id: esc2[p.id], photo_id: pid, photographer_id: ph.id }); });
-          else if (t.own.length > 1) fallos.push(f.name + ': no se pudo ligar a varias carpetas');
+          else if (t.own.length > 1) fallos.push(f.name + ': no se pudo ligar a varias escenas');
         } catch (e) { fallos.push(f.name + ': ' + (e.message || 'error')); }
-        hechas++; asistEstado('Subiendo fotos… ' + hechas + ' de ' + tot, hechas / tot);
+        hechas++; cola.hechas = hechas; if (fallos.length) cola.fallos = fallos.slice(); pintarCola();
       }
     }
     await Promise.all([hilo(), hilo(), hilo()]);
@@ -1482,11 +1574,12 @@ async function asistCrear(){
       var ri = await db.from('scene_photos').insert(extras.slice(c, c + 400));
       if (ri.error) { errSp = ri.error.message; break; }
     }
-    AS.creando = false;
-    await cargarGalerias(); vista = 'detalle'; await abrirDetalle(gid);
-    aviso(errSp ? 'Galería creada, pero las fotos con varias personas no se pudieron ligar (¿ya ejecutaste etapa14.sql?).' : fallos.length ? 'Galería creada. ' + fallos.length + ' foto(s) no se subieron: ' + fallos.slice(0, 2).join('; ') : 'Galería creada con ' + act.length + ' carpetas. Los enlaces están en la pestaña Compartir.');
+    AS.creando = false; cola.titulo = ''; idbDel('as-draft'); idbDel('as-meta'); asistCerrar(); AS.borr = null; if (errSp) cola.fallos.push('Las fotos con varias personas no se ligaron: ejecuta etapa14.sql'); pintarCola();
+    await cargarGalerias();
+    if (vista === 'asist') { vista = 'detalle'; await abrirDetalle(gid); } else if (vista === 'galerias') pintarLista();
+    aviso(errSp ? 'Galería creada, pero las fotos con varias personas no se pudieron ligar (¿ya ejecutaste etapa14.sql?).' : fallos.length ? 'Galería creada. ' + fallos.length + ' foto(s) no se subieron: ' + fallos.slice(0, 2).join('; ') : 'Galería creada con ' + act.length + ' escenas. Los enlaces están en la pestaña Compartir.');
   } catch (e) {
-    AS.creando = false; asistEstado('Algo falló: ' + (e.message || 'error') + '. Si la galería ya se creó, búscala en «Galerías de clientes» y revisa qué fotos faltan.');
+    AS.creando = false; cola.titulo = ''; cola.fallos.push('Algo falló: ' + (e.message || 'error') + '. Si la galería ya se creó, búscala en «Galerías de clientes» y revisa qué fotos faltan.'); pintarCola(); asistEstado('Algo falló: ' + (e.message || 'error'));
   }
 }
 /* ---------- Grupos de graduación ---------- */
@@ -1578,6 +1671,7 @@ async function crearGaleria(e){
   e.preventDefault();
   var cli = $('#pn-cn').value.trim(), titulo = $('#pn-ct').value.trim() || cli, fecha = $('#pn-cf').value || null;
   if (!titulo) return aviso('Escribe un nombre para la galería.');
+  if (fecha && !fechaOk(fecha)) return aviso('Revisa la fecha: el año debe tener 4 dígitos (entre 2000 y 2100).');
   var btn = e.target.querySelector('button[type=submit]'); btn.disabled = true;
   var cid = null;
   if (cli) { var c = await db.from('clients').insert({ photographer_id: ph.id, name: cli }).select('id').single(); if (c.error) { btn.disabled = false; return aviso(c.error.message); } cid = c.data.id; }
@@ -1594,10 +1688,15 @@ async function crearGaleria(e){
 
 window.iniciarPanel = async function(photographer, cliente){
   ph = photographer; db = cliente; root = document.getElementById('vPanel');
+  (function(){
+    var lim = function(n){ if (n.nodeType !== 1) return; var l = n.matches && n.matches('input[type=date]') ? [n] : Array.prototype.slice.call(n.querySelectorAll ? n.querySelectorAll('input[type=date]') : []); l.forEach(function(i){ i.min = '2000-01-01'; i.max = '2100-12-31'; }); };
+    new MutationObserver(function(ms){ ms.forEach(function(m){ Array.prototype.forEach.call(m.addedNodes, lim); }); }).observe(root, { childList: true, subtree: true }); lim(root);
+    root.addEventListener('input', function(e){ var t = e.target; if (t && t.type === 'date' && /^\d{5,}-/.test(t.value || '')) t.value = t.value.replace(/^(\d{4})\d+/, '$1'); });
+  })();
   if (!document.getElementById('pn-css')) { var st = document.createElement('style'); st.id = 'pn-css'; st.textContent = CSS; document.head.appendChild(st); }
   root.innerHTML = '<div class="pn"><aside></aside><main id="pn-main"><div class="pn-skel w1"></div><div class="pn-skel"></div><div class="pn-skel h2"></div></main>' +
     '<dialog id="pn-dnueva"><h2>Nueva galería</h2><form id="pn-fn"><input type="text" id="pn-cn" placeholder="Cliente (ej. Ana y Luis)"><input type="text" id="pn-ct" placeholder="Nombre de la galería (ej. Boda Ana y Luis)"><input type="date" id="pn-cf"><div class="pn-row"><button class="pn-btn" type="submit">Crear</button><button class="pn-btn sec" type="button" id="pn-cc">Cancelar</button></div></form></dialog><dialog id="pn-dqr"><h2 id="pn-qt">Código QR</h2><div class="pn-qr"><canvas id="pn-qc" width="10" height="10"></canvas></div><p class="pn-s ay">Quien lo escanee con la cámara del celular abre la galería. Puedes imprimirlo o mandarlo por WhatsApp.</p><div class="pn-row"><button class="pn-btn" data-act="qr-bajar" type="button">Descargar imagen</button><button class="pn-btn sec" data-act="qr-cerrar" type="button">Cerrar</button></div></dialog><dialog id="pn-dport"><h2>Elegir portada</h2><p class="pn-s">Toca la foto que quieres como portada.</p><div class="pn-grid" id="pn-gport"></div><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-portada">Cancelar</button></div></dialog></div>';
-  root.querySelector('.pn').insertAdjacentHTML('beforeend', '<div id="pn-up" hidden></div>');
+  root.querySelector('.pn').insertAdjacentHTML('beforeend', '<div id="pn-up" hidden></div><button id="pn-as-chip" data-act="asist" hidden type="button"></button>');
   root.querySelector('.pn').insertAdjacentHTML('beforeend', '<dialog id="pn-dver"><header class="pn-vh"><div class="pn-vt2"><b id="pn-vnm"></b><span class="pn-s" id="pn-vct"></span></div><div class="pn-vac"><button type="button" id="pn-vpo" data-act="portada">★ Establecer como portada</button><button type="button" id="pn-vdel" data-act="borrar-foto">Borrar</button><button type="button" id="pn-vx" aria-label="Cerrar">✕</button></div></header><button class="pn-nav l" id="pn-vp" type="button" aria-label="Anterior">‹</button><div class="pn-vm"><img id="pn-vimg" alt=""></div><button class="pn-nav r" id="pn-vn" type="button" aria-label="Siguiente">›</button></dialog>');
   $('#pn-vp').onclick = function(){ pasarVer(-1); }; $('#pn-vn').onclick = function(){ pasarVer(1); }; $('#pn-vx').onclick = function(){ $('#pn-dver').close(); };
   var vx0 = null, dv = $('#pn-dver');

@@ -594,6 +594,29 @@ function ventanaFoco(f, w, h, z, q, dir){
 }
 
 // ---------- Tres bandas: arriba y abajo se deslizan a un lado, la del medio al otro (con acercamiento) ----------
+// Color bonito de una foto: tono dominante (le resta peso al tono de la piel para que no todo salga naranja), suavizado
+function colorFoto(f, respaldo){
+  if (f._tono) return f._tono;
+  var m = /^#?([0-9a-f]{6})$/i.exec(respaldo || ''), rf = m ? [parseInt(m[1].slice(0, 2), 16), parseInt(m[1].slice(2, 4), 16), parseInt(m[1].slice(4, 6), 16)] : [201, 168, 119], res = rf;
+  try {
+    var c = lienzo(24, 24), x = c.getContext('2d', { willReadFrequently: true }); x.drawImage(f.bmp, 0, 0, 24, 24); var d = x.getImageData(0, 0, 24, 24).data, bins = [], i, k;
+    for (k = 0; k < 12; k++) bins.push({ w: 0, cx: 0, cy: 0, ls: 0 });
+    var lum = 0;
+    for (i = 0; i < d.length; i += 4) {
+      var r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), v = mx, sa = mx ? (mx - mn) / mx : 0, h = 0, dd = mx - mn; lum += 0.299 * r + 0.587 * g + 0.114 * b;
+      if (sa < 0.18 || v < 0.22) continue;
+      if (dd) h = mx === r ? ((g - b) / dd + 6) % 6 : mx === g ? (b - r) / dd + 2 : (r - g) / dd + 4; h *= 60;
+      var w = sa * v * ((h > 8 && h < 42) ? 0.4 : 1), bi = bins[Math.floor(h / 30) % 12]; bi.w += w; bi.cx += w * Math.cos(h * Math.PI / 180); bi.cy += w * Math.sin(h * Math.PI / 180);
+    }
+    var best = bins[0]; bins.forEach(function(b2){ if (b2.w > best.w) best = b2; });
+    if (best.w > 2.5) {
+      var hh = (Math.atan2(best.cy, best.cx) * 180 / Math.PI + 360) % 360, L = 0.6, S = 0.42, q2 = L < .5 ? L * (1 + S) : L + S - L * S, p2 = 2 * L - q2;
+      var hue = function(t){ t = (t + 1) % 1; return t < 1 / 6 ? p2 + (q2 - p2) * 6 * t : t < .5 ? q2 : t < 2 / 3 ? p2 + (q2 - p2) * (2 / 3 - t) * 6 : p2; };
+      res = [hue(hh / 360 + 1 / 3) * 255, hue(hh / 360) * 255, hue(hh / 360 - 1 / 3) * 255];
+    } else { var l2 = Math.round(150 + 70 * (lum / (d.length / 4))); res = [Math.min(235, l2 + 8), l2, Math.max(120, l2 - 14)]; }
+  } catch (e) {}
+  f._tono = res; return res;
+}
 function crearEscenaCarriles(fotos, W, H, seg, op){
   var n = fotos.length, u = Math.min(W, H) / 1080, I = op.intro ? INTRO : 0, logo = op.logo || null, acento = op.acento || '#C9A877';
   var tit = String(op.titulo || '').trim(), sub = String(op.subtitulo || '').trim(), conTit = !!(tit || sub);
@@ -603,17 +626,25 @@ function crearEscenaCarriles(fotos, W, H, seg, op){
   var maxL = Math.ceil(n / 3), dur = clamp(n * 1.7, 12, 45), Dp = clamp(dur / maxL, 1.9, 9), duracion = dur + I;
   var th = 0, g = 12 * u, bh = (H - th - 2 * g) / 3, DIR = [1, -1, 1];
   var listas = [0, 1, 2].map(function(r){ var L = []; for (var i = r; i < n; i += 3) L.push(i); if (!L.length) L.push(r % n); return L; });
-  function rr(c, x, y, w, h, r){ c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  // Color de cada foto: se toma el tono más presente (cielo, vegetación, ropa…) y se suaviza para que combine siempre
+  var tonos0 = fotos.map(function(f){ return colorFoto(f, acento); }), base = tonos0[0], mejor = 1e12;
+  tonos0.forEach(function(c){ var sd = 0; tonos0.forEach(function(o){ sd += Math.abs(c[0] - o[0]) + Math.abs(c[1] - o[1]) + Math.abs(c[2] - o[2]); }); if (sd < mejor) { mejor = sd; base = c; } });
+  var tonos = tonos0.map(function(c){ return [base[0] + (c[0] - base[0]) * 0.3, base[1] + (c[1] - base[1]) * 0.3, base[2] + (c[2] - base[2]) * 0.3]; });
+  function mezclaC(a, b, t){ return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]; }
+  function rgbS(c){ return 'rgb(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ')'; }
+  function estado(r, tt){
+    var L = listas[r], mL = L.length, s = tt + r * Dp / 3, idx = Math.floor(s / Dp), ph = s - idx * Dp, Tt = Math.min(0.95, Dp * 0.3), uu = mL > 1 ? clamp((ph - (Dp - Tt)) / Tt, 0, 1) : 0;
+    return { idx: idx, ph: ph, uu: uu, cur: L[idx % mL], nxt: L[(idx + 1) % mL], col: mezclaC(tonos[L[idx % mL]], tonos[L[(idx + 1) % mL]], ease(uu)) };
+  }
   function celda(cx, i, x, y, w, h, z, q, dir){
     if (x > W || x + w < 0) return;
     var f = fotos[i], v = ventanaFoco(f, w, h, z, q, dir);
     cx.save(); cx.beginPath(); cx.rect(x, y, w, h); cx.clip(); cx.imageSmoothingQuality = 'high'; cx.drawImage(f.bmp, v.sx, v.sy, v.sw, v.sh, x, y, w, h); cx.restore();
   }
   function banda(cx, r, y, tt){
-    var L = listas[r], mL = L.length, s = tt + r * Dp / 3, ent = ease(clamp((tt - 0.12 * r) / 1.1, 0, 1)), dir = DIR[r];
-    var idx = Math.floor(s / Dp), ph = s - idx * Dp, Tt = Math.min(0.95, Dp * 0.3), uu = mL > 1 ? clamp((ph - (Dp - Tt)) / Tt, 0, 1) : 0, q = clamp(ph / Dp, 0, 1);
-    var cur = L[idx % mL], nxt = L[(idx + 1) % mL], e = ease(uu), zb = r === 1 ? 1.04 + 0.24 * (idx % 2 ? 1 - q : q) : 1.12, zn = r === 1 ? 1.04 : 1.12;
-    cx.save(); cx.beginPath(); cx.rect(0, y, W, bh); cx.clip(); cx.fillStyle = acento; cx.fillRect(0, y, W, bh);
+    var ent = ease(clamp((tt - 0.12 * r) / 1.1, 0, 1)), dir = DIR[r], st = estado(r, tt), idx = st.idx, ph = st.ph, uu = st.uu, q = clamp(ph / Dp, 0, 1);
+    var cur = st.cur, nxt = st.nxt, e = ease(uu), zb = r === 1 ? 1.04 + 0.24 * (idx % 2 ? 1 - q : q) : 1.12, zn = r === 1 ? ((idx + 1) % 2 ? 1.28 : 1.04) : 1.12;
+    cx.save(); cx.beginPath(); cx.rect(0, y, W, bh); cx.clip(); cx.fillStyle = rgbS(st.col); cx.fillRect(0, y, W, bh);
     var off = -dir * W * (1 - ent), curX = dir * e * (W + g) + off, nxtX = curX - dir * (W + g);
     celda(cx, cur, curX, y, W, bh, zb, q, dir);
     if (uu > 0) celda(cx, nxt, nxtX, y, W, bh, zn, 0, dir);
@@ -646,7 +677,9 @@ function crearEscenaCarriles(fotos, W, H, seg, op){
     t = clamp(t, 0, duracion - 0.0001);
     cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = 1; cx.filter = 'none'; cx.fillStyle = acento; cx.fillRect(0, 0, W, H);
     var tt = t - I; if (tt < 0) { intro(cx, t); return; }
+    var cs = [0, 1, 2].map(function(r){ return estado(r, tt).col; });
     for (var r = 0; r < 3; r++) banda(cx, r, th + r * (bh + g), tt);
+    for (var k = 0; k < 2; k++) { var yg = th + (k + 1) * bh + k * g, gr2 = cx.createLinearGradient(0, yg, 0, yg + g); gr2.addColorStop(0, rgbS(cs[k])); gr2.addColorStop(1, rgbS(cs[k + 1])); cx.fillStyle = gr2; cx.fillRect(0, yg, W, g); }
     rotulo(cx, tt);
     var fin = duracion - t; if (fin < 0.6) { cx.fillStyle = 'rgba(11,10,9,' + clamp(1 - fin / 0.6, 0, 1).toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
   }

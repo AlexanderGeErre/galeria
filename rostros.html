@@ -37,6 +37,8 @@ details summary{cursor:pointer;font-weight:500}
 select{padding:.4rem .6rem;border-radius:10px;border:1px solid var(--l);background:var(--c)}
 .res{display:flex;flex-wrap:wrap;gap:1.4rem;margin-top:.6rem}.res b{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;display:block;line-height:1}
 body.emb{padding:.2rem .2rem 1rem}body.emb #cab{display:none}
+html.luz{--f:#FAFAF8;--c:#fff;--t:#2B2623;--s:#7d756d;--l:#E6E3DF;--a:#B8946A;--ok:#3f7a52;--err:#A32D2D;--p:#F0EFED;color-scheme:light}html.osc{--f:#161514;--c:#211f1d;--t:#F1ECE4;--s:#a39a91;--l:#322f2b;--a:#C9A27A;--ok:#8fd19e;--err:#E58C8C;--p:#2a2724;color-scheme:dark}body.emb{background:transparent}body.emb .card{border-radius:18px}body.emb .per .fc .f{border-radius:50%}
+body.emb .cmb,.cmb{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;font-size:.88rem;width:100%;background:var(--p);border-radius:12px;padding:.6rem .8rem}.cmbsel{border-radius:999px!important}
 </style>
 </head>
 <body>
@@ -45,13 +47,15 @@ body.emb{padding:.2rem .2rem 1rem}body.emb #cab{display:none}
   <p class="s">Sube las fotos de un evento y la IA las agrupa por persona. Tú revisas, les pones nombre y se arma una galería para cada quien. <b>Versión de prueba:</b> no sube nada, todo se analiza en tu computadora y las fotos no salen de ella.</p></div>
 
   <div class="card">
-    <h3>1. Elige las fotos del evento</h3>
-    <p class="s">Selecciona juntas las fotos desde tu carpeta (puedes subir 500 o más; entre más fotos, más tarda) y toca «Analizar rostros».</p>
+    <h3 id="c1t">1. Elige las fotos del evento</h3>
+    <p class="s" id="c1p">Selecciona juntas las fotos desde tu carpeta (puedes subir 500 o más; entre más fotos, más tarda) y toca «Analizar rostros».</p>
     <div class="row" style="margin-top:.7rem"><input type="file" id="fi" accept="image/*" multiple>
       <button class="btn" id="go" disabled>Analizar rostros</button><button class="btn sec" id="stop" hidden>Detener</button></div>
     <div id="pg" hidden><div class="barra"><i id="pb"></i></div><div class="s" id="pt"></div></div>
     <div class="s err" id="er"></div>
   </div>
+
+  <div class="card" id="rst" hidden><h3>Avance recuperado</h3><p class="s" id="rstt"></p><div class="row" style="margin-top:.6rem"><button class="btn sec sm" id="rstx">Descartar y empezar de cero</button></div></div>
 
   <div id="out" hidden>
     <div class="card">
@@ -68,7 +72,7 @@ body.emb{padding:.2rem .2rem 1rem}body.emb #cab{display:none}
     </div>
 
     <h2>2. Personas encontradas</h2>
-    <p class="s">Escribe el nombre de cada una. Si dos personas se confundieron, toca el rostro y muévelo; si una persona quedó dividida en dos, usa «Combinar».</p>
+    <p class="s">Escribe el nombre de cada una. Si dos personas se confundieron, toca el rostro y muévelo; si una persona quedó dividida en dos, usa «Combinar con…» y elige a la otra persona.</p>
     <div class="grid" id="per"></div>
 
     <details class="card" id="dsc"><summary id="dst"></summary><p class="s">Rostros que no pasaron el filtro. Si alguno te sirve, selecciónalo y asígnalo a una persona.</p><div class="fc" id="dsf"></div></details>
@@ -93,10 +97,34 @@ body.emb{padding:.2rem .2rem 1rem}body.emb #cab{display:none}
     estr: { score: .8, min: 100, sharp: 70, l0: 60, l1: 215, yaw: .28 }
   };
   var DIST = .5, MAXLADO = 1280;
-  var EMB = /[?&]embed=1/.test(location.search), ARCH = [];
+  var EMB = /[?&]embed=1/.test(location.search), ARCH = [], FMETA = [], REST = /[?&]borrador=1/.test(location.search), guardaT = null;
+  if (/[?&]tema=luz/.test(location.search)) document.documentElement.classList.add('luz'); if (/[?&]tema=osc/.test(location.search)) document.documentElement.classList.add('osc');
   if (EMB) { document.body.classList.add('emb'); $s3(); }
   var S = { quitar: {}, fotos: [], rostros: [], personas: [], sel: {}, nid: 1, parar: false, listo: false };
-  function $s3(){ var h = document.getElementById('h3'); if (h) { h.textContent = 'Vista previa de las galerías'; h.nextElementSibling.textContent = 'Aquí ves cómo quedaría la galería de cada persona. Toca la × de una foto para quitarla de esa galería. Cuando todo esté bien, usa el botón «Crear galería» de arriba.'; document.getElementById('mk').textContent = 'Ver cómo quedarán las galerías'; } }
+  function $s3(){ var h = document.getElementById('h3'); var h1 = document.querySelector('.card h3'); if (h1) h1.textContent = 'Fotos del evento'; if (h) { h.textContent = 'Vista previa de las galerías'; h.nextElementSibling.textContent = 'Aquí ves cómo quedaría la galería de cada persona. Toca la × de una foto para quitarla de esa galería. Cuando todo esté bien, usa el botón «Crear galería» de arriba.'; document.getElementById('mk').textContent = 'Ver cómo quedarán las galerías'; } }
+  function idbAbrir(){ return new Promise(function(res, rej){ var q = indexedDB.open('galeria-ia', 1); q.onupgradeneeded = function(){ q.result.createObjectStore('kv'); }; q.onsuccess = function(){ res(q.result); }; q.onerror = function(){ rej(q.error); }; }); }
+  function idbGet(k){ return idbAbrir().then(function(d){ return new Promise(function(res){ var q = d.transaction('kv').objectStore('kv').get(k); q.onsuccess = function(){ res(q.result || null); }; q.onerror = function(){ res(null); }; }); }).catch(function(){ return null; }); }
+  function idbSet(k, v){ return idbAbrir().then(function(d){ return new Promise(function(res){ var t = d.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = function(){ res(true); }; t.onerror = function(){ res(false); }; }); }).catch(function(){ return false; }); }
+  function idbDel(k){ return idbAbrir().then(function(d){ return new Promise(function(res){ var t = d.transaction('kv', 'readwrite'); t.objectStore('kv').delete(k); t.oncomplete = function(){ res(true); }; t.onerror = function(){ res(false); }; }); }).catch(function(){ return false; }); }
+  function guardar(){
+    if (!EMB || !S.listo || !S.fotos.length) return; clearTimeout(guardaT);
+    guardaT = setTimeout(function(){ var nv = document.querySelector('input[name=nv]:checked'); idbSet('as-draft', { ts: Date.now(), fotos: S.fotos, rostros: S.rostros, personas: S.personas, quitar: S.quitar, nid: S.nid, nivel: nv ? nv.value : 'norm', files: FMETA }); }, 1200);
+  }
+  async function restaurar(){
+    var rec = await idbGet('as-draft'); if (!rec || !rec.fotos) { $('#er').textContent = 'No se encontró el avance guardado.'; return; }
+    S.fotos = rec.fotos; S.rostros = rec.rostros; S.personas = rec.personas; S.quitar = rec.quitar || {}; S.nid = rec.nid || (S.personas.length + 1); S.sel = {}; S.comb = null; S.listo = true; FMETA = rec.files || [];
+    ARCH = S.fotos.map(function(){ return null; });
+    var rd = document.querySelector('input[name=nv][value=' + (rec.nivel || 'norm') + ']'); if (rd) rd.checked = true;
+    $('#c1t').textContent = 'Vuelve a elegir las mismas fotos'; $('#c1p').textContent = 'Elige de nuevo las fotos del evento (las mismas de la carpeta) para poder subirlas. No se vuelven a analizar: tus nombres y agrupación ya están aquí.'; $('#go').textContent = 'Reconectar fotos';
+    $('#rst').hidden = false; $('#rstt').textContent = 'Se recuperó el análisis de ' + S.fotos.length + ' fotos y ' + S.personas.length + ' personas. Falta reconectar los archivos de las fotos.';
+    $('#out').hidden = false; pintar();
+  }
+  function reconectar(files){
+    var mapa = {}; files.forEach(function(f){ mapa[f.name + '|' + f.size] = mapa[f.name + '|' + f.size] || f; });
+    var ok = 0; ARCH = S.fotos.map(function(f, i){ var m = FMETA[i], x = m && mapa[m.name + '|' + m.size]; if (x) ok++; return x || null; });
+    var nuevas = files.length - ok;
+    $('#rstt').textContent = 'Se reconectaron ' + ok + ' de ' + S.fotos.length + ' fotos.' + (ok < S.fotos.length ? ' Las ' + (S.fotos.length - ok) + ' que faltan no se subirán (elige también esos archivos y vuelve a tocar «Reconectar fotos»).' : ' Ya puedes crear la galería.') + (nuevas > 0 ? ' ' + nuevas + ' archivos no estaban en el análisis y se ignoran.' : '');
+  }
   function $(s){ return document.querySelector(s); }
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function cola(){ return new Promise(function(r){ setTimeout(r, 0); }); }
@@ -151,7 +179,7 @@ body.emb{padding:.2rem .2rem 1rem}body.emb #cab{display:none}
     throw ultimo || new Error('modelos');
   }
   async function analizar(files){
-    ARCH = files.slice();
+    ARCH = files.slice(); FMETA = files.map(function(f){ return { name: f.name, size: f.size }; });
     S.fotos = []; S.rostros = []; S.personas = []; S.sel = {}; S.quitar = {}; S.parar = false; S.listo = false; $('#er').textContent = ''; $('#out').hidden = true;
     $('#pg').hidden = false; $('#go').disabled = true; $('#stop').hidden = false; $('#pt').textContent = 'Cargando la inteligencia artificial (la primera vez tarda un poco)…'; $('#pb').style.width = '0';
     try { await cargarModelos(); } catch (e) { $('#er').textContent = 'No se pudo cargar la inteligencia artificial. Revisa tu conexión a internet e inténtalo de nuevo.'; $('#pg').hidden = true; $('#go').disabled = false; $('#stop').hidden = true; return; }
@@ -162,7 +190,7 @@ body.emb{padding:.2rem .2rem 1rem}body.emb #cab{display:none}
       try { await procesar(files[i], i); } catch (e) { S.fotos.push({ id: i, nombre: files[i].name, thumb: '', err: true }); }
     }
     $('#pg').hidden = true; $('#go').disabled = false; $('#stop').hidden = true; S.listo = true;
-    recalcular(); $('#out').hidden = false; pintar();
+    recalcular(); $('#out').hidden = false; pintar(); guardar();
   }
   async function procesar(file, idx){
     var bm = await createImageBitmap(file), k = Math.min(1, MAXLADO / Math.max(bm.width, bm.height)), cv = document.createElement('canvas');
@@ -181,7 +209,7 @@ body.emb{padding:.2rem .2rem 1rem}body.emb #cab{display:none}
   function nivel(){ var r = document.querySelector('input[name=nv]:checked'); return NIV[r ? r.value : 'norm']; }
   function recalcular(){
     var cfg = nivel(), buenos = [];
-    S.personas = []; S.sel = {}; S.quitar = {}; S.nid = 1;
+    S.personas = []; S.sel = {}; S.quitar = {}; S.nid = 1; S.comb = null;
     S.rostros.forEach(function(f){ f.rz = razones(f, cfg); f.persona = null; f.mano = false; if (!f.rz.length) buenos.push(f); });
     buenos.sort(function(a, b){ return b.size - a.size; });
     agrupar(buenos.map(function(f){ return f.desc; }), DIST).forEach(function(g){ var p = { id: S.nid++, nombre: '', excl: false }; S.personas.push(p); g.forEach(function(i){ buenos[i].persona = p.id; }); });
@@ -202,11 +230,21 @@ body.emb{padding:.2rem .2rem 1rem}body.emb #cab{display:none}
       var rs = S.rostros.filter(function(f){ return f.persona === p.id; }), fs = fotosDe(p.id);
       return '<div class="card per' + (p.excl ? ' exc' : '') + '" data-p="' + p.id + '"><input type="text" data-n="' + p.id + '" placeholder="Persona ' + p.id + ' · escribe el nombre" value="' + esc(p.nombre) + '"><div class="s">' + fs.length + ' foto' + (fs.length === 1 ? '' : 's') + ' · ' + rs.length + ' rostro' + (rs.length === 1 ? '' : 's') + '</div><label class="x"><input type="checkbox" data-ex="' + p.id + '"' + (p.excl ? ' checked' : '') + '> No crear galería para esta persona (no quiere fotos u otra razón)</label><div class="fc">' +
         rs.slice(0, 24).map(function(f){ return face(f); }).join('') + (rs.length > 24 ? '<span class="s">+' + (rs.length - 24) + '</span>' : '') + '</div><div class="row">' +
-        (S.personas.length > 1 ? '<select data-cs="' + p.id + '">' + S.personas.filter(function(q){ return q.id !== p.id; }).map(function(q){ return '<option value="' + q.id + '">' + esc(nombre(q)) + '</option>'; }).join('') + '</select><button class="btn sec sm" data-comb="' + p.id + '">Combinar</button>' : '') + '</div></div>';
+        combinarUI(p) + '</div></div>';
     }).join('') || '<p class="s">No se encontró ninguna persona con esta exigencia. Prueba con "Flexible".</p>';
     $('#dst').textContent = 'Descartados (' + des.length + ')'; $('#dsf').innerHTML = des.map(function(f){ return face(f, f.rz.join(', ')); }).join('');
     $('#sit').textContent = 'Sin clasificar (' + sin.length + ')'; $('#sif').innerHTML = sin.map(function(f){ return '<img src="' + f.thumb + '" title="' + esc(f.nombre) + '" alt="">'; }).join('');
-    barra();
+    barra(); guardar();
+  }
+  function norm(t){ return String(t || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' '); }
+  function combinarUI(p){
+    if (S.comb && S.comb.de === p.id) {
+      var a = S.personas.filter(function(q){ return q.id === S.comb.a; })[0]; if (!a) { S.comb = null; return ''; }
+      return '<div class="cmb"><span>' + (S.comb.dup ? 'Ya existe «' + esc(nombre(a)) + '». ¿Es la misma persona? ' : '¿Juntar todas las fotos de esta persona con «' + esc(nombre(a)) + '»? ') + '</span><button class="btn sm" data-cok="' + p.id + '">Sí, combinar</button><button class="btn sec sm" data-cno="' + p.id + '">' + (S.comb.dup ? 'No, son distintas' : 'Cancelar') + '</button></div>';
+    }
+    var con = S.personas.filter(function(q){ return q.id !== p.id && q.nombre.trim(); });
+    if (!con.length) return '';
+    return '<select class="cmbsel" data-cs="' + p.id + '" aria-label="Combinar con"><option value="">Combinar con…</option>' + con.map(function(q){ return '<option value="' + q.id + '">' + esc(nombre(q)) + '</option>'; }).join('') + '</select>';
   }
   function face(f, tx){ return '<div class="f' + (S.sel[f.id] ? ' on' : '') + '" data-f="' + f.id + '"><img src="' + f.crop + '" alt="">' + (tx ? '<em>' + esc(tx) + '</em>' : '') + '</div>'; }
   function barra(){
@@ -236,8 +274,9 @@ body.emb{padding:.2rem .2rem 1rem}body.emb #cab{display:none}
   }
 
   /* ---------- Eventos ---------- */
-  $('#fi').addEventListener('change', function(){ $('#go').disabled = !this.files.length; $('#go').textContent = this.files.length ? 'Analizar ' + this.files.length + ' fotos' : 'Analizar rostros'; });
-  $('#go').addEventListener('click', function(){ var f = $('#fi').files; if (f.length) analizar(Array.prototype.slice.call(f)); });
+  $('#fi').addEventListener('change', function(){ $('#go').disabled = !this.files.length; $('#go').textContent = this.files.length ? (REST ? 'Reconectar ' : 'Analizar ') + this.files.length + ' fotos' : (REST ? 'Reconectar fotos' : 'Analizar rostros'); });
+  $('#go').addEventListener('click', function(){ var f = $('#fi').files; if (!f.length) return; if (REST) reconectar(Array.prototype.slice.call(f)); else analizar(Array.prototype.slice.call(f)); });
+  $('#rstx').addEventListener('click', async function(){ await idbDel('as-draft'); await idbDel('as-meta'); location.replace(location.pathname + location.search.replace(/&?borrador=1/, '')); });
   $('#stop').addEventListener('click', function(){ S.parar = true; });
   $('#rea').addEventListener('click', function(){ recalcular(); pintar(); });
   $('#mk').addEventListener('click', galerias); $('#csv').addEventListener('click', csv);
@@ -246,10 +285,14 @@ body.emb{padding:.2rem .2rem 1rem}body.emb #cab{display:none}
   document.addEventListener('click', function(e){
     var q = e.target.closest('[data-q]'); if (q) { var k = q.dataset.q; if (S.quitar[k]) delete S.quitar[k]; else S.quitar[k] = 1; return galerias(); }
     var f = e.target.closest('[data-f]'); if (f) { var id = +f.dataset.f; if (S.sel[id]) delete S.sel[id]; else S.sel[id] = 1; return pintar(); }
-    var c = e.target.closest('[data-comb]'); if (c) { var de = +c.dataset.comb, a = document.querySelector('[data-cs="' + de + '"]'); if (!a) return; var ids = S.rostros.filter(function(r){ return r.persona === de; }).map(function(r){ return r.id; }); mover(ids, a.value); }
+    var ok = e.target.closest('[data-cok]'); if (ok && S.comb) { var de = +ok.dataset.cok, aa = S.comb.a, ids = S.rostros.filter(function(r){ return r.persona === de; }).map(function(r){ return r.id; }); S.comb = null; return mover(ids, aa); }
+    var no = e.target.closest('[data-cno]'); if (no) { var pn = S.personas.filter(function(q){ return q.id === +no.dataset.cno; })[0]; if (pn && S.comb && S.comb.dup) pn.dupOk = true; S.comb = null; return pintar(); }
   });
-  document.addEventListener('input', function(e){ var n = e.target.dataset && e.target.dataset.n; if (n) { S.personas.filter(function(p){ return p.id === +n; })[0].nombre = e.target.value; } });
-  document.addEventListener('change', function(e){ var d = e.target.dataset || {}; if (d.n) pintarSinPerder(); if (d.ex) { S.personas.filter(function(p){ return p.id === +d.ex; })[0].excl = e.target.checked; pintar(); } });
+  document.addEventListener('input', function(e){ var n = e.target.dataset && e.target.dataset.n; if (n) { S.personas.filter(function(p){ return p.id === +n; })[0].nombre = e.target.value; guardar(); } });
+  document.addEventListener('change', function(e){ var d = e.target.dataset || {};
+    if (d.cs !== undefined) { if (e.target.value) S.comb = { de: +d.cs, a: +e.target.value, dup: false }; else S.comb = null; return pintar(); }
+    if (d.n) { var yo = S.personas.filter(function(q){ return q.id === +d.n; })[0], k = norm(yo && yo.nombre), otro = k && S.personas.filter(function(q){ return q.id !== yo.id && norm(q.nombre) === k; })[0]; if (otro && !yo.dupOk) { S.comb = { de: yo.id, a: otro.id, dup: true }; return pintar(); } }
+    if (d.n) pintarSinPerder(); if (d.ex) { S.personas.filter(function(p){ return p.id === +d.ex; })[0].excl = e.target.checked; pintar(); } });
   function pintarSinPerder(){ pintar(); }
   function resumen(){
     var exc = {}, fotos = {};
@@ -257,6 +300,7 @@ body.emb{padding:.2rem .2rem 1rem}body.emb #cab{display:none}
     return { listo: S.listo, total: S.fotos.length, archivos: ARCH, personas: per };
   }
   window.__RT = { resumen: resumen, getFiles: function(){ return ARCH; }, agrupar: agrupar, razones: razones, NIV: NIV, S: S, recalcular: recalcular, pintar: pintar };
+  if (EMB && REST) restaurar();
   if (typeof faceapi === 'undefined') $('#er').textContent = 'No se pudo cargar la librería de reconocimiento. Revisa tu conexión a internet y recarga la página.';
 })();
 </script>
