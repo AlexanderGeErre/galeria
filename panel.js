@@ -183,6 +183,12 @@ CSS += '.wm-tb{border:0;padding:.8rem 0 .2rem;gap:.3rem 1.8rem}.wm-pv{display:fl
 CSS += '.fs-top h2{margin:0;font-size:2rem}.fs-new{display:flex;gap:.4rem;margin:0}.fs-new input{max-width:11rem}.fs-sc{margin-top:.4rem}.fs-h{display:flex;align-items:center;gap:.7rem;margin:1.5rem 0 .8rem}.fs-h h2{margin:0;font-size:1.35rem;font-weight:500}.fs-t{width:22px;height:22px;border-radius:50%;border:1px solid var(--l);background:none;color:var(--s);font-size:.68rem;cursor:pointer;padding:0}.fs-t:hover{color:var(--t);border-color:var(--s)}.fs-n{color:var(--s);font-size:.85rem;padding-left:.7rem;border-left:1px solid var(--l)}.fs-dots{background:none;border:0;color:var(--s);letter-spacing:.15em;font-size:1rem;cursor:pointer;padding:.2rem .3rem}' +
 '.np-dd.r ul{left:auto;right:auto;left:0}.fs-strip{display:flex;gap:.7rem;overflow-x:auto;padding-bottom:.5rem}.fs-strip .pn-ph{flex:0 0 124px;width:124px}.fs-add{flex:0 0 124px;aspect-ratio:1;border:0;border-radius:12px;background:var(--p);color:var(--s);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.45rem;cursor:pointer;font:inherit;font-size:.82rem}.fs-add:hover{color:var(--t)}.pn-grid.mx .fs-add{width:100%}' +
 '.fs-more{display:flex;align-items:center;gap:1rem;width:100%;background:none;border:0;color:var(--s);font:inherit;font-size:.85rem;letter-spacing:.06em;cursor:pointer;padding:.5rem 0}.fs-more:empty{display:none}.fs-more:before,.fs-more:after{content:"";flex:1;height:1px;background:var(--l)}.fs-more:hover{color:var(--t)}@media(max-width:640px){.fs-new input{max-width:7.5rem}}';
+CSS += '.fs-tools{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:flex-end;margin:.2rem 0 .2rem}.fs-tools .pn-orden{display:inline-flex;align-items:center;gap:.4rem}.fs-tools .pn-orden .pn-s{display:none}.fs-tools select{font-size:.82rem;padding:.35rem .6rem;max-width:11rem}.fs-tools .pn-btn{font-size:.82rem;padding:.42rem .9rem}.fs-tools .fs-new input{max-width:9rem;font-size:.82rem;padding:.4rem .7rem}' +
+'.fs-h{margin:1.2rem 0 .7rem;flex-wrap:wrap}.fs-seg{margin-left:auto}.fs-seg button{padding:.28rem .8rem!important;font-size:.8rem!important}' +
+'.fs .pn-tb{left:6px;bottom:6px!important;background:#2B2623!important;color:#fff!important;font-size:.6rem;font-weight:700;letter-spacing:.05em;padding:2px 7px}.fs figcaption{display:none}' +
+'.fs .pn-ph img{aspect-ratio:2/3}.fs .pn-ph .pn-ck{bottom:auto;top:6px}.fs .pn-pb{bottom:6px}' +
+'.fs .pn-grid.mx{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:12px}.fs-strip{gap:12px}.fs-strip .pn-ph{flex:0 0 94px;width:94px}.fs-add{flex:0 0 140px;aspect-ratio:auto;height:141px;width:140px}.fs-strip .fs-add{flex:0 0 140px}' +
+'@media(max-width:640px){.fs-tools{justify-content:flex-start}.fs-seg{margin-left:0;width:100%;justify-content:space-between}.fs .pn-grid.mx{grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}}';
 CSS += '.pn main{min-width:0}.vs{margin-bottom:1.2rem;min-width:0;max-width:100%}.vs-tb,.vs-pv,.vs-tx{min-width:0}.vs-ctl,.vs-pv .pn-vb{max-width:100%}.vs-tb{background:var(--c);border:1px solid var(--l);border-radius:16px 16px 0 0;border-bottom:0;padding:.7rem 1.4rem;gap:.2rem 1.6rem}.vs-chip{background:none;border:0;padding:.4rem 0;color:var(--s);font:inherit;font-size:.9rem;cursor:pointer;text-align:left}.vs-chip small{display:inline;font-size:inherit;margin-right:.3rem;color:var(--s)}.vs-chip[hidden]{display:none}.vs-chip:hover{color:var(--t)}' +
 '.vs-tx{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:.6rem 1.2rem;background:var(--c);border:1px solid var(--l);border-top:0;padding:.2rem 1.4rem .9rem}.vs-tx[hidden]{display:none}.vs-tx input{width:100%}' +
 '.vs-pv{border-radius:0 0 16px 16px;min-height:0;padding:1.6rem 1rem 1.4rem}.vs-ctl{width:min(34rem,100%);border-radius:99px;background:#1d1915}.vs-pv .pn-vb{width:min(34rem,100%)}.vs-pv #pn-vst{color:#c9bfb3;text-transform:none;letter-spacing:0;font-size:.82rem}.vs-pv #pn-vinfo{color:#a89f94;font-size:.78rem}.vs-act{display:flex;gap:.7rem;margin-top:.4rem}.vs-act .pn-btn{border-radius:99px;padding:.7rem 2rem}' +
@@ -445,7 +451,7 @@ function pintarCuenta(){
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 05:40</p></div>';
+ + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 00:40</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -807,10 +813,11 @@ function pintarDetalle0(){
       db.from('galleries').update({ link_token: g.link_token }).eq('id', g.id).then(function(){});
     }
     var abierto = g.access_mode === 'abierto', urlG = BASEG + g.link_token, urlC = BASE + g.access_code;
-    var fila = function(et, v, cod){ return '<p class="pn-s">' + et + '</p><div class="pn-copia"><input type="text" readonly value="' + esc(v) + '"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(v) + '">Copiar</button><button class="pn-btn sec" data-act="qr" data-t="' + esc(v) + '" data-n="' + esc(g.title) + '">QR</button><button class="pn-btn sec" data-act="wa" data-t="' + esc('Hola, te comparto tu galería de fotos: ' + v + (cod ? '\nCódigo de acceso: ' + cod : '')) + '">WhatsApp</button></div>'; };
+    var fila = function(et, v, cod){ return '<p class="pn-s">' + et + '</p><div class="pn-copia"><input type="text" readonly value="' + esc(v) + '"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(v) + '">Copiar</button><button class="pn-btn sec" data-act="qr" data-t="' + esc(v) + '" data-n="' + esc(g.title) + '">QR</button><button class="pn-btn sec" data-act="wa" data-t="' + esc(msgCliente(v, cod)) + '">WhatsApp</button></div>'; };
     cuerpo = '<div class="pn-card"><h2>Cómo entra tu cliente</h2><div class="pn-opts">' +
       '<button class="pn-opt' + (abierto ? ' on' : '') + '" data-act="modo" data-v="abierto"><b>Enlace sin clave</b><span>Cualquiera que tenga el enlace ve la galería directamente.</span></button>' +
       '<button class="pn-opt' + (abierto ? '' : ' on') + '" data-act="modo" data-v="codigo"><b>Enlace con código</b><span>Debe escribir el código para entrar.</span></button></div></div>' +
+      '<div class="pn-card"><h2>Mensaje para tu cliente</h2><p class="pn-s">Este mensaje sale solo al tocar WhatsApp junto a cualquier enlace. Donde dice {enlace} se pone el enlace, y {fotos} es el número de fotos del paquete.</p><label class="pn-s" for="pn-msg-n">Fotos incluidas en el paquete de esta galería</label><input type="number" id="pn-msg-n" min="1" max="999" value="' + esc(msgFotos()) + '" style="max-width:8rem"><label class="pn-s" for="pn-msg-t" style="display:block;margin-top:.8rem">Mensaje</label><textarea id="pn-msg-t" rows="14" style="width:100%">' + esc(msgPlantilla()) + '</textarea><div class="pn-row"><button class="pn-btn" data-act="msg-guardar" type="button">Guardar mensaje</button><button class="pn-btn sec" data-act="msg-copiar" type="button">Copiar mensaje con el enlace</button><button class="pn-btn sec" data-act="msg-restaurar" type="button">Volver al mensaje original</button></div></div>' +
       escenasEnlaces(fila) +
       '<div class="pn-card"><h2>' + (abierto ? 'Enlace sin clave' : 'Enlace con código') + '</h2>' +
       (abierto ? '<p class="pn-s">Envía este enlace. Entra directo, sin pedir nada.</p>' + fila('Enlace para el cliente', urlG)
@@ -984,12 +991,12 @@ var EXP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-wid
 var ORDENES = [['nombre', 'Nombre del archivo'], ['nombre-inv', 'Nombre del archivo (inverso)'], ['carga', 'Tiempo de carga (primero las más antiguas)'], ['carga-inv', 'Tiempo de carga (primero las más recientes)'], ['azar', 'Aleatorio']];
 function impCuenta(){ var m = {}; (cur && Array.isArray(cur.imp) ? cur.imp : []).forEach(function(x){ m[x.photo_id] = (m[x.photo_id] || 0) + 1; }); return m; }
 function spTiene(sid, pid){ return !!(cur && cur.sp && cur.sp[sid + ':' + pid]); }
-function filtrarEsc(l){ var ic = fImp ? impCuenta() : null; return l.filter(function(x){ return (!fEsc || (fEsc === '_none' ? !x.scene_id : (x.scene_id === fEsc || spTiene(fEsc, x.id)))) && (!ic || ic[x.id]); }); }
-var fTipo = '', fMas = 48;
+function filtrarEsc(l){ var ic = fImp ? impCuenta() : null; return l.filter(function(x){ return (!fEsc || fEsc === '_ninguna' || (fEsc === '_none' ? !x.scene_id : (x.scene_id === fEsc || spTiene(fEsc, x.id)))) && (!ic || ic[x.id]); }); }
+var fTipo = '', fMas = 48, fTipoE = {};
 function figFoto(x, g, ic){
   var tipo = x.photo_type, esPort = g.cover_photo_id === x.id;
   return '<figure class="pn-ph' + (esPort ? ' cv' : '') + (marcadas.has(x.id) ? ' mk' : '') + (ic[x.id] ? ' pimp' : '') + '">' + (ic[x.id] ? '<span class="pn-pb" title="Marcada para imprimir">' + ico('impresiones') + (ic[x.id] > 1 ? '<i>' + ic[x.id] + '</i>' : '') + '</span>' : '') + '<span class="pn-ck' + (modoSel ? '' : ' off') + '" data-act="marcar" data-id="' + x.id + '">' + (marcadas.has(x.id) ? '✓' : '') + '</span>' +
-    '<span class="pn-tb' + (tipo === 'final' ? ' f' : '') + '">' + (tipo === 'final' ? 'Final' : 'Selección') + '</span>' +
+    '<span class="pn-tb' + (tipo === 'final' ? ' f' : '') + '">' + (tipo === 'final' ? 'FINAL' : 'SEL') + '</span>' +
     '<img data-act="' + (modoSel ? 'marcar' : 'ver') + '" data-id="' + x.id + '" loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '">' +
     '<figcaption>' + esc(x.filename) + (esPort ? ' · Portada' : '') + (tipo === 'final' ? ' · ' + mb(x.file_size || 0) : '') + '</figcaption>' +
     '<button class="pn-ex" data-act="ver" data-id="' + x.id + '" type="button" aria-label="Ampliar" title="Ampliar">' + EXP + '</button></figure>';
@@ -999,34 +1006,36 @@ var fEscSub = '';
 function fotosVista(g, sel, fin){
   var es = cur.escenas || [], todas = cur.fotos, ic = impCuenta(), nImp = Object.keys(ic).length;
   var delaEsc = function(id){ return todas.filter(function(x){ return !id ? true : id === '_none' ? !x.scene_id : (x.scene_id === id || spTiene(id, x.id)); }); };
-  var visibles = function(id){ return delaEsc(id).filter(function(x){ return (!fTipo || x.photo_type === fTipo) && (!fImp || ic[x.id]); }); };
+  var visibles = function(id){ var ft = fTipoE[id] || ''; return delaEsc(id).filter(function(x){ return (!ft || x.photo_type === ft) && (!fImp || ic[x.id]); }); };
   var nS = sel.length, nF = fin.length;
-  var seg = '<div class="pn-seg" role="group" aria-label="Tipo de foto">' + [['', 'Todas ' + (nS + nF)], ['selection', 'Selección ' + nS], ['final', 'Finales ' + nF]].map(function(t){ return '<button type="button" data-act="ftipo" data-v="' + t[0] + '" class="' + (fTipo === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>';
   var lv = listaVisible();
   var ord = lv.length > 1 ? '<span class="pn-orden"><label class="pn-s">Clasificar</label><select data-ord="' + (fTipo || 'todas') + '"><option value="">Elegir orden…</option>' + ORDENES.filter(function(o){ return cur.conFecha || o[0].indexOf('carga') < 0; }).map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select></span>' : '';
   var tipoSub = fTipo === 'final' ? 'final' : 'selection';
-  var top = '<div class="pn-fh fs-top"><div><h2>Fotos y escenas</h2><p class="pn-s" style="margin:.2rem 0 0">' + esc(g.title) + '</p></div><span class="sp"><div class="pn-ncarp fs-new"><input type="text" id="pn-nesc" maxlength="80" placeholder="Nueva escena"><button class="pn-btn sec" data-act="esc-crear" type="button" aria-label="Agregar escena">+</button></div><button class="pn-btn" data-act="abrir-subir" data-tipo="' + tipoSub + '" data-esc="' + (fEsc && fEsc !== '_none' ? fEsc : '') + '" type="button">+ Subir fotos</button></span></div>' +
-    '<div class="pn-fh">' + seg + (nImp || fImp ? '<button class="pn-btn ' + (fImp ? '' : 'sec') + '" data-act="filtro-imp" type="button">' + ico('impresiones') + ' Para imprimir (' + nImp + ')' + (fImp ? ' ✕' : '') + '</button>' : '') + '<span class="sp">' + ord + '</span></div>';
+  var hayF = filtrarEsc(sel).length + filtrarEsc(fin).length > 0;
+  var top = '<div class="fs-tools"><div class="pn-ncarp fs-new"><input type="text" id="pn-nesc" maxlength="80" placeholder="Nueva escena"><button class="pn-btn sec" data-act="esc-crear" type="button" aria-label="Agregar escena">+</button></div>' + ord +
+    (hayF && !modoSel ? '<button class="pn-btn sec" data-act="modo-sel" type="button">Seleccionar varias</button>' : '') +
+    '<button class="pn-btn" data-act="abrir-subir" data-tipo="' + tipoSub + '" data-esc="' + (fEsc && fEsc !== '_none' && fEsc !== '_ninguna' ? fEsc : '') + '" type="button">+ Subir fotos</button></div>' +
+    (nImp || fImp ? '<div class="pn-fh"><button class="pn-btn ' + (fImp ? '' : 'sec') + '" data-act="filtro-imp" type="button">' + ico('impresiones') + ' Para imprimir (' + nImp + ')' + (fImp ? ' ✕' : '') + '</button></div>' : '');
   var secs = es.map(function(e){ return { id: e.id, name: e.name, real: true }; });
   if (es.length && delaEsc('_none').length) secs.push({ id: '_none', name: 'Sin escena', real: false });
   if (!es.length) secs = [{ id: '', name: 'Todas las fotos', real: false }];
   var unica = !es.length;
   var cuerpo = secs.map(function(sc){
-    var abierta = unica || fEsc === sc.id, lst = visibles(sc.id), total = delaEsc(sc.id).length;
+    var abierta = unica || fEsc === sc.id || (fEsc === '' && secs[0] === sc), lst = visibles(sc.id), total = delaEsc(sc.id).length;
     var menu = '<div class="np-dd r"><button type="button" class="fs-dots" data-act="vd-dd" aria-label="Más opciones">•••</button><ul hidden><li><button type="button" data-act="abrir-subir" data-tipo="selection" data-esc="' + (sc.real ? sc.id : '') + '">Subir fotos aquí</button></li>' + (sc.real ? '<li><button type="button" data-act="esc-renombrar" data-id="' + sc.id + '">Cambiar nombre</button></li><li><button type="button" data-act="esc-borrar" data-id="' + sc.id + '">Eliminar escena</button></li>' : '') + '</ul></div>';
-    var head = '<div class="fs-h"><h2>' + esc(sc.name) + '</h2>' + (sc.real ? '<button type="button" class="fs-t" data-act="esc-renombrar" data-id="' + sc.id + '" title="Cambiar nombre" aria-label="Cambiar nombre">T</button>' : '') + '<span class="fs-n">' + total + (total === 1 ? ' foto' : ' fotos') + '</span>' + menu + '</div>';
+    var head = '<div class="fs-h"><h2>' + esc(sc.name) + '</h2>' + (sc.real ? '<button type="button" class="fs-t" data-act="esc-renombrar" data-id="' + sc.id + '" title="Cambiar nombre" aria-label="Cambiar nombre">T</button>' : '') + '<span class="fs-n">' + total + (total === 1 ? ' foto' : ' fotos') + '</span>' + menu + '<div class="pn-seg fs-seg" role="group" aria-label="Tipo de foto">' + [['', 'Todas'], ['selection', 'Selección'], ['final', 'Finales']].map(function(t){ return '<button type="button" data-act="ftipo" data-esc="' + sc.id + '" data-v="' + t[0] + '" class="' + ((fTipoE[sc.id] || '') === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div></div>';
     var add = '<button class="fs-add" data-act="abrir-subir" data-tipo="' + tipoSub + '" data-esc="' + (sc.real ? sc.id : '') + '" type="button"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg><span>Fotos y videos</span></button>';
     var body;
     if (abierta) {
       var mostrar = modoSel ? lst : lst.slice(0, fMas);
-      body = '<div class="pn-grid mx">' + add + mostrar.map(function(x){ return figFoto(x, g, ic); }).join('') + '</div>' + (!modoSel && lst.length > fMas ? '<p class="pn-s" style="text-align:center;margin-top:1rem"><button class="pn-vt" style="display:inline;width:auto;margin:0;text-decoration:underline" data-act="mas-fotos" type="button">Mostrar más (' + (lst.length - fMas) + ')</button></p>' : '');
+      body = '<div class="pn-grid mx">' + (unica ? add : '') + mostrar.map(function(x){ return figFoto(x, g, ic); }).join('') + '</div>' + (!modoSel && lst.length > fMas ? '<p class="pn-s" style="text-align:center;margin-top:1rem"><button class="pn-vt" style="display:inline;width:auto;margin:0;text-decoration:underline" data-act="mas-fotos" type="button">Mostrar más (' + (lst.length - fMas) + ')</button></p>' : '');
     } else {
       body = '<div class="fs-strip">' + add + lst.slice(0, 30).map(function(x){ return figFoto(x, g, ic); }).join('') + '</div>';
     }
     var mas = unica ? '' : '<button class="fs-more" type="button" data-act="fs-abrir" data-id="' + (abierta ? '' : sc.id) + '">' + (abierta ? 'Ver menos ⌃' : (lst.length ? 'Ver todas ⌄' : '')) + '</button>';
     return '<section class="fs-sc' + (abierta && !unica ? ' open' : '') + '">' + head + body + mas + '</section>';
   }).join('');
-  return '<div class="fs">' + top + barraSel(sel, fin) + cuerpo + '</div>';
+  return '<div class="fs">' + top + (modoSel ? barraSel(sel, fin) : '') + cuerpo + '</div>';
 }
 function seccionFotos(tipo, titulo, lista, g){
   lista = filtrarEsc(lista);
@@ -1080,6 +1089,10 @@ async function portadaDesdeArchivo(pf){
   } catch (e) { aviso('No se pudo subir la portada: ' + (e.message || 'error')); }
   pendPortada = null; pintar();
 }
+var MSG_DEF = 'Hola, le comparto su link personal para que pueda ver las fotografías de su sesión:\n\n{enlace}\n\n📸 ¿Cómo elegir sus fotos?\n\n1. Marque con un corazón ❤️ las fotos que más le gusten, a mí me aparecerá automáticamente su selección.\n\n2. El paquete incluye {fotos} fotografías, pero si quiere agregar algunas extras, con gusto se las agregamos con costo adicional.\n\n3. Estas fotografías son una muestra para elegir, en cuanto termine su selección, haremos el revelado y edición final de sus fotografías y las subiremos a este mismo link para que las descargue en máxima calidad.';
+function msgPlantilla(){ try { return localStorage.getItem('pn-msg') || MSG_DEF; } catch (e) { return MSG_DEF; } }
+function msgFotos(){ try { return localStorage.getItem('pn-msg-n-' + galId) || '14'; } catch (e) { return '14'; } }
+function msgCliente(url, cod){ return msgPlantilla().replace(/\{fotos\}/g, msgFotos()).replace(/\{enlace\}/g, url + (cod ? '\nCódigo de acceso: ' + cod : '')); }
 var BASES = 'https://alexandergeerre.github.io/galeria/cliente.html?s=', fEsc = '', fImp = false, modoSel = false, marcadas = new Set();
 var vl = [], vix = 0, abiertas = { selection: false, final: false }, PRIM = 7;
 async function mostrarVer(){
@@ -1145,6 +1158,9 @@ async function accion(a, el){
   if (a === 'abrir') return abrirDetalle(id);
   if (a === 'atras') { await cargarGalerias(); vista = 'galerias'; return pintar(); }
   if (a === 'tab') { tab = el.dataset.t; return pintar(); }
+  if (a === 'msg-guardar') { var mt = $('#pn-msg-t').value, mn2 = parseInt($('#pn-msg-n').value, 10) || 14; if (mt.indexOf('{enlace}') < 0) return aviso('El mensaje debe incluir {enlace} para que se ponga el enlace.'); try { localStorage.setItem('pn-msg', mt); localStorage.setItem('pn-msg-n-' + galId, String(mn2)); } catch (e) {} aviso('Mensaje guardado'); return pintar(); }
+  if (a === 'msg-restaurar') { try { localStorage.removeItem('pn-msg'); } catch (e) {} aviso('Mensaje original restaurado'); return pintar(); }
+  if (a === 'msg-copiar') { var gg2 = gal(galId); if (!gg2) return; var mt2 = $('#pn-msg-t').value, mn3 = parseInt($('#pn-msg-n').value, 10) || 14; copiar(mt2.replace(/\{fotos\}/g, mn3).replace(/\{enlace\}/g, BASEG + gg2.link_token + (gg2.access_mode === 'abierto' ? '' : '\nCódigo de acceso: ' + gg2.access_code))); el.textContent = 'Copiado'; return; }
   if (a === 'copiar') { copiar(el.dataset.t); el.textContent = 'Copiado'; return; }
   if (a === 'nueva') return $('#pn-dnueva').showModal();
   if (a === 'asist') { asistReset(); vista = 'asist'; if (AS.activo) AS.paso = 2; return pintar(); }
@@ -1209,9 +1225,9 @@ async function accion(a, el){
     var rk = await api('/api/admin/scene', { gallery: galId, action: 'update', id: id, access_code: cd }); if (!rk.ok) return aviso('No se pudo guardar el código.');
     cur.escenas.filter(function(x){ return x.id === id; })[0].access_code = cd; return aviso('Código guardado');
   }
-  if (a === 'fs-abrir') { fEsc = el.dataset.id || ''; marcadas = new Set(); fMas = 48; return pintar(); }
+  if (a === 'fs-abrir') { fEsc = el.dataset.id || '_ninguna'; marcadas = new Set(); fMas = 48; return pintar(); }
   if (a === 'carp') { fEsc = el.dataset.id || ''; marcadas = new Set(); fMas = 48; return pintar(); }
-  if (a === 'ftipo') { fTipo = el.dataset.v || ''; fMas = 48; return pintar(); }
+  if (a === 'ftipo') { fTipoE[el.dataset.esc || ''] = el.dataset.v || ''; fMas = 48; return pintar(); }
   if (a === 'mas-fotos') { fMas += 48; return pintar(); }
   if (a === 'vertodo') { abiertas[el.dataset.tipo] = !abiertas[el.dataset.tipo]; return pintar(); }
   if (a === 'modo') return cambiar({ access_mode: el.dataset.v }, el.dataset.v === 'abierto' ? 'Ahora el enlace entra sin clave' : 'Ahora el enlace pide código');
