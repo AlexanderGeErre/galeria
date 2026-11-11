@@ -267,9 +267,46 @@ function temaGuardado(){ try { return localStorage.getItem('pn-tema') || 'auto';
 var PAL_PANEL = [['arena', 'Arena y carbón', 'Elegante y neutra, con dorado como acento'], ['marfil', 'Marfil cálido', 'Cálida y cercana'], ['blanco', 'Blanco galería', 'Sobria, casi sin color'], ['oliva', 'Oliva y arena', 'Natural y tranquila'], ['vino', 'Vino y crema', 'Elegante y cálida'], ['azul', 'Azul noche', 'Moderna y tecnológica']];
 var PAL_PANEL_COL = {'arena': ['#FAFAF8', '#B8946A', '#1A1A1A'], 'marfil': ['#F7F3EC', '#A67C52', '#1C1917'], 'blanco': ['#FFFFFF', '#1F1F1F', '#121212'], 'oliva': ['#F6F5F0', '#6F7F5E', '#161A17'], 'vino': ['#FBF8F5', '#8C3B3B', '#1B1516'], 'azul': ['#F6F7F9', '#3F5B8C', '#14171C']};
 function palPanel(){ var v = 'arena'; try { v = localStorage.getItem('pn-pal') || 'arena'; } catch(e) {} return PAL_PANEL.some(function(x){ return x[0] === v; }) ? v : 'arena'; }
+
+// ---------- Diseños del panel (10 temas): cada uno cambia colores, letra, esquinas y estilo de botones ----------
+var DIS = [
+  ['suave', 'Suave tipo app', { f: '#FAFAF8', c: '#FFFFFF', t: '#2B2623', s: '#7D756D', l: '#E6E3DF', a: '#B8946A', p: '#EFEDE9', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '18px', rb: '999px', rp: '12px', ri: '12px', rs: '999px', rd: '18px', sh: '0 1px 3px rgba(0,0,0,.06)', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
+  ['editorial', 'Editorial crema', { f: '#F4F1EB', c: '#FBF9F5', t: '#2B1D14', s: '#7C6F63', l: '#D8D0C4', a: '#8B5E3C', p: '#E7E1D6', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.8rem', hl: '0', ht: 'none', rc: '2px', rb: '2px', rp: '0', ri: '2px', rs: '2px', rd: '2px', sh: 'none', bt: 'uppercase', bl: '.14em', bs: '.78rem', tt: 'none', tl: '0', sb: '' }],
+  ['moderno', 'Moderno blanco y negro', { f: '#F3F3F0', c: '#FFFFFF', t: '#1D1D1B', s: '#777770', l: '#D4D4CD', a: '#1D1D1B', p: '#E8E8E3', hf: 'Jost,system-ui,sans-serif', hw: 500, h1: '2.2rem', hl: '-.03em', ht: 'uppercase', rc: '0', rb: '0', rp: '0', ri: '0', rs: '0', rd: '0', sh: 'none', bt: 'uppercase', bl: '.1em', bs: '.78rem', tt: 'uppercase', tl: '.06em', sb: '' }],
+  ['oscura', 'Galería oscura', { f: '#141414', c: '#232323', t: '#EDE8E0', s: '#948D83', l: '#333333', a: '#C9A66B', p: '#242424', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '3px', rb: '3px', rp: '2px', ri: '3px', rs: '3px', rd: '4px', sh: 'none', bt: 'uppercase', bl: '.12em', bs: '.78rem', tt: 'uppercase', tl: '.1em', sb: '', fija: 1 }],
+  ['lienzo', 'Lienzo minimal', { f: '#FFFFFF', c: '#FFFFFF', t: '#222222', s: '#9A9A9A', l: '#EEEEEE', a: '#222222', p: '#F5F5F5', hf: 'Jost,system-ui,sans-serif', hw: 300, h1: '2.3rem', hl: '-.02em', ht: 'none', rc: '0', rb: '0', rp: '0', ri: '0', rs: '0', rd: '0', sh: 'none', bt: 'uppercase', bl: '.08em', bs: '.78rem', tt: 'none', tl: '0', sb: '', x: '.pn[data-d="lienzo"] .pn-card,.pn[data-d="lienzo"] .pn-cifras,.pn[data-d="lienzo"] .pn-franja{border-color:transparent;background:none}' }],
+  ['lateral', 'Panel lateral', { f: '#FFFFFF', c: '#FFFFFF', t: '#2A2A2A', s: '#8A8A8A', l: '#E4E4E4', a: '#111111', p: '#EEEEEE', hf: 'Jost,system-ui,sans-serif', hw: 400, h1: '1.7rem', hl: '.16em', ht: 'uppercase', rc: '0', rb: '0', rp: '0', ri: '0', rs: '0', rd: '0', sh: 'none', bt: 'uppercase', bl: '.14em', bs: '.74rem', tt: 'uppercase', tl: '.12em', sb: '#F1F1F1' }],
+  ['carriles', 'Acordeón con carriles', { f: '#F6F4F0', c: '#FFFFFF', t: '#262320', s: '#857E75', l: '#E2DDD5', a: '#6B8F71', p: '#EBE7E0', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.5rem', hl: '0', ht: 'none', rc: '8px', rb: '8px', rp: '6px', ri: '8px', rs: '6px', rd: '10px', sh: 'none', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
+  ['tiempo', 'Línea de tiempo', { f: '#FBFAF7', c: '#FFFFFF', t: '#2A2622', s: '#8B8379', l: '#E4DFD6', a: '#B5651D', p: '#F0EBE2', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '12px', rb: '999px', rp: '8px', ri: '10px', rs: '999px', rd: '14px', sh: 'none', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
+  ['terracota', 'Terracota cálido', { f: '#F3E6DA', c: '#FBF3EA', t: '#3B2416', s: '#8D6F5A', l: '#DCC6B3', a: '#A8643C', p: '#E8D3C0', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.8rem', hl: '0', ht: 'none', rc: '6px', rb: '999px', rp: '4px', ri: '6px', rs: '999px', rd: '8px', sh: 'none', bt: 'none', bl: '.04em', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
+  ['tarjetas', 'Tarjetas con sombra', { f: '#EFEEEA', c: '#FFFFFF', t: '#222222', s: '#7A7A75', l: '#E6E5E0', a: '#222222', p: '#F1F0EC', hf: 'Jost,system-ui,sans-serif', hw: 500, h1: '2.1rem', hl: '-.02em', ht: 'none', rc: '16px', rb: '10px', rp: '8px', ri: '10px', rs: '8px', rd: '16px', sh: '0 2px 14px rgba(0,0,0,.07)', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '' }]
+];
+function disenoGuardado(){ var v = 'suave'; try { v = localStorage.getItem('pn-dis') || 'suave'; } catch(e) {} return DIS.some(function(d){ return d[0] === v; }) ? v : 'suave'; }
+function disenoNombre(){ var id = disenoGuardado(); return DIS.filter(function(d){ return d[0] === id; })[0][1]; }
+function disCss(){
+  var c = '.pn[data-d]{font-family:Jost,system-ui,sans-serif}' +
+    '.pn[data-d] h1,.pn[data-d] h2,.pn[data-d] .marca,.pn[data-d] .pn-cifras b{font-family:var(--hf);font-weight:var(--hw);text-transform:var(--ht);letter-spacing:var(--hl)}.pn[data-d] h1{font-size:var(--h1)}.pn[data-d] h2{font-size:clamp(1.15rem,calc(var(--h1) * .58),1.6rem)}' +
+    '.pn[data-d] .pn-btn{border-radius:var(--rb);text-transform:var(--bt);letter-spacing:var(--bl);font-size:var(--bs)}' +
+    '.pn[data-d] .pn-card,.pn[data-d] .pn-cifras,.pn[data-d] .pn-franja{border-radius:var(--rc);box-shadow:var(--sh)}' +
+    '.pn[data-d] .pn-tar .cv,.pn[data-d] .pn-ph img,.pn[data-d] .pn-pbtn img,.pn[data-d] .pn-portada{border-radius:var(--rp)}' +
+    '.pn[data-d] input[type=text],.pn[data-d] input[type=date],.pn[data-d] input[type=number],.pn[data-d] input[type=time],.pn[data-d] input[type=tel],.pn[data-d] input[type=email],.pn[data-d] textarea,.pn[data-d] select{border-radius:var(--ri)}' +
+    '.pn[data-d] .pn-pill,.pn[data-d] .pn-as-p li,.pn[data-d] .pn-tema button,.pn[data-d] .pn-seg,.pn[data-d] .pn-seg button,.pn[data-d] aside button{border-radius:var(--rs)}' +
+    '.pn[data-d] dialog{border-radius:var(--rd)}.pn[data-d] .pn-tabs button,.pn[data-d] aside button{text-transform:var(--tt);letter-spacing:var(--tl)}.pn[data-d] aside{background:var(--sb,var(--c))}' +
+    '.pn-dis{margin:.2rem 0 .5rem}.pn aside .pn-dis>button{width:100%;justify-content:space-between;padding:.4rem .7rem;font-size:.82rem}.pn-dis ul{top:auto!important;bottom:calc(100% + .3rem);left:0!important;right:0;min-width:0!important;max-height:60vh;overflow:auto}.pn aside .pn-dis li button{width:100%;font-size:.85rem;border-radius:8px}';
+  DIS.forEach(function(d){ var o = d[2], v = ''; ['f', 'c', 't', 's', 'l', 'p'].forEach(function(k){ v += '--' + k + ':' + o[k] + ';'; }); v += '--a:' + o.a + ';--a0:' + o.a + ';';
+    ['hf', 'hw', 'h1', 'hl', 'ht', 'rc', 'rb', 'rp', 'ri', 'rs', 'rd', 'sh', 'bt', 'bl', 'bs', 'tt', 'tl'].forEach(function(k){ v += '--' + k + ':' + o[k] + ';'; }); if (o.sb) v += '--sb:' + o.sb + ';';
+    c += '.pn[data-d="' + d[0] + '"]{' + v + '}' + (o.x || ''); });
+  c += '.pn[data-d][data-e=dark]{--f:#1A1A1A;--t:#EDEBE8;--s:#9A948D;--l:#333;--p:#252525;--c:#202020;--a:color-mix(in srgb,var(--a0) 62%,#fff);--sb:#202020}';
+  DIS.filter(function(d){ return d[2].fija; }).forEach(function(d){ var o = d[2]; c += '.pn[data-d="' + d[0] + '"][data-e]{--f:' + o.f + ';--c:' + o.c + ';--t:' + o.t + ';--s:' + o.s + ';--l:' + o.l + ';--p:' + o.p + ';--a:' + o.a + ';--sb:' + o.c + '}'; });
+  return c;
+}
+function disenoSelHtml(){
+  var id = disenoGuardado();
+  return '<div class="np-dd pn-dis" id="pn-dis"><button type="button" data-act="dis-dd"><span>Diseño: <b>' + disenoNombre() + '</b></span>' + NP_CH + '</button><ul hidden>' + DIS.map(function(d){ return '<li><button type="button" data-act="dis-set" data-k="' + d[0] + '"' + (d[0] === id ? ' class="on"' : '') + '>' + d[1] + '</button></li>'; }).join('') + '</ul></div>';
+}
 function aplicarTema(){
   var t = temaGuardado(), e = t === 'auto' ? (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : t;
-  var p = root && root.querySelector('.pn'); if (p) { p.dataset.e = e; p.dataset.pa = palPanel(); p.dataset.ay = ayudasOn() ? 'on' : 'off'; }
+  var p = root && root.querySelector('.pn'); if (p) { p.dataset.e = e; p.dataset.pa = palPanel(); p.dataset.d = disenoGuardado(); p.dataset.ay = ayudasOn() ? 'on' : 'off'; }
 }
 var ICO = {
   panel: '<path d="M4 4h7v7H4zM13 4h7v4h-7zM13 11h7v9h-7zM4 14h7v6H4z"/>', detalles: '<path d="M5 4h14v16H5zM8 9h8M8 13h8M8 17h5"/>',
@@ -296,7 +333,7 @@ function pintarLado(){
     h = logo() + '<button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias"' + (vista === 'galerias' || vista === 'asist' ? ' class="on"' : '') + '>' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes"' + (vista === 'clientes' ? ' class="on"' : '') + '>' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz"' + (vista === 'cotiz' ? ' class="on"' : '') + '>' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda"' + (vista === 'agenda' ? ' class="on"' : '') + '>' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos"' + (vista === 'grupos' ? ' class="on"' : '') + '>' + ico('grupos') + '<span>Grupos de graduación</span></button><button data-v="ia"' + (vista === 'ia' ? ' class="on"' : '') + '>' + ico('ia') + '<span>Selección con IA</span></button>';
   }
   var tm = temaGuardado();
-  h += '<div class="pie"><button data-v="cuenta"' + (vista === 'cuenta' ? ' class="on"' : '') + '>' + ico('cuenta') + '<span>Mi cuenta</span></button><div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button></div>';
+  h += '<div class="pie"><button data-v="cuenta"' + (vista === 'cuenta' ? ' class="on"' : '') + '>' + ico('cuenta') + '<span>Mi cuenta</span></button>' + disenoSelHtml() + '<div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button></div>';
   a.innerHTML = h;
 }
 function pintar(){
@@ -394,7 +431,7 @@ function pintarCuenta(){
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 01:20</p></div>';
+ + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 02:10</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -1035,6 +1072,8 @@ async function accion(a, el){
   if (a === 'reabrir') return cambiar({ status: 'selection', selection_enabled: true, downloads_enabled: false }, 'Selección reabierta');
   if (a === 'salir') return window.cerrarSesion();
   if (a === 'pal-panel') { try { localStorage.setItem('pn-pal', el.dataset.v); } catch(e) {} aplicarTema(); return pintar(); }
+  if (a === 'dis-dd') { var du = el.parentNode.querySelector('ul'); if (du) du.hidden = !du.hidden; return; }
+  if (a === 'dis-set') { try { localStorage.setItem('pn-dis', el.dataset.k); } catch(e) {} aplicarTema(); return pintar(); }
   if (a === 'tema') { try { localStorage.setItem('pn-tema', el.dataset.t); } catch(e) {} return pintar(); }
   if (a === 'bloqueo') return cambiar({ finals_locked: !g.finals_locked }, g.finals_locked ? 'Fotos liberadas: el cliente ya las ve sin marca de agua' : 'Finales bloqueadas con marca de agua');
   if (a === 'ver') return abrirVer(el.dataset.id);
@@ -1533,7 +1572,7 @@ function asistLoop(){
 function asistIframe(){
   if (document.getElementById('pn-as-if')) return;
   var h = document.getElementById('pn-as-hold'); if (!h) { h = document.createElement('div'); h.id = 'pn-as-hold'; document.body.appendChild(h); }
-  var tm = temaGuardado();
+  var tm = disenoGuardado() === 'oscura' ? 'dark' : temaGuardado();
   h.innerHTML = '<iframe id="pn-as-if" src="rostros.html?embed=1' + (tm === 'light' ? '&tema=luz' : tm === 'dark' ? '&tema=osc' : '') + (AS.restaurar ? '&borrador=1' : '') + '" title="Reconocimiento de rostros" style="width:100%;height:100%;border:0;background:transparent"></iframe>';
   AS.activo = true; if (!AS.loop) { AS.loop = true; requestAnimationFrame(asistLoop); }
   if (!AS.chipT) AS.chipT = setInterval(asistChip, 800);
@@ -1762,7 +1801,7 @@ window.iniciarPanel = async function(photographer, cliente){
     new MutationObserver(function(ms){ ms.forEach(function(m){ Array.prototype.forEach.call(m.addedNodes, lim); }); }).observe(root, { childList: true, subtree: true }); lim(root);
     root.addEventListener('input', function(e){ var t = e.target; if (t && t.type === 'date' && /^\d{5,}-/.test(t.value || '')) t.value = t.value.replace(/^(\d{4})\d+/, '$1'); });
   })();
-  if (!document.getElementById('pn-css')) { var st = document.createElement('style'); st.id = 'pn-css'; st.textContent = CSS; document.head.appendChild(st); }
+  if (!document.getElementById('pn-css')) { var st = document.createElement('style'); st.id = 'pn-css'; st.textContent = CSS + disCss(); document.head.appendChild(st); }
   root.innerHTML = '<div class="pn"><aside></aside><main id="pn-main"><div class="pn-skel w1"></div><div class="pn-skel"></div><div class="pn-skel h2"></div></main>' +
     '<dialog id="pn-dnueva"><h2>Nueva galería</h2><form id="pn-fn"><input type="text" id="pn-cn" placeholder="Cliente (ej. Ana y Luis)"><input type="text" id="pn-ct" placeholder="Nombre de la galería (ej. Boda Ana y Luis)"><input type="date" id="pn-cf"><div class="pn-row"><button class="pn-btn" type="submit">Crear</button><button class="pn-btn sec" type="button" id="pn-cc">Cancelar</button></div></form></dialog><dialog id="pn-dqr"><h2 id="pn-qt">Código QR</h2><div class="pn-qr"><canvas id="pn-qc" width="10" height="10"></canvas></div><p class="pn-s ay">Quien lo escanee con la cámara del celular abre la galería. Puedes imprimirlo o mandarlo por WhatsApp.</p><div class="pn-row"><button class="pn-btn" data-act="qr-bajar" type="button">Descargar imagen</button><button class="pn-btn sec" data-act="qr-cerrar" type="button">Cerrar</button></div></dialog><dialog id="pn-dport"><h2>Elegir portada</h2><p class="pn-s">Toca la foto que quieres como portada.</p><div class="pn-grid" id="pn-gport"></div><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-portada">Cancelar</button></div></dialog></div>';
   root.querySelector('.pn').insertAdjacentHTML('beforeend', '<div id="pn-up" hidden></div><button id="pn-as-chip" data-act="asist" hidden type="button"></button>');
@@ -1797,6 +1836,7 @@ window.iniciarPanel = async function(photographer, cliente){
     if (ch) { var r2 = await api('/api/admin/scene', { gallery: galId, action: 'update', id: ch.dataset.eschid, hidden: ch.checked }); if (!r2.ok) return aviso('No se pudo cambiar.'); cur.escenas.filter(function(x){ return x.id === ch.dataset.eschid; })[0].hidden = ch.checked; return aviso(ch.checked ? 'Solo se ve con su enlace' : 'Aparece también en la galería principal'); }
   });
   root.onclick = function(e){
+    var ddm = $('#pn-dis'); if (ddm && !e.target.closest('#pn-dis')) { var ddu = ddm.querySelector('ul'); if (ddu) ddu.hidden = true; }
     var v = e.target.closest('aside [data-v]'); if (v) { vista = v.dataset.v; return pintar(); }
     var a = e.target.closest('[data-act]'); if (a) accion(a.dataset.act, a);
   };
