@@ -445,7 +445,7 @@ function pintarCuenta(){
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 06:20</p></div>';
+ + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 05:40</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -807,11 +807,10 @@ function pintarDetalle0(){
       db.from('galleries').update({ link_token: g.link_token }).eq('id', g.id).then(function(){});
     }
     var abierto = g.access_mode === 'abierto', urlG = BASEG + g.link_token, urlC = BASE + g.access_code;
-    var fila = function(et, v, cod){ return '<p class="pn-s">' + et + '</p><div class="pn-copia"><input type="text" readonly value="' + esc(v) + '"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(v) + '">Copiar</button><button class="pn-btn sec" data-act="qr" data-t="' + esc(v) + '" data-n="' + esc(g.title) + '">QR</button><button class="pn-btn sec" data-act="wa" data-t="' + esc(msgCliente(v, cod)) + '">WhatsApp</button></div>'; };
+    var fila = function(et, v, cod){ return '<p class="pn-s">' + et + '</p><div class="pn-copia"><input type="text" readonly value="' + esc(v) + '"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(v) + '">Copiar</button><button class="pn-btn sec" data-act="qr" data-t="' + esc(v) + '" data-n="' + esc(g.title) + '">QR</button><button class="pn-btn sec" data-act="wa" data-t="' + esc('Hola, te comparto tu galería de fotos: ' + v + (cod ? '\nCódigo de acceso: ' + cod : '')) + '">WhatsApp</button></div>'; };
     cuerpo = '<div class="pn-card"><h2>Cómo entra tu cliente</h2><div class="pn-opts">' +
       '<button class="pn-opt' + (abierto ? ' on' : '') + '" data-act="modo" data-v="abierto"><b>Enlace sin clave</b><span>Cualquiera que tenga el enlace ve la galería directamente.</span></button>' +
       '<button class="pn-opt' + (abierto ? '' : ' on') + '" data-act="modo" data-v="codigo"><b>Enlace con código</b><span>Debe escribir el código para entrar.</span></button></div></div>' +
-      '<div class="pn-card"><h2>Mensaje para tu cliente</h2><p class="pn-s">Este mensaje sale solo al tocar WhatsApp junto a cualquier enlace. Donde dice {enlace} se pone el enlace, y {fotos} es el número de fotos del paquete.</p><label class="pn-s" for="pn-msg-n">Fotos incluidas en el paquete de esta galería</label><input type="number" id="pn-msg-n" min="1" max="999" value="' + esc(msgFotos()) + '" style="max-width:8rem"><label class="pn-s" for="pn-msg-t" style="display:block;margin-top:.8rem">Mensaje</label><textarea id="pn-msg-t" rows="14" style="width:100%">' + esc(msgPlantilla()) + '</textarea><div class="pn-row"><button class="pn-btn" data-act="msg-guardar" type="button">Guardar mensaje</button><button class="pn-btn sec" data-act="msg-copiar" type="button">Copiar mensaje con el enlace</button><button class="pn-btn sec" data-act="msg-restaurar" type="button">Volver al mensaje original</button></div></div>' +
       escenasEnlaces(fila) +
       '<div class="pn-card"><h2>' + (abierto ? 'Enlace sin clave' : 'Enlace con código') + '</h2>' +
       (abierto ? '<p class="pn-s">Envía este enlace. Entra directo, sin pedir nada.</p>' + fila('Enlace para el cliente', urlG)
@@ -1081,10 +1080,6 @@ async function portadaDesdeArchivo(pf){
   } catch (e) { aviso('No se pudo subir la portada: ' + (e.message || 'error')); }
   pendPortada = null; pintar();
 }
-var MSG_DEF = 'Hola, le comparto su link personal para que pueda ver las fotografías de su sesión:\n\n{enlace}\n\n📸 ¿Cómo elegir sus fotos?\n\n1. Marque con un corazón ❤️ las fotos que más le gusten, a mí me aparecerá automáticamente su selección.\n\n2. El paquete incluye {fotos} fotografías, pero si quiere agregar algunas extras, con gusto se las agregamos con costo adicional.\n\n3. Estas fotografías son una muestra para elegir, en cuanto termine su selección, haremos el revelado y edición final de sus fotografías y las subiremos a este mismo link para que las descargue en máxima calidad.';
-function msgPlantilla(){ try { return localStorage.getItem('pn-msg') || MSG_DEF; } catch (e) { return MSG_DEF; } }
-function msgFotos(){ try { return localStorage.getItem('pn-msg-n-' + galId) || '14'; } catch (e) { return '14'; } }
-function msgCliente(url, cod){ return msgPlantilla().replace(/\{fotos\}/g, msgFotos()).replace(/\{enlace\}/g, url + (cod ? '\nCódigo de acceso: ' + cod : '')); }
 var BASES = 'https://alexandergeerre.github.io/galeria/cliente.html?s=', fEsc = '', fImp = false, modoSel = false, marcadas = new Set();
 var vl = [], vix = 0, abiertas = { selection: false, final: false }, PRIM = 7;
 async function mostrarVer(){
@@ -1150,9 +1145,6 @@ async function accion(a, el){
   if (a === 'abrir') return abrirDetalle(id);
   if (a === 'atras') { await cargarGalerias(); vista = 'galerias'; return pintar(); }
   if (a === 'tab') { tab = el.dataset.t; return pintar(); }
-  if (a === 'msg-guardar') { var mt = $('#pn-msg-t').value, mn2 = parseInt($('#pn-msg-n').value, 10) || 14; if (mt.indexOf('{enlace}') < 0) return aviso('El mensaje debe incluir {enlace} para que se ponga el enlace.'); try { localStorage.setItem('pn-msg', mt); localStorage.setItem('pn-msg-n-' + galId, String(mn2)); } catch (e) {} aviso('Mensaje guardado'); return pintar(); }
-  if (a === 'msg-restaurar') { try { localStorage.removeItem('pn-msg'); } catch (e) {} aviso('Mensaje original restaurado'); return pintar(); }
-  if (a === 'msg-copiar') { var gg2 = gal(galId); if (!gg2) return; var mt2 = $('#pn-msg-t').value, mn3 = parseInt($('#pn-msg-n').value, 10) || 14; copiar(mt2.replace(/\{fotos\}/g, mn3).replace(/\{enlace\}/g, BASEG + gg2.link_token + (gg2.access_mode === 'abierto' ? '' : '\nCódigo de acceso: ' + gg2.access_code))); el.textContent = 'Copiado'; return; }
   if (a === 'copiar') { copiar(el.dataset.t); el.textContent = 'Copiado'; return; }
   if (a === 'nueva') return $('#pn-dnueva').showModal();
   if (a === 'asist') { asistReset(); vista = 'asist'; if (AS.activo) AS.paso = 2; return pintar(); }
