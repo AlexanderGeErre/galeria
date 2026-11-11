@@ -184,6 +184,26 @@ CSS += '.fs-top h2{margin:0;font-size:2rem}.fs-new{display:flex;gap:.4rem;margin
 '.np-dd.r ul{left:auto;right:auto;left:0}.fs-strip{display:flex;gap:.7rem;overflow-x:auto;padding-bottom:.5rem}.fs-strip .pn-ph{flex:0 0 124px;width:124px}.fs-add{flex:0 0 124px;aspect-ratio:1;border:0;border-radius:12px;background:var(--p);color:var(--s);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.45rem;cursor:pointer;font:inherit;font-size:.82rem}.fs-add:hover{color:var(--t)}.pn-grid.mx .fs-add{width:100%}' +
 '.fs-more{display:flex;align-items:center;gap:1rem;width:100%;background:none;border:0;color:var(--s);font:inherit;font-size:.85rem;letter-spacing:.06em;cursor:pointer;padding:.5rem 0}.fs-more:empty{display:none}.fs-more:before,.fs-more:after{content:"";flex:1;height:1px;background:var(--l)}.fs-more:hover{color:var(--t)}@media(max-width:640px){.fs-new input{max-width:7.5rem}}';
 CSS += '.fs-strip,.pn-tabs,.pn-grid.fr{scrollbar-width:none;-ms-overflow-style:none}.fs-strip::-webkit-scrollbar,.pn-tabs::-webkit-scrollbar,.pn-grid.fr::-webkit-scrollbar{display:none;width:0;height:0}.pn-tabs{overflow-y:hidden}.pn *{scrollbar-width:thin;scrollbar-color:var(--l) transparent}';
+CSS += '.ds{display:grid;grid-template-columns:minmax(290px,350px) minmax(0,1fr);gap:0;margin-top:.4rem;align-items:start}.ds-l{padding:0 1.6rem 1rem 0;border-right:1px solid var(--l)}.ds-sec{padding:1rem 0;border-bottom:1px solid var(--l)}.ds-sec:last-child{border:0}.ds-sec h3{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;font-size:1.3rem;margin:0 0 .7rem;display:flex;justify-content:space-between;align-items:baseline;gap:.6rem}.ds-sec h3 i{font:400 .78rem Jost,sans-serif;font-style:normal;color:var(--s)}.ds-h{margin:.6rem 0 0;font-size:.8rem}' +
+'.ds-por{display:flex;gap:.9rem;align-items:flex-start}.ds-th{flex:0 0 104px;height:70px;border-radius:10px;background:var(--p);overflow:hidden}.ds-th img{width:100%;height:100%;object-fit:cover;display:block}.ds-bt{display:flex;gap:.4rem;flex-wrap:wrap}.ds-bt .pn-btn{font-size:.78rem;padding:.35rem .8rem}' +
+'.ds-cds{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}.ds-cd{border:1px solid var(--l);background:var(--c);border-radius:12px;padding:.6rem .3rem .5rem;display:flex;flex-direction:column;align-items:center;gap:.3rem;color:var(--s);font:inherit;font-size:.8rem;cursor:pointer}.ds-cd:hover{border-color:var(--s)}.ds-cd.on{border:2px solid var(--a);padding:calc(.6rem - 1px) calc(.3rem - 1px) calc(.5rem - 1px);color:var(--t)}.ds-aa{font-size:1.4rem;font-weight:500;line-height:1.1;color:var(--t)}' +
+'.ds-dots{display:flex;flex-wrap:wrap;gap:.6rem}.ds-dot{width:34px;height:34px;border-radius:50%;border:1px solid var(--l);cursor:pointer;padding:0}.ds-dot.on{outline:2px solid var(--t);outline-offset:2px}.ds-dot.au{background:var(--p);color:var(--s);font:500 .8rem Jost,sans-serif}' +
+'.ds-r{padding-left:1.6rem;min-width:0}.ds-tb{display:flex;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.9rem}.ds-pvbox{background:var(--p);border-radius:14px;padding:1.1rem;min-width:0}.ds-pvbox.tel{padding:1.4rem 1rem}.ds-ph{width:300px;max-width:100%;margin:0 auto;border:7px solid #2b2623;border-radius:30px;overflow:hidden}' +
+'.ds-mg{background:var(--pf);color:var(--pt);border-radius:8px;overflow:hidden;box-shadow:0 6px 28px rgba(0,0,0,.14);font-size:.72rem}.ds-cv{position:relative;height:190px;background:#333;color:#fff;text-align:center}.ds-cv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.ds-cv>div{position:absolute;inset:0;background:linear-gradient(transparent 35%,rgba(0,0,0,.62));display:flex;flex-direction:column;justify-content:flex-end;padding:.9rem}.ds-cv h2{font-family:var(--pff);font-style:var(--pfs);text-transform:var(--ptt);letter-spacing:var(--pls);font-size:1.5rem;margin:0;color:#fff}.ds-pvbox.tel .ds-cv{height:120px}.ds-pvbox.tel .ds-cv h2{font-size:1.05rem}' +
+'.ds-nv{display:flex;gap:1rem;padding:.6rem 1rem;border-bottom:1px solid var(--pl);color:var(--ps)}.ds-nv b{color:var(--pt);font-weight:500;border-bottom:2px solid var(--pa)}.ds-nv .r{margin-left:auto}' +
+'.ds-et{font-family:var(--pff);font-style:var(--pfs);text-transform:var(--ptt);letter-spacing:var(--pls);font-weight:500;font-size:1.2rem;margin:.9rem 1rem .4rem;color:var(--pt)}.ds-et.centrados{text-align:center}.ds-et.izquierda{text-align:left}' +
+'.ds-gr{padding:.4rem 1rem 1rem;display:grid;gap:5px;grid-template-columns:repeat(4,1fr)}.ds-gr figure{margin:0;background:var(--pl);overflow:hidden}.ds-gr img{width:100%;height:100%;display:block;object-fit:cover}.ds-gr figure.vc{aspect-ratio:2/3}.ds-gr.clasico figure{aspect-ratio:2/3}.ds-gr.clasico figure:nth-child(3n+2){aspect-ratio:3/4}.ds-gr.uniforme figure{aspect-ratio:4/5}.ds-gr.amplio{grid-template-columns:repeat(2,1fr)}.ds-gr.amplio figure{aspect-ratio:3/2}' +
+'.ds-pvbox.tel .ds-gr{padding:.3rem .5rem .8rem;grid-template-columns:repeat(2,1fr)}.ds-pvbox.tel .ds-gr.amplio{grid-template-columns:1fr}.ds-pvbox.tel .ds-nv{padding:.5rem .6rem;gap:.6rem}.ds-pvbox.tel .ds-nv .r{display:none}' +
+'@media(max-width:900px){.ds{grid-template-columns:minmax(0,1fr)}.ds-r{order:-1;padding:0;margin-bottom:1rem}.ds-l{padding:0;border:0}.ds-cv{height:140px}.ds-pvbox{padding:.7rem}.ds-gr{grid-template-columns:repeat(3,1fr)}}';
+CSS += '#pn-bn{display:none}#pn-denl{padding:0;border:0;border-radius:18px;width:min(460px,94vw);max-height:88vh;overflow:auto;background:var(--c);color:var(--t)}#pn-denl::backdrop{background:rgba(30,25,20,.4)}.en-h{display:flex;justify-content:space-between;align-items:center;padding:.9rem 1rem;border-bottom:1px solid var(--l);position:sticky;top:0;background:var(--c);z-index:1}.en-h b{font-family:"Cormorant Garamond",Georgia,serif;font-size:1.25rem;font-weight:500}.en-b{width:2.2rem;height:2.2rem;border:0;background:none;color:var(--t);font-size:1.4rem;cursor:pointer;border-radius:50%}.en-c{padding:1rem}.en-ls{display:grid;gap:.5rem}.en-ls button{display:flex;justify-content:space-between;align-items:center;gap:1rem;width:100%;text-align:left;background:var(--c);border:1px solid var(--l);border-radius:14px;padding:.9rem 1rem;color:var(--t);font:inherit;cursor:pointer}.en-ls button:hover{border-color:var(--a)}.en-ls span{color:var(--s);font-size:.82rem}.en-aj{margin-top:1.2rem;border-top:1px solid var(--l);padding-top:.8rem}.en-aj summary{cursor:pointer;color:var(--s);margin-bottom:.6rem}.en-aj .pn-row{margin-bottom:.6rem}' +
+'@media(max-width:760px){#pn-denl{width:100vw;max-width:100vw;height:100%;max-height:100%;border-radius:0;margin:0}' +
+'.pn.con-bn aside .ta,.pn.con-bn aside .pie{display:none}.pn.con-bn main{padding-bottom:6.5rem}#pn-bn{display:block}' +
+'.pn-bn{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;background:var(--c);border-top:1px solid var(--l);padding:.3rem .3rem calc(.3rem + env(safe-area-inset-bottom))}.pn-bn button{flex:1;display:flex;flex-direction:column;align-items:center;gap:.15rem;background:none;border:0;color:var(--s);font:inherit;font-size:.7rem;padding:.4rem 0;cursor:pointer;border-radius:12px}.pn-bn button.on{color:var(--a);font-weight:600}.pn-bn .pn-i,.pn-mas .pn-i{width:22px;height:22px}' +
+'.pn-mas-dim{position:fixed;inset:0;background:rgba(30,25,20,.38);z-index:38}.pn-mas{position:fixed;left:0;right:0;bottom:calc(3.9rem + env(safe-area-inset-bottom));z-index:39;background:var(--c);border-radius:20px 20px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.18);padding:1rem 1.1rem .6rem}.pn-mas h4{margin:.7rem 0 .2rem;font:600 .7rem Jost,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--s)}.pn-mas button{display:flex;gap:.8rem;align-items:center;width:100%;background:none;border:0;border-bottom:1px solid var(--l);color:var(--t);font:inherit;padding:.75rem .2rem;text-align:left;cursor:pointer}.pn-mas button:last-child{border:0}.pn-mas button.on{color:var(--a);font-weight:600}}';
+CSS += '.fv-tb{display:flex;justify-content:flex-end;margin:0 0 .8rem;position:relative;z-index:30}.fv-wr{position:relative}.fv-mn{position:absolute;right:0;top:calc(100% + 6px);z-index:20;min-width:15rem;background:var(--c);border:1px solid var(--l);border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.18);padding:.4rem}.fv-mn button{display:flex;gap:.6rem;align-items:center;width:100%;text-align:left;background:none;border:0;color:var(--t);font:inherit;padding:.6rem .7rem;border-radius:10px;cursor:pointer}.fv-mn button:hover{background:var(--p)}.fv-mn button.on{font-weight:600}.fv-mn i{width:1rem;color:var(--a);font-style:normal;font-size:.7rem}' +
+'.pn-grid.fv-gra{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}.pn-grid.fv-peq{grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:.4rem}.pn-grid.fv-peq figcaption{display:none}.pn-grid.fv-gra figcaption{font-size:.68rem}' +
+'.fv-lista{margin:.2rem 0 1rem;padding:0 0 0 2.2rem;columns:200px;column-gap:1.6rem;font-size:.95rem;line-height:1.9}.fv-lista li{break-inside:avoid;padding-left:.2rem}.fv-lista li::marker{color:var(--s);font-size:.78rem}' +
+'@media(max-width:760px){.fv-tb{justify-content:stretch}.fv-wr{width:100%}.fv-wr>.pn-btn{width:100%}.fv-mn{left:0;right:0;min-width:0}}';
 CSS += '.fs-tools{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:flex-end;margin:.2rem 0 .2rem}.fs-tools .pn-orden{display:inline-flex;align-items:center;gap:.4rem}.fs-tools .pn-orden .pn-s{display:none}.fs-tools select{font-size:.82rem;padding:.35rem .6rem;max-width:11rem}.fs-tools .pn-btn{font-size:.82rem;padding:.42rem .9rem}.fs-tools .fs-new input{max-width:9rem;font-size:.82rem;padding:.4rem .7rem}' +
 '.fs-h{margin:1.2rem 0 .7rem;flex-wrap:wrap}.fs-seg{margin-left:auto}.fs-seg button{padding:.28rem .8rem!important;font-size:.8rem!important}' +
 '.fs .pn-tb{left:6px;bottom:6px!important;background:#2B2623!important;color:#fff!important;font-size:.6rem;font-weight:700;letter-spacing:.05em;padding:2px 7px}.fs figcaption{display:none}' +
@@ -258,6 +278,7 @@ async function cargarGalerias(){
   var COLS = 'id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity,gallery_type,description,location,grid_style,palette,link_token,access_mode,print_sent_at,finals_locked,view_quality,cover_key';
   var g = await db.from('galleries').select(COLS + ',selection_watermark').is('deleted_at', null).order('created_at', { ascending: false });
   if (g.error) g = await db.from('galleries').select(COLS).is('deleted_at', null).order('created_at', { ascending: false });
+  try { var gx = await db.from('galleries').select('id,title_font,scene_titles').is('deleted_at', null); if (!gx.error && Array.isArray(gx.data) && Array.isArray(g.data)) { var mx = {}; gx.data.forEach(function(r){ mx[r.id] = r; }); g.data.forEach(function(r){ if (mx[r.id]) { r.title_font = mx[r.id].title_font; r.scene_titles = mx[r.id].scene_titles; } }); } } catch (e) {}
   if (g.error) { aviso(g.error.message); return; }
   gals = g.data || [];
   var sinPortada = gals.filter(function(x){ return !x.cover_photo_id && !x.cover_key; }).map(function(x){ return x.id; }), primeras = {}, primerasF = {};
@@ -342,6 +363,7 @@ var ICO = {
   clientes: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-4 3-6 6.5-6s6.5 2 6.5 6M16 4.5a3.5 3.5 0 010 7M18.5 14c2 .8 3 2.700 3 6"/>', cotiz: '<path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/>', ia: '<path d="M12 3l1.800 4.700L18.500 9.500 13.800 11.300 12 16l-1.800-4.700L5.500 9.500l4.700-1.800z"/><path d="M18 15l.800 2.200L21 18l-2.200.800L18 21l-.800-2.200L15 18l2.200-.800z"/>', grupos: '<circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 19c0-3.500 2.500-5 6-5s6 1.500 6 5M15 14.200c3.500-.5 6 .800 6 4.800"/>', agenda: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
   atras: '<path d="M15 5l-7 7 7 7"/>', salir: '<path d="M10 4H5v16h5M15 8l4 4-4 4M19 12H9"/>', cuenta: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>'
 };
+ICO.mas = '<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>';
 function ico(n){ return '<svg class="pn-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICO[n] || '') + '</svg>'; }
 function logoImg(cls, n, dato){ return dato ? '<img class="' + cls + '" alt="" src="' + esc(dato) + '">' : '<img class="' + cls + '" alt="" data-n="' + n + '" data-i="0" src="imagenes/' + n + exts(n)[0] + '">'; }
 function logo(){ var c = ph.logo_para_claro || ph.logo_para_oscuro, o = ph.logo_para_oscuro || ph.logo_para_claro; return '<div class="marca">' + logoImg('lg-l', 'logo-oscuro', c) + logoImg('lg-d', 'logo-claro', o) + '</div>'; }
@@ -357,6 +379,10 @@ function pintarLado(){
   var tm = temaGuardado();
   h += '<div class="pie"><button data-v="cuenta"' + (vista === 'cuenta' ? ' class="on"' : '') + '>' + ico('cuenta') + '<span>Mi cuenta</span></button>' + disenoSelHtml() + '<div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button></div>';
   a.innerHTML = h;
+  var pnEl = root.querySelector('.pn'), bn = root.querySelector('#pn-bn');
+  if (pnEl) { pnEl.classList.toggle('con-bn', !!g); if (!bn) { pnEl.insertAdjacentHTML('beforeend', '<div id="pn-bn"></div>'); bn = root.querySelector('#pn-bn'); } }
+  if (!g) masAb = false;
+  if (bn) bn.innerHTML = g ? navHtml() : '';
 }
 function pintar(){
   AS.show = false;
@@ -453,7 +479,7 @@ function pintarCuenta(){
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 01:25</p></div>';
+ + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 12:55</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -764,15 +790,7 @@ function pintarDetalle0(){
       '<div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-subir" type="button">Cancelar</button></div></dialog>' +
       fotosVista(g, sel, fin);
   } else if (tab === 'diseno') {
-    var cvId = g.cover_photo_id || (sel[0] && sel[0].id), cv = cvId && cur.tk[cvId];
-    var cvSrc = cur.cover ? src(cur.cover) : (cv ? src(cv) : '');
-    cuerpo = '<div class="pn-card"><h2>Portada</h2><p class="pn-s">Es la imagen con la que tu cliente recibe su galería al abrir el enlace. ' + (g.cover_key ? 'Ahora usa una portada que subiste aparte.' : 'Ahora usa una foto del álbum.') + '</p><div class="pn-portada">' + (cvSrc ? '<img alt="" src="' + esc(cvSrc) + '">' : ilus('admin-sin-portada')) + '</div>' +
-      '<div class="pn-row"><button class="pn-btn" data-act="elegir-portada"' + (sel.length ? '' : ' disabled') + '>Elegir de las fotos subidas</button></div>' +
-      '<h2 style="margin-top:1.2rem;font-size:1.25rem">Subir una portada distinta</h2><p class="pn-s">Sirve para un diseño o una foto que solo quieres como portada. <b>No aparece en el álbum</b> del cliente.</p>' +
-      '<div class="pn-marcaui"><label class="pn-s" for="pn-pm">Marca de agua</label><select id="pn-pm"><option value="no">Sin marca de agua</option><option value="si">Con marca de agua</option></select></div>' +
-      '<div class="pn-row"><input type="file" id="pn-pf" accept="image/jpeg,image/png,image/webp"><button class="pn-btn" data-act="subir-portada" id="pn-pg">Subir portada</button>' + (g.cover_key ? '<button class="pn-btn sec" data-act="quitar-portada">Quitar portada subida</button>' : '') + '</div></div>' +
-      '<div class="pn-card"><h2>Estilo de la galería</h2><p class="pn-s">Cómo se acomodan las fotos que ve tu cliente.</p><div class="pn-opts">' + ESTILOS.map(function(e){ return '<button class="pn-opt' + ((g.grid_style || 'clasico') === e[0] ? ' on' : '') + '" data-act="estilo" data-v="' + e[0] + '"><b>' + e[1] + '</b><span>' + e[2] + '</span></button>'; }).join('') + '</div></div>' +
-      '<div class="pn-card"><h2>Paleta de colores</h2><p class="pn-s">Cada paleta tiene versión clara y oscura, y se adapta al modo del dispositivo de tu cliente. “Automática” elige una según el tipo de evento (ahora: ' + esc((PALETAS.filter(function(c){ return c[0] === (PAL_TIPO[g.gallery_type] || 'arena'); })[0] || [])[1] || '') + ').</p><div class="pn-opts">' + PALETAS.map(function(c){ var pa = PAL_VIEJA[g.palette] || g.palette || 'auto'; return '<button class="pn-opt pal' + (pa === c[0] ? ' on' : '') + '" data-act="paleta" data-v="' + c[0] + '"><i style="background:linear-gradient(135deg,' + c[2] + ' 34%,' + c[3] + ' 34% 67%,' + c[4] + ' 67%)"></i><b>' + c[1] + '</b></button>'; }).join('') + '</div></div>';
+    cuerpo = dsHtml(g, sel);
   } else if (tab === 'config') {
     wmSw = g.selection_watermark === false ? '0' : '1';
     cuerpo = '<div class="pn-card"><h2>Marca de agua</h2><p class="pn-s">Texto que se graba en las fotos de selección que subas a partir de ahora. Las que ya subiste tienen la marca grabada; para cambiarla hay que subirlas de nuevo.</p><input type="text" id="pn-wt" maxlength="40" value="' + esc(g.watermark_text || marcaBase()) + '">' +
@@ -787,14 +805,24 @@ function pintarDetalle0(){
   } else if (tab === 'favoritas') {
     var nombre = {}; cur.fotos.forEach(function(x){ nombre[x.id] = x.filename; });
     var por = {}; cur.favs.forEach(function(x){ (por[x.visitor_token] = por[x.visitor_token] || []).push(x.photo_id); });
-    var vis = Object.keys(por);
+    var vis = Object.keys(por), escNom = {}, escDe = {}, usadosF = {};
+    (cur.escenas || []).forEach(function(e){ escNom[e.id] = e.name; }); cur.fotos.forEach(function(x){ escDe[x.id] = x.scene_id || ''; });
+    var favTit = function(ids, i){
+      if (!(cur.escenas || []).length) return 'Invitado ' + (i + 1);
+      var cnt = {}; ids.forEach(function(id){ var sc = escDe[id] || ''; cnt[sc] = (cnt[sc] || 0) + 1; });
+      var nm = Object.keys(cnt).sort(function(a, b){ return cnt[b] - cnt[a]; }).map(function(sc){ return sc ? (escNom[sc] || 'Escena') : 'Sin escena'; });
+      var t = nm.length === 1 ? nm[0] : nm.slice(0, 2).join(' + ') + (nm.length > 2 ? ' +' + (nm.length - 2) : '');
+      usadosF[t] = (usadosF[t] || 0) + 1; return usadosF[t] > 1 ? t + ' (' + usadosF[t] + ')' : t;
+    };
     cuerpo = vis.length ? vis.map(function(k, i){
       var ids = por[k].sort(function(a, b){ return String(nombre[a]).localeCompare(String(nombre[b])); });
       var nom = ids.map(function(id){ return nombre[id] || '?'; }).join(', ');
-      return '<div class="pn-card"><h2>Invitado ' + (i + 1) + ' · ' + ids.length + ' fotos</h2><div class="pn-grid">' + ids.map(function(id){
-        return '<figure class="pn-ph"><img loading="lazy" alt="" src="' + (cur.tk[id] ? esc(src(cur.tk[id])) : '') + '"><figcaption>' + esc(nombre[id] || '?') + '</figcaption></figure>';
-      }).join('') + '</div><div class="pn-row"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(nom) + '">Copiar nombres</button></div></div>';
-    }).join('')
+      var cuerpoF = favVer === 'det' ? '<ol class="fv-lista">' + ids.map(function(id){ return '<li>' + esc(nombre[id] || '?') + '</li>'; }).join('') + '</ol>'
+        : '<div class="pn-grid fv-' + favVer + '">' + ids.map(function(id){
+          return '<figure class="pn-ph"><img loading="lazy" alt="" title="' + esc(nombre[id] || '?') + '" src="' + (cur.tk[id] ? esc(src(cur.tk[id])) : '') + '"><figcaption>' + esc(nombre[id] || '?') + '</figcaption></figure>';
+        }).join('') + '</div>';
+      return '<div class="pn-card"><h2>' + esc(favTit(ids, i)) + ' · ' + ids.length + (ids.length === 1 ? ' foto' : ' fotos') + '</h2>' + cuerpoF + '<div class="pn-row"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(nom) + '">Copiar nombres</button></div></div>';
+    }).reduce(function(a, b){ return a + b; }, favBarra())
       : '<div class="pn-vacio">' + ilus('admin-sin-clientes') + '<p class="pn-s">Todavía no hay favoritas en esta galería.</p></div>';
   } else if (tab === 'impresiones') {
     if (cur.impErr) { cuerpo = '<div class="pn-card"><h2>Falta activar las impresiones</h2><p class="pn-s">La tabla de impresiones todavía no existe en Supabase, por eso los pedidos de tus clientes no se guardan. Abre Supabase → SQL Editor, pega el contenido de <b>etapa4.sql</b> y pulsa Run. Después recarga esta página.</p><p class="pn-s">Detalle técnico: ' + esc(cur.impErr) + '</p></div>'; }
@@ -819,7 +847,6 @@ function pintarDetalle0(){
     cuerpo = '<div class="pn-card"><h2>Cómo entra tu cliente</h2><div class="pn-opts">' +
       '<button class="pn-opt' + (abierto ? ' on' : '') + '" data-act="modo" data-v="abierto"><b>Enlace sin clave</b><span>Cualquiera que tenga el enlace ve la galería directamente.</span></button>' +
       '<button class="pn-opt' + (abierto ? '' : ' on') + '" data-act="modo" data-v="codigo"><b>Enlace con código</b><span>Debe escribir el código para entrar.</span></button></div></div>' +
-      '<div class="pn-card"><h2>Mensaje para tu cliente</h2><p class="pn-s">Este mensaje sale solo al tocar WhatsApp junto a cualquier enlace. Donde dice {enlace} se pone el enlace, y {fotos} es el número de fotos del paquete.</p><label class="pn-s" for="pn-msg-n">Fotos incluidas en el paquete de esta galería</label><input type="number" id="pn-msg-n" min="1" max="999" value="' + esc(msgFotos()) + '" style="max-width:8rem"><label class="pn-s" for="pn-msg-t" style="display:block;margin-top:.8rem">Mensaje</label><textarea id="pn-msg-t" rows="14" style="width:100%">' + esc(msgPlantilla()) + '</textarea><div class="pn-row"><button class="pn-btn" data-act="msg-guardar" type="button">Guardar mensaje</button><button class="pn-btn sec" data-act="msg-copiar" type="button">Copiar mensaje con el enlace</button><button class="pn-btn sec" data-act="msg-restaurar" type="button">Volver al mensaje original</button></div></div>' +
       escenasEnlaces(fila) +
       '<div class="pn-card"><h2>' + (abierto ? 'Enlace sin clave' : 'Enlace con código') + '</h2>' +
       (abierto ? '<p class="pn-s">Envía este enlace. Entra directo, sin pedir nada.</p>' + fila('Enlace para el cliente', urlG)
@@ -980,14 +1007,43 @@ function barraSel(sel, fin){
     '<button class="pn-btn rojo" data-act="borrar-sel"' + (marcadas.size ? '' : ' disabled') + '>Eliminar seleccionadas</button><button class="pn-btn" data-act="modo-sel">Listo</button></div>';
 }
 function escenasEnlaces(fila){
-  var es = cur.escenas || []; if (!es.length) return '';
-  return '<div class="pn-card"><h2>Enlaces por escena</h2><p class="pn-s">Cada escena tiene su propio enlace. El cliente que lo abre ve solo las fotos de esa escena.</p>' + es.map(function(e){
-    return '<div class="pn-esc"><b>' + esc(e.name) + '</b>' + fila('Enlace', BASES + e.link_token, e.access_mode === 'codigo' ? e.access_code : '') +
-      '<div class="pn-row"><select data-escmodo="' + e.id + '"><option value="abierto"' + (e.access_mode === 'abierto' ? ' selected' : '') + '>Sin clave</option><option value="codigo"' + (e.access_mode === 'codigo' ? ' selected' : '') + '>Con código</option></select>' +
-      (e.access_mode === 'codigo' ? '<input type="text" id="pn-sc-' + e.id + '" maxlength="40" value="' + esc(e.access_code || '') + '"><button class="pn-btn sec" data-act="esc-codigo" data-id="' + e.id + '">Guardar código</button>' : '') + '</div>' +
+  return '<div class="pn-card"><h2>Enlaces para invitados</h2><p class="pn-s">Saca el enlace de toda la galería o de una sola escena, por ejemplo para tu familia.</p><div class="pn-row"><button class="pn-btn" data-act="enl-abrir" type="button">Obtener enlace</button></div></div>';
+}
+var FAV_VER = [['muy', 'Muy grandes'], ['gra', 'Grandes'], ['peq', 'Pequeñas'], ['det', 'Detalles (solo nombres)']];
+var favVer = (function(){ var v = 'muy'; try { v = localStorage.getItem('pn-favver') || 'muy'; } catch (e) {} return FAV_VER.some(function(x){ return x[0] === v; }) ? v : 'muy'; })(), favMenu = false;
+function favBarra(){
+  var act = FAV_VER.filter(function(x){ return x[0] === favVer; })[0];
+  return '<div class="fv-tb"><div class="fv-wr"><button type="button" class="pn-btn sec" data-act="fav-menu" aria-haspopup="true" aria-expanded="' + favMenu + '">Ver: ' + act[1] + ' ▾</button>' +
+    (favMenu ? '<div class="fv-mn" role="menu">' + FAV_VER.map(function(x){ return '<button type="button" role="menuitemradio" aria-checked="' + (x[0] === favVer) + '" data-act="fav-ver" data-k="' + x[0] + '" class="' + (x[0] === favVer ? 'on' : '') + '"><i>' + (x[0] === favVer ? '●' : '') + '</i>' + x[1] + '</button>'; }).join('') + '</div>' : '') + '</div></div>';
+}
+var enlPaso = 'lista', enlEsc = null;
+function nFotosEsc(id){ return cur.fotos.filter(function(x){ return x.scene_id === id || spTiene(id, x.id); }).length; }
+function enlHtml(){
+  var g = gal(galId), es = cur.escenas || [];
+  var cab = '<header class="en-h">' + (enlPaso === 'link' && es.length ? '<button type="button" class="en-b" data-act="enl-atras" aria-label="Volver">‹</button>' : '<span class="en-b"></span>') + '<b>Enlace para invitados</b><button type="button" class="en-b" data-act="enl-cerrar" aria-label="Cerrar">✕</button></header>';
+  if (enlPaso === 'lista') {
+    return cab + '<div class="en-c"><p class="pn-s">Elige qué quieres compartir.</p><div class="en-ls"><button type="button" data-act="enl-ver" data-id=""><b>Toda la galería</b><span>' + cur.fotos.length + ' archivos</span></button>' + es.map(function(e){ return '<button type="button" data-act="enl-ver" data-id="' + e.id + '"><b>' + esc(e.name) + '</b><span>' + nFotosEsc(e.id) + ' fotos</span></button>'; }).join('') + '</div></div>';
+  }
+  var e = enlEsc ? es.filter(function(x){ return x.id === enlEsc; })[0] : null;
+  var url = e ? BASES + e.link_token : BASEG + g.link_token, cd = e ? e.access_mode === 'codigo' : g.access_mode !== 'abierto', cod = e ? e.access_code : g.access_code;
+  var h = cab + '<div class="en-c"><p class="pn-s" style="margin:0 0 .5rem">' + (e ? esc(e.name) : 'Toda la galería') + '</p><div class="pn-copia"><input type="text" readonly value="' + esc(url) + '"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(url) + '" type="button">Copiar</button></div>' +
+    '<div class="pn-row" style="margin-top:.6rem"><button class="pn-btn sec" data-act="qr" data-t="' + esc(url) + '" data-n="' + esc(e ? e.name : g.title) + '" type="button">QR</button><button class="pn-btn sec" data-act="wa" data-t="' + esc(msgCliente(url, cd ? cod : '')) + '" type="button">WhatsApp</button></div>' +
+    (cd ? '<p class="pn-s" style="margin:1rem 0 .3rem">Código de acceso</p><div class="pn-copia"><input type="text" readonly value="' + esc(cod || '') + '"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(cod || '') + '" type="button">Copiar</button></div>' : '<p class="pn-s" style="margin-top:1rem">Este enlace entra sin clave.</p>');
+  if (e) {
+    h += '<details class="en-aj"><summary>Ajustes de este enlace</summary><div class="pn-row"><select data-escmodo="' + e.id + '"><option value="abierto"' + (e.access_mode === 'abierto' ? ' selected' : '') + '>Sin clave</option><option value="codigo"' + (e.access_mode === 'codigo' ? ' selected' : '') + '>Con código</option></select>' +
+      (e.access_mode === 'codigo' ? '<input type="text" id="pn-sc-' + e.id + '" maxlength="40" value="' + esc(e.access_code || '') + '"><button class="pn-btn sec" data-act="esc-codigo" data-id="' + e.id + '" type="button">Guardar código</button>' : '') + '</div>' +
       '<div class="pn-row"><label class="pn-s" for="pn-wm-' + e.id + '">Marca de agua en esta escena</label><select id="pn-wm-' + e.id + '" data-escwm="' + e.id + '"><option value="0"' + (e.no_watermark ? '' : ' selected') + '>Como en Configuración</option><option value="1"' + (e.no_watermark ? ' selected' : '') + '>Sin marca de agua (para familia o amigos)</option></select></div>' +
-      '<label class="pn-s"><input type="checkbox" data-eschid="' + e.id + '"' + (e.hidden ? ' checked' : '') + '> Solo con su enlace (no aparece en la galería principal)</label></div>';
-  }).join('') + '</div>';
+      '<label class="pn-s"><input type="checkbox" data-eschid="' + e.id + '"' + (e.hidden ? ' checked' : '') + '> Solo con su enlace (no aparece en la galería principal)</label></details>';
+  }
+  return h + '</div>';
+}
+function enlRefrescar(){ var d = $('#pn-denl'); if (d && d.open && cur) d.innerHTML = enlHtml(); }
+var MAS = [['favoritas', 'Favoritas', 'Contenido'], ['impresiones', 'Impresiones', 'Contenido'], ['video', 'Video', 'Contenido'], ['detalles', 'Detalles', 'Ajustes'], ['config', 'Configuración', 'Ajustes']], masAb = false;
+function navHtml(){
+  var enMas = MAS.some(function(m){ return m[0] === tab; });
+  var b = function(t, ic, lab){ return '<button type="button" data-act="tab" data-t="' + t + '"' + (tab === t ? ' class="on"' : '') + '>' + ico(ic) + '<span>' + lab + '</span></button>'; };
+  var hoja = masAb ? '<div class="pn-mas-dim" data-act="mas-cerrar"></div><div class="pn-mas">' + ['Contenido', 'Ajustes'].map(function(gr){ return '<h4>' + gr + '</h4>' + MAS.filter(function(m){ return m[2] === gr; }).map(function(m){ return '<button type="button" data-act="tab" data-t="' + m[0] + '"' + (tab === m[0] ? ' class="on"' : '') + '>' + ico(m[0]) + '<span>' + m[1] + '</span></button>'; }).join(''); }).join('') + '</div>' : '';
+  return hoja + '<nav class="pn-bn" aria-label="Secciones">' + b('panel', 'inicio', 'Resumen') + b('fotos', 'fotos', 'Fotos') + b('diseno', 'diseno', 'Diseño') + b('compartir', 'compartir', 'Compartir') + '<button type="button" data-act="mas-abrir"' + (enMas || masAb ? ' class="on"' : '') + '>' + ico('mas') + '<span>Más</span></button></nav>';
 }
 var EXP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>';
 var ORDENES = [['nombre', 'Nombre del archivo'], ['nombre-inv', 'Nombre del archivo (inverso)'], ['carga', 'Tiempo de carga (primero las más antiguas)'], ['carga-inv', 'Tiempo de carga (primero las más recientes)'], ['azar', 'Aleatorio']];
@@ -1094,7 +1150,7 @@ async function portadaDesdeArchivo(pf){
 var MSG_DEF = 'Hola, le comparto su link personal para que pueda ver las fotografías de su sesión:\n\n{enlace}\n\n📸 ¿Cómo elegir sus fotos?\n\n1. Marque con un corazón ❤️ las fotos que más le gusten, a mí me aparecerá automáticamente su selección.\n\n2. El paquete incluye {fotos} fotografías, pero si quiere agregar algunas extras, con gusto se las agregamos con costo adicional.\n\n3. Estas fotografías son una muestra para elegir, en cuanto termine su selección, haremos el revelado y edición final de sus fotografías y las subiremos a este mismo link para que las descargue en máxima calidad.';
 function msgPlantilla(){ try { return localStorage.getItem('pn-msg') || MSG_DEF; } catch (e) { return MSG_DEF; } }
 function msgFotos(){ try { return localStorage.getItem('pn-msg-n-' + galId) || '14'; } catch (e) { return '14'; } }
-function msgCliente(url, cod){ return msgPlantilla().replace(/\{fotos\}/g, msgFotos()).replace(/\{enlace\}/g, url + (cod ? '\nCódigo de acceso: ' + cod : '')); }
+function msgCliente(url, cod){ return 'Hola, le comparto su enlace personal para ver las fotografías de su sesión:\n\n' + url + (cod ? '\n\nCódigo de acceso: ' + cod : ''); }
 var BASES = 'https://alexandergeerre.github.io/galeria/cliente.html?s=', fEsc = '', fImp = false, modoSel = false, marcadas = new Set();
 var vl = [], vix = 0, abiertas = { selection: false, final: false }, PRIM = 7;
 async function mostrarVer(){
@@ -1112,6 +1168,59 @@ function abrirVer(id){
 }
 function pasarVer(d){ if (!vl.length) return; vix = (vix + d + vl.length) % vl.length; mostrarVer(); }
 
+var dsDisp = 'pc', dsModo = 'auto';
+var LETRAS = [['elegante', 'Elegante', '"Cormorant Garamond",Georgia,serif', 'normal', 'none', '.02em'], ['moderna', 'Moderna', 'Jost,system-ui,sans-serif', 'normal', 'uppercase', '.12em'], ['romantica', 'Romántica', '"Cormorant Garamond",Georgia,serif', 'italic', 'none', '.02em']];
+var TITESC = [['centrados', 'Centrados'], ['izquierda', 'A la izquierda'], ['ocultos', 'Ocultos']];
+function dsPalId(g){ var pa = PAL_VIEJA[g.palette] || g.palette || 'auto'; return pa; }
+function dsCol(g, osc){ var pa = dsPalId(g); if (pa === 'auto' || !PAL_PANEL_COL[pa]) pa = PAL_TIPO[g.gallery_type] || 'arena'; var c = PAL_PANEL_COL[pa] || PAL_PANEL_COL.arena; return osc ? { f: c[2], t: '#EDEBE8', s: '#9A948D', l: '#3a3a3a', a: c[1] } : { f: c[0], t: '#2B2623', s: '#8A837C', l: '#E6E3DF', a: c[1] }; }
+function dsIcono(k){
+  var r = function(x, y, w, h){ return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="2" fill="currentColor" opacity=".35"/>'; };
+  var cont = k === 'uniforme' ? r(1, 1, 16, 16) + r(19, 1, 16, 16) + r(37, 1, 16, 16) + r(1, 19, 16, 16) + r(19, 19, 16, 16) + r(37, 19, 16, 16) : k === 'amplio' ? r(1, 1, 24, 36) + r(28, 1, 24, 36) : r(1, 1, 16, 24) + r(19, 1, 16, 16) + r(37, 1, 16, 30) + r(19, 19, 16, 18);
+  return '<svg width="54" height="38" viewBox="0 0 54 38" aria-hidden="true">' + cont + '</svg>';
+}
+function dsPreview(g, sel){
+  var osc = dsModo === 'oscuro' || (dsModo === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  var c = dsCol(g, osc), L = LETRAS.filter(function(l){ return l[0] === (g.title_font || 'elegante'); })[0] || LETRAS[0];
+  var cvId = g.cover_photo_id || (sel[0] && sel[0].id), cv = cvId && cur.tk[cvId], cvSrc = cur.cover ? src(cur.cover) : (cv ? src(cv) : '');
+  var tel = dsDisp === 'tel', fotos = sel.slice(0, tel ? 8 : 12), es = cur.escenas || [], ts = g.scene_titles || 'centrados';
+  var nomEsc = es.length ? es[0].name : 'Ceremonia', estilo = g.grid_style || 'clasico';
+  var st = '--pf:' + c.f + ';--pt:' + c.t + ';--ps:' + c.s + ';--pl:' + c.l + ';--pa:' + c.a + ';--pff:' + L[2] + ';--pfs:' + L[3] + ';--ptt:' + L[4] + ';--pls:' + L[5];
+  var fecha = g.event_date ? new Date(g.event_date + 'T12:00:00').toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+  var ims = fotos.length ? fotos.map(function(x){ return '<figure><img alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"></figure>'; }).join('') : [1, 2, 3, 4, 5, 6].map(function(){ return '<figure class="vc"></figure>'; }).join('');
+  var gal0 = '<div class="ds-mg" style="' + st + '"><div class="ds-cv">' + (cvSrc ? '<img alt="" src="' + esc(cvSrc) + '">' : '') + '<div><h2>' + esc(g.title) + '</h2><span>' + esc(fecha) + '</span></div></div>' +
+    '<div class="ds-nv"><b>Todas</b><span>Mis favoritas</span><span class="r">' + esc(ph.studio_name || '') + '</span></div>' +
+    (ts === 'ocultos' ? '' : '<h3 class="ds-et ' + ts + '">' + esc(nomEsc) + '</h3>') +
+    '<div class="ds-gr ' + estilo + '">' + ims + '</div></div>';
+  return '<div class="ds-pvbox ' + (tel ? 'tel' : '') + '">' + (tel ? '<div class="ds-ph">' + gal0 + '</div>' : gal0) + '</div>';
+}
+function dsHtml(g, sel){
+  var cvId = g.cover_photo_id || (sel[0] && sel[0].id), cv = cvId && cur.tk[cvId], cvSrc = cur.cover ? src(cur.cover) : (cv ? src(cv) : '');
+  var pa = dsPalId(g), cur_ = (g.grid_style || 'clasico'), tf = g.title_font || 'elegante', ts = g.scene_titles || 'centrados';
+  var pn = (PALETAS.filter(function(c){ return c[0] === pa; })[0] || PALETAS[0])[1];
+  var auto = (PALETAS.filter(function(c){ return c[0] === (PAL_TIPO[g.gallery_type] || 'arena'); })[0] || [])[1] || '';
+  var btn = function(campo, v, cls, inner){ return '<button type="button" class="ds-cd' + cls + '" data-act="ds-set" data-c="' + campo + '" data-k="' + v + '">' + inner + '</button>'; };
+  var pill = function(act, lista, act_){ return '<div class="pn-seg" role="group">' + lista.map(function(t){ return '<button type="button" data-act="' + act + '" data-k="' + t[0] + '" class="' + (act_ === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div>'; };
+  var dots = '<div class="ds-dots"><button type="button" class="ds-dot au' + (pa === 'auto' ? ' on' : '') + '" data-act="ds-set" data-c="palette" data-k="auto" title="Automática (según el evento)">A</button>' +
+    PALETAS.filter(function(c){ return c[0] !== 'auto'; }).map(function(c){ return '<button type="button" class="ds-dot' + (pa === c[0] ? ' on' : '') + '" data-act="ds-set" data-c="palette" data-k="' + c[0] + '" title="' + esc(c[1]) + '" aria-label="' + esc(c[1]) + '" style="background:conic-gradient(' + c[2] + ' 0 33%,' + c[3] + ' 0 66%,' + c[4] + ' 0)"></button>'; }).join('') + '</div>';
+  var izq = '<div class="ds-l">' +
+    '<section class="ds-sec"><h3>Portada</h3><div class="ds-por"><div class="ds-th">' + (cvSrc ? '<img alt="" src="' + esc(cvSrc) + '">' : '') + '</div><div><p class="pn-s" style="margin:0 0 .5rem">La foto que ve tu cliente al abrir el enlace. Sin marca de agua.</p><div class="ds-bt"><button class="pn-btn sec" data-act="elegir-portada" type="button"' + (sel.length ? '' : ' disabled') + '>Elegir foto</button><button class="pn-btn sec" data-act="portada-subir" type="button">Subir otra</button></div>' + (g.cover_key ? '<button class="pn-vt" style="display:inline;width:auto;margin:.4rem 0 0;font-size:.78rem;text-decoration:underline" data-act="quitar-portada" type="button">Quitar portada subida</button>' : '') + '</div></div></section>' +
+    '<section class="ds-sec"><h3>Estilo de fotos</h3><div class="ds-cds">' + ESTILOS.map(function(e){ return btn('grid_style', e[0], cur_ === e[0] ? ' on' : '', dsIcono(e[0]) + '<span>' + e[1] + '</span>'); }).join('') + '</div><p class="pn-s ds-h">' + esc((ESTILOS.filter(function(e){ return e[0] === cur_; })[0] || [])[2] || '') + '</p></section>' +
+    '<section class="ds-sec"><h3>Colores <i>' + (pa === 'auto' ? 'Automática: ' + esc(auto) : esc(pn)) + '</i></h3>' + dots + '<p class="pn-s ds-h">Se adaptan solos al modo claro u oscuro del dispositivo de tu cliente.</p></section>' +
+    '<section class="ds-sec"><h3>Letra de los títulos</h3><div class="ds-cds">' + LETRAS.map(function(l){ return btn('title_font', l[0], tf === l[0] ? ' on' : '', '<b class="ds-aa" style="font-family:' + l[2].replace(/"/g, "'") + ';font-style:' + l[3] + '">Aa</b><span>' + l[1] + '</span>'); }).join('') + '</div></section>' +
+    '<section class="ds-sec"><h3>Títulos de escena</h3><div class="pn-seg" role="group">' + TITESC.map(function(t){ return '<button type="button" data-act="ds-set" data-c="scene_titles" data-k="' + t[0] + '" class="' + (ts === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div></section></div>';
+  var der = '<div class="ds-r"><div class="ds-tb"><div class="pn-seg"><button type="button" data-act="ds-disp" data-k="pc" class="' + (dsDisp === 'pc' ? 'on' : '') + '">PC</button><button type="button" data-act="ds-disp" data-k="tel" class="' + (dsDisp === 'tel' ? 'on' : '') + '">Teléfono</button></div>' +
+    '<div class="pn-seg"><button type="button" data-act="ds-modo" data-k="auto" class="' + (dsModo === 'auto' ? 'on' : '') + '">Auto</button><button type="button" data-act="ds-modo" data-k="claro" class="' + (dsModo === 'claro' ? 'on' : '') + '">Claro</button><button type="button" data-act="ds-modo" data-k="oscuro" class="' + (dsModo === 'oscuro' ? 'on' : '') + '">Oscuro</button></div></div>' +
+    dsPreview(g, sel) + '<p class="pn-s" style="text-align:center;margin:.7rem 0 0">Los cambios se ven al instante y se guardan solos.</p></div>';
+  return '<div class="ds" id="ds">' + izq + der + '</div>';
+}
+function dsRefrescar(){ var d = $('#ds'), g = gal(galId); if (!d || !g || !cur) return; var sl = cur.fotos.filter(function(x){ return x.photo_type === 'selection'; }); var tmp = document.createElement('div'); tmp.innerHTML = dsHtml(g, sl); d.replaceWith(tmp.firstChild); }
+async function dsSet(campo, v){
+  var g = gal(galId); if (!g || g[campo] === v) return;
+  var prev = g[campo]; g[campo] = v; dsRefrescar();
+  var o = {}; o[campo] = v; var r = await db.from('galleries').update(o).eq('id', galId);
+  if (r.error) { g[campo] = prev; dsRefrescar(); return aviso(/title_font|scene_titles/.test(r.error.message || '') ? 'Falta ejecutar etapa16.sql en Supabase (ver instrucciones).' : r.error.message); }
+  aviso('Guardado');
+}
 async function cambiar(campos, msg){
   var r = await db.from('galleries').update(campos).eq('id', galId);
   if (r.error) { aviso(/selection_watermark/.test(r.error.message || '') ? 'Falta ejecutar etapa9.sql en Supabase (ver instrucciones).' : r.error.message); return; }
@@ -1159,7 +1268,14 @@ async function accion(a, el){
   if (a === 'vid-cancel') { vidCancel = true; return vidEstado('Cancelando…'); }
   if (a === 'abrir') return abrirDetalle(id);
   if (a === 'atras') { await cargarGalerias(); vista = 'galerias'; return pintar(); }
-  if (a === 'tab') { tab = el.dataset.t; return pintar(); }
+  if (a === 'tab') { tab = el.dataset.t; masAb = false; favMenu = false; return pintar(); }
+  if (a === 'fav-menu') { favMenu = !favMenu; return pintar(); }
+  if (a === 'fav-ver') { favVer = el.dataset.k; favMenu = false; try { localStorage.setItem('pn-favver', favVer); } catch (e) {} return pintar(); }
+  if (a === 'mas-abrir' || a === 'mas-cerrar') { masAb = a === 'mas-abrir' ? !masAb : false; var bn2 = $('#pn-bn'); if (bn2) bn2.innerHTML = navHtml(); return; }
+  if (a === 'enl-abrir') { enlEsc = null; enlPaso = (cur.escenas || []).length ? 'lista' : 'link'; $('#pn-denl').innerHTML = enlHtml(); return $('#pn-denl').showModal(); }
+  if (a === 'enl-ver') { enlEsc = el.dataset.id || null; enlPaso = 'link'; return enlRefrescar(); }
+  if (a === 'enl-atras') { enlPaso = 'lista'; return enlRefrescar(); }
+  if (a === 'enl-cerrar') return $('#pn-denl').close();
   if (a === 'msg-guardar') { var mt = $('#pn-msg-t').value, mn2 = parseInt($('#pn-msg-n').value, 10) || 14; if (mt.indexOf('{enlace}') < 0) return aviso('El mensaje debe incluir {enlace} para que se ponga el enlace.'); try { localStorage.setItem('pn-msg', mt); localStorage.setItem('pn-msg-n-' + galId, String(mn2)); } catch (e) {} aviso('Mensaje guardado'); return pintar(); }
   if (a === 'msg-restaurar') { try { localStorage.removeItem('pn-msg'); } catch (e) {} aviso('Mensaje original restaurado'); return pintar(); }
   if (a === 'msg-copiar') { var gg2 = gal(galId); if (!gg2) return; var mt2 = $('#pn-msg-t').value, mn3 = parseInt($('#pn-msg-n').value, 10) || 14; copiar(mt2.replace(/\{fotos\}/g, mn3).replace(/\{enlace\}/g, BASEG + gg2.link_token + (gg2.access_mode === 'abierto' ? '' : '\nCódigo de acceso: ' + gg2.access_code))); el.textContent = 'Copiado'; return; }
@@ -1225,7 +1341,7 @@ async function accion(a, el){
   if (a === 'esc-codigo') {
     var cd = $('#pn-sc-' + id).value.trim().toUpperCase(); if (!/^[A-Z0-9-]{4,40}$/.test(cd)) return aviso('El código debe tener de 4 a 40 letras, números o guiones.');
     var rk = await api('/api/admin/scene', { gallery: galId, action: 'update', id: id, access_code: cd }); if (!rk.ok) return aviso('No se pudo guardar el código.');
-    cur.escenas.filter(function(x){ return x.id === id; })[0].access_code = cd; return aviso('Código guardado');
+    cur.escenas.filter(function(x){ return x.id === id; })[0].access_code = cd; enlRefrescar(); return aviso('Código guardado');
   }
   if (a === 'fs-abrir') { fEsc = el.dataset.id || '_ninguna'; marcadas = new Set(); fMas = 48; return pintar(); }
   if (a === 'carp') { fEsc = el.dataset.id || ''; marcadas = new Set(); fMas = 48; return pintar(); }
@@ -1239,6 +1355,10 @@ async function accion(a, el){
     if (gals.some(function(x){ return x.id !== g.id && String(x.access_code).toUpperCase() === nc; })) return aviso('Ese código ya lo usa otra galería. Elige otro.');
     return cambiar({ access_code: nc }, 'Código guardado');
   }
+  if (a === 'ds-set') return dsSet(el.dataset.c, el.dataset.k);
+  if (a === 'ds-disp') { dsDisp = el.dataset.k; return dsRefrescar(); }
+  if (a === 'ds-modo') { dsModo = el.dataset.k; return dsRefrescar(); }
+  if (a === 'portada-subir') { pendPortada = null; var pfo2 = $('#pn-pfo'); if (!pfo2) return aviso('No se pudo abrir el selector de archivos.'); pfo2.value = ''; return pfo2.click(); }
   if (a === 'estilo') return cambiar({ grid_style: el.dataset.v }, 'Estilo guardado');
   if (a === 'paleta') return cambiar({ palette: el.dataset.v }, 'Paleta guardada');
   if (a === 'guardar-detalles') {
@@ -1909,6 +2029,7 @@ window.iniciarPanel = async function(photographer, cliente){
   if (!document.getElementById('pn-css')) { var st = document.createElement('style'); st.id = 'pn-css'; st.textContent = CSS + disCss(); document.head.appendChild(st); }
   root.innerHTML = '<div class="pn"><aside></aside><main id="pn-main"><div class="pn-skel w1"></div><div class="pn-skel"></div><div class="pn-skel h2"></div></main>' +
     '<dialog id="pn-dnueva"><h2>Nueva galería</h2><form id="pn-fn"><input type="text" id="pn-cn" placeholder="Cliente (ej. Ana y Luis)"><input type="text" id="pn-ct" placeholder="Nombre de la galería (ej. Boda Ana y Luis)"><input type="date" id="pn-cf"><div class="pn-row"><button class="pn-btn" type="submit">Crear</button><button class="pn-btn sec" type="button" id="pn-cc">Cancelar</button></div></form></dialog><dialog id="pn-dqr"><h2 id="pn-qt">Código QR</h2><div class="pn-qr"><canvas id="pn-qc" width="10" height="10"></canvas></div><p class="pn-s ay">Quien lo escanee con la cámara del celular abre la galería. Puedes imprimirlo o mandarlo por WhatsApp.</p><div class="pn-row"><button class="pn-btn" data-act="qr-bajar" type="button">Descargar imagen</button><button class="pn-btn sec" data-act="qr-cerrar" type="button">Cerrar</button></div></dialog><input type="file" id="pn-pfo" accept="image/jpeg,image/png,image/webp" hidden><dialog id="pn-dport"><h2>Elegir portada</h2><p class="pn-s">Toca la foto que quieres como portada. Después te pediré su archivo original para que la portada salga <b>sin marca de agua</b>.</p><div class="pn-grid" id="pn-gport"></div><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-portada">Cancelar</button></div></dialog></div>';
+  root.querySelector('.pn').insertAdjacentHTML('beforeend', '<dialog id="pn-denl"></dialog>');
   root.querySelector('.pn').insertAdjacentHTML('beforeend', '<div id="pn-up" hidden></div><button id="pn-as-chip" data-act="asist" hidden type="button"></button>');
   root.querySelector('.pn').insertAdjacentHTML('beforeend', '<dialog id="pn-dver"><header class="pn-vh"><div class="pn-vt2"><b id="pn-vnm"></b><span class="pn-s" id="pn-vct"></span></div><div class="pn-vac"><button type="button" id="pn-vpo" data-act="portada">★ Establecer como portada</button><button type="button" id="pn-vdel" data-act="borrar-foto">Borrar</button><button type="button" id="pn-vx" aria-label="Cerrar">✕</button></div></header><button class="pn-nav l" id="pn-vp" type="button" aria-label="Anterior">‹</button><div class="pn-vm"><img id="pn-vimg" alt=""></div><button class="pn-nav r" id="pn-vn" type="button" aria-label="Siguiente">›</button></dialog>');
   $('#pn-vp').onclick = function(){ pasarVer(-1); }; $('#pn-vn').onclick = function(){ pasarVer(1); }; $('#pn-vx').onclick = function(){ $('#pn-dver').close(); };
@@ -1936,7 +2057,7 @@ window.iniciarPanel = async function(photographer, cliente){
       cur.fotos.forEach(function(x){ if (marcadas.has(x.id)) x.scene_id = dest; }); aviso('Fotos movidas'); marcadas = new Set(); return pintar();
     }
     var sm = e.target.closest('select[data-escmodo]');
-    if (sm) { var r1 = await api('/api/admin/scene', { gallery: galId, action: 'update', id: sm.dataset.escmodo, access_mode: sm.value }); if (!r1.ok) return aviso('No se pudo cambiar.'); cur.escenas.filter(function(x){ return x.id === sm.dataset.escmodo; })[0].access_mode = sm.value; return pintar(); }
+    if (sm) { var r1 = await api('/api/admin/scene', { gallery: galId, action: 'update', id: sm.dataset.escmodo, access_mode: sm.value }); if (!r1.ok) return aviso('No se pudo cambiar.'); cur.escenas.filter(function(x){ return x.id === sm.dataset.escmodo; })[0].access_mode = sm.value; enlRefrescar(); return pintar(); }
     var wmS = e.target.closest('select[data-escwm]');
     if (wmS) { var r3 = await api('/api/admin/scene', { gallery: galId, action: 'update', id: wmS.dataset.escwm, no_watermark: wmS.value === '1' }); if (!r3.ok) return aviso('No se pudo cambiar. ¿Ya ejecutaste etapa15.sql y actualizaste el Worker?'); cur.escenas.filter(function(x){ return x.id === wmS.dataset.escwm; })[0].no_watermark = wmS.value === '1'; return aviso(wmS.value === "1" ? 'Esta escena se verá sin marca de agua en su enlace' : 'Esta escena vuelve a seguir la Configuración'); }
     var ch = e.target.closest('input[data-eschid]');
