@@ -357,30 +357,17 @@ function crearEscenaEstudio(fotos, W, H, seg, op){
     }
     cx.restore();
   }
-  function partir(cx, txt, maxW){
-    if (cx.measureText(txt).width <= maxW) return [txt];
-    var pal = txt.split(/\s+/), best = [txt], bd = 1e9, j;
-    for (j = 1; j < pal.length; j++) { var a = pal.slice(0, j).join(' '), b = pal.slice(j).join(' '), d = Math.abs(cx.measureText(a).width - cx.measureText(b).width); if (d < bd) { bd = d; best = [a, b]; } }
-    return best;
-  }
   function intro(cx, t){
-    cx.fillStyle = '#0b0908'; cx.fillRect(0, 0, W, H);
-    var e = ease(clamp((t - 0.25) / 0.8, 0, 1)), tit = String(op.titulo || '').trim(), sub = String(op.subtitulo || '').trim().toUpperCase();
-    cx.save(); cx.globalAlpha = e; cx.textAlign = 'center'; cx.textBaseline = 'middle';
-    var fs1 = vert ? W * 0.034 : H * 0.036, fs2 = vert ? W * 0.15 : H * 0.15, lines = [], lw = 0, lh = 0, fs3 = vert ? W * 0.038 : H * 0.04;
-    if (tit) { cx.font = 'italic 500 ' + fs2 + 'px ' + famT; lines = partir(cx, tit, W * 0.84); while (fs2 > 24 && lines.some(function(l){ return cx.measureText(l).width > W * 0.86; })) { fs2 *= 0.94; cx.font = 'italic 500 ' + fs2 + 'px ' + famT; } }
-    if (logo && logo.bmp) { lw = (vert ? 0.42 : 0.2) * W; lh = lw * logo.h / logo.w; var mh = H * (vert ? 0.14 : 0.2); if (lh > mh) { lw *= mh / lh; lh = mh; } }
-    var marca = lh ? lh : (op.nombre ? fs3 : 0), tot = (sub ? fs1 * 2.4 : 0) + lines.length * fs2 * 1.04 + (lines.length ? 40 * u : 0) + (marca ? marca + (lines.length ? 30 * u : 0) : 0);
-    var y = H / 2 - tot / 2;
-    if (sub) { cx.fillStyle = '#c9a877'; cx.font = '400 ' + fs1 + 'px ' + famS; try { cx.letterSpacing = (fs1 * 0.5) + 'px'; } catch (e1) {} cx.fillText(sub, W / 2, y + fs1 / 2); try { cx.letterSpacing = '0px'; } catch (e2) {} y += fs1 * 2.4; }
-    if (lines.length) { cx.fillStyle = '#efe6d4'; cx.font = 'italic 500 ' + fs2 + 'px ' + famT; lines.forEach(function(l){ cx.fillText(l, W / 2, y + fs2 * 0.52); y += fs2 * 1.04; }); cx.fillStyle = '#c9a877'; cx.fillRect(W / 2 - 45 * u, y + 14 * u, 90 * u, 1.6 * u); y += 40 * u; }
-    if (lh) { cx.imageSmoothingQuality = 'high'; cx.drawImage(logo.bmp, W / 2 - lw / 2, y + (lines.length ? 30 * u : 0), lw, lh); }
-    else if (op.nombre) { cx.fillStyle = '#bdb4a4'; cx.font = '400 ' + fs3 + 'px ' + famT; try { cx.letterSpacing = (fs3 * 0.3) + 'px'; } catch (e3) {} cx.fillText(String(op.nombre).toUpperCase(), W / 2, y + (lines.length ? 30 * u : 0) + fs3 / 2); try { cx.letterSpacing = '0px'; } catch (e4) {} }
+    var g = cx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, Math.max(W, H) * 0.7); g.addColorStop(0, '#1d1813'); g.addColorStop(1, '#0b0806'); cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+    var a = clamp((t - 0.25) / 0.8, 0, 1), e = ease(a); cx.save(); cx.globalAlpha = e; cx.translate(W / 2, H / 2); cx.scale(0.94 + 0.06 * e, 0.94 + 0.06 * e);
+    if (logo && logo.bmp) { var lw = (vert ? 0.62 : 0.32) * W, lh = lw * logo.h / logo.w, mh = H * (vert ? 0.3 : 0.4); if (lh > mh) { lw *= mh / lh; lh = mh; } cx.imageSmoothingQuality = 'high'; cx.drawImage(logo.bmp, -lw / 2, -lh / 2, lw, lh); }
+    else if (op.nombre) { var fs = (vert ? W * 0.085 : H * 0.1); cx.fillStyle = '#E9D9B8'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.font = '300 ' + fs + 'px "Cormorant Garamond", Georgia, serif'; try { cx.letterSpacing = (fs * 0.12) + 'px'; } catch (e2) {} cx.fillText(String(op.nombre).toUpperCase(), 0, 0); }
+    pieMarca(cx, W, H, op, logo);
     cx.restore();
   }
   function dibujar(cx, t){
     t = clamp(t, 0, duracion - 0.0001);
-    cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = 1; cx.filter = 'none'; cx.fillStyle = '#0b0908'; cx.fillRect(0, 0, W, H);
+    cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = 1; cx.filter = 'none'; cx.fillStyle = '#000'; cx.fillRect(0, 0, W, H);
     // El cambio de cada foto es un barrido de luz centrado en el momento en que empieza la siguiente (la primera foto, si hay inicio).
     var q, tr = -1;
     for (q = I > 0 ? 0 : 1; q < n; q++) if (Math.abs(t - (I + q * D)) < TR / 2) { tr = q; break; }
@@ -392,10 +379,9 @@ function crearEscenaEstudio(fotos, W, H, seg, op){
     else {
       var i = Math.min(n - 1, Math.floor((t - I) / D)), lt = t - I - i * D;
       foto(cx, i, lt);
-      if (I === 0 && i === 0 && lt < 0.6) { cx.fillStyle = 'rgba(11,9,8,' + (1 - ease(lt / 0.6)).toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
     }
-    var fin = duracion - t, neg = clamp(1 - fin / 0.6, 0, 1);
-    if (neg > 0) { cx.fillStyle = 'rgba(11,9,8,' + neg.toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
+    var fin = duracion - t, neg = Math.max(clamp(1 - fin / 0.6, 0, 1), I > 0 ? 0 : clamp(1 - t / 0.25, 0, 1));
+    if (neg > 0) { cx.fillStyle = 'rgba(0,0,0,' + neg.toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
   }
   return { W: W, H: H, duracion: duracion, dibujar: dibujar, n: n, seg: D, estilo: 'estudio' };
 }
@@ -434,7 +420,7 @@ function crearEscenaBase(fotos, W, H, seg, op){
 
   // Geometría del marco de papel
   var b = vertical ? 0.074 * W : 0.036 * Math.min(W, H), pad = 70 * u;
-  var ow = (vertical ? 1.14 : 0.79) * W, oh = (vertical ? 0.76 : 0.79) * H, fw = Math.round(ow - 2 * b), fh = Math.round(oh - 2 * b);
+  var v2 = op.v2 !== false, ow = (vertical ? 1.14 : (v2 ? 0.86 : 0.79)) * W, oh = (vertical ? (v2 ? 0.85 : 0.76) : (v2 ? 0.86 : 0.79)) * H, fw = Math.round(ow - 2 * b), fh = Math.round(oh - 2 * b);
 
   // Destello de lente natural (se crea una sola vez)
   var flare = papel ? crearFlare(W, H) : null;
@@ -461,8 +447,8 @@ function crearEscenaBase(fotos, W, H, seg, op){
       cx.save(); cx.shadowColor = 'rgba(40,30,20,.35)'; cx.shadowBlur = 6 * u; cx.fillStyle = '#000'; cx.fillRect(pad + b, pad + b, fw, fh); cx.restore();
       cx.drawImage(ventana(f), pad + b, pad + b);
       // fondo: la misma foto muy desenfocada + marcos grandes inclinados
-      var bg = fondoDesenf(f, W, H, 1.7, Math.max(2, Math.round(7 * u))), bx = bg.getContext('2d'), rr = mulberry(100 + i * 13);
-      bx.fillStyle = 'rgba(248,244,236,.30)'; bx.fillRect(0, 0, bg.width, bg.height);
+      var bg = fondoDesenf(f, W, H, v2 ? 2.7 : 1.7, Math.max(2, Math.round((v2 ? 15 : 7) * u))), bx = bg.getContext('2d'), rr = mulberry(100 + i * 13);
+      bx.fillStyle = v2 ? 'rgba(248,244,236,.42)' : 'rgba(248,244,236,.30)'; bx.fillRect(0, 0, bg.width, bg.height);
       for (var k = 0; k < 4; k++) {
         var sz = (0.55 + rr() * 0.5) * bg.width, asp = fw / fh, ww = sz, hh = sz / asp;
         bx.save(); bx.translate(rr() * bg.width, rr() * bg.height); bx.rotate((rr() < 0.5 ? -1 : 1) * (8 + rr() * 34) * Math.PI / 180);
