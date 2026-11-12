@@ -481,15 +481,18 @@ function crearEscenaBase(fotos, W, H, seg, op){
       var uc = carasClave(f), foco = uc ? [(uc.x + uc.w / 2) / f.w, (uc.y + uc.h / 2) / f.h] : [0.5, 0.45];
       var tw = (vertical ? 0.46 : 0.205) * W, th = tw / pa, bT = Math.max(4 * u, tw * 0.04), gx = tw * 0.12, gy = th * 0.1, stepX = tw + 2 * bT + gx, stepY = th + 2 * bT + gy;
       var nC = Math.ceil(W / stepX) + 2, nR = Math.ceil(H / stepY) + 2, ox = -stepX * 0.55, oy = -stepY * 0.5;
+      var tl = lienzo(Math.round(W / 3), Math.round(H / 3)), tx = tl.getContext('2d'), ksc = tl.width / W; tx.scale(ksc, ksc); tx.imageSmoothingQuality = 'high';
       for (var rI = 0; rI < nR; rI++) for (var cI = 0; cI < nC; cI++) {
         var px = ox + cI * stepX + (rI % 2 ? stepX / 2 : 0), py = oy + rI * stepY, ang = ((rI + cI) % 2 ? 1 : -1) * (2.5 + rr() * 2.2) * Math.PI / 180;
         var zk = 1.0 + rr() * 0.7, sw = baseP.width / zk, sh = baseP.height / zk, fx = foco[0] + (rr() - 0.5) * 0.5, fy = foco[1] + (rr() - 0.5) * 0.5;
         var sx = clamp(fx * baseP.width - sw / 2, 0, baseP.width - sw), sy = clamp(fy * baseP.height - sh / 2, 0, baseP.height - sh);
-        bx.save(); bx.translate(px + stepX / 2, py + stepY / 2); bx.rotate(ang);
-        bx.shadowColor = 'rgba(40,30,20,.30)'; bx.shadowBlur = 14 * u; bx.shadowOffsetY = 5 * u; bx.fillStyle = '#F6F1E6'; bx.fillRect(-tw / 2 - bT, -th / 2 - bT, tw + 2 * bT, th + 2 * bT);
-        bx.shadowColor = 'transparent'; bx.shadowBlur = 0; bx.shadowOffsetY = 0; bx.drawImage(baseP, sx, sy, sw, sh, -tw / 2, -th / 2, tw, th);
-        bx.fillStyle = 'rgba(248,244,236,.20)'; bx.fillRect(-tw / 2, -th / 2, tw, th); bx.restore();
+        tx.save(); tx.translate(px + stepX / 2, py + stepY / 2); tx.rotate(ang);
+        tx.shadowColor = 'rgba(40,30,20,.30)'; tx.shadowBlur = 14 * u; tx.shadowOffsetY = 5 * u; tx.fillStyle = '#F6F1E6'; tx.fillRect(-tw / 2 - bT, -th / 2 - bT, tw + 2 * bT, th + 2 * bT);
+        tx.shadowColor = 'transparent'; tx.shadowBlur = 0; tx.shadowOffsetY = 0; tx.drawImage(baseP, sx, sy, sw, sh, -tw / 2, -th / 2, tw, th);
+        tx.fillStyle = 'rgba(248,244,236,.20)'; tx.fillRect(-tw / 2, -th / 2, tw, th); tx.restore();
       }
+      try { desenfocar(tl, 3); } catch (e) {}
+      bx.imageSmoothingQuality = 'high'; bx.drawImage(tl, 0, 0, W, H);
       res = { card: c, bg: bg, cw: c.width, ch: c.height };
     } else {
       var c2 = lienzo(W, H), x2 = c2.getContext('2d'), asp2 = f.w / f.h, wa2 = W / H;
@@ -936,8 +939,8 @@ function crearEscenaPostales(fotos, W, H, seg, op){
   var Dc = dcPostales(n), duracion = n * Dc + 1.4 + I, vert = H >= W;
   var rnd = (function(s){ return function(){ s = (s * 1664525 + 1013904223) % 4294967296; return s / 4294967296; }; })((op.semilla || 7) * 99991 + 13);
   var cards = fotos.map(function(f, k){
-    var a = clamp(f.w / f.h, 0.72, 1.45), maxW = vert ? 0.74 * W : 0.42 * W, maxH = (vert ? 0.46 : 0.62) * H, pw = Math.min(maxW, maxH * a), ph = pw / a, b = pw * 0.045, bb = pw * 0.15;
-    return { i: k, pw: pw, ph: ph, b: b, bb: bb, cw: pw + 2 * b, ch: ph + b + bb, cx: W / 2 + (rnd() - 0.5) * W * (vert ? 0.2 : 0.34), cy: H * (vert ? 0.54 : 0.55) + (rnd() - 0.5) * H * 0.06, rot: (rnd() < 0.5 ? -1 : 1) * (0.03 + rnd() * 0.07), side: rnd() < 0.5 ? -1 : 1, cinta: k % 2 === 0, dir: Math.floor(rnd() * 3) };
+    var a = clamp(f.w / f.h, 0.72, 1.45), maxW = vert ? 0.80 * W : 0.50 * W, maxH = (vert ? 0.56 : 0.65) * H, pw = Math.min(maxW, maxH * a), ph = pw / a, b = pw * 0.045, bb = pw * 0.15;
+    return { i: k, pw: pw, ph: ph, b: b, bb: bb, cw: pw + 2 * b, ch: ph + b + bb, cx: W / 2 + (rnd() - 0.5) * W * (vert ? 0.12 : 0.30), cy: H * (vert ? 0.565 : 0.585) + (rnd() - 0.5) * H * 0.06, rot: (rnd() < 0.5 ? -1 : 1) * (0.03 + rnd() * 0.07), side: rnd() < 0.5 ? -1 : 1, cinta: k % 2 === 0, dir: Math.floor(rnd() * 3) };
   });
   // Fondo de papel con grano suave (se prepara una sola vez)
   var fondo = null;
