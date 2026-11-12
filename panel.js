@@ -2,7 +2,7 @@
 'use strict';
 var W = 'https://galerias-api.alexandergeerre.workers.dev';
 var BASE = 'https://alexandergeerre.github.io/galeria/cliente.html?c=';
-var BASEG = 'https://alexandergeerre.github.io/galeria/cliente.html?g=';
+var BASEG = 'https://galerias-api.alexandergeerre.workers.dev/g/';
 var MAX = 45 * 1048576;
 var ESTADOS = { draft: 'Borrador', selection: 'En selección', selection_sent: 'Selección enviada', delivered: 'Entregada', expired: 'Expirada' };
 var EXTS = ['.png.jpg', '.jpg.jpg', '.jpg', '.png', '.jpeg', '.webp', '.png.png'];
@@ -488,7 +488,7 @@ function pintarCuenta(){
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
     '<dialog id="pn-dlogo"><h2>Logotipos</h2>' + '<p class="pn-s ay">Sube un PNG con fondo transparente. Necesitas dos versiones: una oscura (se ve sobre fondo claro) y una clara o dorada (se ve sobre fondo oscuro). Si subes solo una, se usa en los dos modos.</p><div class="pn-logos"><div><b>Para fondo claro</b>' + pv('claro', 'logo-oscuro', ph.logo_para_claro) + '<input type="file" id="pn-lg-c" accept="image/png,image/webp,image/jpeg"><div class="pn-row"><button class="pn-btn sec" data-act="logo-quitar" data-v="claro" type="button">Volver al logo por defecto</button></div></div>' +
       '<div><b>Para fondo oscuro</b>' + pv('oscuro', 'logo-claro', ph.logo_para_oscuro) + '<input type="file" id="pn-lg-o" accept="image/png,image/webp,image/jpeg"><div class="pn-row"><button class="pn-btn sec" data-act="logo-quitar" data-v="oscuro" type="button">Volver al logo por defecto</button></div></div></div>' + '<div class="pn-row"><button class="pn-btn" data-act="logo-cerrar" type="button">Listo</button></div></dialog>' +
-    '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 12 nov 2026, 12:35</p></div>';
+    '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 12 nov 2026, 12:50</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -1108,6 +1108,7 @@ function figFoto(x, g, ic){
 function listaVisible(){ return filtrarEsc(cur.fotos.filter(function(x){ return !fTipo || x.photo_type === fTipo; })); }
 var fEscSub = '';
 function escEnt(id){ var e = (cur.escenas || []).filter(function(x){ return x.id === id; })[0]; return !!(e && e.delivered); }
+function escCov(id){ var e = (cur.escenas || []).filter(function(x){ return x.id === id; })[0]; return !!(e && e.cover_key); }
 function escCer(id){ var e = (cur.escenas || []).filter(function(x){ return x.id === id; })[0]; return !!(e && e.closed); }
 function escPag(id){ var e = (cur.escenas || []).filter(function(x){ return x.id === id; })[0]; return !!(e && e.paid); }
 function fotosVista(g, sel, fin){
@@ -1129,7 +1130,7 @@ function fotosVista(g, sel, fin){
   var unica = !es.length;
   var cuerpo = secs.map(function(sc){
     var abierta = unica || fEsc === sc.id, lst = visibles(sc.id), total = delaEsc(sc.id).length;
-    var menu = '<div class="np-dd r"><button type="button" class="fs-dots" data-act="vd-dd" aria-label="Más opciones">•••</button><ul hidden><li><button type="button" data-act="abrir-subir" data-tipo="selection" data-esc="' + (sc.real ? sc.id : '') + '">Subir fotos aquí</button></li>' + (sc.real ? '<li><button type="button" data-act="esc-entrega" data-id="' + sc.id + '">' + (escEnt(sc.id) ? 'Quitar entrega' : 'Marcar como entregada') + '</button></li><li><button type="button" data-act="esc-renombrar" data-id="' + sc.id + '">Renombrar</button></li><li><button type="button" data-act="esc-borrar" data-id="' + sc.id + '">Eliminar escena</button></li>' : '') + '</ul></div>';
+    var menu = '<div class="np-dd r"><button type="button" class="fs-dots" data-act="vd-dd" aria-label="Más opciones">•••</button><ul hidden><li><button type="button" data-act="abrir-subir" data-tipo="selection" data-esc="' + (sc.real ? sc.id : '') + '">Subir fotos aquí</button></li>' + (sc.real ? '<li><button type="button" data-act="esc-entrega" data-id="' + sc.id + '">' + (escEnt(sc.id) ? 'Quitar entrega' : 'Marcar como entregada') + '</button></li><li><button type="button" data-act="esc-renombrar" data-id="' + sc.id + '">Renombrar</button></li><li><button type="button" data-act="esc-portada" data-id="' + sc.id + '">' + (escCov(sc.id) ? 'Cambiar portada de la escena' : 'Poner portada a la escena') + '</button></li>' + (escCov(sc.id) ? '<li><button type="button" data-act="esc-portada-quitar" data-id="' + sc.id + '">Quitar portada de la escena</button></li>' : '') + '<li><button type="button" data-act="esc-borrar" data-id="' + sc.id + '">Eliminar escena</button></li>' : '') + '</ul></div>';
     var head = '<div class="fs-h"><h2>' + esc(sc.name) + '</h2>' + (sc.real ? '<button type="button" class="fs-t" data-act="esc-renombrar" data-id="' + sc.id + '" title="Renombrar" aria-label="Renombrar">R</button><button type="button" class="fs-p' + (escPag(sc.id) ? ' on' : '') + '" data-act="esc-pago" data-id="' + sc.id + '" title="' + (escPag(sc.id) ? 'Pagada: sus finales se ven sin marca de agua. Toca para quitar' : 'Marcar como pagada') + '" aria-pressed="' + escPag(sc.id) + '" aria-label="Pagada">P</button>' : '') + (sc.real ? '<button type="button" class="fs-p fs-d' + (escCer(sc.id) ? ' off' : ' on') + '" data-act="esc-ojo" data-id="' + sc.id + '" title="' + (escCer(sc.id) ? 'Galería cerrada: tu cliente verá un aviso para contactarte. Toca para abrirla' : 'Galería abierta: tu cliente puede ver sus fotos. Toca para cerrarla') + '" aria-pressed="' + !escCer(sc.id) + '" aria-label="' + (escCer(sc.id) ? 'Galería cerrada' : 'Galería abierta') + '">' + (escCer(sc.id) ? '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.5 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4.2-.9M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>' : '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>') + '</button>' : '') + (sc.real && escEnt(sc.id) ? '<span class="fs-ent">Entregada</span>' : '') + (sc.real && escCer(sc.id) ? '<span class="fs-ent fs-cer">Cerrada</span>' : '') + '<span class="fs-n">' + total + (total === 1 ? ' foto' : ' fotos') + '</span>' + menu + '<div class="pn-seg fs-seg" role="group" aria-label="Tipo de foto">' + [['', 'Todas'], ['selection', 'Selección'], ['final', 'Finales']].map(function(t){ return '<button type="button" data-act="ftipo" data-esc="' + sc.id + '" data-v="' + t[0] + '" class="' + ((fTipoE[sc.id] || '') === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div></div>';
     var add = '<button class="fs-add" data-act="abrir-subir" data-tipo="' + tipoSub + '" data-esc="' + (sc.real ? sc.id : '') + '" type="button"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg><span>Fotos y videos</span></button>';
     var body;
@@ -1183,6 +1184,33 @@ async function ordenar(tipo, modo){
   aviso('Orden guardado: así lo verá tu cliente.'); pintar();
 }
 var pendPortada = null;
+// Vista previa del enlace (WhatsApp): versión pequeña 1200x630 de la portada
+function ogBlob(file){
+  return createImageBitmap(file).then(function(b){
+    var c = document.createElement('canvas'); c.width = 1200; c.height = 630; var x = c.getContext('2d');
+    var k = Math.max(1200 / b.width, 630 / b.height), w = b.width * k, h = b.height * k;
+    x.drawImage(b, (1200 - w) / 2, Math.min(0, Math.max(630 - h, (630 - h) * 0.35)), w, h);
+    return new Promise(function(r){ c.toBlob(function(bl){ r(bl); }, 'image/jpeg', 0.8); });
+  });
+}
+async function subirOg(file, sceneId){
+  try {
+    var bl = await ogBlob(file), ss = (await db.auth.getSession()).data.session;
+    await fetch(W + '/api/admin/cover-upload?gallery=' + galId + '&og=1' + (sceneId ? '&scene=' + sceneId : ''), { method: 'POST', headers: { Authorization: 'Bearer ' + ss.access_token, 'Content-Type': 'image/jpeg' }, body: bl });
+  } catch (e) {}
+}
+var escPortadaId = '';
+async function portadaEscenaArchivo(pf){
+  var ee = (cur.escenas || []).filter(function(x){ return x.id === escPortadaId; })[0]; if (!pf || !ee) return;
+  aviso('Subiendo la portada de la escena…');
+  try {
+    var rp = await reducir(pf, null, 'alta'), ss = (await db.auth.getSession()).data.session;
+    var rs = await fetch(W + '/api/admin/cover-upload?gallery=' + galId + '&scene=' + ee.id, { method: 'POST', headers: { Authorization: 'Bearer ' + ss.access_token, 'Content-Type': 'image/jpeg' }, body: rp.blob });
+    var dd = await rs.json().catch(function(){ return {}; }); if (!dd.ok) throw new Error('¿ya ejecutaste etapa20.sql y actualizaste el Worker?');
+    ee.cover_key = 'x'; await subirOg(pf, ee.id); aviso('Portada de la escena actualizada');
+  } catch (e) { aviso('No se pudo subir la portada: ' + (e.message || 'error')); }
+  pintar();
+}
 async function portadaDesdeArchivo(pf){
   var g = gal(galId); if (!pf || !g) return;
   aviso('Subiendo la portada…');
@@ -1190,7 +1218,7 @@ async function portadaDesdeArchivo(pf){
     var rp = await reducir(pf, null, 'alta'), ss = (await db.auth.getSession()).data.session;
     var rs = await fetch(W + '/api/admin/cover-upload?gallery=' + galId, { method: 'POST', headers: { Authorization: 'Bearer ' + ss.access_token, 'Content-Type': 'image/jpeg' }, body: rp.blob });
     var dd = await rs.json().catch(function(){ return {}; }); if (!dd.ok) throw new Error('no se pudo subir');
-    g.cover_key = 'x'; if (cur) cur.cover = dd.t;
+    g.cover_key = 'x'; if (cur) cur.cover = dd.t; await subirOg(pf);
     if (pendPortada) { var u = await db.from('galleries').update({ cover_photo_id: pendPortada }).eq('id', galId); if (!u.error) g.cover_photo_id = pendPortada; }
     aviso('Portada actualizada, sin marca de agua');
   } catch (e) { aviso('No se pudo subir la portada: ' + (e.message || 'error')); }
@@ -1200,7 +1228,7 @@ var MSG_DEF = 'Hola, le comparto su link personal para que pueda ver las fotogra
 function msgPlantilla(){ try { return localStorage.getItem('pn-msg') || MSG_DEF; } catch (e) { return MSG_DEF; } }
 function msgFotos(){ try { return localStorage.getItem('pn-msg-n-' + galId) || '14'; } catch (e) { return '14'; } }
 function msgCliente(url, cod){ return 'Hola, le comparto su enlace personal para ver las fotografías de su sesión:\n\n' + url + (cod ? '\n\nCódigo de acceso: ' + cod : ''); }
-var BASES = 'https://alexandergeerre.github.io/galeria/cliente.html?s=', fEsc = '', fImp = false, modoSel = false, marcadas = new Set();
+var BASES = 'https://galerias-api.alexandergeerre.workers.dev/s/', fEsc = '', fImp = false, modoSel = false, marcadas = new Set();
 var vl = [], vix = 0, abiertas = { selection: false, final: false }, PRIM = 7;
 async function mostrarVer(){
   var f = vl[vix]; if (!f) return;
@@ -1389,6 +1417,12 @@ async function accion(a, el){
     aviso(a === 'esc-ojo' ? (nuevo2 ? 'Galería cerrada: tu cliente verá un aviso para contactarte' : 'Galería abierta: tu cliente ya puede ver sus fotos') : a === 'esc-pago' ? (nuevo2 ? 'Marcada como pagada: en su enlace verá sus fotos sin marca de agua y podrá descargarlas' : 'Pago quitado: en su enlace las verá con marca de agua') : (nuevo2 ? 'Escena entregada: solo su enlace la muestra con las fotos finales' : 'Entrega quitada de la escena'));
     return pintar();
   }
+  if (a === 'esc-portada') { escPortadaId = id; var pfe = $('#pn-pfesc'); if (!pfe) return aviso('No se pudo abrir el selector de archivos.'); pfe.value = ''; aviso('Elige la foto que será la portada de esta escena.'); return pfe.click(); }
+  if (a === 'esc-portada-quitar') {
+    var ee3 = cur.escenas.filter(function(x){ return x.id === id; })[0]; if (!ee3) return;
+    var rq3 = await api('/api/admin/cover-clear', { gallery: galId, scene: id }); if (!rq3.ok) return aviso('No se pudo quitar la portada.');
+    ee3.cover_key = null; aviso('Portada de la escena quitada: usará la de la galería'); return pintar();
+  }
   if (a === 'esc-renombrar') {
     var ee = cur.escenas.filter(function(x){ return x.id === id; })[0]; var nm = prompt('Nuevo nombre de la escena:', ee ? ee.name : ''); if (!nm || !nm.trim()) return;
     var ru = await api('/api/admin/scene', { gallery: galId, action: 'update', id: id, name: nm.trim() }); if (!ru.ok) return aviso('No se pudo renombrar.');
@@ -1447,7 +1481,7 @@ async function accion(a, el){
       var rs = await fetch(W + '/api/admin/cover-upload?gallery=' + galId, { method: 'POST', headers: { Authorization: 'Bearer ' + ss.access_token, 'Content-Type': 'image/jpeg' }, body: rp.blob });
       var dd = await rs.json().catch(function(){ return {}; });
       if (!dd.ok) throw new Error('no se pudo subir');
-      g.cover_key = 'x'; if (cur) cur.cover = dd.t; aviso('Portada actualizada');
+      g.cover_key = 'x'; if (cur) cur.cover = dd.t; await subirOg(pf); aviso('Portada actualizada');
     } catch (e) { aviso('No se pudo subir la portada: ' + (e.message || 'error')); }
     return pintar();
   }
@@ -2054,7 +2088,7 @@ function negIniciar(){
   root.querySelector('.pn').insertAdjacentHTML('beforeend', negHtml());
   root.addEventListener('click', function(e){ var a = e.target.closest('[data-act^="n-"]'); if (a) negAccion(a.dataset.act, a); });
   root.addEventListener('submit', function(e){ if (e.target.id === 'n-fcli') cliGuardar(e); else if (e.target.id === 'n-fcot') cotGuardar(e); else if (e.target.id === 'n-fev') evGuardar(e); else if (e.target.id === 'n-fgr') grGuardar(e); });
-  root.addEventListener('change', function(e){ if (e.target.id === 'pn-pfo' && e.target.files && e.target.files[0]) portadaDesdeArchivo(e.target.files[0]); });
+  root.addEventListener('change', function(e){ if (e.target.id === 'pn-pfo' && e.target.files && e.target.files[0]) portadaDesdeArchivo(e.target.files[0]); if (e.target.id === 'pn-pfesc' && e.target.files && e.target.files[0]) portadaEscenaArchivo(e.target.files[0]); });
   root.addEventListener('change', async function(e){ if (e.target.id === 'n-vst' && neg.cotImg) { var r = await db.from('quotes').update({ status: e.target.value }).eq('id', neg.cotImg.id); if (r.error) return aviso(r.error.message); neg.cotImg.status = e.target.value; aviso('Estado actualizado'); if (e.target.value === 'accepted') await cotAAgenda(neg.cotImg, true); } });
   root.addEventListener('input', function(e){ var id = e.target.id; if (id === 'n-qdg') cotRecalc('dg'); else if (id === 'n-qim') { neg.qMan.imp = true; cotRecalc(); } else if (id === 'n-qto') { neg.qMan.tot = true; cotRecalc(); } else if (id === 'n-qds') { neg.qMan.tot = false; cotRecalc(); } });
   root.addEventListener('change', function(e){ if (e.target.id === 'n-qvi') cotRecalc(); });
@@ -2089,7 +2123,7 @@ window.iniciarPanel = async function(photographer, cliente){
   })();
   if (!document.getElementById('pn-css')) { var st = document.createElement('style'); st.id = 'pn-css'; st.textContent = CSS + disCss(); document.head.appendChild(st); }
   root.innerHTML = '<div class="pn"><aside></aside><main id="pn-main"><div class="pn-skel w1"></div><div class="pn-skel"></div><div class="pn-skel h2"></div></main>' +
-    '<dialog id="pn-dnueva"><h2>Nueva galería</h2><form id="pn-fn"><input type="text" id="pn-cn" placeholder="Cliente (ej. Ana y Luis)"><input type="text" id="pn-ct" placeholder="Nombre de la galería (ej. Boda Ana y Luis)"><input type="date" id="pn-cf"><div class="pn-row"><button class="pn-btn" type="submit">Crear</button><button class="pn-btn sec" type="button" id="pn-cc">Cancelar</button></div></form></dialog><dialog id="pn-dqr"><h2 id="pn-qt">Código QR</h2><div class="pn-qr"><canvas id="pn-qc" width="10" height="10"></canvas></div><p class="pn-s ay">Quien lo escanee con la cámara del celular abre la galería. Puedes imprimirlo o mandarlo por WhatsApp.</p><div class="pn-row"><button class="pn-btn" data-act="qr-bajar" type="button">Descargar imagen</button><button class="pn-btn sec" data-act="qr-cerrar" type="button">Cerrar</button></div></dialog><input type="file" id="pn-pfo" accept="image/jpeg,image/png,image/webp" hidden><dialog id="pn-dport"><h2>Elegir portada</h2><p class="pn-s">Toca la foto que quieres como portada. Después te pediré su archivo original para que la portada salga <b>sin marca de agua</b>.</p><div class="pn-grid" id="pn-gport"></div><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-portada">Cancelar</button></div></dialog></div>';
+    '<dialog id="pn-dnueva"><h2>Nueva galería</h2><form id="pn-fn"><input type="text" id="pn-cn" placeholder="Cliente (ej. Ana y Luis)"><input type="text" id="pn-ct" placeholder="Nombre de la galería (ej. Boda Ana y Luis)"><input type="date" id="pn-cf"><div class="pn-row"><button class="pn-btn" type="submit">Crear</button><button class="pn-btn sec" type="button" id="pn-cc">Cancelar</button></div></form></dialog><dialog id="pn-dqr"><h2 id="pn-qt">Código QR</h2><div class="pn-qr"><canvas id="pn-qc" width="10" height="10"></canvas></div><p class="pn-s ay">Quien lo escanee con la cámara del celular abre la galería. Puedes imprimirlo o mandarlo por WhatsApp.</p><div class="pn-row"><button class="pn-btn" data-act="qr-bajar" type="button">Descargar imagen</button><button class="pn-btn sec" data-act="qr-cerrar" type="button">Cerrar</button></div></dialog><input type="file" id="pn-pfo" accept="image/jpeg,image/png,image/webp" hidden><input type="file" id="pn-pfesc" accept="image/jpeg,image/png,image/webp" hidden><dialog id="pn-dport"><h2>Elegir portada</h2><p class="pn-s">Toca la foto que quieres como portada. Después te pediré su archivo original para que la portada salga <b>sin marca de agua</b>.</p><div class="pn-grid" id="pn-gport"></div><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-portada">Cancelar</button></div></dialog></div>';
   root.querySelector('.pn').insertAdjacentHTML('beforeend', '<dialog id="pn-denl"></dialog><div id="pn-dzov" hidden><div><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 15v4a1 1 0 001 1h14a1 1 0 001-1v-4"/></svg><b>Suelta tus fotos para subirlas</b></div></div>');
   dzIniciar();
   root.querySelector('.pn').insertAdjacentHTML('beforeend', '<div id="pn-up" hidden></div><button id="pn-as-chip" data-act="asist" hidden type="button"></button>');
