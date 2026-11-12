@@ -327,33 +327,57 @@ function luzBarrido(cx, W, H, tmp, dir, s, adapt, dibujarB){
 // ---------- Plantilla «Estudio»: retratos de estudio, foto protagonista y barridos de luz blanca ----------
 function crearEscenaEstudio(fotos, W, H, seg, op){
   var n = fotos.length, D = seg || 2.5, vert = H > W, u = Math.min(W, H) / 1080, I = op.intro ? INTRO : 0, TR = Math.min(1.1, D * 0.45), duracion = n * D + I;
-  var logo = op.logo || null, famT = '"Cormorant Garamond", Georgia, serif', famS = 'Jost, "Helvetica Neue", Arial, sans-serif', fondos = {}, tmp = lienzo(W, H);
+  var logo = op.logo || null, famT = '"Cormorant Garamond", Georgia, serif', famS = 'Jost, "Helvetica Neue", Arial, sans-serif', tmp = lienzo(W, H);
   // Dirección de cada barrido: izquierda→derecha, derecha→izquierda o arriba→abajo (nunca de abajo hacia arriba), al azar y sin repetir la anterior.
   var rnd = mulberry((op.semilla != null ? op.semilla : 12345) >>> 0), DIRS = ['lr', 'rl', 'tb'], dirs = [], pd = '', k, c;
   for (k = 0; k < n; k++) { do { c = DIRS[Math.floor(rnd() * 3)]; } while (c === pd); dirs.push(c); pd = c; }
-  function fondo(i){
-    if (fondos[i]) return fondos[i];
-    fondos[i] = fondoDesenf(fotos[i], W, H, 1.3, Math.max(2, Math.round(6 * u)));
-    var ks = Object.keys(fondos); if (ks.length > 8) delete fondos[ks[0]];
-    return fondos[i];
+  // La foto es la protagonista. Se llena la pantalla solo si se ve casi toda la foto y NINGUNA persona queda cortada
+  // (el recorte se centra en todas las caras detectadas). Si el formato no alcanza, la foto se muestra completa, centrada,
+  // sobre un fondo de estudio (luz suave, viñeta y filete dorado fino).
+  var vent = {}, fondosE = {};
+  function carasTodas(f){
+    var c = f.caras || []; if (!c.length) return null;
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, j;
+    for (j = 0; j < c.length; j++) { x0 = Math.min(x0, c[j].x); y0 = Math.min(y0, c[j].y); x1 = Math.max(x1, c[j].x + c[j].w); y1 = Math.max(y1, c[j].y + c[j].h); }
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
   }
-  // La foto es la protagonista: si su formato es parecido al de la pantalla la llena (centrada en las personas);
-  // si no, se muestra lo más grande posible sobre su propio fondo desenfocado (en vertical, una foto horizontal se recorta en 4:5 alrededor de las personas).
-  var modos = {};
-  function llena(i){
-    if (modos[i] === undefined) { var f = fotos[i], dif = Math.abs(f.w / f.h / (W / H) - 1); modos[i] = carasClave(f) ? (dif <= 0.30 && cabeCaras(f, W, H)) : dif <= 0.10; }
-    return modos[i];
+  function ventanaLlena(i){
+    if (vent[i] !== undefined) return vent[i];
+    var f = fotos[i], kc = Math.max(W / f.w, H / f.h), sw = W / kc, sh = H / kc, u0 = carasTodas(f), r = null;
+    if (sw * sh / (f.w * f.h) >= 0.80) { // se vería al menos el 80% de la foto
+      if (u0) {
+        var mx = sw * 0.07, my = sh * 0.06, sx = clamp(u0.x + u0.w / 2 - sw / 2, 0, f.w - sw), sy = clamp(u0.y + u0.h / 2 - sh * 0.38, 0, f.h - sh);
+        if (u0.x >= sx + mx && u0.x + u0.w <= sx + sw - mx && u0.y >= sy + my && u0.y + u0.h <= sy + sh - my) r = { sx: sx, sy: sy, sw: sw, sh: sh };
+      } else if (Math.abs(f.w / f.h / (W / H) - 1) <= 0.08) r = { sx: (f.w - sw) / 2, sy: (f.h - sh) / 2, sw: sw, sh: sh };
+    }
+    vent[i] = r; return r;
+  }
+  function tonoFoto(f){
+    if (f._tono) return f._tono;
+    var c = lienzo(8, 8), x = c.getContext('2d'), d, r = 0, g = 0, b = 0, q, nn = 64;
+    try { x.drawImage(f.bmp, 0, 0, 8, 8); d = x.getImageData(0, 0, 8, 8).data; for (q = 0; q < d.length; q += 4) { r += d[q]; g += d[q + 1]; b += d[q + 2]; } f._tono = [r / nn, g / nn, b / nn]; } catch (e) { f._tono = [90, 80, 70]; }
+    return f._tono;
+  }
+  function fondoEstudio(i){
+    if (fondosE[i]) return fondosE[i];
+    var c = lienzo(W, H), x = c.getContext('2d'), t = tonoFoto(fotos[i]), M = Math.max(W, H);
+    x.fillStyle = '#0a0807'; x.fillRect(0, 0, W, H);
+    var g = x.createRadialGradient(W / 2, H * 0.46, 0, W / 2, H * 0.46, M * 0.72);
+    g.addColorStop(0, 'rgb(' + Math.round(40 + t[0] * 0.10) + ',' + Math.round(33 + t[1] * 0.10) + ',' + Math.round(26 + t[2] * 0.10) + ')'); g.addColorStop(0.55, 'rgb(' + Math.round(20 + t[0] * 0.04) + ',' + Math.round(16 + t[1] * 0.04) + ',' + Math.round(13 + t[2] * 0.04) + ')'); g.addColorStop(1, '#0a0807');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+    fondosE[i] = c; var ks = Object.keys(fondosE); if (ks.length > 6) delete fondosE[ks[0]];
+    return c;
   }
   function foto(cx, i, lt){
-    var f = fotos[i], z = 1 + 0.035 * clamp(lt / D, 0, 1);
+    var f = fotos[i], p = clamp(lt / D, 0, 1), z = (i % 2) ? 1.045 - 0.045 * p : 1 + 0.045 * p, r = ventanaLlena(i); // acercándose o alejándose, alternando
     cx.save(); cx.translate(W / 2, H / 2); cx.scale(z, z); cx.translate(-W / 2, -H / 2); cx.imageSmoothingQuality = 'high';
-    if (llena(i)) cubrirCarasF(cx, f, 0, 0, W, H);
+    if (r) cx.drawImage(f.bmp, r.sx, r.sy, r.sw, r.sh, 0, 0, W, H);
     else {
-      cx.drawImage(fondo(i), 0, 0, W, H); cx.fillStyle = 'rgba(8,6,4,.5)'; cx.fillRect(0, 0, W, H);
-      var sx = 0, sw = f.w, sh = f.h;
-      if (vert && f.w / f.h > 0.95) { var cw = Math.min(f.w, f.h * 0.8), u0 = carasClave(f), mid = u0 ? u0.x + u0.w / 2 : f.w / 2; sw = cw; sx = clamp(mid - cw / 2, 0, f.w - cw); }
-      var kk = vert ? Math.min(W * 0.94 / sw, H * 0.90 / sh) : Math.min(W * 0.97 / sw, H * 0.95 / sh), dw = sw * kk, dh = sh * kk;
-      cx.drawImage(f.bmp, sx, 0, sw, sh, (W - dw) / 2, (H - dh) / 2, dw, dh);
+      cx.drawImage(fondoEstudio(i), 0, 0, W, H);
+      var mg = 14 * u, kk = vert ? Math.min((W * 0.92 - 2 * mg) / f.w, (H * 0.86 - 2 * mg) / f.h) : Math.min((W * 0.94 - 2 * mg) / f.w, (H * 0.90 - 2 * mg) / f.h), dw = f.w * kk, dh = f.h * kk, x0 = (W - dw) / 2, y0 = (H - dh) / 2 - H * 0.006;
+      cx.save(); cx.shadowColor = 'rgba(0,0,0,.65)'; cx.shadowBlur = 38 * u; cx.shadowOffsetY = 10 * u; cx.fillStyle = '#000'; cx.fillRect(x0, y0, dw, dh); cx.restore();
+      cx.drawImage(f.bmp, x0, y0, dw, dh);
+      cx.strokeStyle = 'rgba(201,168,119,.55)'; cx.lineWidth = Math.max(1, 1.6 * u); cx.strokeRect(x0 - mg, y0 - mg, dw + 2 * mg, dh + 2 * mg);
     }
     cx.restore();
   }
