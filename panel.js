@@ -488,7 +488,7 @@ function pintarCuenta(){
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
     '<dialog id="pn-dlogo"><h2>Logotipos</h2>' + '<p class="pn-s ay">Sube un PNG con fondo transparente. Necesitas dos versiones: una oscura (se ve sobre fondo claro) y una clara o dorada (se ve sobre fondo oscuro). Si subes solo una, se usa en los dos modos.</p><div class="pn-logos"><div><b>Para fondo claro</b>' + pv('claro', 'logo-oscuro', ph.logo_para_claro) + '<input type="file" id="pn-lg-c" accept="image/png,image/webp,image/jpeg"><div class="pn-row"><button class="pn-btn sec" data-act="logo-quitar" data-v="claro" type="button">Volver al logo por defecto</button></div></div>' +
       '<div><b>Para fondo oscuro</b>' + pv('oscuro', 'logo-claro', ph.logo_para_oscuro) + '<input type="file" id="pn-lg-o" accept="image/png,image/webp,image/jpeg"><div class="pn-row"><button class="pn-btn sec" data-act="logo-quitar" data-v="oscuro" type="button">Volver al logo por defecto</button></div></div></div>' + '<div class="pn-row"><button class="pn-btn" data-act="logo-cerrar" type="button">Listo</button></div></dialog>' +
-    '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 12 nov 2026, 01:10</p></div>';
+    '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 12 nov 2026, 07:25</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -1108,6 +1108,7 @@ function figFoto(x, g, ic){
 function listaVisible(){ return filtrarEsc(cur.fotos.filter(function(x){ return !fTipo || x.photo_type === fTipo; })); }
 var fEscSub = '';
 function escEnt(id){ var e = (cur.escenas || []).filter(function(x){ return x.id === id; })[0]; return !!(e && e.delivered); }
+function escDes(id){ var e = (cur.escenas || []).filter(function(x){ return x.id === id; })[0]; return !!(e && e.downloads_enabled); }
 function escPag(id){ var e = (cur.escenas || []).filter(function(x){ return x.id === id; })[0]; return !!(e && e.paid); }
 function fotosVista(g, sel, fin){
   var es = cur.escenas || [], todas = cur.fotos, ic = impCuenta(), nImp = Object.keys(ic).length;
@@ -1129,7 +1130,7 @@ function fotosVista(g, sel, fin){
   var cuerpo = secs.map(function(sc){
     var abierta = unica || fEsc === sc.id, lst = visibles(sc.id), total = delaEsc(sc.id).length;
     var menu = '<div class="np-dd r"><button type="button" class="fs-dots" data-act="vd-dd" aria-label="Más opciones">•••</button><ul hidden><li><button type="button" data-act="abrir-subir" data-tipo="selection" data-esc="' + (sc.real ? sc.id : '') + '">Subir fotos aquí</button></li>' + (sc.real ? '<li><button type="button" data-act="esc-entrega" data-id="' + sc.id + '">' + (escEnt(sc.id) ? 'Quitar entrega' : 'Marcar como entregada') + '</button></li><li><button type="button" data-act="esc-renombrar" data-id="' + sc.id + '">Cambiar nombre</button></li><li><button type="button" data-act="esc-borrar" data-id="' + sc.id + '">Eliminar escena</button></li>' : '') + '</ul></div>';
-    var head = '<div class="fs-h"><h2>' + esc(sc.name) + '</h2>' + (sc.real ? '<button type="button" class="fs-t" data-act="esc-renombrar" data-id="' + sc.id + '" title="Cambiar nombre" aria-label="Cambiar nombre">T</button><button type="button" class="fs-p' + (escPag(sc.id) ? ' on' : '') + '" data-act="esc-pago" data-id="' + sc.id + '" title="' + (escPag(sc.id) ? 'Pagada: sus finales se ven sin marca de agua. Toca para quitar' : 'Marcar como pagada') + '" aria-pressed="' + escPag(sc.id) + '" aria-label="Pagada">P</button>' : '') + (sc.real && escEnt(sc.id) ? '<span class="fs-ent">Entregada</span>' : '') + '<span class="fs-n">' + total + (total === 1 ? ' foto' : ' fotos') + '</span>' + menu + '<div class="pn-seg fs-seg" role="group" aria-label="Tipo de foto">' + [['', 'Todas'], ['selection', 'Selección'], ['final', 'Finales']].map(function(t){ return '<button type="button" data-act="ftipo" data-esc="' + sc.id + '" data-v="' + t[0] + '" class="' + ((fTipoE[sc.id] || '') === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div></div>';
+    var head = '<div class="fs-h"><h2>' + esc(sc.name) + '</h2>' + (sc.real ? '<button type="button" class="fs-t" data-act="esc-renombrar" data-id="' + sc.id + '" title="Cambiar nombre" aria-label="Cambiar nombre">R</button><button type="button" class="fs-p' + (escPag(sc.id) ? ' on' : '') + '" data-act="esc-pago" data-id="' + sc.id + '" title="' + (escPag(sc.id) ? 'Pagada: sus finales se ven sin marca de agua. Toca para quitar' : 'Marcar como pagada') + '" aria-pressed="' + escPag(sc.id) + '" aria-label="Pagada">P</button>' : '') + (sc.real ? '<button type="button" class="fs-p fs-d' + (escDes(sc.id) ? ' on' : '') + '" data-act="esc-desc" data-id="' + sc.id + '" title="' + (escDes(sc.id) ? 'Descargas activadas para esta escena. Toca para desactivar' : 'Activar descargas para esta escena') + '" aria-pressed="' + escDes(sc.id) + '" aria-label="Descargas"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg></button>' : '') + (sc.real && escEnt(sc.id) ? '<span class="fs-ent">Entregada</span>' : '') + '<span class="fs-n">' + total + (total === 1 ? ' foto' : ' fotos') + '</span>' + menu + '<div class="pn-seg fs-seg" role="group" aria-label="Tipo de foto">' + [['', 'Todas'], ['selection', 'Selección'], ['final', 'Finales']].map(function(t){ return '<button type="button" data-act="ftipo" data-esc="' + sc.id + '" data-v="' + t[0] + '" class="' + ((fTipoE[sc.id] || '') === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div></div>';
     var add = '<button class="fs-add" data-act="abrir-subir" data-tipo="' + tipoSub + '" data-esc="' + (sc.real ? sc.id : '') + '" type="button"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg><span>Fotos y videos</span></button>';
     var body;
     if (abierta) {
@@ -1380,12 +1381,12 @@ async function accion(a, el){
     var rc = await api('/api/admin/scene', { gallery: galId, action: 'create', name: nn }); if (!rc.ok) return aviso('No se pudo crear la escena.');
     cur.escenas.push(rc.escena); aviso('Escena creada'); return pintar();
   }
-  if (a === 'esc-entrega' || a === 'esc-pago') {
+  if (a === 'esc-entrega' || a === 'esc-pago' || a === 'esc-desc') {
     var ee2 = cur.escenas.filter(function(x){ return x.id === id; })[0]; if (!ee2) return;
-    var campo2 = a === 'esc-pago' ? 'paid' : 'delivered', nuevo2 = !ee2[campo2], cb = { gallery: galId, action: 'update', id: id }; cb[campo2] = nuevo2;
-    var ru2 = await api('/api/admin/scene', cb); if (!ru2.ok) return aviso('No se pudo cambiar. ¿Ya ejecutaste etapa17.sql y actualizaste el Worker?');
+    var campo2 = a === 'esc-pago' ? 'paid' : a === 'esc-desc' ? 'downloads_enabled' : 'delivered', nuevo2 = !ee2[campo2], cb = { gallery: galId, action: 'update', id: id }; cb[campo2] = nuevo2;
+    var ru2 = await api('/api/admin/scene', cb); if (!ru2.ok) return aviso('No se pudo cambiar. ¿Ya ejecutaste etapa17.sql y etapa18.sql y actualizaste el Worker?');
     ee2[campo2] = nuevo2;
-    aviso(a === 'esc-pago' ? (nuevo2 ? 'Marcada como pagada: en su enlace verá sus fotos sin marca de agua' : 'Pago quitado: en su enlace las verá con marca de agua') : (nuevo2 ? 'Escena entregada: solo su enlace la muestra con las fotos finales' : 'Entrega quitada de la escena'));
+    aviso(a === 'esc-desc' ? (nuevo2 ? 'Descargas activadas: en su enlace podrá descargar (si la escena está entregada y pagada)' : 'Descargas desactivadas para esta escena') : a === 'esc-pago' ? (nuevo2 ? 'Marcada como pagada: en su enlace verá sus fotos sin marca de agua' : 'Pago quitado: en su enlace las verá con marca de agua') : (nuevo2 ? 'Escena entregada: solo su enlace la muestra con las fotos finales' : 'Entrega quitada de la escena'));
     return pintar();
   }
   if (a === 'esc-renombrar') {
