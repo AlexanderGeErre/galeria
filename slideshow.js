@@ -435,20 +435,16 @@ function crearEscenaBase(fotos, W, H, seg, op){
   var I = op.intro ? INTRO : 0, logo = op.logo || null;
   var duracion = tot + I, cache = {}, papel = estilo === 'papel', particulas = papel && op.particulas !== false;
   var rnd = mulberry(20260601), P = [];
-  // Chispitas en profundidad: lejos = diminutas, nítidas y lentas; cerca = grandes, suaves (desenfocadas) y más rápidas
-  if (particulas) {
-    for (var i = 0; i < Math.round(80 * (W * H) / (1080 * 1920)) + 40; i++) {
-      var z = Math.pow(rnd(), 1.5), tono = rnd();
-      P.push({ x: rnd(), y: rnd(), z: z, r: (0.9 + z * z * 11) * (0.8 + rnd() * 0.4) * u, a: 0.30 + 0.5 * (1 - z * 0.55) * rnd() + 0.15, vx: (rnd() - 0.5) * (0.006 + 0.03 * z), vy: -(0.015 + 0.1 * z) * (0.7 + rnd() * 0.6), f: rnd() * 6.28, w: 0.4 + rnd() * 1.1, wa: 0.003 + 0.022 * z * rnd(), c: tono < 0.5 ? '255,226,170' : tono < 0.85 ? '255,196,120' : '255,242,214' });
-    }
-    P.sort(function(p, q){ return p.z - q.z; });
+  if (particulas) for (var i = 0; i < Math.round(70 * (W * H) / (1080 * 1920)) + 30; i++) {
+    var grande = rnd() < 0.10, tono = rnd();
+    P.push({ x: rnd(), y: rnd(), r: (grande ? 6 + rnd() * 7 : 1.1 + rnd() * 2.2) * u, a: grande ? 0.10 + rnd() * 0.10 : 0.55 + rnd() * 0.4, vx: (rnd() - 0.5) * 0.02, vy: grande ? -0.008 - rnd() * 0.02 : -0.035 - rnd() * 0.07, f: rnd() * 6.28, g: grande, w: 0.4 + rnd() * 1.2, wa: (0.004 + rnd() * 0.012), c: tono < 0.5 ? '255,226,170' : tono < 0.85 ? '255,196,120' : '255,242,214' });
   }
   var ruido = lienzo(256, 256), rc = ruido.getContext('2d'), rr0 = mulberry(7);
   for (var q = 0; q < 2600; q++) { rc.fillStyle = 'rgba(' + (rr0() < 0.5 ? '120,100,70' : '255,255,255') + ',' + (0.03 + rr0() * 0.07).toFixed(3) + ')'; rc.fillRect(rr0() * 256, rr0() * 256, 1 + rr0() * 2, 1 + rr0() * 2); }
 
   // Geometría del marco de papel
   var b = vertical ? 0.074 * W : 0.036 * Math.min(W, H), pad = 70 * u;
-  var v2 = op.v2 !== false, ow = (vertical ? (v2 ? 0.86 : 1.14) : (v2 ? 0.86 : 0.79)) * W, oh = (vertical ? (v2 ? 0.85 : 0.76) : (v2 ? 0.86 : 0.79)) * H, fw = Math.round(ow - 2 * b), fh = Math.round(oh - 2 * b);
+  var v2 = op.v2 !== false, ow = (vertical ? 1.14 : (v2 ? 0.86 : 0.79)) * W, oh = (vertical ? (v2 ? 0.85 : 0.76) : (v2 ? 0.86 : 0.79)) * H, fw = Math.round(ow - 2 * b), fh = Math.round(oh - 2 * b);
 
   // Destello de lente natural (se crea una sola vez)
   var flare = papel ? crearFlare(W, H) : null;
@@ -498,29 +494,13 @@ function crearEscenaBase(fotos, W, H, seg, op){
   }
 
   // ---- Marco de papel ----
-  var pTilt = null;
   function capaPapel(cx, i, lt, o){
     o = o || {};
     var t = activo(i), s = (i % 2 ? -1 : 1), h = clamp(lt / D, 0, 1.3), tin = o.tin == null ? 1 : o.tin;
-    var prof = op.profundidad === true, hp = clamp(h, 0, 1), par = prof ? (hp - 0.5) * s : 0;
-    cx.save(); cx.translate(W / 2 + (o.bgDx || 0) - par * 0.045 * W, H / 2 + (o.bgDy || 0)); cx.rotate(s * 0.9 * h * Math.PI / 180); cx.scale(1.06 * (1 + 0.08 * h), 1.06 * (1 + 0.08 * h)); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.bg, -W / 2, -H / 2, W, H); cx.restore();
+    cx.save(); cx.translate(W / 2 + (o.bgDx || 0), H / 2 + (o.bgDy || 0)); cx.rotate(s * 0.9 * h * Math.PI / 180); cx.scale(1.06 * (1 + 0.08 * h), 1.06 * (1 + 0.08 * h)); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.bg, -W / 2, -H / 2, W, H); cx.restore();
     var rr = GIROS[i % GIROS.length], rot = rr + s * 0.6 * h, esc = 1 + 0.035 * h;
     if (tin < 1) { var p = ease(tin); rot += (1 - p) * (rr >= 0 ? -3 : 3); esc *= 1 + (1 - p) * 0.12; }
-    cx.save(); cx.translate(W / 2 + (o.cardDx || 0) + par * 0.012 * W, H / 2 + (o.cardDy || 0)); cx.rotate(rot * Math.PI / 180); cx.scale(esc, esc); cx.imageSmoothingQuality = 'high';
-    // giro suave en perspectiva (como una foto flotando): 0 al entrar y al salir, máximo a mitad de la foto
-    var yaw = prof ? s * 4.5 * Math.sin(Math.PI * hp) * (1 - clamp((o.veil || 0) * 3, 0, 1)) * Math.PI / 180 : 0;
-    if (Math.abs(yaw) > 0.002) {
-      var dd = 2.1 * Math.max(t.cw, t.ch), sy = Math.sin(yaw), cy = Math.cos(yaw), NS = 64, sw0 = t.cw / NS, tw = Math.ceil(t.cw * 1.04), th = Math.ceil(t.ch * 1.04);
-      if (!pTilt || pTilt.width !== tw || pTilt.height !== th) pTilt = lienzo(tw, th);
-      var tg = pTilt.getContext('2d'); tg.setTransform(1, 0, 0, 1, 0, 0); tg.clearRect(0, 0, tw, th); tg.imageSmoothingQuality = 'high';
-      var bd = [], kk = [];
-      for (var q = 0; q <= NS; q++) { var xq = -t.cw / 2 + q * sw0, k = 1 / (1 + xq * sy / dd); kk.push(k); bd.push(Math.round(xq * cy * k + tw / 2)); }
-      for (var q2 = 0; q2 < NS; q2++) {
-        var km = (kk[q2] + kk[q2 + 1]) / 2, wd = bd[q2 + 1] - bd[q2]; if (wd <= 0) continue;
-        tg.drawImage(t.card, q2 * sw0, 0, sw0, t.ch, bd[q2], th / 2 - t.ch * km / 2, wd, t.ch * km);
-      }
-      cx.drawImage(pTilt, -tw / 2, -th / 2);
-    } else cx.drawImage(t.card, -t.cw / 2, -t.ch / 2);
+    cx.save(); cx.translate(W / 2 + (o.cardDx || 0), H / 2 + (o.cardDy || 0)); cx.rotate(rot * Math.PI / 180); cx.scale(esc, esc); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.card, -t.cw / 2, -t.ch / 2);
     if (o.veil > 0.001) {
       var x0 = -t.cw / 2 + pad + b, y0 = -t.ch / 2 + pad + b, vd = o.veilDir || 'der', gv, ex, ey, fe;
       cx.beginPath(); cx.rect(x0, y0, fw, fh); cx.clip();
@@ -573,16 +553,10 @@ function crearEscenaBase(fotos, W, H, seg, op){
     if (!P.length) return;
     cx.save();
     for (var i = 0; i < P.length; i++) {
-      var p = P[i], z = p.z, x = ((((p.x + p.vx * t + p.wa * Math.sin(t * p.w + p.f)) % 1) + 1) % 1) * W, y = (((p.y + p.vy * t) % 1) + 1) % 1 * H;
-      var tw = Math.max(0, Math.sin(p.f + t * (1.6 + p.w * 1.4))), pul = 1 + 0.12 * Math.sin(t * 0.7 + p.f) * z;
-      if (z > 0.62) {
-        // cerca: disco suave tipo bokeh, con borde apenas más claro
-        var r1 = p.r * pul, al = m * p.a * 0.5 * (0.6 + 0.4 * tw), gr = cx.createRadialGradient(x, y, 0, x, y, r1);
-        gr.addColorStop(0, 'rgba(' + p.c + ',' + (al * 0.55).toFixed(3) + ')'); gr.addColorStop(0.72, 'rgba(' + p.c + ',' + (al * 0.8).toFixed(3) + ')'); gr.addColorStop(0.92, 'rgba(' + p.c + ',' + al.toFixed(3) + ')'); gr.addColorStop(1, 'rgba(' + p.c + ',0)');
-        cx.fillStyle = gr; cx.beginPath(); cx.arc(x, y, r1, 0, 6.2832); cx.fill(); continue;
-      }
-      // lejos y a media distancia: chispita con halo cálido y titileo
-      var al2 = m * p.a * (0.3 + 0.7 * tw * tw), rg = p.r * (3.2 + 2 * z), g2 = cx.createRadialGradient(x, y, 0, x, y, rg);
+      var p = P[i], x = ((((p.x + p.vx * t + p.wa * Math.sin(t * p.w + p.f)) % 1) + 1) % 1) * W, y = (((p.y + p.vy * t) % 1) + 1) % 1 * H;
+      if (p.g) { var al = m * p.a * (0.55 + 0.45 * Math.sin(p.f + t * 0.6)), gr = cx.createRadialGradient(x, y, 0, x, y, p.r); gr.addColorStop(0, 'rgba(' + p.c + ',' + al.toFixed(3) + ')'); gr.addColorStop(1, 'rgba(' + p.c + ',0)'); cx.fillStyle = gr; cx.beginPath(); cx.arc(x, y, p.r, 0, 6.2832); cx.fill(); continue; }
+      // chispita: centro brillante con un halo cálido y un titileo irregular
+      var tw = Math.max(0, Math.sin(p.f + t * (2.2 + p.w * 1.5))), al2 = m * p.a * (0.25 + 0.75 * tw * tw), rg = p.r * 3.6, g2 = cx.createRadialGradient(x, y, 0, x, y, rg);
       g2.addColorStop(0, 'rgba(' + p.c + ',' + al2.toFixed(3) + ')'); g2.addColorStop(0.25, 'rgba(' + p.c + ',' + (al2 * 0.45).toFixed(3) + ')'); g2.addColorStop(1, 'rgba(' + p.c + ',0)');
       cx.fillStyle = g2; cx.beginPath(); cx.arc(x, y, rg, 0, 6.2832); cx.fill();
       cx.fillStyle = 'rgba(255,250,236,' + Math.min(1, al2 * 1.1).toFixed(3) + ')'; cx.beginPath(); cx.arc(x, y, p.r * 0.6, 0, 6.2832); cx.fill();
