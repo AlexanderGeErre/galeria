@@ -443,8 +443,8 @@ function crearEscenaBase(fotos, W, H, seg, op){
   for (var q = 0; q < 2600; q++) { rc.fillStyle = 'rgba(' + (rr0() < 0.5 ? '120,100,70' : '255,255,255') + ',' + (0.03 + rr0() * 0.07).toFixed(3) + ')'; rc.fillRect(rr0() * 256, rr0() * 256, 1 + rr0() * 2, 1 + rr0() * 2); }
 
   // Geometría del marco de papel
-  var b = vertical ? 0.074 * W : 0.036 * Math.min(W, H), pad = 70 * u;
-  var v2 = op.v2 !== false, ow = (vertical ? 1.14 : (v2 ? 0.86 : 0.79)) * W, oh = (vertical ? (v2 ? 0.85 : 0.76) : (v2 ? 0.86 : 0.79)) * H, fw = Math.round(ow - 2 * b), fh = Math.round(oh - 2 * b);
+  var v2 = op.v2 !== false, b = vertical ? (v2 ? 0.04 : 0.074) * W : 0.036 * Math.min(W, H), pad = 70 * u;
+  var ow = (vertical ? (v2 ? 1.02 : 1.14) : (v2 ? 0.74 : 0.79)) * W, oh = (vertical ? (v2 ? 0.75 : 0.76) : (v2 ? 0.74 : 0.79)) * H, fw = Math.round(ow - 2 * b), fh = Math.round(oh - 2 * b);
 
   // Destello de lente natural (se crea una sola vez)
   var flare = papel ? crearFlare(W, H) : null;
@@ -474,17 +474,20 @@ function crearEscenaBase(fotos, W, H, seg, op){
       var bg0 = fondoDesenf(f, W, H, v2 ? 2.7 : 1.7, Math.max(2, Math.round((v2 ? 15 : 7) * u))), bg = lienzo(bg0.width, bg0.height), bx = bg.getContext('2d'), rr = mulberry(100 + i * 13);
       bx.drawImage(bg0, 0, 0); var base = fondoDesenf(f, W, H, 1.3, Math.max(2, Math.round(7 * u)));
       bx.fillStyle = v2 ? 'rgba(248,244,236,.42)' : 'rgba(248,244,236,.30)'; bx.fillRect(0, 0, bg.width, bg.height);
-      // marcos de fondo: delgados y con la misma foto, desenfocada, vista desde distintos puntos y acercamientos
-      var asp = fw / fh, uc = carasClave(f), foco = uc ? [uc.x / f.w, uc.y / f.h] : [0.5, 0.45], lw = Math.max(2, b * 0.5);
-      for (var k = 0; k < 5; k++) {
-        var ww = (0.58 + rr() * 0.4) * Math.min(bg.width, bg.height * asp * 1.1), hh = ww / asp, zk = 1.1 + rr() * 1.5;
-        var sw = Math.min(base.width, base.height * asp) / zk, sh = sw / asp;
-        var fx = foco[0] + (k === 0 ? 0 : (rr() - 0.5) * 0.55), fy = foco[1] + (k === 0 ? 0 : (rr() - 0.5) * 0.6), sx = clamp(fx * base.width - sw / 2, 0, base.width - sw), sy = clamp(fy * base.height - sh / 2, 0, base.height - sh);
-        bx.save(); bx.translate(rr() * bg.width, rr() * bg.height); bx.rotate((rr() < 0.5 ? -1 : 1) * (6 + rr() * 22) * Math.PI / 180);
-        bx.shadowColor = 'rgba(40,30,20,.28)'; bx.shadowBlur = 18 * u; bx.shadowOffsetY = 6 * u; bx.fillStyle = 'rgba(250,246,238,.9)'; bx.fillRect(-ww / 2 - lw, -hh / 2 - lw, ww + 2 * lw, hh + 2 * lw);
+      // marcos de fondo: la misma foto de frente, desenfocada y vista desde distintos puntos, alrededor del marco principal
+      var pa = clamp(f.w / f.h, 0.62, 1.6), baseP = fondoDesenf(f, 1080, Math.round(1080 / pa), 1.0, Math.max(2, Math.round(3 * u))), uc = carasClave(f), foco = uc ? [(uc.x + uc.w / 2) / f.w, (uc.y + uc.h / 2) / f.h] : [0.5, 0.45], lw = 4 * u;
+      var SL = vertical
+        ? [[0.20, 0.05, 0.70, -9], [0.76, 0.04, 0.72, 8], [0.50, 0.09, 0.50, -3], [0.24, 0.96, 0.70, 8], [0.78, 0.96, 0.72, -8], [0.50, 0.92, 0.50, 3]]
+        : [[0.08, 0.28, 0.36, -9], [0.07, 0.80, 0.32, 11], [0.92, 0.24, 0.34, 9], [0.93, 0.78, 0.36, -10], [0.50, 0.03, 0.32, -4], [0.50, 0.98, 0.32, 4]];
+      for (var k = 0; k < SL.length; k++) {
+        var sl = SL[k], ww = sl[2] * W * (0.92 + rr() * 0.16), hh = ww / pa, zk = 1.0 + rr() * 0.8;
+        var sw = baseP.width / zk, sh = baseP.height / zk, fx = foco[0] + (rr() - 0.5) * 0.5, fy = foco[1] + (rr() - 0.5) * 0.5;
+        var sx = clamp(fx * baseP.width - sw / 2, 0, baseP.width - sw), sy = clamp(fy * baseP.height - sh / 2, 0, baseP.height - sh);
+        bx.save(); bx.scale(bg.width / W, bg.height / H); bx.translate(sl[0] * W, sl[1] * H); bx.rotate((sl[3] + (rr() - 0.5) * 4) * Math.PI / 180);
+        bx.shadowColor = 'rgba(40,30,20,.25)'; bx.shadowBlur = 16 * u; bx.shadowOffsetY = 5 * u; bx.fillStyle = 'rgba(250,246,238,.92)'; bx.fillRect(-ww / 2 - lw, -hh / 2 - lw, ww + 2 * lw, hh + 2 * lw);
         bx.shadowColor = 'transparent'; bx.shadowBlur = 0; bx.shadowOffsetY = 0;
-        bx.beginPath(); bx.rect(-ww / 2, -hh / 2, ww, hh); bx.clip(); bx.imageSmoothingQuality = 'high'; bx.drawImage(base, sx, sy, sw, sh, -ww / 2, -hh / 2, ww, hh);
-        bx.fillStyle = 'rgba(248,244,236,.08)'; bx.fillRect(-ww / 2, -hh / 2, ww, hh); bx.restore();
+        bx.beginPath(); bx.rect(-ww / 2, -hh / 2, ww, hh); bx.clip(); bx.imageSmoothingQuality = 'high'; bx.drawImage(baseP, sx, sy, sw, sh, -ww / 2, -hh / 2, ww, hh);
+        bx.fillStyle = 'rgba(248,244,236,.26)'; bx.fillRect(-ww / 2, -hh / 2, ww, hh); bx.restore();
       }
       res = { card: c, bg: bg, cw: c.width, ch: c.height };
     } else {
