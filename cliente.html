@@ -22,6 +22,16 @@ html[data-pal=azul]{--f:#F6F7F9;--c:#E9ECF1;--t:#1E2430;--s:#7A8294;--l:#DDE1E8;
 .lgx{display:block;margin:0 auto;max-width:100%;height:auto}.lgD{display:none}:root[data-m=dark] .lgL{display:none}:root[data-m=dark] .lgD{display:block}
 .rej.uniforme{columns:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}.rej.uniforme .f{margin:0;aspect-ratio:4/5!important}
 .rej.amplio{columns:420px}
+.cerr{min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;padding:2rem 1.2rem;text-align:center}
+.cerr .cc{max-width:30rem;display:flex;flex-direction:column;align-items:center;gap:1rem;animation:up .9s cubic-bezier(.2,.7,.2,1) both}
+.cerr .ojo{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--l);background:var(--c);position:relative;color:var(--a);margin:.6rem 0}
+.cerr .ojo::after{content:'';position:absolute;inset:-11px;border-radius:50%;border:1px solid var(--l);opacity:.7}
+.cerr .ojo svg{width:38px;height:38px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.cerr .esn{font-size:.78rem;letter-spacing:.24em;text-transform:uppercase;color:var(--s)}
+.cerr h1{font-size:clamp(2rem,6vw,2.9rem)}
+.cerr .lin{width:46px;height:1px;background:var(--a);opacity:.7}
+.cerr p{color:var(--s);max-width:25rem}.cerr .seg{font-size:.88rem;opacity:.85}
+.cerr .acc{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin-top:.5rem}.cerr .acc .btn{text-decoration:none;display:inline-block}.cerr .acc .btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;vertical-align:-4px;margin-right:.4rem}
 *{box-sizing:border-box;margin:0}[hidden]{display:none!important}
 body{background:var(--f);color:var(--t);font-family:'Jost',system-ui,sans-serif;line-height:1.55;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
 h1,h2{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;line-height:1.1}
@@ -39,6 +49,7 @@ header h1{font-size:clamp(1.8rem,5vw,2.8rem);letter-spacing:.09em;text-transform
 .tabs{display:flex;justify-content:center;gap:1.8rem;border-bottom:1px solid var(--l);margin:1.2rem 0 1.4rem;padding:0 1rem;flex-wrap:wrap;position:sticky;top:0;z-index:15;background:var(--f)}body.cp .tabs{top:56px}
 .tabs button{background:none;border:0;padding:.6rem 0;color:var(--s);border-bottom:2px solid transparent}.tabs button.on{color:var(--t);border-color:var(--a)}
 .escs{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:-.6rem 1rem 1.2rem}.escs button{background:none;border:1px solid var(--l);border-radius:999px;padding:.3rem .9rem;color:var(--s)}.escs button.on{background:var(--t);color:var(--f);border-color:var(--t)}
+.et{column-span:all;font-size:1.6rem;margin:1.6rem 0 .8rem;text-align:center;break-after:avoid}.et.iz{text-align:left}.et:first-child{margin-top:.2rem}.rej.uniforme .et{grid-column:1/-1}html[data-letra=moderna] h1,html[data-letra=moderna] h2,html[data-letra=moderna] header .e{font-family:'Jost',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.12em;font-weight:500}html[data-letra=moderna] .et{font-size:1.1rem}html[data-letra=romantica] h1,html[data-letra=romantica] h2,html[data-letra=romantica] header .e{font-style:italic;text-transform:none;letter-spacing:.02em}
 .rej{columns:260px;column-gap:8px;padding:0 8px 6rem;max-width:1500px;margin:0 auto}
 .f{position:relative;margin:0 0 8px;break-inside:avoid;background:linear-gradient(100deg,var(--l) 30%,var(--f) 50%,var(--l) 70%);background-size:200% 100%;animation:sh 1.5s infinite;border-radius:3px;overflow:hidden}.f img{width:100%;height:100%;display:block;object-fit:cover;cursor:zoom-in;opacity:0;transition:opacity .7s ease,transform .8s ease}.f img.ld{opacity:1}.f:hover img.ld{transform:scale(1.035)}
 @keyframes sh{from{background-position:200% 0}to{background-position:-200% 0}}
@@ -88,6 +99,19 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   <form id="fa" autocomplete="off"><input id="cod" name="codigo-galeria" placeholder="Tu código" autocomplete="off" autocapitalize="characters" spellcheck="false"><p class="err" id="err" role="alert"></p><button class="btn" id="go" type="submit">Entrar a mi galería</button></form>
   <div id="ilErr"></div>
 </main>
+
+<section id="cerrada" class="cerr" hidden>
+  <div class="cc">
+    <img class="lgx lgL logo" data-n="logo-oscuro" data-i="0" src="imagenes/logo-oscuro.png" alt=""><img class="lgx lgD logo" data-n="logo-claro" data-i="0" src="imagenes/logo-claro.png" alt="">
+    <div class="ojo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.5 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4.2-.9M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></div>
+    <div class="esn" id="cerEsc"></div>
+    <h1>Tu galería está cerrada por ahora</h1>
+    <div class="lin"></div>
+    <p>Para visualizarla, ponte en contacto con tu fotógrafo.</p>
+    <p class="seg">Tus fotos están guardadas y seguras.</p>
+    <div class="acc" id="cerAcc"></div>
+  </div>
+</section>
 
 <section id="portada" hidden><img id="pbg" alt="" aria-hidden="true"><img id="pimg" alt=""><div class="pc" id="pc"><small id="pcs"></small><span id="pct"></span></div><div class="pv" id="pvv"><div class="pe" id="pest"></div><h1 id="ptit"></h1><p id="pfec"></p><button class="btn" id="pver" type="button">Ver galería</button></div></section>
 
@@ -158,7 +182,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   }
   window.addEventListener('scroll', ajustarPortada, { passive: true }); window.addEventListener('resize', ajustarPortada);
   function mostrar(id){
-    ['acceso', 'galeria', 'gracias'].forEach(function(x){ $('#' + x).hidden = x !== id; });
+    ['acceso', 'galeria', 'gracias', 'cerrada'].forEach(function(x){ $('#' + x).hidden = x !== id; });
     var pc = conPortada && id === 'galeria'; $('#portada').hidden = !pc; $('#pspacer').hidden = !pc; document.body.classList.toggle('cp', pc);
     if (id === 'acceso') document.documentElement.removeAttribute('data-pal');
     window.scrollTo(0, 0); ajustarPortada();
@@ -181,11 +205,25 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   $('#pver').addEventListener('click', function(){ window.scrollTo({ top: $('#galeria').getBoundingClientRect().top + window.scrollY - 56, behavior: 'smooth' }); });
   aplicarTemaC();
 
+  function cerradaPantalla(d){
+    E = d.estudio || null; codigo = '';
+    if (E && (E.logo_para_claro || E.logo_para_oscuro)) { var lc = E.logo_para_claro || E.logo_para_oscuro, lo = E.logo_para_oscuro || E.logo_para_claro; document.querySelectorAll('.lgL').forEach(function(i){ i.removeAttribute('data-n'); i.src = lc; i.alt = E.studio_name || ''; }); document.querySelectorAll('.lgD').forEach(function(i){ i.removeAttribute('data-n'); i.src = lo; i.alt = E.studio_name || ''; }); }
+    var nom = d.escena || d.galeria || '';
+    $('#cerEsc').textContent = nom; $('#cerEsc').hidden = !nom;
+    var wa = E && E.wa_phone ? String(E.wa_phone).replace(/\D/g, '') : '', ml = E && E.contact_email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(E.contact_email) ? E.contact_email : '', h = '';
+    if (wa.length >= 8) h += '<a class="btn" target="_blank" rel="noopener" href="https://wa.me/' + wa + '?text=' + encodeURIComponent('Hola, quisiera ver mi galería «' + nom + '»') + '"><svg viewBox="0 0 24 24"><path d="M4 20l1.3-4.2A8 8 0 1 1 8.4 18.8z"/></svg>Escribir por WhatsApp</a>';
+    if (ml) h += '<a class="btn sec" href="mailto:' + esc(ml) + '?subject=' + encodeURIComponent(nom) + '"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>Correo</a>';
+    $('#cerAcc').innerHTML = h; $('#cerAcc').hidden = !h;
+    document.title = nom || (E && E.studio_name) || 'Galería';
+    mostrar('cerrada');
+  }
+
   function abrir(c, silencioso){
     c = (c || '').trim(); if (!c && !acc.t && !acc.s) return;
     var btn = $('#go'); btn.disabled = true; btn.textContent = 'Entrando…'; $('#err').textContent = ''; $('#ilErr').innerHTML = '';
     post('/api/client/open', { code: c, token: acc.t, scene: acc.s, visitor: visitor }).then(function(d){
       if (!d.ok) {
+        if (d.error === 'escena_cerrada') { cerradaPantalla(d); return; }
         if (silencioso) { escribir('age-acceso', ''); escribir('age-codigo-cliente', ''); return; }
         if (d.error === 'pide_codigo') { $('#err').textContent = 'Esta galería está protegida. Escribe el código que te enviaron.'; $('#cod').focus(); return; }
         var exp = d.error === 'expirada';
@@ -199,7 +237,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
       $('#tit').textContent = G.titulo; $('#fec').textContent = fechaLarga(G.fecha);
       $('#guia').textContent = G.estado === 'delivered' && G.bloqueada ? 'Tus fotos finales están listas. Las verás con marca de agua y podrás descargarlas sin ella cuando se confirme el pago.' : G.estado === 'delivered' ? 'Tus fotos finales ya están listas. Descárgalas en la pestaña Fotos finales.' : puede() ? 'Toca el corazón en tus fotos favoritas y luego envía tu selección.' : '';
       $('#desc').textContent = [G.escenaUnica, G.tipo, G.ubicacion, G.descripcion].filter(Boolean).join(' · ');
-      document.documentElement.setAttribute('data-pal', paletaDe(G));
+      document.documentElement.setAttribute('data-pal', paletaDe(G)); document.documentElement.setAttribute('data-letra', G.letra || 'elegante');
       if (E && (E.logo_para_claro || E.logo_para_oscuro)) { var lc = E.logo_para_claro || E.logo_para_oscuro, lo = E.logo_para_oscuro || E.logo_para_claro; document.querySelectorAll('.lgL').forEach(function(i){ i.removeAttribute('data-n'); i.src = lc; i.alt = E.studio_name || ''; }); document.querySelectorAll('.lgD').forEach(function(i){ i.removeAttribute('data-n'); i.src = lo; i.alt = E.studio_name || ''; }); }
       contacto();
       $('#rej').className = 'rej ' + (G.estilo || 'clasico');
@@ -250,6 +288,14 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     return '<figure class="f' + (imps.has(f.id) ? ' imp' : '') + '" style="aspect-ratio:' + r + '"><img loading="lazy" data-ver="' + f.id + '" alt="" src="' + esc(url(f.t)) + '">' + (G.descargas ? '<a class="dl" href="' + esc(url(f.t, true)) + '" download aria-label="Descargar">' + DESCARGA + '</a>' : '') + '<button class="pr" data-pr="' + f.id + '" aria-label="Marcar para imprimir" aria-pressed="' + imps.has(f.id) + '" type="button">' + PRINTER + '<span>Imprimir</span></button></figure>';
   }
   function enEsc(f){ return !escSel || f.escena === escSel; }
+  function conTitulos(arr, fn){
+    var es = G.escenas || [];
+    if (es.length < 2 || G.escenaUnica || escSel || G.titEsc === 'ocultos') return { l: arr, h: arr.map(fn).join('') };
+    var usados = {}, ord = [], h = '';
+    es.forEach(function(x){ var gr = arr.filter(function(f){ return f.escena === x.id; }); if (!gr.length) return; gr.forEach(function(f){ usados[f.id] = 1; }); ord = ord.concat(gr); h += '<h2 class="et ' + (G.titEsc === 'izquierda' ? 'iz' : 'ce') + '">' + esc(x.nombre) + '</h2>' + gr.map(fn).join(''); });
+    var resto = arr.filter(function(f){ return !usados[f.id]; });
+    return { l: resto.concat(ord), h: resto.map(fn).join('') + h };
+  }
   document.addEventListener('load', function(e){ var t = e.target; if (t && t.tagName === 'IMG' && t.closest && t.closest('.f')) t.classList.add('ld'); }, true);
   document.addEventListener('error', function(e){ var t = e.target; if (t && t.tagName === 'IMG' && t.closest && t.closest('.f')) t.classList.add('ld'); }, true);
   function pintar(){
@@ -260,9 +306,9 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     var es = G.escenas || [], ce = $('#escs'); ce.hidden = es.length < 2 || !!G.escenaUnica;
     if (!ce.hidden) ce.innerHTML = [['', 'Todas']].concat(es.map(function(x){ return [x.id, x.nombre]; })).map(function(x){ return '<button data-esc="' + esc(x[0]) + '"' + (escSel === x[0] ? ' class="on"' : '') + '>' + esc(x[1]) + '</button>'; }).join('');
     $('#tabs').innerHTML = tabs.map(function(t){ return '<button data-tab="' + t[0] + '"' + (tab === t[0] ? ' class="on"' : '') + '>' + t[1] + '</button>'; }).join('');
-    var h = '';
-    if (tab === 'todas') { lista = s; h = s.length ? s.map(tarjeta).join('') : '<p class="vacio">Pronto verás aquí tus fotos.</p>'; }
-    else if (tab === 'favoritas') { lista = mias; h = mias.length ? mias.map(tarjeta).join('') : '<p class="vacio">Aún no tienes favoritas. Toca el corazón en las fotos que más te gusten.</p>'; }
+    var h = '', cg;
+    if (tab === 'todas') { cg = conTitulos(s, tarjeta); lista = cg.l; h = s.length ? cg.h : '<p class="vacio">Pronto verás aquí tus fotos.</p>'; }
+    else if (tab === 'favoritas') { cg = conTitulos(mias, tarjeta); lista = cg.l; h = mias.length ? cg.h : '<p class="vacio">Aún no tienes favoritas. Toca el corazón en las fotos que más te gusten.</p>'; }
     else {
       lista = fn;
       h = fn.length ? (G.descargas ? '<div class="masivo"><button class="btn" id="dtodas" type="button">Descargar todas</button></div>' : '') + fn.map(tarjetaFinal).join('') : '<p class="vacio">Tus fotos finales aparecerán aquí.</p>';
