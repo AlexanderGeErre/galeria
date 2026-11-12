@@ -541,7 +541,7 @@ function plegar(abierta){
 var vidCal = 'fhd', vidIds = [], vidForm = 'v', vidSeg = 2.5, vidPart = true, vidCache = {}, vidTok = 0, vidBusy = false, vidCancel = false;
 function cargarSlideshow(){
   if (window.Slideshow) return Promise.resolve();
-  return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = 'slideshow.js?v=23'; sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró slideshow.js en GitHub. Súbelo junto a panel.js.')); }; document.head.appendChild(sc); });
+  return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = 'slideshow.js?v=24'; sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró slideshow.js en GitHub. Súbelo junto a panel.js.')); }; document.head.appendChild(sc); });
 }
 function vidEstado(t){ var e = $('#pn-vst'); if (e) e.textContent = t || ''; }
 function vidBarra(x){ var b = $('#pn-vbar'); if (b) b.style.width = Math.round(clampN(x) * 100) + '%'; }

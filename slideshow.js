@@ -448,7 +448,7 @@ function crearEscenaBase(fotos, W, H, seg, op){
 
   // Geometría del marco de papel
   var b = vertical ? 0.074 * W : 0.036 * Math.min(W, H), pad = 70 * u;
-  var v2 = op.v2 !== false, ow = (vertical ? 1.14 : (v2 ? 0.86 : 0.79)) * W, oh = (vertical ? (v2 ? 0.85 : 0.76) : (v2 ? 0.86 : 0.79)) * H, fw = Math.round(ow - 2 * b), fh = Math.round(oh - 2 * b);
+  var v2 = op.v2 !== false, ow = (vertical ? (v2 ? 0.86 : 1.14) : (v2 ? 0.86 : 0.79)) * W, oh = (vertical ? (v2 ? 0.85 : 0.76) : (v2 ? 0.86 : 0.79)) * H, fw = Math.round(ow - 2 * b), fh = Math.round(oh - 2 * b);
 
   // Destello de lente natural (se crea una sola vez)
   var flare = papel ? crearFlare(W, H) : null;
@@ -502,7 +502,7 @@ function crearEscenaBase(fotos, W, H, seg, op){
   function capaPapel(cx, i, lt, o){
     o = o || {};
     var t = activo(i), s = (i % 2 ? -1 : 1), h = clamp(lt / D, 0, 1.3), tin = o.tin == null ? 1 : o.tin;
-    var prof = op.profundidad !== false, hp = clamp(h, 0, 1), par = prof ? (hp - 0.5) * s : 0;
+    var prof = op.profundidad === true, hp = clamp(h, 0, 1), par = prof ? (hp - 0.5) * s : 0;
     cx.save(); cx.translate(W / 2 + (o.bgDx || 0) - par * 0.045 * W, H / 2 + (o.bgDy || 0)); cx.rotate(s * 0.9 * h * Math.PI / 180); cx.scale(1.06 * (1 + 0.08 * h), 1.06 * (1 + 0.08 * h)); cx.imageSmoothingQuality = 'high'; cx.drawImage(t.bg, -W / 2, -H / 2, W, H); cx.restore();
     var rr = GIROS[i % GIROS.length], rot = rr + s * 0.6 * h, esc = 1 + 0.035 * h;
     if (tin < 1) { var p = ease(tin); rot += (1 - p) * (rr >= 0 ? -3 : 3); esc *= 1 + (1 - p) * 0.12; }
