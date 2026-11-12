@@ -116,7 +116,7 @@ function cargarCaras(){
 async function detectarCaras(fotos, progreso, cancelado){
   var pend = fotos.filter(function(f){ return f && !f.carasListas; });
   if (!pend.length) return true;
-  try { await cargarCaras(); } catch (e) { return false; }
+  try { await Promise.race([cargarCaras(), new Promise(function(ok, no){ setTimeout(function(){ no(new Error('tiempo')); }, 15000); })]); } catch (e) { return false; }
   var i, f, k, c, g, ds, op = new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.4 });
   for (i = 0; i < pend.length; i++) {
     if (cancelado && cancelado()) return false;
@@ -238,8 +238,171 @@ function fondoDesenf(f, w, h, zoom, radio){
   try { desenfocar(c, r); } catch (e) {}
   return c;
 }
+// ---------- Luz natural: destello de lente (flare) y barrido de luz tipo flash ----------
+// Todo se dibuja por código (sin videos): rápido, liviano y se adapta a cada foto. Se mezcla con 'screen' para que nunca queme la imagen.
+var _luzSp = null;
+function luzSprites(){
+  if (_luzSp) return _luzSp;
+  function sp(S, fn, blur){ var c = lienzo(S, S), x = c.getContext('2d'); fn(x, S); if (blur) { try { desenfocar(c, blur); } catch (e) {} } return c; }
+  function anillo(rim){ return sp(256, function(x, S){
+    var g = x.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2 * 0.96);
+    g.addColorStop(0, 'rgba(255,214,120,0.05)'); g.addColorStop(0.55, 'rgba(255,176,80,0.10)'); g.addColorStop(0.80, 'rgba(' + rim + ',0.30)'); g.addColorStop(0.92, 'rgba(' + rim + ',0.46)'); g.addColorStop(1, 'rgba(' + rim + ',0)');
+    x.fillStyle = g; x.fillRect(0, 0, S, S); }, 3); }
+  function disco(col){ return sp(256, function(x, S){
+    var g = x.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2 * 0.97);
+    g.addColorStop(0, 'rgba(' + col + ',0.55)'); g.addColorStop(0.62, 'rgba(' + col + ',0.42)'); g.addColorStop(0.9, 'rgba(' + col + ',0.16)'); g.addColorStop(1, 'rgba(' + col + ',0)');
+    x.fillStyle = g; x.fillRect(0, 0, S, S); }, 4); }
+  function hex(col){ return sp(256, function(x, S){
+    x.fillStyle = 'rgba(' + col + ',0.5)'; x.beginPath();
+    for (var k = 0; k < 6; k++) { var a = Math.PI / 6 + k * Math.PI / 3; x[k ? 'lineTo' : 'moveTo'](S / 2 + 104 * Math.cos(a), S / 2 + 104 * Math.sin(a)); }
+    x.closePath(); x.fill(); x.strokeStyle = 'rgba(' + col + ',0.55)'; x.lineWidth = 7; x.stroke(); }, 5); }
+  _luzSp = {
+    anillo: anillo('255,128,52'), disco: disco('255,184,84'), hex: hex('255,170,70'),
+    nucleo: sp(512, function(x, S){
+      var g = x.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+      g.addColorStop(0, 'rgba(255,248,226,1)'); g.addColorStop(0.05, 'rgba(255,232,170,.85)'); g.addColorStop(0.16, 'rgba(255,190,96,.42)'); g.addColorStop(0.40, 'rgba(230,132,58,.16)'); g.addColorStop(0.72, 'rgba(190,100,50,.05)'); g.addColorStop(1, 'rgba(190,100,50,0)');
+      x.fillStyle = g; x.fillRect(0, 0, S, S); }, 0),
+    estrella: sp(512, function(x, S){
+      x.translate(S / 2, S / 2);
+      for (var k = 0; k < 8; k++) { x.save(); x.rotate(k * Math.PI / 8 + 0.2); var g = x.createLinearGradient(-S / 2, 0, S / 2, 0);
+        g.addColorStop(0, 'rgba(255,214,150,0)'); g.addColorStop(0.5, 'rgba(255,226,170,' + (k % 2 ? 0.28 : 0.5) + ')'); g.addColorStop(1, 'rgba(255,214,150,0)');
+        x.fillStyle = g; x.fillRect(-S / 2, -1.6, S, 3.2); x.restore(); } }, 3),
+    rayo: sp(512, function(x, S){
+      var g = x.createLinearGradient(0, 0, S, 0); g.addColorStop(0, 'rgba(255,190,100,0)'); g.addColorStop(0.5, 'rgba(255,224,160,.9)'); g.addColorStop(1, 'rgba(255,190,100,0)');
+      x.fillStyle = g; x.fillRect(0, S / 2 - 3, S, 6); }, 6)
+  };
+  return _luzSp;
+}
+// Luminosidad media de una foto (0 = oscura, 1 = clara): se usa para bajar la luz en fotos claras.
+function lumFoto(f){
+  if (f._lum != null) return f._lum;
+  var c = lienzo(24, 24), x = c.getContext('2d'), s = 0, i, d;
+  try { x.drawImage(f.bmp, 0, 0, 24, 24); d = x.getImageData(0, 0, 24, 24).data; for (i = 0; i < d.length; i += 4) s += 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]; f._lum = s / (d.length / 4) / 255; } catch (e) { f._lum = 0.4; }
+  return f._lum;
+}
+function smoothstep(a, b, x){ x = clamp((x - a) / (b - a), 0, 1); return x * x * (3 - 2 * x); }
+// Destello de lente natural: la luz entra por una esquina, con un resplandor cálido y discos desenfocados que se alinean hacia el centro.
+// o.lum = luminosidad de la foto, o.caras = [{x,y,w,h}] (0..1) para apartar los discos de las caras, o.fuerza = intensidad.
+var GHOSTS = [[0.26, 0.10, 0.55, 'disco'], [0.46, 0.20, 0.42, 'anillo'], [0.70, 0.065, 0.60, 'disco'], [0.96, 0.15, 0.34, 'hex'], [1.24, 0.30, 0.30, 'anillo'], [1.55, 0.09, 0.42, 'disco'], [1.95, 0.40, 0.20, 'anillo']];
+function crearFlare(W, H){
+  var S = luzSprites(), R = Math.min(W, H), M = Math.max(W, H);
+  function dibujar(cx, t, m, o){
+    o = o || {}; if (m <= 0.001) return;
+    var lum = o.lum == null ? 0.4 : o.lum, adapt = clamp(1.18 - 1.15 * lum, 0.22, 1), k = m * adapt * (o.fuerza == null ? 1 : o.fuerza) * (0.93 + 0.07 * Math.sin(t * 1.7));
+    var sx = W * (1.03 - 0.16 * (0.5 + 0.5 * Math.sin(t * 0.27 + 0.6))), sy = H * (-0.05 + 0.20 * (0.5 + 0.5 * Math.cos(t * 0.21)));
+    if (o.lado === 'izq') sx = W - sx;
+    var ax = W * 0.5 - sx, ay = H * 0.5 - sy, i, gi, g;
+    cx.save(); cx.globalCompositeOperation = 'screen'; cx.imageSmoothingQuality = 'high';
+    g = cx.createRadialGradient(sx, sy, 0, sx, sy, M * 1.05);
+    g.addColorStop(0, 'rgba(255,196,100,' + (0.30 * k).toFixed(3) + ')'); g.addColorStop(0.45, 'rgba(255,150,64,' + (0.10 * k).toFixed(3) + ')'); g.addColorStop(1, 'rgba(255,150,64,0)');
+    cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+    var cr = M * 0.78; cx.globalAlpha = clamp(0.85 * k, 0, 1); cx.drawImage(S.nucleo, sx - cr / 2, sy - cr / 2, cr, cr);
+    cx.globalAlpha = clamp(0.20 * k, 0, 1); var sr = M * 0.9; cx.drawImage(S.estrella, sx - sr / 2, sy - sr / 2, sr, sr);
+    cx.globalAlpha = clamp(0.20 * k, 0, 1); cx.drawImage(S.rayo, sx - M * 0.7, sy - M * 0.045, M * 1.4, M * 0.09);
+    for (i = 0; i < GHOSTS.length; i++) {
+      gi = GHOSTS[i]; var px = sx + ax * gi[0], py = sy + ay * gi[0], r = R * gi[1] * (0.9 + 0.1 * Math.sin(t * 0.9 + i)), fade = 1;
+      if (o.caras) for (var f = 0; f < o.caras.length; f++) { var c = o.caras[f], fx = (c.x + c.w / 2) * W, fy = (c.y + c.h / 2) * H, fr = Math.max(c.w * W, c.h * H) * 0.75, d = Math.sqrt((px - fx) * (px - fx) + (py - fy) * (py - fy)); fade = Math.min(fade, 0.10 + 0.90 * smoothstep(0.55, 1.15, d / (r + fr))); }
+      cx.globalAlpha = clamp(gi[2] * k * fade * 1.15, 0, 1); cx.drawImage(S[gi[3]], px - r, py - r, 2 * r, 2 * r);
+    }
+    cx.restore();
+  }
+  return { dibujar: dibujar };
+}
+// Barrido de luz blanca tipo flash: una franja de luz cruza la pantalla, se lleva la foto anterior y deja la siguiente.
+// dir: 'lr' (izquierda a derecha), 'rl' (derecha a izquierda) o 'tb' (arriba hacia abajo). s: avance 0..1. dibujarB(ctx): pinta la foto que llega.
+function luzBarrido(cx, W, H, tmp, dir, s, adapt, dibujarB){
+  var L = dir === 'tb' ? H : W, c = (-0.28 + 1.56 * s) * L, w = 0.16 * L, tx = tmp.getContext('2d');
+  function grad(ctx, a, b){ if (dir === 'tb') return ctx.createLinearGradient(0, a, 0, b); if (dir === 'rl') return ctx.createLinearGradient(W - a, 0, W - b, 0); return ctx.createLinearGradient(a, 0, b, 0); }
+  tx.setTransform(1, 0, 0, 1, 0, 0); tx.globalCompositeOperation = 'source-over'; tx.globalAlpha = 1; tx.clearRect(0, 0, W, H);
+  dibujarB(tx);
+  var g = grad(tx, c - w, c + w); g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  tx.globalCompositeOperation = 'destination-in'; tx.fillStyle = g; tx.fillRect(0, 0, W, H); tx.globalCompositeOperation = 'source-over';
+  cx.drawImage(tmp, 0, 0);
+  var env = Math.pow(Math.sin(Math.PI * clamp(s, 0, 1)), 0.7), bw = 0.30 * L, g2 = grad(cx, c - bw, c + bw);
+  g2.addColorStop(0, 'rgba(255,252,246,0)'); g2.addColorStop(0.5, 'rgba(255,252,246,' + (0.85 * env * adapt).toFixed(3) + ')'); g2.addColorStop(1, 'rgba(255,252,246,0)');
+  cx.save(); cx.globalCompositeOperation = 'screen'; cx.fillStyle = g2; cx.fillRect(0, 0, W, H);
+  cx.fillStyle = 'rgba(255,250,242,' + (0.14 * env * adapt).toFixed(3) + ')'; cx.fillRect(0, 0, W, H); cx.restore();
+}
+
+// ---------- Plantilla «Estudio»: retratos de estudio, foto protagonista y barridos de luz blanca ----------
+function crearEscenaEstudio(fotos, W, H, seg, op){
+  var n = fotos.length, D = seg || 2.5, vert = H > W, u = Math.min(W, H) / 1080, I = op.intro ? INTRO : 0, TR = Math.min(1.1, D * 0.45), duracion = n * D + I;
+  var logo = op.logo || null, famT = '"Cormorant Garamond", Georgia, serif', famS = 'Jost, "Helvetica Neue", Arial, sans-serif', fondos = {}, tmp = lienzo(W, H);
+  // Dirección de cada barrido: izquierda→derecha, derecha→izquierda o arriba→abajo (nunca de abajo hacia arriba), al azar y sin repetir la anterior.
+  var rnd = mulberry((op.semilla != null ? op.semilla : 12345) >>> 0), DIRS = ['lr', 'rl', 'tb'], dirs = [], pd = '', k, c;
+  for (k = 0; k < n; k++) { do { c = DIRS[Math.floor(rnd() * 3)]; } while (c === pd); dirs.push(c); pd = c; }
+  function fondo(i){
+    if (fondos[i]) return fondos[i];
+    fondos[i] = fondoDesenf(fotos[i], W, H, 1.3, Math.max(2, Math.round(6 * u)));
+    var ks = Object.keys(fondos); if (ks.length > 8) delete fondos[ks[0]];
+    return fondos[i];
+  }
+  // La foto es la protagonista: si su formato es parecido al de la pantalla la llena (centrada en las personas);
+  // si no, se muestra lo más grande posible sobre su propio fondo desenfocado (en vertical, una foto horizontal se recorta en 4:5 alrededor de las personas).
+  var modos = {};
+  function llena(i){
+    if (modos[i] === undefined) { var f = fotos[i], dif = Math.abs(f.w / f.h / (W / H) - 1); modos[i] = carasClave(f) ? (dif <= 0.30 && cabeCaras(f, W, H)) : dif <= 0.10; }
+    return modos[i];
+  }
+  function foto(cx, i, lt){
+    var f = fotos[i], z = 1 + 0.035 * clamp(lt / D, 0, 1);
+    cx.save(); cx.translate(W / 2, H / 2); cx.scale(z, z); cx.translate(-W / 2, -H / 2); cx.imageSmoothingQuality = 'high';
+    if (llena(i)) cubrirCarasF(cx, f, 0, 0, W, H);
+    else {
+      cx.drawImage(fondo(i), 0, 0, W, H); cx.fillStyle = 'rgba(8,6,4,.5)'; cx.fillRect(0, 0, W, H);
+      var sx = 0, sw = f.w, sh = f.h;
+      if (vert && f.w / f.h > 0.95) { var cw = Math.min(f.w, f.h * 0.8), u0 = carasClave(f), mid = u0 ? u0.x + u0.w / 2 : f.w / 2; sw = cw; sx = clamp(mid - cw / 2, 0, f.w - cw); }
+      var kk = vert ? Math.min(W * 0.94 / sw, H * 0.90 / sh) : Math.min(W * 0.97 / sw, H * 0.95 / sh), dw = sw * kk, dh = sh * kk;
+      cx.drawImage(f.bmp, sx, 0, sw, sh, (W - dw) / 2, (H - dh) / 2, dw, dh);
+    }
+    cx.restore();
+  }
+  function partir(cx, txt, maxW){
+    if (cx.measureText(txt).width <= maxW) return [txt];
+    var pal = txt.split(/\s+/), best = [txt], bd = 1e9, j;
+    for (j = 1; j < pal.length; j++) { var a = pal.slice(0, j).join(' '), b = pal.slice(j).join(' '), d = Math.abs(cx.measureText(a).width - cx.measureText(b).width); if (d < bd) { bd = d; best = [a, b]; } }
+    return best;
+  }
+  function intro(cx, t){
+    cx.fillStyle = '#0b0908'; cx.fillRect(0, 0, W, H);
+    var e = ease(clamp((t - 0.25) / 0.8, 0, 1)), tit = String(op.titulo || '').trim(), sub = String(op.subtitulo || '').trim().toUpperCase();
+    cx.save(); cx.globalAlpha = e; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+    var fs1 = vert ? W * 0.034 : H * 0.036, fs2 = vert ? W * 0.15 : H * 0.15, lines = [], lw = 0, lh = 0, fs3 = vert ? W * 0.038 : H * 0.04;
+    if (tit) { cx.font = 'italic 500 ' + fs2 + 'px ' + famT; lines = partir(cx, tit, W * 0.84); while (fs2 > 24 && lines.some(function(l){ return cx.measureText(l).width > W * 0.86; })) { fs2 *= 0.94; cx.font = 'italic 500 ' + fs2 + 'px ' + famT; } }
+    if (logo && logo.bmp) { lw = (vert ? 0.42 : 0.2) * W; lh = lw * logo.h / logo.w; var mh = H * (vert ? 0.14 : 0.2); if (lh > mh) { lw *= mh / lh; lh = mh; } }
+    var marca = lh ? lh : (op.nombre ? fs3 : 0), tot = (sub ? fs1 * 2.4 : 0) + lines.length * fs2 * 1.04 + (lines.length ? 40 * u : 0) + (marca ? marca + (lines.length ? 30 * u : 0) : 0);
+    var y = H / 2 - tot / 2;
+    if (sub) { cx.fillStyle = '#c9a877'; cx.font = '400 ' + fs1 + 'px ' + famS; try { cx.letterSpacing = (fs1 * 0.5) + 'px'; } catch (e1) {} cx.fillText(sub, W / 2, y + fs1 / 2); try { cx.letterSpacing = '0px'; } catch (e2) {} y += fs1 * 2.4; }
+    if (lines.length) { cx.fillStyle = '#efe6d4'; cx.font = 'italic 500 ' + fs2 + 'px ' + famT; lines.forEach(function(l){ cx.fillText(l, W / 2, y + fs2 * 0.52); y += fs2 * 1.04; }); cx.fillStyle = '#c9a877'; cx.fillRect(W / 2 - 45 * u, y + 14 * u, 90 * u, 1.6 * u); y += 40 * u; }
+    if (lh) { cx.imageSmoothingQuality = 'high'; cx.drawImage(logo.bmp, W / 2 - lw / 2, y + (lines.length ? 30 * u : 0), lw, lh); }
+    else if (op.nombre) { cx.fillStyle = '#bdb4a4'; cx.font = '400 ' + fs3 + 'px ' + famT; try { cx.letterSpacing = (fs3 * 0.3) + 'px'; } catch (e3) {} cx.fillText(String(op.nombre).toUpperCase(), W / 2, y + (lines.length ? 30 * u : 0) + fs3 / 2); try { cx.letterSpacing = '0px'; } catch (e4) {} }
+    cx.restore();
+  }
+  function dibujar(cx, t){
+    t = clamp(t, 0, duracion - 0.0001);
+    cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = 1; cx.filter = 'none'; cx.fillStyle = '#0b0908'; cx.fillRect(0, 0, W, H);
+    // El cambio de cada foto es un barrido de luz centrado en el momento en que empieza la siguiente (la primera foto, si hay inicio).
+    var q, tr = -1;
+    for (q = I > 0 ? 0 : 1; q < n; q++) if (Math.abs(t - (I + q * D)) < TR / 2) { tr = q; break; }
+    if (tr >= 0) {
+      var s = (t - (I + tr * D - TR / 2)) / TR, a = tr - 1, b = tr;
+      if (a < 0) intro(cx, t); else foto(cx, a, t - (I + a * D));
+      luzBarrido(cx, W, H, tmp, dirs[b], ease(s), clamp(1.2 - 0.8 * (a < 0 ? lumFoto(fotos[b]) : Math.max(lumFoto(fotos[a]), lumFoto(fotos[b]))), 0.5, 1), function(x){ foto(x, b, t - (I + b * D)); });
+    } else if (t < I) intro(cx, t);
+    else {
+      var i = Math.min(n - 1, Math.floor((t - I) / D)), lt = t - I - i * D;
+      foto(cx, i, lt);
+      if (I === 0 && i === 0 && lt < 0.6) { cx.fillStyle = 'rgba(11,9,8,' + (1 - ease(lt / 0.6)).toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
+    }
+    var fin = duracion - t, neg = clamp(1 - fin / 0.6, 0, 1);
+    if (neg > 0) { cx.fillStyle = 'rgba(11,9,8,' + neg.toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
+  }
+  return { W: W, H: H, duracion: duracion, dibujar: dibujar, n: n, seg: D, estilo: 'estudio' };
+}
+
 function crearEscenaBase(fotos, W, H, seg, op){
   op = op || {};
+  if (op.estilo === 'estudio') return crearEscenaEstudio(fotos, W, H, seg, op);
   if (op.estilo === 'prisma') return crearEscenaPrisma(fotos, W, H, seg, op);
   if (op.estilo === 'carriles') return crearEscenaCarriles(fotos, W, H, seg, op);
   if (op.estilo === 'postales') return crearEscenaPostales(fotos, W, H, seg, op);
@@ -273,12 +436,8 @@ function crearEscenaBase(fotos, W, H, seg, op){
   var b = vertical ? 0.074 * W : 0.036 * Math.min(W, H), pad = 70 * u;
   var ow = (vertical ? 1.14 : 0.79) * W, oh = (vertical ? 0.76 : 0.79) * H, fw = Math.round(ow - 2 * b), fh = Math.round(oh - 2 * b);
 
-  // Destellos hexagonales (sprites con desenfoque, una sola vez)
-  var sprites = [];
-  if (papel) [[255, 190, 60], [255, 120, 40], [210, 60, 45], [255, 165, 50], [190, 70, 55], [255, 205, 90]].forEach(function(col){
-    var c = lienzo(160, 160), x = c.getContext('2d'); if ('filter' in x) x.filter = 'blur(4px)';
-    x.fillStyle = 'rgb(' + col.join(',') + ')'; x.beginPath(); for (var k = 0; k < 6; k++) { var a = Math.PI / 6 + k * Math.PI / 3; x[k ? 'lineTo' : 'moveTo'](80 + 56 * Math.cos(a), 80 + 56 * Math.sin(a)); } x.closePath(); x.fill(); sprites.push(c);
-  });
+  // Destello de lente natural (se crea una sola vez)
+  var flare = papel ? crearFlare(W, H) : null;
 
   function ventana(f){
     var c = lienzo(fw, fh), x = c.getContext('2d'), asp = f.w / f.h, wa = fw / fh;
@@ -376,23 +535,9 @@ function crearEscenaBase(fotos, W, H, seg, op){
     }
     cx.restore();
   }
-  function destellos(cx, t, m){
-    cx.save(); cx.globalCompositeOperation = 'lighter';
-    var R = 0.62 * Math.max(W, H), L = [[0.35, 0.21, 0.0], [0.6, 0.17, 2.1]];
-    for (var k = 0; k < L.length; k++) {
-      var x = W * (0.5 + 0.5 * Math.cos(t * L[k][1] + L[k][2])), y = H * (0.5 + 0.45 * Math.sin(t * L[k][1] * 0.8 + L[k][2] * 1.7)), gr = cx.createRadialGradient(x, y, 0, x, y, R);
-      gr.addColorStop(0, 'rgba(200,130,45,' + ((0.20 + 0.06 * Math.sin(t * 0.7 + k)) * m).toFixed(3) + ')'); gr.addColorStop(1, 'rgba(200,130,45,0)'); cx.fillStyle = gr; cx.fillRect(0, 0, W, H);
-    }
-    for (var f = 0; f < 2; f++) {
-      var ph = ((t * 0.045 + f * 0.5) % 1), al = Math.sin(ph * Math.PI), ang = (-35 + 10 * Math.sin(t * 0.2 + f)) * Math.PI / 180;
-      var bx = W * (-0.1 + 1.2 * ph), by = H * (0.25 + 0.5 * ((f * 0.37 + 0.2) % 1)), sp = 0.085 * Math.max(W, H), Rr = 0.07 * Math.min(W, H) * (vertical ? 1.4 : 1.9);
-      for (var k2 = 0; k2 < sprites.length; k2++) {
-        var d = (k2 - 1) * sp, rs = Rr * (1.1 - 0.13 * k2) / 56;
-        cx.globalAlpha = m * al * (k2 === 0 ? 0.33 : 0.16 + 0.04 * (k2 % 3));
-        cx.drawImage(sprites[k2], bx + d * Math.cos(ang) - 80 * rs, by + d * Math.sin(ang) - 80 * rs, 160 * rs, 160 * rs);
-      }
-    }
-    cx.restore();
+  function destellos(cx, t, m, i){
+    var f = fotos[i], u0 = carasClave(f), caras = u0 ? [{ x: 0.1 + 0.8 * u0.x / f.w, y: 0.1 + 0.8 * u0.y / f.h, w: 0.8 * u0.w / f.w, h: 0.8 * u0.h / f.h }] : null;
+    flare.dibujar(cx, t, m, { lum: lumFoto(f), fuerza: 0.75, caras: caras });
   }
   function dibujarParticulas(cx, t, m){
     if (!P.length) return;
@@ -463,7 +608,7 @@ function crearEscenaBase(fotos, W, H, seg, op){
         capaPapel(cx, i, lt, { bgDy: (1 - p) * H, cardDy: (1 - p) * H * 1.15, tin: lt / Tr });
         cx.filter = 'none';
       } else capaPapel(cx, i, lt, {});
-      if (tt >= 0) { var ef = clamp((tt - 0.72 * Tr) / 0.85, 0, 1); ef = ef * ef * (3 - 2 * ef); destellos(cx, tt, ef); dibujarParticulas(cx, tt, ef); }
+      if (tt >= 0) { var ef = clamp((tt - 0.72 * Tr) / 0.85, 0, 1); ef = ef * ef * (3 - 2 * ef); destellos(cx, tt, ef, i); dibujarParticulas(cx, tt, ef); }
     } else {
       if (tt < 0) capaIntro(cx, t, 0, 0);
       else if ((i > 0 || I > 0) && lt < (i > 0 ? trDe(i) : Tr)) {

@@ -204,6 +204,8 @@ CSS += '.fv-tb{display:flex;justify-content:flex-end;margin:0 0 .8rem;position:r
 '.pn-grid.fv-gra{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}.pn-grid.fv-peq{grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:.4rem}.pn-grid.fv-peq figcaption{display:none}.pn-grid.fv-gra figcaption{font-size:.68rem}' +
 '.fv-lista{margin:.2rem 0 1rem;padding:0 0 0 2.2rem;columns:200px;column-gap:1.6rem;font-size:.95rem;line-height:1.9}.fv-lista li{break-inside:avoid;padding-left:.2rem}.fv-lista li::marker{color:var(--s);font-size:.78rem}' +
 '@media(max-width:760px){.fv-tb{justify-content:stretch}.fv-wr{width:100%}.fv-wr>.pn-btn{width:100%}.fv-mn{left:0;right:0;min-width:0}}';
+CSS += '.pn-dz{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;text-align:center;border:2px dashed var(--l);border-radius:16px;padding:1.8rem 1rem;margin:1rem 0;color:var(--s);cursor:pointer;transition:border-color .15s,background .15s}.pn-dz:hover,.pn-dz.sobre{border-color:var(--a);background:var(--p);color:var(--t)}.pn-dz.lleno{border-style:solid;border-color:var(--a)}.pn-dz b{font-weight:500;color:var(--t);font-size:1rem}.pn-dz input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0}' +
+'#pn-dzov{position:fixed;inset:0;z-index:300;background:rgba(30,25,20,.55);display:flex;align-items:center;justify-content:center;pointer-events:none}#pn-dzov[hidden]{display:none}#pn-dzov>div{background:var(--c);color:var(--t);border:2px dashed var(--a);border-radius:22px;padding:2.4rem 3rem;display:flex;flex-direction:column;align-items:center;gap:.7rem;font-size:1.1rem}';
 CSS += '.fs-tools{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;justify-content:flex-end;margin:.2rem 0 .2rem}.fs-tools .pn-orden{display:inline-flex;align-items:center;gap:.4rem}.fs-tools .pn-orden .pn-s{display:none}.fs-tools select{font-size:.82rem;padding:.35rem .6rem;max-width:11rem}.fs-tools .pn-btn{font-size:.82rem;padding:.42rem .9rem}.fs-tools .fs-new input{max-width:9rem;font-size:.82rem;padding:.4rem .7rem}' +
 '.fs-h{margin:1.2rem 0 .7rem;flex-wrap:wrap}.fs-seg{margin-left:auto}.fs-seg button{padding:.28rem .8rem!important;font-size:.8rem!important}' +
 '.fs .pn-tb{left:6px;bottom:6px!important;background:#2B2623!important;color:#fff!important;font-size:.6rem;font-weight:700;letter-spacing:.05em;padding:2px 7px}.fs figcaption{display:none}' +
@@ -479,7 +481,7 @@ function pintarCuenta(){
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 12:55</p></div>';
+ + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 19:20</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -533,7 +535,7 @@ function plegar(abierta){
 var vidCal = 'fhd', vidIds = [], vidForm = 'v', vidSeg = 2.5, vidPart = true, vidCache = {}, vidTok = 0, vidBusy = false, vidCancel = false;
 function cargarSlideshow(){
   if (window.Slideshow) return Promise.resolve();
-  return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = 'slideshow.js?v=17'; sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró slideshow.js en GitHub. Súbelo junto a panel.js.')); }; document.head.appendChild(sc); });
+  return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = 'slideshow.js?v=18'; sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró slideshow.js en GitHub. Súbelo junto a panel.js.')); }; document.head.appendChild(sc); });
 }
 function vidEstado(t){ var e = $('#pn-vst'); if (e) e.textContent = t || ''; }
 function vidBarra(x){ var b = $('#pn-vbar'); if (b) b.style.width = Math.round(clampN(x) * 100) + '%'; }
@@ -596,7 +598,7 @@ function vidHtml(g, sel, fin){
 }
 
 var npSem = 7, npSeg = 2.5, npI = 0, npEstilo = 'carriles', npForm = 'h', npMarca = true, npFotos = null, npEsc = null, npT = 0, npRaf = 0, npTok = 0, npDeb = 0;
-var NP_ES = [['papel', 'Álbum de luz'], ['pantalla', 'Marea'], ['carriles', 'Tres bandas'], ['postales', 'Postales'], ['prisma', 'Prisma']], NP_FM = [['h', '16:9 horizontal'], ['v', '9:16 vertical'], ['s', '1:1 cuadrado']];
+var NP_ES = [['papel', 'Álbum de luz'], ['pantalla', 'Marea'], ['carriles', 'Tres bandas'], ['postales', 'Postales'], ['prisma', 'Prisma'], ['estudio', 'Estudio']], NP_FM = [['h', '16:9 horizontal'], ['v', '9:16 vertical'], ['s', '1:1 cuadrado']];
 var NP_CH = '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 4l4 4 4-4"/></svg>', NP_RI = [[3.5, 'Lento'], [2.5, 'Normal'], [1.5, 'Rápido']], NP_IN = [[true, 'Con inicio y cierre'], [false, 'Sin inicio ni cierre']];
 function npDD(k, rot, lista){
   return '<div class="np-dd" data-k="' + k + '"><button type="button" data-act="np-dd" data-k="' + k + '">' + rot + ': <b id="np-v-' + k + '"></b>' + NP_CH + '</button><ul hidden>' + lista.map(function(o){ return '<li><button type="button" data-act="np-set" data-k="' + k + '" data-v="' + o[0] + '">' + o[1] + '</button></li>'; }).join('') + '</ul></div>';
@@ -660,7 +662,7 @@ function vidRefrescar(){ vidPestana(); vdLab(); root.querySelectorAll('#pn-vf .p
   var inf = $('#pn-vinfo'); if (inf) inf.textContent = n ? (vidEstilo === 'prisma' ? Math.floor(n / 2) + (Math.floor(n / 2) === 1 ? ' par' : ' pares') + (n % 2 ? ' (la última foto sobra: falta su pareja)' : '') : n + (n === 1 ? ' diapositiva' : ' diapositivas')) + ' · ' + mmss(window.Slideshow ? window.Slideshow.duracionTotal(n, vidSeg, vidEstilo, vidMarca) : n * vidSeg) + ' de duración' : 'Aún no hay fotos. Toca «Agregar fotos» en la tira de abajo.';
   var chip = function(id, t, v){ var e = $(id); if (e) e.innerHTML = '<small>' + t + '</small>' + v; };
   root.querySelectorAll('#pn-ve .pn-opt').forEach(function(o){ o.classList.toggle('on', o.dataset.v === vidEstilo); }); root.querySelectorAll('#pn-vm .pn-opt').forEach(function(o){ o.classList.toggle('on', (o.dataset.v === 'si') === vidMarca); }); chip('#pn-cr', 'Ritmo', VRIT[vidSeg] || 'Normal'); chip('#pn-cp', 'Partículas', vidPart ? 'Sí' : 'No');
-  var cpp = $('#pn-cp'); if (cpp) cpp.hidden = vidEstilo !== 'papel'; var cta = $('#pn-ct'); if (cta) cta.hidden = vidEstilo === 'prisma' || vidEstilo === 'carriles' || vidEstilo === 'postales'; var cac = $('#pn-ca'); if (cac) { cac.hidden = !(vidEstilo === 'prisma' || vidEstilo === 'carriles' || vidEstilo === 'postales'); cac.innerHTML = '<small>Color del título</small>' + (vidAcento < 0 ? 'Automático · ' + vidPalNom(vidPalAuto(gal(galId) || {})) : PAL_PANEL[vidAcento][1]); }
+  var cpp = $('#pn-cp'); if (cpp) cpp.hidden = vidEstilo !== 'papel'; var cta = $('#pn-ct'); if (cta) cta.hidden = vidEstilo === 'prisma' || vidEstilo === 'carriles' || vidEstilo === 'postales' || vidEstilo === 'estudio'; var cac = $('#pn-ca'); if (cac) { cac.hidden = !(vidEstilo === 'prisma' || vidEstilo === 'carriles' || vidEstilo === 'postales'); cac.innerHTML = '<small>Color del título</small>' + (vidAcento < 0 ? 'Automático · ' + vidPalNom(vidPalAuto(gal(galId) || {})) : PAL_PANEL[vidAcento][1]); }
   chip('#pn-ct', 'Transiciones', vidEstilo === 'pantalla' ? { variadas: 'Variadas', desliza: 'Deslizar de lado', disuelve: 'Disolver' }[vidTrans] : { variadas: 'Variadas (todas las direcciones)', der: 'Hacia la derecha', izq: 'Hacia la izquierda', arriba: 'Hacia arriba', abajo: 'Hacia abajo' }[vidTransP]);
   var g0 = gal(galId) || {}, o0 = vidOp(); if ($('#pn-vtt') && document.activeElement !== $('#pn-vtt')) $('#pn-vtt').value = o0.titulo; var tx = $('#pn-vtx'); if (tx) { tx.hidden = vidEstilo === 'papel'; if ($('#pn-vts') && document.activeElement !== $('#pn-vts')) $('#pn-vts').value = o0.subtitulo; var te = $('#pn-vte'); if (te) { te.hidden = vidEstilo !== 'prisma'; if ($('#pn-vea') && document.activeElement !== $('#pn-vea')) $('#pn-vea').value = vidEA; if ($('#pn-veb') && document.activeElement !== $('#pn-veb')) $('#pn-veb').value = vidEB; } }
   clearTimeout(vidDeb); vidEsc = null; vidDeb = setTimeout(vidPrepara, 350); vidCtl();
@@ -749,7 +751,7 @@ async function vidGenerar(){
       var dm2 = VDIM[fmts[q]] || VDIM.v, kq = vidCal === '4k' ? 2 : 1, W = dm2[0] * kq, H = dm2[1] * kq, esc2 = window.Slideshow.crearEscena(fotos, W, H, vidSeg, vidOp());
       vidEstado('Creando el video ' + dm2[2] + '… no cierres esta pestaña.');
       var blob = await window.Slideshow.exportar(esc2, { fps: 30, bitrate: kq === 2 ? 28e6 : 8e6, codecs: kq === 2 ? ['avc1.640033', 'avc1.640034', 'avc1.4D0033'] : undefined, cancelado: function(){ return vidCancel; }, progreso: function(x){ vidBarra(0.25 + 0.75 * (q + x) / fmts.length); vidEstado('Creando el video ' + dm2[2] + '… ' + Math.round(x * 100) + '%'); } });
-      var u = URL.createObjectURL(blob), l = document.createElement('a'); l.href = u; l.download = 'slideshow-' + slug(g ? g.title : 'galeria') + '-' + (vidEstilo === 'pantalla' ? 'pantalla-' : vidEstilo === 'prisma' ? 'prisma-' : vidEstilo === 'carriles' ? 'bandas-' : vidEstilo === 'postales' ? 'postales-' : '') + dm2[2] + (kq === 2 ? '-4k' : '') + (vidMarca ? '' : '-sin-logo') + '.mp4'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000);
+      var u = URL.createObjectURL(blob), l = document.createElement('a'); l.href = u; l.download = 'slideshow-' + slug(g ? g.title : 'galeria') + '-' + (vidEstilo === 'pantalla' ? 'pantalla-' : vidEstilo === 'prisma' ? 'prisma-' : vidEstilo === 'carriles' ? 'bandas-' : vidEstilo === 'postales' ? 'postales-' : vidEstilo === 'estudio' ? 'estudio-' : '') + dm2[2] + (kq === 2 ? '-4k' : '') + (vidMarca ? '' : '-sin-logo') + '.mp4'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000);
     }
     vidSem = Math.floor(Math.random() * 4e9); vidBarra(1); fin = 'Listo. El video se descargó en tu computadora.';
   } catch(e) { vidBarra(0); fin = e && e.message === 'cancelado' ? 'Cancelado.' : 'No se pudo crear el video: ' + (e && e.message ? e.message : 'error') + (vidCal === '4k' ? ' Si tu equipo no soporta 4K, elige Full HD.' : ''); }
@@ -787,7 +789,8 @@ function pintarDetalle0(){
   } else if (tab === 'fotos') {
     cuerpo = '<dialog id="pn-dsub"><h2>Subir fotos</h2><div class="pn-rc"><label class="pn-rcl"><input type="radio" name="pn-dest" value="selection" checked><span class="d"></span><span><b>Selección</b><small>Se reducen según la calidad de Configuración</small></span></label><label class="pn-rcl"><input type="radio" name="pn-dest" value="final"><span class="d"></span><span><b>Finales</b><small>Originales, hasta 45 MB</small></span></label></div>' +
       (cur.escenas && cur.escenas.length ? '<div class="pn-marcaui"><label class="pn-s" for="pn-esc">Escena de destino</label><select id="pn-esc"><option value="">Sin escena</option>' + cur.escenas.map(function(e){ return '<option value="' + e.id + '"' + (fEsc === e.id ? ' selected' : '') + '>' + esc(e.name) + '</option>'; }).join('') + '</select></div>' : '') + '<p class="pn-s pn-marcaui" id="pn-mbox">De cada foto se guardan dos versiones: limpia y con marca de agua. En Configuración eliges cuál ve tu cliente.</p>' +
-      '<div class="pn-row"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><button class="pn-btn" data-act="subir" id="pn-go">Subir</button></div><ul id="pn-prog"></ul><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-subir" type="button">Cancelar</button></div></dialog>' +
+      '<label class="pn-dz" id="pn-dz"><input type="file" id="pn-file" accept="image/jpeg,image/png,image/webp,image/tiff" multiple><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 15v4a1 1 0 001 1h14a1 1 0 001-1v-4"/></svg><b id="pn-dzt">Arrastra tus fotos aquí</b><span class="pn-s" id="pn-dzs">o toca para elegirlas desde tu equipo</span></label>' +
+      '<div class="pn-row"><button class="pn-btn" data-act="subir" id="pn-go" disabled>Subir</button><button class="pn-btn sec" data-act="cerrar-subir" type="button">Cancelar</button></div><ul id="pn-prog"></ul></dialog>' +
       fotosVista(g, sel, fin);
   } else if (tab === 'diseno') {
     cuerpo = dsHtml(g, sel);
@@ -973,13 +976,47 @@ async function correrCola(){
     cola.activos--; cola.hechas++; pintarCola();
   }
 }
+var DZ_OK = /\.(jpe?g|png|webp|tiff?)$/i;
+function dzActualizar(){
+  var f = $('#pn-file'), t = $('#pn-dzt'), sb = $('#pn-dzs'), go = $('#pn-go'), z = $('#pn-dz'); if (!f || !t) return;
+  var n = f.files ? f.files.length : 0, mb = 0; for (var i = 0; i < n; i++) mb += f.files[i].size;
+  t.textContent = n ? (n + (n === 1 ? ' foto lista para subir' : ' fotos listas para subir')) : 'Arrastra tus fotos aquí';
+  sb.textContent = n ? (mb / 1048576 < 1 ? '< 1 MB' : Math.round(mb / 1048576) + ' MB') + ' · toca o arrastra más para cambiar la selección' : 'o toca para elegirlas desde tu equipo';
+  if (go) go.disabled = !n; if (z) z.classList.toggle('lleno', !!n);
+}
+function dzPoner(lista){
+  var f = $('#pn-file'); if (!f) return;
+  var arr = Array.from(lista || []), ok = arr.filter(function(x){ return /^image\/(jpeg|png|webp|tiff)$/.test(x.type) || DZ_OK.test(x.name); });
+  var dt = new DataTransfer(); ok.forEach(function(x){ dt.items.add(x); }); f.files = dt.files; dzActualizar();
+  if (arr.length > ok.length) aviso((arr.length - ok.length) + (arr.length - ok.length === 1 ? ' archivo no es una foto válida y se omitió.' : ' archivos no son fotos válidas y se omitieron.'));
+}
+function dzTieneArchivos(e){ var t = e.dataTransfer && e.dataTransfer.types; return !!t && Array.prototype.indexOf.call(t, 'Files') >= 0; }
+var dzIniciado = false;
+function dzIniciar(){
+  if (dzIniciado) return; dzIniciado = true;
+  root.addEventListener('change', function(e){ if (e.target && e.target.id === 'pn-file') dzActualizar(); });
+  root.addEventListener('dragover', function(e){ var z = e.target.closest && e.target.closest('#pn-dz'); if (z && dzTieneArchivos(e)) { e.preventDefault(); z.classList.add('sobre'); } });
+  root.addEventListener('dragleave', function(e){ var z = e.target.closest && e.target.closest('#pn-dz'); if (z) z.classList.remove('sobre'); });
+  root.addEventListener('drop', function(e){ var z = e.target.closest && e.target.closest('#pn-dz'); if (!z || !dzTieneArchivos(e)) return; e.preventDefault(); z.classList.remove('sobre'); dzPoner(e.dataTransfer.files); });
+  var ov = function(){ return $('#pn-dzov'); }, enFotos = function(){ return vista === 'detalle' && tab === 'fotos' && cur && !($('#pn-dsub') && $('#pn-dsub').open); };
+  window.addEventListener('dragenter', function(e){ if (dzTieneArchivos(e) && enFotos() && ov()) ov().hidden = false; });
+  window.addEventListener('dragover', function(e){ if (dzTieneArchivos(e) && enFotos()) e.preventDefault(); });
+  window.addEventListener('dragleave', function(e){ if (!e.relatedTarget && ov()) ov().hidden = true; });
+  window.addEventListener('drop', function(e){
+    if (!dzTieneArchivos(e)) return; if (ov()) ov().hidden = true;
+    if (!enFotos()) return; e.preventDefault();
+    var fl = e.dataTransfer.files, d = $('#pn-dsub'); if (!d) return;
+    var selE = $('#pn-esc'); if (selE) selE.value = fEsc && fEsc !== '_none' && fEsc !== '_ninguna' ? fEsc : '';
+    d.showModal(); dzPoner(fl);
+  });
+}
 async function subirTodo(){
   var files = Array.from($('#pn-file').files); if (!files.length) return;
   var tipo = root.querySelector('input[name=pn-dest]:checked').value, g0 = gal(galId);
   var base = { tipo: tipo, marca: null, gid: galId, cal: (g0 && g0.view_quality) || 'media', texto: g0 && g0.watermark_text, esc: $('#pn-esc') && $('#pn-esc').value ? $('#pn-esc').value : '' };
   if (!subiendo()) { cola.total = 0; cola.hechas = 0; cola.fallos = []; cola.gids = {}; }
   files.forEach(function(f){ cola.trabajos.push(Object.assign({ file: f }, base)); }); cola.total += files.length;
-  $('#pn-file').value = ''; try { $('#pn-dsub').close(); } catch (e) {} pintarCola();
+  $('#pn-file').value = ''; dzActualizar(); try { $('#pn-dsub').close(); } catch (e) {} pintarCola();
   aviso('Subiendo ' + files.length + (files.length === 1 ? ' foto' : ' fotos') + ' en segundo plano. Puedes seguir trabajando.');
   var corriendo = cola.activos;
   var hilos = Math.max(0, 3 - corriendo); var ps = [];
@@ -1253,7 +1290,7 @@ async function accion(a, el){
   if (a === 'vid-agregar') return $('#pn-dvp').showModal();
   if (a === 'vid-cerrar') return $('#pn-dvp').close();
   if (a === 'vid-quitar') { vidIds.splice(+el.dataset.i, 1); vidStop(); return vidRefrescar(); }
-  if (a === 'vid-estilo') { vidEstilo = el.dataset.v === 'pantalla' ? 'pantalla' : el.dataset.v === 'prisma' ? 'prisma' : el.dataset.v === 'carriles' ? 'carriles' : el.dataset.v === 'postales' ? 'postales' : 'papel'; vidStop(); vidT = 0; return vidRefrescar(); }
+  if (a === 'vid-estilo') { vidEstilo = el.dataset.v === 'pantalla' ? 'pantalla' : el.dataset.v === 'prisma' ? 'prisma' : el.dataset.v === 'carriles' ? 'carriles' : el.dataset.v === 'postales' ? 'postales' : el.dataset.v === 'estudio' ? 'estudio' : 'papel'; vidStop(); vidT = 0; return vidRefrescar(); }
   if (a === 'vid-acento') { vidAcento = vidAcento + 1 >= PAL_PANEL.length ? -1 : vidAcento + 1; vidStop(); return vidRefrescar(); }
   if (a === 'vid-trans') { if (vidEstilo === 'pantalla') vidTrans = { variadas: 'desliza', desliza: 'disuelve', disuelve: 'variadas' }[vidTrans]; else vidTransP = { variadas: 'der', der: 'izq', izq: 'arriba', arriba: 'abajo', abajo: 'variadas' }[vidTransP]; vidStop(); vidT = 0; return vidRefrescar(); }
   if (a === 'vid-marca') { vidMarca = el.dataset.v !== 'no'; vidStop(); vidT = 0; return vidRefrescar(); }
@@ -1622,7 +1659,7 @@ function cotDibujar(){
   var ids = [1, 4, 2, 3];
   $('#n-dbt').innerHTML = ids.map(function(i){ return '<button class="pn-btn sec" data-act="n-cot-dis" data-d="' + i + '">' + esc(ESTILOS_COT[i]) + '</button>'; }).join('');
   root.querySelectorAll('[data-act=n-cot-dis]').forEach(function(b){ b.classList.toggle('on', +b.dataset.d === neg.cotDis); });
-  var f = document.fonts ? Promise.all([document.fonts.load('500 40px "Cormorant Garamond"'), document.fonts.load('300 30px Jost')]).catch(function(){}) : Promise.resolve();
+  var f = document.fonts ? Promise.all([document.fonts.load('500 40px "Cormorant Garamond"'), document.fonts.load('italic 500 40px "Cormorant Garamond"'), document.fonts.load('300 30px Jost')]).catch(function(){}) : Promise.resolve();
   Promise.all([f, cotLogos()]).then(function(r){ neg.logosR = r[1]; var d = $('#n-dver'); if (d && d.open && neg.cotImg) cotLienzo($('#n-vcv'), neg.cotImg, neg.cotDis); });
 }
 function cotLienzo(cv, c, dis){
@@ -2029,7 +2066,8 @@ window.iniciarPanel = async function(photographer, cliente){
   if (!document.getElementById('pn-css')) { var st = document.createElement('style'); st.id = 'pn-css'; st.textContent = CSS + disCss(); document.head.appendChild(st); }
   root.innerHTML = '<div class="pn"><aside></aside><main id="pn-main"><div class="pn-skel w1"></div><div class="pn-skel"></div><div class="pn-skel h2"></div></main>' +
     '<dialog id="pn-dnueva"><h2>Nueva galería</h2><form id="pn-fn"><input type="text" id="pn-cn" placeholder="Cliente (ej. Ana y Luis)"><input type="text" id="pn-ct" placeholder="Nombre de la galería (ej. Boda Ana y Luis)"><input type="date" id="pn-cf"><div class="pn-row"><button class="pn-btn" type="submit">Crear</button><button class="pn-btn sec" type="button" id="pn-cc">Cancelar</button></div></form></dialog><dialog id="pn-dqr"><h2 id="pn-qt">Código QR</h2><div class="pn-qr"><canvas id="pn-qc" width="10" height="10"></canvas></div><p class="pn-s ay">Quien lo escanee con la cámara del celular abre la galería. Puedes imprimirlo o mandarlo por WhatsApp.</p><div class="pn-row"><button class="pn-btn" data-act="qr-bajar" type="button">Descargar imagen</button><button class="pn-btn sec" data-act="qr-cerrar" type="button">Cerrar</button></div></dialog><input type="file" id="pn-pfo" accept="image/jpeg,image/png,image/webp" hidden><dialog id="pn-dport"><h2>Elegir portada</h2><p class="pn-s">Toca la foto que quieres como portada. Después te pediré su archivo original para que la portada salga <b>sin marca de agua</b>.</p><div class="pn-grid" id="pn-gport"></div><div class="pn-row"><button class="pn-btn sec" data-act="cerrar-portada">Cancelar</button></div></dialog></div>';
-  root.querySelector('.pn').insertAdjacentHTML('beforeend', '<dialog id="pn-denl"></dialog>');
+  root.querySelector('.pn').insertAdjacentHTML('beforeend', '<dialog id="pn-denl"></dialog><div id="pn-dzov" hidden><div><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 15v4a1 1 0 001 1h14a1 1 0 001-1v-4"/></svg><b>Suelta tus fotos para subirlas</b></div></div>');
+  dzIniciar();
   root.querySelector('.pn').insertAdjacentHTML('beforeend', '<div id="pn-up" hidden></div><button id="pn-as-chip" data-act="asist" hidden type="button"></button>');
   root.querySelector('.pn').insertAdjacentHTML('beforeend', '<dialog id="pn-dver"><header class="pn-vh"><div class="pn-vt2"><b id="pn-vnm"></b><span class="pn-s" id="pn-vct"></span></div><div class="pn-vac"><button type="button" id="pn-vpo" data-act="portada">★ Establecer como portada</button><button type="button" id="pn-vdel" data-act="borrar-foto">Borrar</button><button type="button" id="pn-vx" aria-label="Cerrar">✕</button></div></header><button class="pn-nav l" id="pn-vp" type="button" aria-label="Anterior">‹</button><div class="pn-vm"><img id="pn-vimg" alt=""></div><button class="pn-nav r" id="pn-vn" type="button" aria-label="Siguiente">›</button></dialog>');
   $('#pn-vp').onclick = function(){ pasarVer(-1); }; $('#pn-vn').onclick = function(){ pasarVer(1); }; $('#pn-vx').onclick = function(){ $('#pn-dver').close(); };
