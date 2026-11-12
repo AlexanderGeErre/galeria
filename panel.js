@@ -219,6 +219,8 @@ CSS += '.pn main{min-width:0}.vs{margin-bottom:1.2rem;min-width:0;max-width:100%
 '.vs-pv{border-radius:0 0 16px 16px;min-height:0;padding:1.6rem 1rem 1.4rem}.vs-ctl{width:min(34rem,100%);border-radius:99px;background:#1d1915}.vs-pv .pn-vb{width:min(34rem,100%)}.vs-pv #pn-vst{color:#c9bfb3;text-transform:none;letter-spacing:0;font-size:.82rem}.vs-pv #pn-vinfo{color:#a89f94;font-size:.78rem}.vs-act{display:flex;gap:.7rem;margin-top:.4rem}.vs-act .pn-btn{border-radius:99px;padding:.7rem 2rem}' +
 '.np-dd li button.pn-opt{display:block;width:100%;max-width:none;border:0;border-radius:0;background:none;padding:.55rem 1rem;color:var(--s);flex:none}.np-dd li button.pn-opt:hover{color:var(--t);background:var(--p)}.np-dd li button.pn-opt.on{color:var(--t);font-weight:500;background:var(--p)}' +
 '.np-dev.v canvas{height:min(50vh,560px)}.np-dev.h canvas{width:min(640px,78vw,92vh)}@media(min-width:1500px){.np-dev.v canvas{height:min(62vh,640px)}.np-dev.h canvas{width:min(760px,60vw)}}@media(max-width:640px){.vs-tb{padding:.6rem 1rem;display:grid;grid-template-columns:1fr 1fr;gap:.1rem .8rem}.vs-tb .np-dd>button,.vs-chip{font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.vs-tb .np-dd:nth-child(2n) ul{left:auto;right:0}.vs-tb .np-dd ul{left:0;min-width:11rem}.vs-chip{grid-column:auto}.np-dev.v canvas{height:min(52vh,460px)}.np-dev.h canvas{width:min(78vw,420px)}.vs-pv{padding:1.2rem .6rem}.vs-act{width:100%}.vs-act .pn-btn{flex:1}}';
+CSS += '.pn dialog.vs-dlg{width:min(68rem,96vw);max-height:94vh;overflow:auto}.vs-dlg .vs{margin:0}.vs-dlg .vs-tb{border:0;border-radius:0;border-bottom:1px solid var(--l)}.vs-dlg .vs-pv{border-radius:0}.vs-dlg>.pn-card{margin:1rem 1.4rem}.vs-dlg .np-hd{position:sticky;top:0;background:var(--c);z-index:3;border-radius:20px 20px 0 0}.pn-vabre{max-width:30rem}';
+CSS += '#pn-dlogo{width:min(32rem,94vw)}#pn-dlogo input[type=file]{width:100%;margin:.6rem 0;font:inherit;font-size:.85rem;color:var(--s)}#pn-dlogo input[type=file]::file-selector-button{background:var(--a);color:var(--f);border:0;border-radius:99px;padding:.55rem 1.3rem;margin-right:.8rem;font:inherit;cursor:pointer}';
 CSS += '.pn-ved{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,380px);gap:1.4rem;align-items:start;margin-bottom:1.2rem}' +
 '.pn-vtabs{display:flex;gap:.3rem;border-bottom:1px solid var(--l);margin:.4rem 0 .9rem}.pn-vtabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--s);font:inherit;padding:.55rem .9rem;cursor:pointer;margin-bottom:-1px}.pn-vtabs button.on{color:var(--t);border-bottom-color:var(--a);font-weight:500}.pn-vpane[hidden]{display:none}.pn-vtam .pn-opt{flex:1 1 9rem}.pn-vtam .ar{display:block;border:2px solid currentColor;border-radius:3px;margin-bottom:.5rem;opacity:.7}.pn-vtam .ar.v{width:1.1rem;height:1.95rem}.pn-vtam .ar.h{width:2.2rem;height:1.25rem}.ar.s{width:1.6rem;height:1.6rem}.pn-vtam .ar.b{width:2.2rem;height:1.25rem;border-style:double;border-width:5px}.pn-vchips{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:1rem 0}.pn-vchip{background:var(--c);border:1px solid var(--l);border-radius:12px;padding:.9rem .6rem;color:var(--t);font:inherit;cursor:pointer;text-align:center;line-height:1.3}.pn-vchip small{display:block;color:var(--s);font-size:.74rem;margin-bottom:.15rem}.pn-vchip.pri{background:var(--a);color:var(--f);border-color:var(--a)}.pn-vchip.pri small{color:inherit;opacity:.8}.pn-vchip:disabled{opacity:.6;cursor:wait}' +
 '.pn-vpl{background:#0c0a08;border-radius:14px;overflow:hidden}.pn-vpl .pn-vprev{border-radius:0;min-height:0}.pn-vpl canvas{max-height:62vh;width:auto;max-width:100%}.pn-vctl{display:flex;align-items:center;gap:.7rem;padding:.6rem .9rem;color:#eee;background:#161310}.pn-vctl button{background:none;border:0;color:#fff;font-size:1.05rem;cursor:pointer;width:2rem;height:2rem}.pn-vctl input{flex:1;min-width:0;accent-color:var(--a)}.pn-vctl span{font-size:.78rem;font-variant-numeric:tabular-nums;white-space:nowrap}' +
@@ -387,8 +389,10 @@ function pintarLado(){
   if (!g) masAb = false;
   if (bn) bn.innerHTML = g ? navHtml() : '';
 }
+function navGuardar(){ try { localStorage.setItem('pn-nav', JSON.stringify({ v: vista, g: galId, t: tab, p: typeof vidPest !== 'undefined' ? vidPest : 0 })); } catch (e) {} }
+function navLeer(){ try { return JSON.parse(localStorage.getItem('pn-nav') || 'null'); } catch (e) { return null; } }
 function pintar(){
-  AS.show = false;
+  AS.show = false; navGuardar();
   if (!(vista === 'detalle' && tab === 'video')) vidLiberar();
   pintarLado(); aplicarTema(); setTimeout(marcarCargadas, 0);
   if (vista === 'cuenta') return pintarCuenta();
@@ -477,12 +481,13 @@ function pintarCuenta(){
     dt('Estudio', ph.studio_name, '<label for="pn-cu-n">Nombre del estudio o marca</label><input type="text" id="pn-cu-n" maxlength="60" value="' + esc(ph.studio_name) + '"><p class="pn-s ay">Es el nombre que ven tus clientes arriba de su galería.</p>' +
       '<label for="pn-cu-wm">Marca de agua predeterminada</label><input type="text" id="pn-cu-wm" maxlength="40" value="' + esc(ph.watermark_default || '') + '" placeholder="' + esc(ph.studio_name) + '"><p class="pn-s ay">Se usa en las galerías nuevas. Cada galería puede cambiarla en su Configuración. Si la dejas vacía se usa el nombre del estudio.</p>' +
       '<div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>', true) +
-    dt('Logotipo', ph.logo_para_claro || ph.logo_para_oscuro ? 'Personalizado' : 'Por defecto', '<p class="pn-s ay">Sube un PNG con fondo transparente. Necesitas dos versiones: una oscura (se ve sobre fondo claro) y una clara o dorada (se ve sobre fondo oscuro). Si subes solo una, se usa en los dos modos.</p><div class="pn-logos"><div><b>Para fondo claro</b>' + pv('claro', 'logo-oscuro', ph.logo_para_claro) + '<input type="file" id="pn-lg-c" accept="image/png,image/webp,image/jpeg"><div class="pn-row"><button class="pn-btn sec" data-act="logo-quitar" data-v="claro" type="button">Volver al logo por defecto</button></div></div>' +
-      '<div><b>Para fondo oscuro</b>' + pv('oscuro', 'logo-claro', ph.logo_para_oscuro) + '<input type="file" id="pn-lg-o" accept="image/png,image/webp,image/jpeg"><div class="pn-row"><button class="pn-btn sec" data-act="logo-quitar" data-v="oscuro" type="button">Volver al logo por defecto</button></div></div></div>') +
+    dt('Logotipo', ph.logo_para_claro || ph.logo_para_oscuro ? 'Personalizado' : 'Por defecto', '<p class="pn-s ay">Tu logotipo aparece en las galerías de tus clientes y en los videos.</p><div class="pn-row"><button class="pn-btn" data-act="logo-abrir" type="button">Cambiar logotipos</button></div>') +
     dt('Contacto', (ph.wa_phone || ph.contact_email) ? 'Configurado' : 'Sin configurar', '<p class="pn-s ay">Aparecen como botones en la galería de tus clientes y se usarán en las cotizaciones.</p><label for="pn-cu-wa">WhatsApp (con código de país)</label><input type="tel" id="pn-cu-wa" maxlength="20" placeholder="502 5555 5555" value="' + esc(ph.wa_phone || '') + '"><label for="pn-cu-ml">Correo de contacto</label><input type="email" id="pn-cu-ml" maxlength="80" value="' + esc(ph.contact_email || '') + '"><div class="pn-row"><button class="pn-btn" data-act="cuenta-guardar" type="button">Guardar</button></div>') +
     dt('Contraseña', '', '<label for="pn-cu-p1">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="pn-cu-p1" autocomplete="new-password"><label for="pn-cu-p2">Repite la contraseña</label><input type="password" id="pn-cu-p2" autocomplete="new-password"><div class="pn-row"><button class="pn-btn" data-act="cuenta-clave" type="button">Cambiar contraseña</button></div>') +
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
- + '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 20:10</p></div>';
+    '<dialog id="pn-dlogo"><h2>Logotipos</h2>' + '<p class="pn-s ay">Sube un PNG con fondo transparente. Necesitas dos versiones: una oscura (se ve sobre fondo claro) y una clara o dorada (se ve sobre fondo oscuro). Si subes solo una, se usa en los dos modos.</p><div class="pn-logos"><div><b>Para fondo claro</b>' + pv('claro', 'logo-oscuro', ph.logo_para_claro) + '<input type="file" id="pn-lg-c" accept="image/png,image/webp,image/jpeg"><div class="pn-row"><button class="pn-btn sec" data-act="logo-quitar" data-v="claro" type="button">Volver al logo por defecto</button></div></div>' +
+      '<div><b>Para fondo oscuro</b>' + pv('oscuro', 'logo-claro', ph.logo_para_oscuro) + '<input type="file" id="pn-lg-o" accept="image/png,image/webp,image/jpeg"><div class="pn-row"><button class="pn-btn sec" data-act="logo-quitar" data-v="oscuro" type="button">Volver al logo por defecto</button></div></div></div>' + '<div class="pn-row"><button class="pn-btn" data-act="logo-cerrar" type="button">Listo</button></div></dialog>' +
+    '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 11 nov 2026, 21:55</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -536,12 +541,13 @@ function plegar(abierta){
 var vidCal = 'fhd', vidIds = [], vidForm = 'v', vidSeg = 2.5, vidPart = true, vidCache = {}, vidTok = 0, vidBusy = false, vidCancel = false;
 function cargarSlideshow(){
   if (window.Slideshow) return Promise.resolve();
-  return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = 'slideshow.js?v=20'; sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró slideshow.js en GitHub. Súbelo junto a panel.js.')); }; document.head.appendChild(sc); });
+  return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = 'slideshow.js?v=22'; sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró slideshow.js en GitHub. Súbelo junto a panel.js.')); }; document.head.appendChild(sc); });
 }
 function vidEstado(t){ var e = $('#pn-vst'); if (e) e.textContent = t || ''; }
 function vidBarra(x){ var b = $('#pn-vbar'); if (b) b.style.width = Math.round(clampN(x) * 100) + '%'; }
 function clampN(x){ return Math.max(0, Math.min(1, x)); }
 function vidStop(){ vidPlay = false; cancelAnimationFrame(vidRaf); vidCtl(); }
+var vidEdCerrado = false;
 function vidLiberar(){ if (vidBusy) return; vidStop(); vidLoadTok++; vidEsc = null; vidLogo = undefined; Object.keys(vidCache).forEach(function(k){ try { vidCache[k].bmp.close(); } catch(e) {} }); vidCache = {}; }
 var VID_CONTACTO = { usuario: '@alexandergr32', gracias: '', lema: 'Fotografía y Video', contactos: [['Instagram', '@alexander_ge_erre'], ['WhatsApp', '+502 4465-8195'], ['Facebook', '@alexandergr32']] }, vidPest = 0, vidEstilo = 'papel', vidTit = null, vidSub = null, vidAcento = -1, vidMarca = true, vidEA = '', vidEB = '', vidLogo, vidTrans = 'variadas', vidTransP = 'variadas', vidSem = Math.floor(Math.random() * 4e9);
 function cargarLogoVideo(){
@@ -805,7 +811,8 @@ function pintarDetalle0(){
       '<div class="pn-row"><button class="pn-btn" data-act="guardar-config">Guardar cambios</button></div>' +
       '<div class="pn-card"><h2>Eliminar galería</h2><p class="pn-s">Se borran la galería y todas sus fotos. No se puede deshacer.</p><button class="pn-btn rojo" data-act="eliminar-galeria">Eliminar galería</button></div>';
   } else if (tab === 'video') {
-    cuerpo = vidHtml(g, sel, fin);
+    cuerpo = '<div class="pn-card pn-vabre"><h2>Video</h2><p class="pn-s">Crea un video con las fotos de esta galería.</p><button class="pn-btn" type="button" data-act="vid-abrir-ed">Abrir editor de video</button></div>' +
+      '<dialog id="pn-dvid" class="np vs-dlg"><div class="np-hd"><h2>Presentación de video</h2><button class="pn-btn sec" type="button" data-act="vid-cerrar-ed">Cerrar</button></div>' + vidHtml(g, sel, fin) + '</dialog>';
   } else if (tab === 'favoritas') {
     var nombre = {}; cur.fotos.forEach(function(x){ nombre[x.id] = x.filename; });
     var por = {}; cur.favs.forEach(function(x){ (por[x.visitor_token] = por[x.visitor_token] || []).push(x.photo_id); });
@@ -858,7 +865,7 @@ function pintarDetalle0(){
           '<details class="pn-s" style="margin-top:.6rem"><summary>Enlace con el código incluido (entra sin escribirlo)</summary>' + fila('Enlace directo con código', urlC) + '</details>') + '</div>';
   }
   $('#pn-main').innerHTML = '<h1>' + esc(TITULOS[tab] || '') + '</h1><div class="pn-sub"><p class="pn-s" style="margin:0">' + esc(g.title) + '</p><span class="pn-pill">' + esc(ESTADOS[g.status] || g.status) + '</span></div><div class="pn-tabs" role="tablist">' + TABS.map(function(t){ return '<button type="button" data-act="tab" data-t="' + t[0] + '"' + (tab === t[0] ? ' class="on" aria-selected="true"' : '') + '>' + t[1] + '</button>'; }).join('') + '</div>' + cuerpo;
-  if (cur && tab === 'video') vidIniciar();
+  if (cur && tab === 'video') { vidIniciar(); var dv = $('#pn-dvid'); if (dv && !dv.open && !vidEdCerrado) { try { dv.showModal(); } catch (e) {} } }
   if (cur && tab === 'config') { wmLab(); var wti = $('#pn-wt'); if (wti) wti.oninput = wmLab; }
   if (cur && (tab === 'config' || tab === 'diseno')) plegar(function(t){ return t === 'Portada' || t === 'Paleta de colores'; });
   else root.querySelectorAll('#pn-main .pn-card > h2 + p.pn-s').forEach(function(x){ x.classList.add('ay'); });
@@ -1272,6 +1279,8 @@ async function accion(a, el){
   if (a === 'qr-bajar') { $('#pn-qc').toBlob(function(b){ var u = URL.createObjectURL(b), l = document.createElement('a'); l.href = u; l.download = 'QR-' + slug(qrNombre) + '.png'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 2000); }); return; }
   if (a === 'cuenta-guardar') return guardarCuenta();
   if (a === 'cuenta-clave') return cambiarClave();
+  if (a === 'logo-abrir') return $('#pn-dlogo').showModal();
+  if (a === 'logo-cerrar') return $('#pn-dlogo').close();
   if (a === 'logo-quitar') { var col = el.dataset.v === 'claro' ? 'logo_para_claro' : 'logo_para_oscuro', cam = {}; cam[col] = null; var rq = await db.from('photographers').update(cam).eq('id', ph.id).select('id'); if (rq.error || !rq.data || !rq.data.length) return aviso(errCuenta(rq.error)); ph[col] = null; aviso('Se volvió al logo por defecto'); pintarLado(); return pintarCuenta(); }
   if (a === 'vid-foto') { var vi2 = vidIds.indexOf(id); if (vi2 >= 0) vidIds.splice(vi2, 1); else vidIds.push(id); vidStop(); return vidRefrescar(); }
   if (a === 'vid-sel') {
@@ -1290,6 +1299,8 @@ async function accion(a, el){
   if (a === 'np-cont') { vidEstilo = npEstilo; vidForm = npForm; vidMarca = npMarca; vidSeg = npSeg; var nn = $('#np-n').value.trim(); vidTit = nn || null; vidPest = 0; vidStop(); vidT = 0; $('#pn-dnp').close(); return vidRefrescar(); }
   if (a === 'vid-agregar') return $('#pn-dvp').showModal();
   if (a === 'vid-cerrar') return $('#pn-dvp').close();
+  if (a === 'vid-abrir-ed') { vidEdCerrado = false; var dv2 = $('#pn-dvid'); if (dv2 && !dv2.open) dv2.showModal(); return; }
+  if (a === 'vid-cerrar-ed') { if (vidBusy) return aviso('Espera a que termine el video o cancélalo.'); vidEdCerrado = true; vidStop(); var dv3 = $('#pn-dvid'); if (dv3) dv3.close(); return; }
   if (a === 'vid-quitar') { vidIds.splice(+el.dataset.i, 1); vidStop(); return vidRefrescar(); }
   if (a === 'vid-estilo') { vidEstilo = el.dataset.v === 'pantalla' ? 'pantalla' : el.dataset.v === 'prisma' ? 'prisma' : el.dataset.v === 'carriles' ? 'carriles' : el.dataset.v === 'postales' ? 'postales' : el.dataset.v === 'estudio' ? 'estudio' : 'papel'; vidStop(); vidT = 0; return vidRefrescar(); }
   if (a === 'vid-acento') { vidAcento = vidAcento + 1 >= PAL_PANEL.length ? -1 : vidAcento + 1; vidStop(); return vidRefrescar(); }
@@ -1306,7 +1317,7 @@ async function accion(a, el){
   if (a === 'vid-cancel') { vidCancel = true; return vidEstado('Cancelando…'); }
   if (a === 'abrir') return abrirDetalle(id);
   if (a === 'atras') { await cargarGalerias(); vista = 'galerias'; return pintar(); }
-  if (a === 'tab') { tab = el.dataset.t; masAb = false; favMenu = false; return pintar(); }
+  if (a === 'tab') { tab = el.dataset.t; if (tab === 'video') vidEdCerrado = false; masAb = false; favMenu = false; return pintar(); }
   if (a === 'fav-menu') { favMenu = !favMenu; return pintar(); }
   if (a === 'fav-ver') { favVer = el.dataset.k; favMenu = false; try { localStorage.setItem('pn-favver', favVer); } catch (e) {} return pintar(); }
   if (a === 'mas-abrir' || a === 'mas-cerrar') { masAb = a === 'mas-abrir' ? !masAb : false; var bn2 = $('#pn-bn'); if (bn2) bn2.innerHTML = navHtml(); return; }
@@ -2108,12 +2119,19 @@ window.iniciarPanel = async function(photographer, cliente){
     var v = e.target.closest('aside [data-v]'); if (v) { vista = v.dataset.v; return pintar(); }
     var a = e.target.closest('[data-act]'); if (a) accion(a.dataset.act, a);
   };
+  root.addEventListener('close', function(e){ if (e.target && e.target.id === 'pn-dvid') { vidEdCerrado = true; vidStop(); } }, true);
   $('#pn-fn').addEventListener('submit', crearGaleria);
   negIniciar();
   $('#pn-cc').addEventListener('click', function(){ $('#pn-dnueva').close(); });
   if (window.matchMedia && !window.__pnMq) { window.__pnMq = matchMedia('(prefers-color-scheme: dark)'); window.__pnMq.addEventListener('change', function(){ aplicarTema(); }); }
   vista = 'inicio';
   await cargarGalerias();
+  var nv = navLeer();
+  if (nv && nv.v && nv.v !== 'asist' && nv.v !== 'ia') {
+    if (nv.v === 'detalle') {
+      if (nv.g && gals.some(function(x){ return x.id === nv.g; })) { tab = nv.t || 'panel'; if (+nv.p) vidPest = +nv.p; return abrirDetalle(nv.g, true); }
+    } else { vista = nv.v; }
+  }
   pintar();
 };
 })();
