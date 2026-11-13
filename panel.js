@@ -488,7 +488,7 @@ function pintarCuenta(){
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
     '<dialog id="pn-dlogo"><h2>Logotipos</h2>' + '<p class="pn-s ay">Sube un PNG con fondo transparente. Necesitas dos versiones: una oscura (se ve sobre fondo claro) y una clara o dorada (se ve sobre fondo oscuro). Si subes solo una, se usa en los dos modos.</p><div class="pn-logos"><div><b>Para fondo claro</b>' + pv('claro', 'logo-oscuro', ph.logo_para_claro) + '<input type="file" id="pn-lg-c" accept="image/png,image/webp,image/jpeg"><div class="pn-row"><button class="pn-btn sec" data-act="logo-quitar" data-v="claro" type="button">Volver al logo por defecto</button></div></div>' +
       '<div><b>Para fondo oscuro</b>' + pv('oscuro', 'logo-claro', ph.logo_para_oscuro) + '<input type="file" id="pn-lg-o" accept="image/png,image/webp,image/jpeg"><div class="pn-row"><button class="pn-btn sec" data-act="logo-quitar" data-v="oscuro" type="button">Volver al logo por defecto</button></div></div></div>' + '<div class="pn-row"><button class="pn-btn" data-act="logo-cerrar" type="button">Listo</button></div></dialog>' +
-    '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 12 nov 2026, 12:50</p></div>';
+    '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 12 nov 2026, 13:35</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -893,7 +893,7 @@ function wmLab(){
   im.src = 'muestras/muestra3.jpg';
 }
 var wmTok = 0;
-var CALIDAD = { baja: [1000, 0.72], media: [1600, 0.85], alta: [2400, 0.9] };
+var CALIDAD = { baja: [1000, 0.72], media: [1600, 0.85], alta: [2400, 0.9], vista: [1800, 0.86] };
 function reducir(file, marca, cal){
   var qd = CALIDAD[cal] || CALIDAD.media;
   return createImageBitmap(file).then(function(b){
@@ -972,6 +972,10 @@ async function subirUna(t){
         var rp = await fetch(W + '/api/upload-preview?photo=' + d.photo.id, { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'image/jpeg' }, body: pv.blob });
         var dp = await rp.json().catch(function(){ return {}; }); okp = !!dp.ok;
       } catch (e) {}
+    }
+    if (t.tipo === 'final') {
+      // Copia ligera sin marca para que cargue rápido en el celular; el original queda intacto para descargar
+      try { var vv = await reducir(f, null, 'vista'); await fetch(W + '/api/upload-preview?photo=' + d.photo.id + '&view=1', { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'image/jpeg' }, body: vv.blob }); } catch (e) {}
     }
     if (!okp && t.tipo === 'selection') { try { await api('/api/admin/delete-photos', { photos: [d.photo.id] }); } catch (e) {} throw new Error('no se pudo guardar la versión con marca de agua, vuelve a subirla'); }
   }
@@ -1130,7 +1134,7 @@ function fotosVista(g, sel, fin){
   var unica = !es.length;
   var cuerpo = secs.map(function(sc){
     var abierta = unica || fEsc === sc.id, lst = visibles(sc.id), total = delaEsc(sc.id).length;
-    var menu = '<div class="np-dd r"><button type="button" class="fs-dots" data-act="vd-dd" aria-label="Más opciones">•••</button><ul hidden><li><button type="button" data-act="abrir-subir" data-tipo="selection" data-esc="' + (sc.real ? sc.id : '') + '">Subir fotos aquí</button></li>' + (sc.real ? '<li><button type="button" data-act="esc-entrega" data-id="' + sc.id + '">' + (escEnt(sc.id) ? 'Quitar entrega' : 'Marcar como entregada') + '</button></li><li><button type="button" data-act="esc-renombrar" data-id="' + sc.id + '">Renombrar</button></li><li><button type="button" data-act="esc-portada" data-id="' + sc.id + '">' + (escCov(sc.id) ? 'Cambiar portada de la escena' : 'Poner portada a la escena') + '</button></li>' + (escCov(sc.id) ? '<li><button type="button" data-act="esc-portada-quitar" data-id="' + sc.id + '">Quitar portada de la escena</button></li>' : '') + '<li><button type="button" data-act="esc-borrar" data-id="' + sc.id + '">Eliminar escena</button></li>' : '') + '</ul></div>';
+    var menu = '<div class="np-dd r"><button type="button" class="fs-dots" data-act="vd-dd" aria-label="Más opciones">•••</button><ul hidden><li><button type="button" data-act="abrir-subir" data-tipo="selection" data-esc="' + (sc.real ? sc.id : '') + '">Subir fotos aquí</button></li>' + (sc.real ? '<li><button type="button" data-act="esc-entrega" data-id="' + sc.id + '">' + (escEnt(sc.id) ? 'Quitar entrega' : 'Marcar como entregada') + '</button></li><li><button type="button" data-act="esc-renombrar" data-id="' + sc.id + '">Renombrar</button></li><li><button type="button" data-act="esc-portada" data-id="' + sc.id + '">' + (escCov(sc.id) ? 'Cambiar portada de la escena' : 'Poner portada a la escena') + '</button></li>' + '<li><button type="button" data-act="esc-optimizar" data-id="' + sc.id + '">Optimizar fotos para celular</button></li>' + (escCov(sc.id) ? '<li><button type="button" data-act="esc-portada-quitar" data-id="' + sc.id + '">Quitar portada de la escena</button></li>' : '') + '<li><button type="button" data-act="esc-borrar" data-id="' + sc.id + '">Eliminar escena</button></li>' : '') + '</ul></div>';
     var head = '<div class="fs-h"><h2>' + esc(sc.name) + '</h2>' + (sc.real ? '<button type="button" class="fs-t" data-act="esc-renombrar" data-id="' + sc.id + '" title="Renombrar" aria-label="Renombrar">R</button><button type="button" class="fs-p' + (escPag(sc.id) ? ' on' : '') + '" data-act="esc-pago" data-id="' + sc.id + '" title="' + (escPag(sc.id) ? 'Pagada: sus finales se ven sin marca de agua. Toca para quitar' : 'Marcar como pagada') + '" aria-pressed="' + escPag(sc.id) + '" aria-label="Pagada">P</button>' : '') + (sc.real ? '<button type="button" class="fs-p fs-d' + (escCer(sc.id) ? ' off' : ' on') + '" data-act="esc-ojo" data-id="' + sc.id + '" title="' + (escCer(sc.id) ? 'Galería cerrada: tu cliente verá un aviso para contactarte. Toca para abrirla' : 'Galería abierta: tu cliente puede ver sus fotos. Toca para cerrarla') + '" aria-pressed="' + !escCer(sc.id) + '" aria-label="' + (escCer(sc.id) ? 'Galería cerrada' : 'Galería abierta') + '">' + (escCer(sc.id) ? '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.5 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4.2-.9M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>' : '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>') + '</button>' : '') + (sc.real && escEnt(sc.id) ? '<span class="fs-ent">Entregada</span>' : '') + (sc.real && escCer(sc.id) ? '<span class="fs-ent fs-cer">Cerrada</span>' : '') + '<span class="fs-n">' + total + (total === 1 ? ' foto' : ' fotos') + '</span>' + menu + '<div class="pn-seg fs-seg" role="group" aria-label="Tipo de foto">' + [['', 'Todas'], ['selection', 'Selección'], ['final', 'Finales']].map(function(t){ return '<button type="button" data-act="ftipo" data-esc="' + sc.id + '" data-v="' + t[0] + '" class="' + ((fTipoE[sc.id] || '') === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('') + '</div></div>';
     var add = '<button class="fs-add" data-act="abrir-subir" data-tipo="' + tipoSub + '" data-esc="' + (sc.real ? sc.id : '') + '" type="button"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg><span>Fotos y videos</span></button>';
     var body;
@@ -1416,6 +1420,21 @@ async function accion(a, el){
     ee2[campo2] = nuevo2;
     aviso(a === 'esc-ojo' ? (nuevo2 ? 'Galería cerrada: tu cliente verá un aviso para contactarte' : 'Galería abierta: tu cliente ya puede ver sus fotos') : a === 'esc-pago' ? (nuevo2 ? 'Marcada como pagada: en su enlace verá sus fotos sin marca de agua y podrá descargarlas' : 'Pago quitado: en su enlace las verá con marca de agua') : (nuevo2 ? 'Escena entregada: solo su enlace la muestra con las fotos finales' : 'Entrega quitada de la escena'));
     return pintar();
+  }
+  if (a === 'esc-optimizar') {
+    var fo = (cur.fotos || []).filter(function(x){ return x.scene_id === id && x.photo_type === 'final'; });
+    if (!fo.length) return aviso('Esta escena no tiene fotos finales.');
+    if (!await seguro('¿Optimizar ' + fo.length + ' fotos finales para que carguen rápido en el celular? Tus originales no se tocan y la descarga sigue siendo en calidad original. Deja esta pestaña abierta.')) return;
+    var tko = await firmar(fo.map(function(x){ return x.id; })), sso = (await db.auth.getSession()).data.session, okk = 0;
+    for (var oi = 0; oi < fo.length; oi++) {
+      aviso('Optimizando ' + (oi + 1) + ' de ' + fo.length + '…');
+      try {
+        var rb = await fetch(src(tko[fo[oi].id])), bb = await rb.blob(), vv2 = await reducir(bb, null, 'vista');
+        var ru = await fetch(W + '/api/upload-preview?photo=' + fo[oi].id + '&view=1', { method: 'POST', headers: { Authorization: 'Bearer ' + sso.access_token, 'Content-Type': 'image/jpeg' }, body: vv2.blob });
+        var dj = await ru.json().catch(function(){ return {}; }); if (dj.ok) okk++;
+      } catch (e) {}
+    }
+    return aviso(okk === fo.length ? 'Listo: ' + okk + ' fotos optimizadas para celular' : okk + ' de ' + fo.length + ' optimizadas. ¿Ya ejecutaste etapa21.sql y actualizaste el Worker?');
   }
   if (a === 'esc-portada') { escPortadaId = id; var pfe = $('#pn-pfesc'); if (!pfe) return aviso('No se pudo abrir el selector de archivos.'); pfe.value = ''; aviso('Elige la foto que será la portada de esta escena.'); return pfe.click(); }
   if (a === 'esc-portada-quitar') {
