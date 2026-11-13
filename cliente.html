@@ -38,7 +38,8 @@ h1,h2{font-family:'Cormorant Garamond',Georgia,serif;font-weight:500;line-height
 button,input{font:inherit;color:inherit}button{cursor:pointer}
 .il{mix-blend-mode:multiply;filter:contrast(1.04) brightness(1.05);max-width:100%;display:block;margin:0 auto}
 .btn{background:var(--t);color:var(--f);border:1px solid var(--t);padding:.7rem 1.5rem;border-radius:999px;transition:opacity .2s}.btn:hover{opacity:.85}.btn.sec{background:none;color:var(--t);border-color:var(--l)}.btn:disabled{opacity:.5}
-#acceso,#gracias{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem 1.2rem;text-align:center}
+#cargando,#acceso,#gracias{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem 1.2rem;text-align:center}
+#cargando .lin{width:120px;height:2px;border-radius:2px;background:var(--l);overflow:hidden;position:relative;margin-top:.8rem}#cargando .lin::after{content:'';position:absolute;top:0;bottom:0;left:0;width:40%;background:var(--a);animation:cg 1.3s ease-in-out infinite}@keyframes cg{from{transform:translateX(-110%)}to{transform:translateX(270%)}}@media(prefers-reduced-motion:reduce){#cargando .lin::after{animation:none;width:100%;opacity:.5}}
 #acceso .il,#gracias .il{width:min(14rem,60vw)}.logo{width:min(20rem,80vw)!important}
 #acceso h1,#gracias h1{font-size:clamp(2rem,6vw,2.8rem)}
 #fa{display:flex;flex-direction:column;gap:.7rem;width:min(22rem,100%)}
@@ -92,7 +93,12 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
 </head>
 <body>
 
-<main id="acceso">
+<main id="cargando" role="status" aria-label="Abriendo tu galería">
+  <img class="lgx lgL logo" data-n="logo-oscuro" data-i="0" src="imagenes/logo-oscuro.png" alt=""><img class="lgx lgD logo" data-n="logo-claro" data-i="0" src="imagenes/logo-claro.png" alt="">
+  <div class="lin"></div>
+</main>
+
+<main id="acceso" hidden>
   <img class="lgx lgL logo" data-n="logo-oscuro" data-i="0" src="imagenes/logo-oscuro.png" alt=""><img class="lgx lgD logo" data-n="logo-claro" data-i="0" src="imagenes/logo-claro.png" alt="">
   <h1>Entra a tu galería</h1>
   <p class="s">Escribe el código que te envié para ver tus fotos.</p>
@@ -182,7 +188,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   }
   window.addEventListener('scroll', ajustarPortada, { passive: true }); window.addEventListener('resize', ajustarPortada);
   function mostrar(id){
-    ['acceso', 'galeria', 'gracias', 'cerrada'].forEach(function(x){ $('#' + x).hidden = x !== id; });
+    ['cargando', 'acceso', 'galeria', 'gracias', 'cerrada'].forEach(function(x){ $('#' + x).hidden = x !== id; });
     var pc = conPortada && id === 'galeria'; $('#portada').hidden = !pc; $('#pspacer').hidden = !pc; document.body.classList.toggle('cp', pc);
     if (id === 'acceso') document.documentElement.removeAttribute('data-pal');
     window.scrollTo(0, 0); ajustarPortada();
@@ -224,6 +230,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     post('/api/client/open', { code: c, token: acc.t, scene: acc.s, visitor: visitor }).then(function(d){
       if (!d.ok) {
         if (d.error === 'escena_cerrada') { cerradaPantalla(d); return; }
+        mostrar('acceso');
         if (silencioso) { escribir('age-acceso', ''); escribir('age-codigo-cliente', ''); return; }
         if (d.error === 'pide_codigo') { $('#err').textContent = 'Esta galería está protegida. Escribe el código que te enviaron.'; $('#cod').focus(); return; }
         var exp = d.error === 'expirada';
@@ -249,7 +256,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
         $('#pcs').textContent = E && E.studio_name ? E.studio_name : ''; $('#pct').textContent = G.titulo; conPortada = true;
       } else conPortada = false;
       mostrar('galeria');
-    }).catch(function(e){ if (!silencioso) $('#err').textContent = 'No pude conectar (' + (e && e.message ? e.message : 'error') + '). Revisa tu internet e inténtalo de nuevo.'; })
+    }).catch(function(e){ mostrar('acceso'); if (!silencioso) $('#err').textContent = 'No pude conectar (' + (e && e.message ? e.message : 'error') + '). Revisa tu internet e inténtalo de nuevo.'; })
       .then(function(){ btn.disabled = false; btn.textContent = 'Entrar a mi galería'; });
   }
 
@@ -285,7 +292,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   }
   function tarjetaFinal(f){
     var r = f.ancho && f.alto ? f.ancho + ' / ' + f.alto : '3 / 2';
-    return '<figure class="f' + (imps.has(f.id) ? ' imp' : '') + '" style="aspect-ratio:' + r + '"><img loading="lazy" data-ver="' + f.id + '" alt="" src="' + esc(url(f.t)) + '">' + (G.descargas ? '<a class="dl" href="' + esc(url(f.t, true)) + '" download aria-label="Descargar">' + DESCARGA + '</a>' : '') + '<button class="pr" data-pr="' + f.id + '" aria-label="Marcar para imprimir" aria-pressed="' + imps.has(f.id) + '" type="button">' + PRINTER + '<span>Imprimir</span></button></figure>';
+    return '<figure class="f' + (imps.has(f.id) ? ' imp' : '') + '" style="aspect-ratio:' + r + '"><img loading="lazy" data-ver="' + f.id + '" alt="" src="' + esc(url(f.t)) + '">' + (G.descargas ? '<a class="dl" href="' + esc(url(f.t, true)) + '" download aria-label="Descargar">' + DESCARGA + '</a>' : '') + (G.bloqueada ? '' : '<button class="pr" data-pr="' + f.id + '" aria-label="Marcar para imprimir" aria-pressed="' + imps.has(f.id) + '" type="button">' + PRINTER + '<span>Imprimir</span></button>') + '</figure>';
   }
   function enEsc(f){ return !escSel || f.escena === escSel; }
   function conTitulos(arr, fn){
@@ -365,7 +372,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     if (!lista.length) return; vi = (i + lista.length) % lista.length; var f = lista[vi];
     var vim = visor.querySelector('img'); vim.classList.remove('cambia'); void vim.offsetWidth; vim.classList.add('cambia'); vim.src = url(f.t); $('#vnm').textContent = f.nombre;
     var c = $('#vco'); c.hidden = !puede(); c.dataset.fav = f.id; c.setAttribute('aria-pressed', favs.has(f.id));
-    var vp = $('#vpr'); vp.hidden = !(G.estado === 'delivered' && f.tipo === 'final'); if (!vp.hidden) { vp.dataset.pr = f.id; vp.setAttribute('aria-pressed', imps.has(f.id)); vp.innerHTML = PRINTER + '<span>Imprimir</span>'; }
+    var vp = $('#vpr'); vp.hidden = !(G.estado === 'delivered' && f.tipo === 'final' && !G.bloqueada); if (!vp.hidden) { vp.dataset.pr = f.id; vp.setAttribute('aria-pressed', imps.has(f.id)); vp.innerHTML = PRINTER + '<span>Imprimir</span>'; }
     var dv = $('#vdl'); dv.hidden = !(G.descargas && f.tipo === 'final'); if (!dv.hidden) dv.href = url(f.t, true);
   }
   document.addEventListener('click', function(e){
@@ -416,6 +423,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   else if (gc) { $('#cod').value = gc; abrir(gc, false); }
   else if (guardado && (guardado.t || guardado.s || guardado.c)) { acc.t = guardado.t || ''; acc.s = guardado.s || ''; $('#cod').value = guardado.c || ''; abrir(guardado.c || '', true); }
   else if (leer('age-codigo-cliente')) { $('#cod').value = leer('age-codigo-cliente'); abrir(leer('age-codigo-cliente'), true); }
+  else mostrar('acceso');
 })();
 </script>
 </body>
