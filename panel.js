@@ -270,11 +270,12 @@ async function api(path, body){
   var r = await fetch(W + path, { method: 'POST', headers: { Authorization: 'Bearer ' + (s ? s.access_token : ''), 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   return r.json();
 }
-async function firmar(ids){
+var vistasOk = {};
+async function firmar(ids, original){
   var out = {};
   for (var i = 0; i < ids.length; i += 200) {
-    var r = await api('/api/admin/sign', { photos: ids.slice(i, i + 200) });
-    Object.assign(out, r.fotos || {});
+    var r = await api('/api/admin/sign', { photos: ids.slice(i, i + 200), original: !!original });
+    Object.assign(out, r.fotos || {}); Object.assign(vistasOk, r.vistas || {});
   }
   return out;
 }
@@ -488,7 +489,7 @@ function pintarCuenta(){
     dt('Preferencias del panel', ayudasOn() ? 'Con ayudas' : 'Sin ayudas', '<label class="pn-chk"><input type="checkbox" id="pn-cu-ay"' + (ayudasOn() ? ' checked' : '') + '> Mostrar ayudas y explicaciones</label><p class="pn-s ay">Si ya conoces el panel puedes ocultarlas para ver menos texto.</p>') +
     '<dialog id="pn-dlogo"><h2>Logotipos</h2>' + '<p class="pn-s ay">Sube un PNG con fondo transparente. Necesitas dos versiones: una oscura (se ve sobre fondo claro) y una clara o dorada (se ve sobre fondo oscuro). Si subes solo una, se usa en los dos modos.</p><div class="pn-logos"><div><b>Para fondo claro</b>' + pv('claro', 'logo-oscuro', ph.logo_para_claro) + '<input type="file" id="pn-lg-c" accept="image/png,image/webp,image/jpeg"><div class="pn-row"><button class="pn-btn sec" data-act="logo-quitar" data-v="claro" type="button">Volver al logo por defecto</button></div></div>' +
       '<div><b>Para fondo oscuro</b>' + pv('oscuro', 'logo-claro', ph.logo_para_oscuro) + '<input type="file" id="pn-lg-o" accept="image/png,image/webp,image/jpeg"><div class="pn-row"><button class="pn-btn sec" data-act="logo-quitar" data-v="oscuro" type="button">Volver al logo por defecto</button></div></div></div>' + '<div class="pn-row"><button class="pn-btn" data-act="logo-cerrar" type="button">Listo</button></div></dialog>' +
-    '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 12 nov 2026, 13:35</p></div>';
+    '<p class="pn-s" style="margin-top:1.4rem">Versión del panel: 12 nov 2026, 22:00</p></div>';
 }
 async function guardarCuenta(){
   var nom = $('#pn-cu-n').value.trim(); if (!nom) return aviso('Escribe el nombre de tu estudio.');
@@ -1154,7 +1155,7 @@ function seccionFotos(tipo, titulo, lista, g){
   var ic = impCuenta(), nImp = Object.keys(ic).length;
   var ab = abiertas[tipo] || modoSel, mostrar = ab ? lista : lista.slice(0, PRIM), mas = lista.length > PRIM;
   var cab = '<div class="pn-sec"><h2>' + titulo + '</h2><span class="pn-s">' + lista.length + (lista.length === 1 ? ' artículo' : ' artículos') + '</span>' +
-    (tipo === 'final' && (nImp || fImp) ? '<button class="pn-btn ' + (fImp ? '' : 'sec') + '" data-act="filtro-imp" type="button">' + ico('impresiones') + ' Para imprimir (' + nImp + ')' + (fImp ? ' ✕' : '') + '</button>' : '') + ' ' + (lista.length > 1 ? '<span class="pn-orden"><label class="pn-s">Clasificar</label><select data-ord="' + tipo + '"><option value="">Elegir orden…</option>' + ORDENES.filter(function(o){ return cur.conFecha || o[0].indexOf('carga') < 0; }).map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select></span>' : '') + '</div>';
+    (tipo === 'final' && lista.length ? '<button class="pn-btn sec" data-act="fin-optimizar" type="button" title="Crea copias ligeras para que las fotos carguen rápido. Tus originales no se tocan">Optimizar</button> ' : '') + (tipo === 'final' && (nImp || fImp) ? '<button class="pn-btn ' + (fImp ? '' : 'sec') + '" data-act="filtro-imp" type="button">' + ico('impresiones') + ' Para imprimir (' + nImp + ')' + (fImp ? ' ✕' : '') + '</button>' : '') + ' ' + (lista.length > 1 ? '<span class="pn-orden"><label class="pn-s">Clasificar</label><select data-ord="' + tipo + '"><option value="">Elegir orden…</option>' + ORDENES.filter(function(o){ return cur.conFecha || o[0].indexOf('carga') < 0; }).map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select></span>' : '') + '</div>';
   var add = '<button class="pn-add" data-act="abrir-subir" data-tipo="' + tipo + '" type="button"><b>+</b><span>' + (tipo === 'selection' ? 'Subir fotos' : 'Subir finales') + '</span></button>';
   var fig = mostrar.map(function(x){
     var esPort = g.cover_photo_id === x.id;
@@ -1421,20 +1422,25 @@ async function accion(a, el){
     aviso(a === 'esc-ojo' ? (nuevo2 ? 'Galería cerrada: tu cliente verá un aviso para contactarte' : 'Galería abierta: tu cliente ya puede ver sus fotos') : a === 'esc-pago' ? (nuevo2 ? 'Marcada como pagada: en su enlace verá sus fotos sin marca de agua y podrá descargarlas' : 'Pago quitado: en su enlace las verá con marca de agua') : (nuevo2 ? 'Escena entregada: solo su enlace la muestra con las fotos finales' : 'Entrega quitada de la escena'));
     return pintar();
   }
-  if (a === 'esc-optimizar') {
-    var fo = (cur.fotos || []).filter(function(x){ return x.scene_id === id && x.photo_type === 'final'; });
-    if (!fo.length) return aviso('Esta escena no tiene fotos finales.');
-    if (!await seguro('¿Optimizar ' + fo.length + ' fotos finales para que carguen rápido en el celular? Tus originales no se tocan y la descarga sigue siendo en calidad original. Deja esta pestaña abierta.')) return;
-    var tko = await firmar(fo.map(function(x){ return x.id; })), sso = (await db.auth.getSession()).data.session, okk = 0;
-    for (var oi = 0; oi < fo.length; oi++) {
-      aviso('Optimizando ' + (oi + 1) + ' de ' + fo.length + '…');
+  if (a === 'esc-optimizar' || a === 'fin-optimizar') {
+    var fo = (cur.fotos || []).filter(function(x){ return x.photo_type === 'final' && (a === 'fin-optimizar' || x.scene_id === id); });
+    if (!fo.length) return aviso('No hay fotos finales para optimizar.');
+    await firmar(fo.map(function(x){ return x.id; }));
+    var pend = fo.filter(function(x){ return !vistasOk[x.id]; });
+    if (!pend.length) return aviso('Todas las fotos finales ya están optimizadas.');
+    if (!await seguro('¿Optimizar ' + pend.length + ' fotos finales para que carguen rápido? Tus originales no se tocan y la descarga sigue siendo en calidad original. Deja esta pestaña abierta.')) return;
+    var tko = await firmar(pend.map(function(x){ return x.id; }), true), sso = (await db.auth.getSession()).data.session, okk = 0;
+    for (var oi = 0; oi < pend.length; oi++) {
+      aviso('Optimizando ' + (oi + 1) + ' de ' + pend.length + '…');
       try {
-        var rb = await fetch(src(tko[fo[oi].id])), bb = await rb.blob(), vv2 = await reducir(bb, null, 'vista');
-        var ru = await fetch(W + '/api/upload-preview?photo=' + fo[oi].id + '&view=1', { method: 'POST', headers: { Authorization: 'Bearer ' + sso.access_token, 'Content-Type': 'image/jpeg' }, body: vv2.blob });
+        var rb = await fetch(src(tko[pend[oi].id])), bb = await rb.blob(), vv2 = await reducir(bb, null, 'vista');
+        var ru = await fetch(W + '/api/upload-preview?photo=' + pend[oi].id + '&view=1', { method: 'POST', headers: { Authorization: 'Bearer ' + sso.access_token, 'Content-Type': 'image/jpeg' }, body: vv2.blob });
         var dj = await ru.json().catch(function(){ return {}; }); if (dj.ok) okk++;
       } catch (e) {}
     }
-    return aviso(okk === fo.length ? 'Listo: ' + okk + ' fotos optimizadas para celular' : okk + ' de ' + fo.length + ' optimizadas. ¿Ya ejecutaste etapa21.sql y actualizaste el Worker?');
+    try { Object.assign(cur.tk, await firmar(fo.map(function(x){ return x.id; }))); } catch (e) {}
+    aviso(okk === pend.length ? 'Listo: ' + okk + ' fotos optimizadas' : okk + ' de ' + pend.length + ' optimizadas. ¿Ya ejecutaste etapa21.sql y actualizaste el Worker?');
+    return pintar();
   }
   if (a === 'esc-portada') { escPortadaId = id; var pfe = $('#pn-pfesc'); if (!pfe) return aviso('No se pudo abrir el selector de archivos.'); pfe.value = ''; aviso('Elige la foto que será la portada de esta escena.'); return pfe.click(); }
   if (a === 'esc-portada-quitar') {
