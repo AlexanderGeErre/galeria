@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-var VERSION = 'V1.0.0.2';
+var VERSION = 'V1.0.0.3';
 var W = 'https://galerias-api.alexandergeerre.workers.dev';
 var BASE = 'https://alexandergeerre.github.io/galeria/cliente.html?c=';
 var BASEG = 'https://galerias-api.alexandergeerre.workers.dev/g/';
