@@ -154,7 +154,7 @@ body.cp .tabs{top:auto}
 
 <div id="pspacer" hidden></div>
 <section id="galeria" hidden>
-  <header class="h"><div class="e" id="est"></div><h1 id="tit"></h1><p class="s" id="fec"></p><p id="desc"></p><p id="guia"></p><div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem"><button class="btn sec" id="salir" style="padding:.3rem 1rem;font-size:.85rem">Salir</button></div></header>
+  <header class="h"><div class="e" id="est"></div><h1 id="tit"></h1><p class="s" id="fec"></p><p id="desc"></p><p id="guia"></p><div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:.8rem"><button class="btn sec" id="compartir" type="button" style="padding:.3rem 1rem;font-size:.85rem">Compartir galería</button><button class="btn sec" id="salir" style="padding:.3rem 1rem;font-size:.85rem">Salir</button></div></header>
   <div class="cont" id="cont" hidden></div>
   <nav class="tabs" id="tabs"></nav>
   <div class="escs" id="escs" hidden></div>
@@ -422,6 +422,14 @@ body.cp .tabs{top:auto}
     } catch (e) {}
   }
   var vistos = {};
+  function compartirGaleria(){
+    var enlace = location.href.split('#')[0], tit = G && G.titulo ? G.titulo : 'Mi galería';
+    var contar = function(){ post('/api/client/event', { code: codigo, token: acc.t, scene: acc.s, visitor: visitor, kind: 'share' }).catch(function(){}); };
+    if (navigator.share) { navigator.share({ title: tit, text: 'Mira mi galería «' + tit + '»', url: enlace }).then(contar).catch(function(){}); return; }
+    var listo = function(){ contar(); aviso('Enlace copiado. Ya puedes pegarlo donde quieras.'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(enlace).then(listo, function(){ window.prompt('Copia este enlace:', enlace); });
+    else window.prompt('Copia este enlace:', enlace);
+  }
   function evVista(f){ if (!f || vistos[f.id]) return; vistos[f.id] = 1; post('/api/client/event', { code: codigo, token: acc.t, scene: acc.s, visitor: visitor, photo: f.id, kind: 'view' }).catch(function(){}); }
   function verFoto(i){
     if (!lista.length) return; vi = (i + lista.length) % lista.length; var f = lista[vi];
@@ -432,6 +440,7 @@ body.cp .tabs{top:auto}
   }
   document.addEventListener('click', function(e){
     var t = e.target, el;
+    if (t.closest('#compartir')) { compartirGaleria(); return; }
     if ((el = t.closest('#visor .co'))) { alternar(lista[vi].id); return; }
     if ((el = t.closest('.co[data-fav]'))) { alternar(el.dataset.fav); return; }
     if ((el = t.closest('.pr[data-pr]'))) { alternarImp(el.dataset.pr); return; }

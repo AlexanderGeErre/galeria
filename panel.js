@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-var VERSION = 'V1.0.0.5';
+var VERSION = 'V1.0.0.6';
 var W = 'https://galerias-api.alexandergeerre.workers.dev';
 var BASE = 'https://alexandergeerre.github.io/galeria/cliente.html?c=';
 var BASEG = 'https://galerias-api.alexandergeerre.workers.dev/g/';
@@ -234,6 +234,7 @@ CSS += '.fs-n{color:var(--s);font-weight:400;opacity:.7}.pn-ov .pn-tb td{white-s
 '.vp-chips{display:flex;flex-wrap:wrap;gap:.45rem;margin:.7rem 0 1rem}.vp-chip{border:1px solid var(--l);background:var(--c);color:var(--s);border-radius:99px;padding:.42rem .95rem;font:inherit;font-size:.86rem;cursor:pointer}.vp-chip small{opacity:.6;margin-left:.2rem}.vp-chip.on{background:var(--t);color:var(--c);border-color:var(--t)}.vp-chip.todas{border-style:dashed}.vp-body{max-height:50vh;overflow:auto;padding-right:.2rem}.vp-g{margin-bottom:1.2rem}.vp-gh{display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem}.vp-gh b{font-weight:500}.vp-gh .pn-btn{margin-left:auto}#pn-dvp .pn-row{margin-top:.9rem}' +
 '.pn dialog.vs-dlg{max-height:min(94vh,calc(100dvh - 1.5rem))}.vs-dlg .np-dev.v canvas,.vs-dlg .np-dev.f canvas{height:min(42vh,470px);width:auto}.vs-dlg .np-dev.s canvas{height:min(40vh,440px);width:auto}.vs-dlg .np-dev.h canvas{width:min(560px,78vw);height:auto}.vs-dlg .vs-pv{padding:.7rem .8rem .8rem;min-height:0}.vs-dlg .vs-pcol{gap:.45rem}.vs-dlg .np-dev{padding:9px}@media(max-height:860px){.vs-dlg .np-dev.v canvas,.vs-dlg .np-dev.f canvas{height:min(32vh,360px)}.vs-dlg .np-dev.s canvas{height:min(30vh,320px)}.vs-dlg .np-dev.h canvas{width:min(400px,60vw)}}' +
 '@media(min-width:1100px){.pn dialog.vs-dlg[open]{display:grid;grid-template-columns:minmax(0,1fr) 20rem;align-items:start}.vs-dlg>.np-hd{grid-column:1/-1}.vs-dlg>.vs{grid-column:1;grid-row:2}.vs-dlg>.pn-card{grid-column:2;grid-row:2;margin:1rem 1.2rem 1rem 0;position:sticky;top:4.5rem;max-height:calc(90vh - 6rem);overflow:auto}.vs-dlg .pn-vtira{flex-wrap:wrap;overflow-x:visible}}';
+CSS += '.pn-tm{table-layout:fixed;width:100%}.pn-tm th:first-child{width:38%}.pn-tm td:first-child{overflow-wrap:anywhere}@media(max-width:760px){.pn-tm th,.pn-tm td{padding:.65rem .4rem;font-size:.82rem}.pn-tm th{font-size:.56rem;letter-spacing:.02em}.pn-tm th:first-child,.pn-tm td:first-child{padding-left:.7rem}}';
 CSS += '#pn-dlogo{width:min(32rem,94vw)}#pn-dlogo input[type=file]{width:100%;margin:.6rem 0;font:inherit;font-size:.85rem;color:var(--s)}#pn-dlogo input[type=file]::file-selector-button{background:var(--a);color:var(--f);border:0;border-radius:99px;padding:.55rem 1.3rem;margin-right:.8rem;font:inherit;cursor:pointer}';
 CSS += '.fs-p{width:22px;height:22px;border-radius:50%;border:1px solid var(--l);background:none;color:var(--s);font-size:.68rem;cursor:pointer;padding:0;margin-left:-.2rem}.fs-p:hover{border-color:var(--s);color:var(--t)}.fs-p.on{background:#2f8f55;border-color:#2f8f55;color:#fff}.fs-d.off{background:#2B2623;border-color:#2B2623;color:#fff}.fs-ent.fs-cer{color:#8a8178;border-color:#8a8178}.fs-ent{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:#2f8f55;border:1px solid #2f8f55;border-radius:99px;padding:.1rem .55rem}';
 CSS += '.pn-ved{display:grid;grid-template-columns:minmax(0,1fr) minmax(250px,380px);gap:1.4rem;align-items:start;margin-bottom:1.2rem}' +
@@ -578,7 +579,7 @@ function actCalcula(D){
   var get = function(id){ return porG[id] = porG[id] || { v: 0, f: 0, d: 0, u: {}, fav: {}, ult: '' }; };
   for (var i = 0; i < D.dias; i++) { var dx = new Date(D.ini); dx.setDate(dx.getDate() + i); dia[diaClave(dx)] = { d: dx, v: 0, dl: 0 }; }
   D.vistas.forEach(function(r){ var o = get(r.gallery_id); o.v++; tot.v++; if (r.visitor_token) { o.u[r.visitor_token] = 1; tot.u[r.visitor_token] = 1; } if (r.created_at > o.ult) o.ult = r.created_at; var k = dia[diaClave(r.created_at)]; if (k) k.v++; });
-  D.eventos.forEach(function(e){ var o = get(e.gallery_id); if (e.kind === 'download') { o.d++; tot.d++; var k = dia[diaClave(e.created_at)]; if (k) k.dl++; } else { o.f++; tot.f++; } if (e.created_at > o.ult) o.ult = e.created_at; });
+  D.eventos.forEach(function(e){ var o = get(e.gallery_id); if (e.kind === 'share') { o.s = (o.s || 0) + 1; tot.s = (tot.s || 0) + 1; } else if (e.kind === 'download') { o.d++; tot.d++; var k = dia[diaClave(e.created_at)]; if (k) k.dl++; } else { o.f++; tot.f++; } if (e.created_at > o.ult) o.ult = e.created_at; });
   var fu = {}; D.favs.forEach(function(r){ var k = r.gallery_id + ':' + r.photo_id; if (fu[k]) return; fu[k] = 1; var o = get(r.gallery_id); o.fav[r.photo_id] = 1; });
   return { porG: porG, dias: Object.keys(dia).map(function(k){ return dia[k]; }).sort(function(a, b){ return a.d - b.d; }), tot: tot };
 }
@@ -601,19 +602,14 @@ function actFmtFecha(t){ var d = new Date(t); return isNaN(d) ? '–' : d.toLoca
 function actPintar(){
   var z = $('#pn-act'); if (!z) return;
   var per = '<div class="pn-seg">' + [7, 30, 90].map(function(n){ return '<button type="button" data-act="act-per" data-id="' + n + '"' + (n === actDias ? ' class="on"' : '') + '>' + n + ' días</button>'; }).join('') + '</div>';
-  var cab = '<div class="pn-row" style="justify-content:space-between;margin:1.4rem 0 .6rem"><h2 style="margin:0">Actividad de tus galerías</h2>' + per + '</div>';
+  var cab = '<div class="pn-row" style="justify-content:space-between;margin:1.4rem 0 .6rem"><h2 style="margin:0">Actividad por periodo</h2>' + per + '</div>';
   if (!actDatos) { z.innerHTML = cab + '<p class="pn-s">Cargando actividad…</p>'; return; }
   var C = actCalcula(actDatos), t = C.tot, nU = Object.keys(t.u).length;
-  var tiles = '<div class="pn-cifras"><div><b>' + t.v + '</b><span class="pn-s">Visitas</span></div><div><b>' + nU + '</b><span class="pn-s">Visitantes</span></div><div><b>' + t.f + '</b><span class="pn-s">Fotos vistas</span></div><div><b>' + t.d + '</b><span class="pn-s">Fotos descargadas</span></div></div>';
+  var tiles = '<div class="pn-cifras"><div><b>' + t.v + '</b><span class="pn-s">Visitas</span></div><div><b>' + nU + '</b><span class="pn-s">Visitantes</span></div><div><b>' + t.f + '</b><span class="pn-s">Fotos vistas</span></div><div><b>' + t.d + '</b><span class="pn-s">Fotos descargadas</span></div><div><b>' + (t.s || 0) + '</b><span class="pn-s">Compartidos</span></div></div>';
   var aviso0 = actDatos.evErr ? '<p class="pn-s">Para contar fotos vistas y descargas ejecuta etapa23.sql en Supabase y sube el Worker nuevo.</p>' : '';
   var graf = '<div class="pn-card pn-gfc"><div class="pn-leyenda"><span><i style="background:#B48B58"></i>Visitas</span><span><i style="background:#3F7D74"></i>Descargas</span><span class="pn-s" id="pn-gt">Pasa el cursor sobre la gráfica</span></div>' + actGrafica(C.dias) + '</div>';
-  var filas = gals.map(function(g){ var o = C.porG[g.id] || { v: 0, f: 0, d: 0, u: {}, fav: {}, ult: '' }; return { g: g, o: o, pt: o.d * 3 + o.f + o.v * 2 }; }).sort(function(a, b){ return (b.pt - a.pt) || String(b.g.created_at).localeCompare(String(a.g.created_at)); });
-  var lim = actVerTodas ? filas.length : 10;
-  var tabla = '<div class="pn-card" style="padding:0;overflow:auto"><table class="pn-tb pn-ta"><tr><th>Galería</th><th>Visitas</th><th>Fotos vistas</th><th>Descargas</th><th>Favoritas</th><th>Última visita</th></tr>' +
-    (filas.length ? filas.slice(0, lim).map(function(r){ return '<tr data-act="act-gal" data-id="' + r.g.id + '" tabindex="0"><td><b>' + esc(r.g.title) + '</b><br><span class="pn-s">' + esc(ESTADOS[r.g.status] || '') + '</span></td><td>' + r.o.v + '</td><td>' + r.o.f + '</td><td>' + r.o.d + '</td><td>' + Object.keys(r.o.fav).length + '</td><td>' + (r.o.ult ? esc(actFmtFecha(r.o.ult)) : '–') + '</td></tr>'; }).join('') : '<tr><td colspan="6" class="pn-s">Aún no hay galerías.</td></tr>') + '</table></div>' +
-    (filas.length > 10 ? '<p style="text-align:center"><button class="pn-btn sec" data-act="act-todas">' + (actVerTodas ? 'Ver menos' : 'Ver las ' + filas.length + ' galerías') + '</button></p>' : '');
-  var comp = '<div class="pn-row"><button class="pn-btn" data-act="act-card">Crear imagen para compartir</button><span class="pn-s">Sin nombres de clientes, lista para redes.</span></div>';
-  z.innerHTML = cab + aviso0 + tiles + graf + '<h2 style="margin-top:1.6rem">Galerías por actividad</h2><p class="pn-s">Toca una galería para ver quién entró, las fotos más vistas y las descargas. Se ordenan por la actividad del periodo elegido.</p>' + tabla + comp;
+  z.innerHTML = cab + aviso0 + tiles + graf + '<div class="pn-cifras"><div><b id="pn-nf2">–</b><span class="pn-s">Favoritas en total</span></div><div><b id="pn-np2">–</b><span class="pn-s">Fotos en total</span></div></div>';
+  metTotales();
   var gf = z.querySelector('.pn-gf');
   if (gf) gf.addEventListener('mousemove', function(e){ var r = e.target.closest ? e.target.closest('.pn-gh') : null; if (!r) return; var d = C.dias[+r.dataset.i], l = $('#pn-gl'); if (l) { l.setAttribute('x1', r.dataset.x); l.setAttribute('x2', r.dataset.x); l.style.display = ''; } var gt = $('#pn-gt'); if (gt) gt.textContent = d.d.toLocaleDateString('es-GT', { weekday: 'short', day: 'numeric', month: 'short' }) + ': ' + d.v + (d.v === 1 ? ' visita' : ' visitas') + ' · ' + d.dl + (d.dl === 1 ? ' descarga' : ' descargas'); });
   actUlt = C;
@@ -636,7 +632,7 @@ async function actGaleria(id){
   var vr = await db.from('gallery_views').select('created_at,visitor_token').eq('gallery_id', id).order('created_at', { ascending: false }).limit(2000);
   if (!$('#pn-dact')) return;
   var fotos = p.data || [], sel = fotos.filter(function(x){ return x.photo_type === 'selection'; }), fin = fotos.filter(function(x){ return x.photo_type === 'final'; });
-  var cnt = {}; (ev.data || []).forEach(function(e){ if (!e.photo_id) return; var o = cnt[e.photo_id] = cnt[e.photo_id] || { v: 0, d: 0 }; if (e.kind === 'download') o.d++; else o.v++; });
+  var cnt = {}; (ev.data || []).forEach(function(e){ if (!e.photo_id || e.kind === 'share') return; var o = cnt[e.photo_id] = cnt[e.photo_id] || { v: 0, d: 0 }; if (e.kind === 'download') o.d++; else o.v++; });
   var topIds = fin.length ? fin.filter(function(x){ return cnt[x.id]; }).sort(function(a, b){ return (cnt[b.id].d * 3 + cnt[b.id].v) - (cnt[a.id].d * 3 + cnt[a.id].v); }).slice(0, 10).map(function(x){ return x.id; })
     : (f.data || []).slice().sort(function(a, b){ return String(a.created_at || '').localeCompare(String(b.created_at || '')); }).map(function(x){ return x.photo_id; }).filter(function(x, i, a){ return a.indexOf(x) === i; }).slice(0, 10);
   var tk = topIds.length ? await firmar(topIds) : {};
@@ -645,9 +641,9 @@ async function actGaleria(id){
   cur = { fotos: fotos, favs: f.data || [], eventos: ev.error ? [] : (ev.data || []), evErr: !!ev.error, vrows: vr.error ? null : (vr.data || []), tk: tk };
   var hv = '', ht = '';
   try {
-    var nV = cur.vrows ? cur.vrows.length : 0, nD = cur.eventos.filter(function(e){ return e.kind === 'download'; }).length, nF = cur.eventos.length - nD;
+    var nV = cur.vrows ? cur.vrows.length : 0, nD = cur.eventos.filter(function(e){ return e.kind === 'download'; }).length, nS = cur.eventos.filter(function(e){ return e.kind === 'share'; }).length, nF = cur.eventos.length - nD - nS;
     var uq = {}; (cur.vrows || []).forEach(function(r){ if (r.visitor_token) uq[r.visitor_token] = 1; });
-    hv = '<div class="pn-cifras"><div><b>' + nV + '</b><span class="pn-s">Visitas</span></div><div><b>' + Object.keys(uq).length + '</b><span class="pn-s">Visitantes</span></div><div><b>' + nF + '</b><span class="pn-s">Fotos vistas</span></div><div><b>' + nD + '</b><span class="pn-s">Descargas</span></div></div>' + visitantesHtml();
+    hv = '<div class="pn-cifras"><div><b>' + nV + '</b><span class="pn-s">Visitas</span></div><div><b>' + Object.keys(uq).length + '</b><span class="pn-s">Visitantes</span></div><div><b>' + nF + '</b><span class="pn-s">Fotos vistas</span></div><div><b>' + nD + '</b><span class="pn-s">Descargas</span></div><div><b>' + nS + '</b><span class="pn-s">Compartidos</span></div></div>' + visitantesHtml();
     var ids = topIds, byId = {}; fotos.forEach(function(x){ byId[x.id] = x; });
     ht = fin.length ? topFotosHtml(sel, fin) : topFotosHtml(sel, []);
   } catch (e) { console.error(e); }
@@ -655,45 +651,131 @@ async function actGaleria(id){
   d.innerHTML = '<div class="pn-row" style="justify-content:space-between;margin-top:0"><div><h2 style="margin:0">' + esc(g.title) + '</h2><span class="pn-s">' + esc(ESTADOS[g.status] || '') + ' · todo el historial</span></div><div class="pn-row" style="margin:0"><button class="pn-btn sec" type="button" data-act="abrir" data-id="' + g.id + '">Abrir galería</button><button class="pn-btn" type="button" data-act="act-gal-cerrar">Cerrar</button></div></div>' + hv + ht;
 }
 
-/* Tarjeta para compartir (sin nombres de clientes) */
-var cardFmt = '45';
+/* Métricas: pestañas General / Por galería y datos de todo el historial */
+var metAbierto = false, metTabSel = 'gen', metDatos = null, metTok = 0, metProm = null;
+function metToggle(){
+  metAbierto = !metAbierto; var z = $('#pn-met'), b = $('#pn-mv'); if (!z) return;
+  z.hidden = !metAbierto; if (b) b.textContent = metAbierto ? 'Ver menos' : 'Ver más';
+  if (metAbierto) metTabPintar();
+}
+function metTab_(t){ metTabSel = t === 'gal' ? 'gal' : 'gen'; metTabPintar(); }
+function metTabPintar(){
+  var z = $('#pn-met'); if (!z) return;
+  var tabs = '<div class="pn-row" style="margin:.4rem 0 1rem"><div class="pn-seg"><button type="button" data-act="met-tab" data-id="gen"' + (metTabSel === 'gen' ? ' class="on"' : '') + '>General</button><button type="button" data-act="met-tab" data-id="gal"' + (metTabSel === 'gal' ? ' class="on"' : '') + '>Por galería</button></div></div>';
+  if (metTabSel === 'gen') { z.innerHTML = tabs + '<div id="pn-act"></div>'; actIniciar(); }
+  else { z.innerHTML = tabs + '<div id="pn-gal"><p class="pn-s">Cargando…</p></div>'; metAsegurar().then(metPintarGal); }
+}
+function metTotales(){
+  (async function(){ var c = await db.from('favorites').select('id', { count: 'exact', head: true }); var el = $('#pn-nf2'); if (el && !c.error) el.textContent = c.count; })();
+  (async function(){ var c = await db.from('photos').select('id', { count: 'exact', head: true }); var el = $('#pn-np2'); if (el && !c.error) el.textContent = c.count; })();
+}
+function metAsegurar(){
+  if (metDatos) return Promise.resolve(metDatos);
+  if (metProm) return metProm;
+  var n = ++metTok;
+  metProm = (async function(){
+    var v = await paginar(function(){ return db.from('gallery_views').select('gallery_id,created_at').order('created_at'); });
+    var e = await paginar(function(){ return db.from('photo_events').select('gallery_id,kind,created_at').order('created_at'); });
+    var fc = await db.from('photos').select('id', { count: 'exact', head: true }).eq('photo_type', 'final');
+    var D = { v: v.data || [], e: e.error ? [] : (e.data || []), evErr: !!e.error, finales: fc.error ? 0 : (fc.count || 0) };
+    if (n === metTok) metDatos = D; metProm = null; return D;
+  })();
+  return metProm;
+}
+function metPintarGal(){
+  var z = $('#pn-gal'); if (!z || !metDatos) return;
+  var por = {}, T = { v: 0, s: 0, d: 0 };
+  var get = function(id){ return por[id] = por[id] || { v: 0, s: 0, d: 0 }; };
+  metDatos.v.forEach(function(r){ get(r.gallery_id).v++; T.v++; });
+  metDatos.e.forEach(function(r){ var o = get(r.gallery_id); if (r.kind === 'download') { o.d++; T.d++; } else if (r.kind === 'share') { o.s++; T.s++; } });
+  var filas = gals.map(function(g){ var o = por[g.id] || { v: 0, s: 0, d: 0 }; return { g: g, o: o, pt: o.d * 3 + o.v * 2 + o.s }; }).sort(function(a, b){ return (b.pt - a.pt) || String(b.g.created_at).localeCompare(String(a.g.created_at)); });
+  var lim = actVerTodas ? filas.length : 10;
+  var aviso0 = metDatos.evErr ? '<p class="pn-s">Para contar descargas y compartidos ejecuta etapa23.sql y etapa27.sql en Supabase y sube el Worker nuevo.</p>' : (T.s === 0 ? '<p class="pn-s">Los compartidos se cuentan desde que subas la versión V1.0.0.6, ejecutes etapa27.sql y subas el Worker nuevo.</p>' : '');
+  z.innerHTML = aviso0 + '<p class="pn-s">Toca una escena para ver el detalle. Todo el historial: si una foto se descarga varias veces, cada descarga suma.</p>' +
+    '<div class="pn-card" style="padding:0;overflow:auto"><table class="pn-tb pn-ta pn-tm"><tr><th>Escena</th><th>Visitas</th><th>Compartidos</th><th>Descargas</th></tr>' +
+    (filas.length ? filas.slice(0, lim).map(function(r){ return '<tr data-act="act-gal" data-id="' + r.g.id + '" tabindex="0"><td><b>' + esc(r.g.title) + '</b><br><span class="pn-s">' + esc(ESTADOS[r.g.status] || '') + '</span></td><td>' + r.o.v + '</td><td>' + r.o.s + '</td><td>' + r.o.d + '</td></tr>'; }).join('') + '<tr><td><b>Total</b></td><td><b>' + T.v + '</b></td><td><b>' + T.s + '</b></td><td><b>' + T.d + '</b></td></tr>' : '<tr><td colspan="4" class="pn-s">Aún no hay galerías.</td></tr>') + '</table></div>' +
+    (filas.length > 10 ? '<p style="text-align:center"><button class="pn-btn sec" data-act="act-todas">' + (actVerTodas ? 'Ver menos' : 'Ver las ' + filas.length + ' galerías') + '</button></p>' : '');
+}
+
+/* Imagen para compartir: diseño Niebla, con tu logotipo, sin nombres de clientes */
+var cardFmt = '45', cardPer = 'todo';
+var CARD_PERS = [['mes', 'Este mes'], ['tri', '3 meses'], ['todo', 'Todo el tiempo']];
+function cargarLogoSobreClaro(){
+  var dato = ph.logo_para_claro || ph.logo_para_oscuro, lista = dato ? [dato] : exts('logo-oscuro').map(function(e){ return 'imagenes/logo-oscuro' + e; });
+  return new Promise(function(ok){
+    (function prueba(k){
+      if (k >= lista.length) return ok(null);
+      var im = new Image(); im.onload = function(){ if (!im.naturalWidth) return prueba(k + 1); createImageBitmap(im).then(function(b){ try { var tc = document.createElement('canvas'); tc.width = tc.height = 2; var tx = tc.getContext('2d'); tx.drawImage(b, 0, 0, 2, 2); tx.getImageData(0, 0, 1, 1); } catch (e) { return ok(null); } ok({ bmp: b, w: b.width, h: b.height }); }, function(){ prueba(k + 1); }); }; im.onerror = function(){ prueba(k + 1); }; im.src = lista[k];
+    })(0);
+  });
+}
+function cardCifras(per){
+  var D = metDatos, DIA = 864e5, now = Date.now(), dias = per === 'mes' ? 30 : per === 'tri' ? 90 : 0, ini = dias ? now - dias * DIA : 0, ant = dias ? ini - dias * DIA : 0;
+  var t = function(x){ return new Date(x).getTime(); };
+  var R = { v: 0, d: 0, g: 0, vp: 0, dp: 0, pts: [], ini: ini };
+  var tsAct = [];
+  D.v.forEach(function(r){ var x = t(r.created_at); if (x >= ini) { R.v++; tsAct.push(x); } else if (dias && x >= ant) R.vp++; });
+  D.e.forEach(function(r){ if (r.kind !== 'download') return; var x = t(r.created_at); if (x >= ini) { R.d++; tsAct.push(x); } else if (dias && x >= ant) R.dp++; });
+  gals.forEach(function(g){ if (!dias || t(g.created_at) >= ini) R.g++; });
+  var desde = ini || (tsAct.length ? Math.min.apply(null, tsAct) : now - 30 * DIA);
+  var N = 24, b = []; for (var i = 0; i < N; i++) b.push(0);
+  tsAct.forEach(function(x){ var k = Math.min(N - 1, Math.max(0, Math.floor((x - desde) / (now - desde + 1) * N))); b[k]++; });
+  R.pts = b; R.desde = desde; R.crec = dias && (R.vp + R.dp) > 0 ? Math.round(((R.v + R.d) - (R.vp + R.dp)) / (R.vp + R.dp) * 100) : null;
+  return R;
+}
 async function actCardAbrir(){
-  if (!actUlt) return aviso('Espera a que cargue la actividad');
   var d = $('#pn-dcard'); if (d) d.remove();
   d = document.createElement('dialog'); d.id = 'pn-dcard'; d.style.cssText = 'width:min(34rem,95vw);max-height:94vh;overflow:auto;text-align:center';
-  d.innerHTML = '<h2>Imagen para compartir</h2><div class="pn-row" style="justify-content:center"><div class="pn-seg"><button type="button" data-act="card-fmt" data-id="45" class="on">Publicación 4:5</button><button type="button" data-act="card-fmt" data-id="916">Historia 9:16</button></div></div><canvas id="pn-ccv" style="width:100%;max-height:62vh;object-fit:contain;border-radius:10px;background:#222"></canvas><div class="pn-row" style="justify-content:center"><button class="pn-btn" type="button" data-act="card-bajar">Descargar imagen</button><button class="pn-btn sec" type="button" data-act="card-cerrar">Cerrar</button></div><p class="pn-s">Usa solo cifras generales: no aparece ningún nombre de cliente.</p>';
+  d.innerHTML = '<h2>Imagen para compartir</h2><div class="pn-row" style="justify-content:center"><div class="pn-seg"><button type="button" data-act="card-fmt" data-id="45" class="on">Publicación 4:5</button><button type="button" data-act="card-fmt" data-id="11">Cuadrada</button><button type="button" data-act="card-fmt" data-id="916">Historia 9:16</button></div></div><div class="pn-row" style="justify-content:center"><div class="pn-seg">' + CARD_PERS.map(function(p){ return '<button type="button" data-act="card-per" data-id="' + p[0] + '"' + (p[0] === 'todo' ? ' class="on"' : '') + '>' + p[1] + '</button>'; }).join('') + '</div></div><canvas id="pn-ccv" style="width:100%;max-height:62vh;object-fit:contain;border-radius:10px;background:#fff;border:1px solid var(--l)"></canvas><div class="pn-row" style="justify-content:center"><button class="pn-btn" type="button" data-act="card-bajar">Descargar imagen</button><button class="pn-btn sec" type="button" data-act="card-cerrar">Cerrar</button></div><p class="pn-s">Usa solo cifras generales: no aparece ningún nombre de cliente.</p>';
   (root.querySelector('.pn') || root).appendChild(d); d.addEventListener('close', function(){ d.remove(); }); d.showModal();
-  cardFmt = '45'; await actCardDibujar();
+  cardFmt = '45'; cardPer = 'todo'; await metAsegurar(); await actCardDibujar();
 }
 async function actCardDibujar(){
-  var cv = $('#pn-ccv'); if (!cv || !actUlt) return;
-  var H = cardFmt === '916' ? 1920 : 1350, Wd = 1080; cv.width = Wd; cv.height = H; cv.style.aspectRatio = Wd + '/' + H;
-  var x = cv.getContext('2d'), C = actUlt, t = C.tot, ent = gals.filter(function(g){ return g.status === 'delivered'; }).length;
-  try { await document.fonts.load('500 80px "Cormorant Garamond"'); await document.fonts.load('400 30px Jost'); await document.fonts.load('italic 500 40px "Cormorant Garamond"'); } catch (e) {}
-  var SER = '"Cormorant Garamond",Georgia,serif', SAN = 'Jost,system-ui,sans-serif', ORO = '#C9A877';
-  var fg = x.createLinearGradient(0, 0, 0, H); fg.addColorStop(0, '#2b2622'); fg.addColorStop(1, '#171412'); x.fillStyle = fg; x.fillRect(0, 0, Wd, H);
-  var rg = x.createRadialGradient(Wd * .8, H * .15, 20, Wd * .8, H * .15, Wd * .9); rg.addColorStop(0, 'rgba(201,168,119,.20)'); rg.addColorStop(1, 'rgba(201,168,119,0)'); x.fillStyle = rg; x.fillRect(0, 0, Wd, H);
-  x.strokeStyle = 'rgba(201,168,119,.55)'; x.lineWidth = 2; x.strokeRect(44, 44, Wd - 88, H - 88);
-  var cy = cardFmt === '916' ? 150 : 100, LG = null; try { LG = await cargarLogoVideo(); } catch (e) {}
+  var cv = $('#pn-ccv'); if (!cv || !metDatos) return;
+  var P = { '45': { H: 1350, hero: 260, sp: 150, ch: 230, ly: 110, lh: 150 }, '11': { H: 1080, hero: 190, sp: 70, ch: 200, ly: 80, lh: 110 }, '916': { H: 1920, hero: 300, sp: 250, ch: 270, ly: 170, lh: 170 } }[cardFmt] || {};
+  var Wd = 1080, H = P.H; cv.width = Wd; cv.height = H; cv.style.aspectRatio = Wd + '/' + H;
+  var x = cv.getContext('2d'), R = cardCifras(cardPer), fin = metDatos.finales;
+  try { await document.fonts.load('500 80px "Cormorant Garamond"'); await document.fonts.load('300 30px Jost'); await document.fonts.load('400 30px Jost'); } catch (e) {}
+  var SER = '"Cormorant Garamond",Georgia,serif', SAN = 'Jost,system-ui,sans-serif', INK = '#111111', GR = '#8A8A8A', LN = '#E4E4E4';
+  var LS = function(px){ if ('letterSpacing' in x) x.letterSpacing = px + 'px'; };
+  x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, Wd, H);
+  [[Wd * .08, H * .04, Wd * .75, .11], [Wd * .96, H * .40, Wd * .85, .065], [Wd * .40, H * 1.04, Wd * .8, .09]].forEach(function(r){ var g = x.createRadialGradient(r[0], r[1], 10, r[0], r[1], r[2]); g.addColorStop(0, 'rgba(17,17,17,' + r[3] + ')'); g.addColorStop(1, 'rgba(17,17,17,0)'); x.fillStyle = g; x.fillRect(0, 0, Wd, H); });
   x.textAlign = 'center'; x.textBaseline = 'alphabetic';
-  if (LG) { var s = Math.min(420 / LG.w, 130 / LG.h); x.drawImage(LG.bmp, (Wd - LG.w * s) / 2, cy, LG.w * s, LG.h * s); cy += LG.h * s; }
-  else { x.fillStyle = '#F3ECE2'; x.font = '500 54px ' + SER; x.fillText(ph.studio_name || '', Wd / 2, cy + 56); cy += 70; }
-  var k = cardFmt === '916' ? 1.18 : 1, y = cy + 90 * k;
-  x.fillStyle = ORO; x.font = '400 26px ' + SAN; if ('letterSpacing' in x) x.letterSpacing = '7px'; x.fillText('MI FLUJO DE TRABAJO', Wd / 2, y); if ('letterSpacing' in x) x.letterSpacing = '0px';
-  y += 40 * k; x.fillStyle = 'rgba(243,236,226,.7)'; x.font = 'italic 500 38px ' + SER; x.fillText('Últimos ' + C.dias.length + ' días', Wd / 2, y);
-  var num = function(n, et, yy){ x.fillStyle = '#F6EFE5'; x.font = '500 ' + Math.round(138 * k) + 'px ' + SER; x.fillText(n.toLocaleString('es-GT'), Wd / 2, yy); x.fillStyle = ORO; x.font = '400 27px ' + SAN; if ('letterSpacing' in x) x.letterSpacing = '5px'; x.fillText(et.toUpperCase(), Wd / 2, yy + 46); if ('letterSpacing' in x) x.letterSpacing = '0px'; };
-  var yy = y + 150 * k, paso = 210 * k;
-  num(ent, ent === 1 ? 'galería entregada' : 'galerías entregadas', yy);
-  num(t.d, t.d === 1 ? 'foto descargada' : 'fotos descargadas', yy + paso);
-  num(t.v, t.v === 1 ? 'visita a galerías' : 'visitas a galerías', yy + paso * 2);
-  var gy = yy + paso * 2 + 110 * k, gh = cardFmt === '916' ? 250 : 130, gx = 120, gw = Wd - 240, dias = C.dias, mx = 1; dias.forEach(function(d){ mx = Math.max(mx, d.v); });
-  if (gy + gh < H - 150) {
-    var pt = dias.map(function(d, i){ return [gx + (dias.length > 1 ? gw * i / (dias.length - 1) : gw / 2), gy + gh - gh * d.v / mx]; });
-    var ar = x.createLinearGradient(0, gy, 0, gy + gh); ar.addColorStop(0, 'rgba(201,168,119,.35)'); ar.addColorStop(1, 'rgba(201,168,119,0)');
-    x.beginPath(); x.moveTo(pt[0][0], gy + gh); pt.forEach(function(p){ x.lineTo(p[0], p[1]); }); x.lineTo(pt[pt.length - 1][0], gy + gh); x.closePath(); x.fillStyle = ar; x.fill();
-    x.beginPath(); pt.forEach(function(p, i){ i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1]); }); x.strokeStyle = ORO; x.lineWidth = 4; x.lineJoin = 'round'; x.stroke();
-  }
-  x.fillStyle = 'rgba(243,236,226,.55)'; x.font = '400 26px ' + SAN; if ('letterSpacing' in x) x.letterSpacing = '4px'; x.fillText((ph.studio_name || '').toUpperCase(), Wd / 2, H - 92); if ('letterSpacing' in x) x.letterSpacing = '0px';
+  var LG = null; try { LG = await cargarLogoSobreClaro(); } catch (e) {}
+  var cy = P.ly;
+  if (LG) { var s = Math.min(520 / LG.w, P.lh / LG.h); x.drawImage(LG.bmp, (Wd - LG.w * s) / 2, cy, LG.w * s, LG.h * s); cy += LG.h * s; }
+  else { x.fillStyle = INK; x.font = '400 34px ' + SAN; LS(9); x.fillText((ph.studio_name || '').toUpperCase(), Wd / 2, cy + 40); LS(0); cy += 60; }
+  var topEnd = cy + 50;
+  var cardY = H - 90 - 64 - 38 - P.ch, avail = cardY - 50 - topEnd, Hs = P.hero * .72 + 56 + 50 + P.sp, y0 = topEnd + Math.max(10, (avail - Hs) / 2);
+  var hb = y0 + P.hero * .72;
+  x.fillStyle = INK; x.font = '500 ' + P.hero + 'px ' + SER; x.fillText(fin.toLocaleString('es-GT'), Wd / 2, hb);
+  x.fillStyle = GR; x.font = '300 32px ' + SAN; LS(2); x.fillText(fin === 1 ? 'foto entregada' : 'fotos entregadas', Wd / 2, hb + 56); LS(0);
+  var gx = 160, gw = Wd - 320, gy = hb + 56 + 50, pts = R.pts, mx = 1; pts.forEach(function(v){ mx = Math.max(mx, v); });
+  var xy = pts.map(function(v, i){ return [gx + gw * i / (pts.length - 1), gy + P.sp - (P.sp - 14) * v / mx - 4]; });
+  var curva = function(){ x.moveTo(xy[0][0], xy[0][1]); for (var i = 1; i < xy.length; i++) { var mxp = (xy[i - 1][0] + xy[i][0]) / 2, myp = (xy[i - 1][1] + xy[i][1]) / 2; x.quadraticCurveTo(xy[i - 1][0], xy[i - 1][1], mxp, myp); } x.lineTo(xy[xy.length - 1][0], xy[xy.length - 1][1]); };
+  x.beginPath(); curva(); x.lineTo(gx + gw, gy + P.sp); x.lineTo(gx, gy + P.sp); x.closePath(); x.fillStyle = 'rgba(17,17,17,.06)'; x.fill();
+  x.beginPath(); curva(); x.strokeStyle = INK; x.lineWidth = 4; x.lineJoin = 'round'; x.lineCap = 'round'; x.stroke();
+  var ul = xy[xy.length - 1]; x.beginPath(); x.arc(ul[0], ul[1], 9, 0, 7); x.fillStyle = INK; x.fill();
+  // tarjeta de vidrio
+  var cx = 70, cw = Wd - 140, rad = 56;
+  x.save(); x.shadowColor = 'rgba(60,45,25,.10)'; x.shadowBlur = 50; x.shadowOffsetY = 14; x.beginPath(); x.roundRect(cx, cardY, cw, P.ch, rad); x.fillStyle = 'rgba(255,255,255,.82)'; x.fill(); x.restore();
+  x.beginPath(); x.roundRect(cx, cardY, cw, P.ch, rad); x.strokeStyle = LN; x.lineWidth = 2; x.stroke();
+  var cols = [[R.g, R.g === 1 ? 'galería' : 'galerías'], [R.d, R.d === 1 ? 'descarga' : 'descargas'], [R.v, R.v === 1 ? 'visita' : 'visitas']], cwi = cw / 3;
+  cols.forEach(function(c, i){
+    var mxC = cx + cwi * i + cwi / 2;
+    if (i) { x.beginPath(); x.moveTo(cx + cwi * i, cardY + P.ch * .22); x.lineTo(cx + cwi * i, cardY + P.ch * .78); x.strokeStyle = LN; x.lineWidth = 2; x.stroke(); }
+    x.fillStyle = INK; x.font = '500 ' + Math.round(P.ch * .36) + 'px ' + SER; x.fillText(c[0].toLocaleString('es-GT'), mxC, cardY + P.ch * .56);
+    x.fillStyle = GR; x.font = '300 28px ' + SAN; LS(1); x.fillText(c[1], mxC, cardY + P.ch * .56 + 46); LS(0);
+  });
+  var perTxt = cardPer === 'mes' ? 'ÚLTIMOS 30 DÍAS' : cardPer === 'tri' ? 'ÚLTIMOS 3 MESES' : 'DESDE EL INICIO';
+  x.fillStyle = GR; x.font = '400 22px ' + SAN; LS(5); x.fillText(perTxt, Wd / 2, cardY - 22); LS(0);
+  // píldora + gracias
+  var pil = R.crec !== null && R.crec > 0 ? '+' + R.crec + '% ' + (cardPer === 'mes' ? 'este mes' : 'en 3 meses') : (cardPer === 'todo' ? 'Desde ' + new Date(R.desde).getFullYear() : (R.g ? '+' + R.g + (R.g === 1 ? ' galería nueva' : ' galerías nuevas') : 'En marcha'));
+  var gr = 'Gracias por confiar en mí';
+  x.font = '400 30px ' + SAN; var pw = x.measureText(pil).width + 64; x.font = '300 30px ' + SAN; var gw2 = x.measureText(gr).width, tot = pw + 28 + gw2, px = (Wd - tot) / 2, py = H - 90 - 64;
+  x.beginPath(); x.roundRect(px, py, pw, 64, 32); x.fillStyle = INK; x.fill();
+  x.textAlign = 'center'; x.fillStyle = '#FFFFFF'; x.font = '400 30px ' + SAN; x.fillText(pil, px + pw / 2, py + 42);
+  x.textAlign = 'left'; x.fillStyle = GR; x.font = '300 30px ' + SAN; x.fillText(gr, px + pw + 28, py + 42); x.textAlign = 'center';
 }
 
 async function pintarInicio(){
@@ -702,16 +784,14 @@ async function pintarInicio(){
   var act = pend.length ? pend.map(function(g){ return '<p><button class="pn-btn sec" data-act="abrir" data-id="' + g.id + '">' + esc(g.title) + '</button> envió su selección</p>'; }).join('')
     : '<div class="pn-vacio">' + ilus('admin-al-dia') + '<div><b>Todo al día</b><p class="pn-s">No hay selecciones nuevas por revisar.</p></div></div>';
   $('#pn-main').innerHTML = '<h1>Hola, ' + esc(ph.studio_name) + '</h1><p class="pn-s ay">Un resumen de tu estudio. Desde aquí creas una galería nueva o revisas lo que necesita tu atención.</p><div class="pn-row"><input type="text" id="pn-q" placeholder="Buscar galerías"><button class="pn-btn" data-act="nueva">+ Crear galería</button></div>' +
-    '<h2>Resumen</h2><div class="pn-cifras"><div><b>' + gals.length + '</b><span class="pn-s">Galerías</span></div><div><b>' + ent + '</b><span class="pn-s">Entregadas</span></div><div><b id="pn-nv">–</b><span class="pn-s">Vistas</span></div><div><b id="pn-nv7">–</b><span class="pn-s">Vistas 7 días</span></div><div><b id="pn-nf">–</b><span class="pn-s">Favoritas</span></div><div><b id="pn-np">–</b><span class="pn-s">Fotos</span></div></div>' +
-    '<div id="pn-neg"></div><div id="pn-act"></div><h2>Actividad reciente</h2><div class="pn-card">' + act + '</div><h2>Galerías recientes</h2><div class="pn-rej">' + gals.slice(0, 4).map(tarjeta).join('') + '</div>';
+    '<h2>Métricas</h2><div class="pn-cifras"><div><b>' + gals.length + '</b><span class="pn-s">Galerías</span></div><div><b>' + ent + '</b><span class="pn-s">Entregadas</span></div><div><b id="pn-nv">–</b><span class="pn-s">Vistas</span></div><div><b id="pn-nd">–</b><span class="pn-s">Descargas</span></div></div>' +
+    '<div class="pn-row" style="justify-content:space-between;margin-top:-.8rem"><button class="pn-btn sec" data-act="met-ver" id="pn-mv">' + (metAbierto ? 'Ver menos' : 'Ver más') + '</button><button class="pn-btn" data-act="act-card">Crear imagen para compartir</button></div><div id="pn-met"' + (metAbierto ? '' : ' hidden') + '></div>' +
+    '<div id="pn-neg"></div><h2>Actividad reciente</h2><div class="pn-card">' + act + '</div><h2>Galerías recientes</h2><div class="pn-rej">' + gals.slice(0, 4).map(tarjeta).join('') + '</div>';
   $('#pn-q').addEventListener('keydown', function(e){ if (e.key === 'Enter') { busca = e.target.value; vista = 'galerias'; pintar(); } });
-  actIniciar();
+  metDatos = null; if (metAbierto) metTabPintar();
   negInicio().then(function(h){ var z = $('#pn-neg'); if (z) z.innerHTML = h; }).catch(function(){});
-  (async function(){ var d7 = new Date(); d7.setDate(d7.getDate() - 7); var c7 = await db.from('gallery_views').select('id', { count: 'exact', head: true }).gte('created_at', d7.toISOString()); var e7 = $('#pn-nv7'); if (e7 && !c7.error) e7.textContent = c7.count; })();
-  [['gallery_views', '#pn-nv'], ['favorites', '#pn-nf'], ['photos', '#pn-np']].forEach(async function(t){
-    var c = await db.from(t[0]).select('id', { count: 'exact', head: true });
-    var el = $(t[1]); if (el && !c.error) el.textContent = c.count;
-  });
+  (async function(){ var c = await db.from('gallery_views').select('id', { count: 'exact', head: true }); var el = $('#pn-nv'); if (el && !c.error) el.textContent = c.count; })();
+  (async function(){ var c = await db.from('photo_events').select('id', { count: 'exact', head: true }).eq('kind', 'download'); var el = $('#pn-nd'); if (el) el.textContent = c.error ? '0' : c.count; })();
 }
 
 function pintarLista(){
@@ -1088,7 +1168,7 @@ async function vidGenerar(){
 }
 function topFotosHtml(sel, fin){
   var ev = cur.eventos || [], vi = {}, de = {};
-  ev.forEach(function(e){ if (!e.photo_id) return; if (e.kind === 'download') de[e.photo_id] = (de[e.photo_id] || 0) + 1; else vi[e.photo_id] = (vi[e.photo_id] || 0) + 1; });
+  ev.forEach(function(e){ if (!e.photo_id || e.kind === 'share') return; if (e.kind === 'download') de[e.photo_id] = (de[e.photo_id] || 0) + 1; else vi[e.photo_id] = (vi[e.photo_id] || 0) + 1; });
   var fig = function(x, pie){ return '<figure class="pn-ph"><img loading="lazy" alt="" src="' + esc(thumbSrc(x.id)) + '"><figcaption>' + esc(sinExt(x.filename)) + (pie ? ' · ' + pie : '') + '</figcaption></figure>'; };
   var h;
   if (fin.length) {
@@ -1106,7 +1186,7 @@ function visitantesHtml(){
   var rows = cur.vrows || [], ev = cur.eventos || [], V = {};
   rows.forEach(function(r){ var k = r.visitor_token; if (!k) return; var o = V[k] = V[k] || { n: 0, ini: r.created_at, fin: r.created_at, vi: {}, d: 0 }; o.n++; if (r.created_at < o.ini) o.ini = r.created_at; if (r.created_at > o.fin) o.fin = r.created_at; });
   var totD = 0, fd = {};
-  ev.forEach(function(e){ if (e.kind === 'download') { totD++; fd[e.photo_id] = 1; } var o = V[e.visitor_token]; if (!o) return; if (e.kind === 'download') o.d++; else o.vi[e.photo_id] = 1; });
+  ev.forEach(function(e){ if (e.kind === 'share') return; if (e.kind === 'download') { totD++; fd[e.photo_id] = 1; } var o = V[e.visitor_token]; if (!o) return; if (e.kind === 'download') o.d++; else o.vi[e.photo_id] = 1; });
   var ks = Object.keys(V).sort(function(a, b){ return V[a].ini < V[b].ini ? -1 : 1; });
   var fx = function(t){ var d = new Date(t); return isNaN(d) ? '' : d.toLocaleString('es-GT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); };
   var nf = Object.keys(fd).length;
@@ -1705,13 +1785,15 @@ async function accion(a, el){
   if (a === 'imp-zip') return zipImpresiones(el.dataset.id || '');
   if (a === 'zip-cancelar') { zipCancel = true; return; }
   if (a === 'act-per') { actDias = +id || 30; return actIniciar(); }
-  if (a === 'act-todas') { actVerTodas = !actVerTodas; return actPintar(); }
+  if (a === 'act-todas') { actVerTodas = !actVerTodas; return metPintarGal(); }
+  if (a === 'met-ver') return metToggle();
+  if (a === 'met-tab') return metTab_(id);
   if (a === 'act-gal') return actGaleria(id);
   if (a === 'act-gal-cerrar') { var dmB = $('#pn-dact'); if (dmB) dmB.close(); return; }
   if (a === 'act-card') return actCardAbrir();
-  if (a === 'card-fmt') { cardFmt = id; var dc = $('#pn-dcard'); if (dc) dc.querySelectorAll('.pn-seg button').forEach(function(b){ b.classList.toggle('on', b.dataset.id === id); }); return actCardDibujar(); }
+  if (a === 'card-fmt' || a === 'card-per') { if (a === 'card-fmt') cardFmt = id; else cardPer = id; el.parentNode.querySelectorAll('button').forEach(function(b){ b.classList.toggle('on', b.dataset.id === id); }); return actCardDibujar(); }
   if (a === 'card-cerrar') { var dmC = $('#pn-dcard'); if (dmC) dmC.close(); return; }
-  if (a === 'card-bajar') { var cc = $('#pn-ccv'); if (!cc) return; cc.toBlob(function(b){ var u = URL.createObjectURL(b), l = document.createElement('a'); l.href = u; l.download = 'mi-flujo-de-trabajo-' + (cardFmt === '916' ? 'historia' : 'publicacion') + '.png'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 2000); }); return; }
+  if (a === 'card-bajar') { var cc = $('#pn-ccv'); if (!cc) return; cc.toBlob(function(b){ var u = URL.createObjectURL(b), l = document.createElement('a'); l.href = u; l.download = 'metricas-' + (cardFmt === '916' ? 'historia' : cardFmt === '11' ? 'cuadrada' : 'publicacion') + '-' + cardPer + '.png'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 2000); }); return; }
   if (a === 'sel-reiniciar') {
     var kr = el.dataset.k, er = el.dataset.id || '', filasR = kr === 'imp' ? (cur.imp || []) : cur.favs;
     var gr2 = gruposEsc(filasR.map(function(x){ return x.photo_id; })).filter(function(x){ return x.id === er; })[0]; if (!gr2) return;
