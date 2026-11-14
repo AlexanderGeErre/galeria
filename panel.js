@@ -1,5 +1,6 @@
 (function(){
 'use strict';
+var VERSION = 'V1.0.0.1';
 var W = 'https://galerias-api.alexandergeerre.workers.dev';
 var BASE = 'https://alexandergeerre.github.io/galeria/cliente.html?c=';
 var BASEG = 'https://galerias-api.alexandergeerre.workers.dev/g/';
@@ -26,7 +27,7 @@ var CSS = '.pn-pb{position:absolute;right:6px;bottom:34px;z-index:2;display:flex
 '.pn-pbtn{background:none;border:0;padding:0;cursor:pointer}.pn-pbtn img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;display:block}#pn-dport{width:min(46rem,94vw)}#pn-gport{max-height:60vh;overflow:auto;margin:.8rem 0}' +
 '.pn *{box-sizing:border-box}.pn aside{background:var(--c);border-right:1px solid var(--l);padding:1.4rem 1rem;display:flex;flex-direction:column;gap:.3rem;position:sticky;top:0;height:100vh}' +
 '.pn .marca{font-family:"Cormorant Garamond",serif;font-size:1.35rem;margin-bottom:1.2rem}.pn aside button{background:none;border:0;text-align:left;padding:.55rem .7rem;border-radius:10px;color:var(--s)}' +
-'.pn aside button.on{background:var(--l);color:var(--t)}.pn aside .pie{margin-top:auto}.pn main{padding:2rem clamp(1rem,4vw,3rem);max-width:1100px;width:100%}' +
+'.pn aside button.on{background:var(--l);color:var(--t)}.pn aside .pie{margin-top:auto}.pn-ver{display:block;text-align:center;font-size:.68rem;opacity:.5;padding:.4rem 0 0;letter-spacing:.04em}.pn main{padding:2rem clamp(1rem,4vw,3rem);max-width:1100px;width:100%}' +
 '.pn h1,.pn h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;line-height:1.1}.pn h1{font-size:2.6rem}.pn h2{font-size:1.5rem;margin-bottom:.6rem}' +
 '.pn-btn{background:var(--t);color:var(--f);border:1px solid var(--t);padding:.55rem 1.2rem;border-radius:999px;cursor:pointer;font:inherit;text-decoration:none;display:inline-block}.pn-btn.sec{background:none;color:var(--t);border-color:var(--l)}.pn-btn.rojo{background:none;color:#b5453f;border-color:#b5453f}' +
 '.pn-btn:disabled{opacity:.5}.pn input[type=text],.pn input[type=date],.pn input[type=number],.pn input[type=time],.pn input[type=tel],.pn input[type=email],.pn textarea,.pn select{width:100%;padding:.65rem .85rem;border:1px solid var(--l);background:var(--f);color:var(--t);border-radius:10px;font:inherit}' +
@@ -283,16 +284,18 @@ async function api(path, body){
   var r = await fetch(W + path, { method: 'POST', headers: { Authorization: 'Bearer ' + (s ? s.access_token : ''), 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   return r.json();
 }
-var vistasOk = {};
+var vistasOk = {}, miniTk = {};
 async function firmar(ids, original){
   var out = {};
   for (var i = 0; i < ids.length; i += 200) {
     var r = await api('/api/admin/sign', { photos: ids.slice(i, i + 200), original: !!original });
-    Object.assign(out, r.fotos || {}); Object.assign(vistasOk, r.vistas || {});
+    Object.assign(out, r.fotos || {}); Object.assign(vistasOk, r.vistas || {}); Object.assign(miniTk, r.minis || {});
   }
   return out;
 }
 function src(t){ return W + '/api/img?t=' + encodeURIComponent(t); }
+// Cuadrículas: usa la miniatura liviana si existe; si no, la copia normal
+function thumbSrc(id){ var t = miniTk[id] || (cur && cur.tk && cur.tk[id]); return t ? src(t) : ''; }
 
 async function cargarGalerias(){
   var COLS = 'id,title,access_code,event_date,status,expires_at,created_at,cover_photo_id,client_id,downloads_enabled,selection_enabled,watermark_text,watermark_opacity,gallery_type,description,location,grid_style,palette,link_token,access_mode,print_sent_at,finals_locked,view_quality,cover_key';
@@ -333,18 +336,18 @@ function palPanel(){ var v = 'arena'; try { v = localStorage.getItem('pn-pal') |
 
 // ---------- Diseños del panel (10 temas): cada uno cambia colores, letra, esquinas y estilo de botones ----------
 var DIS = [
-  ['vidrio', 'Vidrio 1', { f: '#F8F4EE', c: '#FFFFFF', t: '#26231E', s: '#7D746A', l: '#E7DFD3', a: '#B98B5E', p: '#EFE8DD', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '22px', rb: '999px', rp: '14px', ri: '14px', rs: '999px', rd: '22px', sh: '0 8px 28px rgba(60,45,25,.07), inset 0 1px 0 rgba(255,255,255,.8)', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '', x: '.pn[data-d="vidrio"]{background:radial-gradient(560px 420px at 8% 4%,color-mix(in srgb,var(--a) 20%,transparent),transparent 70%),radial-gradient(620px 460px at 96% 28%,color-mix(in srgb,var(--a) 12%,transparent),transparent 70%),radial-gradient(520px 420px at 40% 104%,color-mix(in srgb,var(--a) 14%,transparent),transparent 70%),var(--f);background-attachment:fixed}.pn[data-d="vidrio"] .pn-card,.pn[data-d="vidrio"] .pn-cifras,.pn[data-d="vidrio"] .pn-franja{background:color-mix(in srgb,var(--c) 62%,transparent);border-color:color-mix(in srgb,#fff 60%,var(--l));-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4)}.pn[data-d="vidrio"] .pn-cifras div{border-color:color-mix(in srgb,var(--l) 70%,transparent)}.pn[data-d="vidrio"] .pn-tabs{display:inline-flex;gap:2px;padding:5px;border:1px solid color-mix(in srgb,#fff 60%,var(--l));border-radius:999px;max-width:100%;overflow-x:auto;background:color-mix(in srgb,var(--c) 58%,transparent);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);box-shadow:0 8px 28px rgba(60,45,25,.07),inset 0 1px 0 color-mix(in srgb,#fff 45%,var(--c));margin:.6rem 0 1.4rem}.pn[data-d="vidrio"] .pn-tabs button{padding:.5rem 1rem;border:0;border-radius:999px;white-space:nowrap}.pn[data-d="vidrio"] .pn-tabs button.on{background:color-mix(in srgb,var(--a) 20%,var(--c) 58%);color:var(--t);font-weight:600}.pn[data-d="vidrio"][data-e=dark]{background:radial-gradient(560px 420px at 8% 4%,color-mix(in srgb,var(--a0) 16%,transparent),transparent 70%),radial-gradient(620px 460px at 96% 28%,color-mix(in srgb,var(--a0) 9%,transparent),transparent 70%),var(--f);background-attachment:fixed}@media(min-width:761px){.pn[data-d="vidrio"] aside{background:color-mix(in srgb,var(--c) 66%,transparent)}}' }],
-  ['vidrio2', 'Vidrio 2', { f: '#FFFFFF', c: '#FFFFFF', t: '#2A2A2A', s: '#8A8A8A', l: '#E4E4E4', a: '#111111', p: '#EEEEEE', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '22px', rb: '999px', rp: '14px', ri: '14px', rs: '999px', rd: '22px', sh: '0 8px 28px rgba(60,45,25,.07), inset 0 1px 0 rgba(255,255,255,.8)', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '#F1F1F1', x: '.pn[data-d="vidrio2"]{background:radial-gradient(560px 420px at 8% 4%,color-mix(in srgb,var(--a) 20%,transparent),transparent 70%),radial-gradient(620px 460px at 96% 28%,color-mix(in srgb,var(--a) 12%,transparent),transparent 70%),radial-gradient(520px 420px at 40% 104%,color-mix(in srgb,var(--a) 14%,transparent),transparent 70%),var(--f);background-attachment:fixed}.pn[data-d="vidrio2"] .pn-card,.pn[data-d="vidrio2"] .pn-cifras,.pn[data-d="vidrio2"] .pn-franja{background:color-mix(in srgb,var(--c) 62%,transparent);border-color:color-mix(in srgb,#fff 60%,var(--l));-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4)}.pn[data-d="vidrio2"] .pn-cifras div{border-color:color-mix(in srgb,var(--l) 70%,transparent)}.pn[data-d="vidrio2"] .pn-tabs{display:inline-flex;gap:2px;padding:5px;border:1px solid color-mix(in srgb,#fff 60%,var(--l));border-radius:999px;max-width:100%;overflow-x:auto;background:color-mix(in srgb,var(--c) 58%,transparent);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);box-shadow:0 8px 28px rgba(60,45,25,.07),inset 0 1px 0 color-mix(in srgb,#fff 45%,var(--c));margin:.6rem 0 1.4rem}.pn[data-d="vidrio2"] .pn-tabs button{padding:.5rem 1rem;border:0;border-radius:999px;white-space:nowrap}.pn[data-d="vidrio2"] .pn-tabs button.on{background:color-mix(in srgb,var(--a) 20%,var(--c) 58%);color:var(--t);font-weight:600}.pn[data-d="vidrio2"][data-e=dark]{background:radial-gradient(560px 420px at 8% 4%,color-mix(in srgb,var(--a0) 16%,transparent),transparent 70%),radial-gradient(620px 460px at 96% 28%,color-mix(in srgb,var(--a0) 9%,transparent),transparent 70%),var(--f);background-attachment:fixed}@media(min-width:761px){.pn[data-d="vidrio2"] aside{background:color-mix(in srgb,var(--c) 66%,transparent)}}' }],
-  ['suave', 'Suave tipo app', { f: '#FAFAF8', c: '#FFFFFF', t: '#2B2623', s: '#7D756D', l: '#E6E3DF', a: '#B8946A', p: '#EFEDE9', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '18px', rb: '999px', rp: '12px', ri: '12px', rs: '999px', rd: '18px', sh: '0 1px 3px rgba(0,0,0,.06)', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
-  ['editorial', 'Editorial crema', { f: '#F4F1EB', c: '#FBF9F5', t: '#2B1D14', s: '#7C6F63', l: '#D8D0C4', a: '#8B5E3C', p: '#E7E1D6', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.8rem', hl: '0', ht: 'none', rc: '2px', rb: '2px', rp: '0', ri: '2px', rs: '2px', rd: '2px', sh: 'none', bt: 'uppercase', bl: '.14em', bs: '.78rem', tt: 'none', tl: '0', sb: '' }],
-  ['moderno', 'Moderno blanco y negro', { f: '#F3F3F0', c: '#FFFFFF', t: '#1D1D1B', s: '#777770', l: '#D4D4CD', a: '#1D1D1B', p: '#E8E8E3', hf: 'Jost,system-ui,sans-serif', hw: 500, h1: '2.2rem', hl: '-.03em', ht: 'uppercase', rc: '0', rb: '0', rp: '0', ri: '0', rs: '0', rd: '0', sh: 'none', bt: 'uppercase', bl: '.1em', bs: '.78rem', tt: 'uppercase', tl: '.06em', sb: '' }],
-  ['oscura', 'Galería oscura', { f: '#141414', c: '#232323', t: '#EDE8E0', s: '#948D83', l: '#333333', a: '#C9A66B', p: '#242424', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '3px', rb: '3px', rp: '2px', ri: '3px', rs: '3px', rd: '4px', sh: 'none', bt: 'uppercase', bl: '.12em', bs: '.78rem', tt: 'uppercase', tl: '.1em', sb: '', fija: 1 }],
-  ['lienzo', 'Lienzo minimal', { f: '#FFFFFF', c: '#FFFFFF', t: '#222222', s: '#9A9A9A', l: '#EEEEEE', a: '#222222', p: '#F5F5F5', hf: 'Jost,system-ui,sans-serif', hw: 300, h1: '2.3rem', hl: '-.02em', ht: 'none', rc: '0', rb: '0', rp: '0', ri: '0', rs: '0', rd: '0', sh: 'none', bt: 'uppercase', bl: '.08em', bs: '.78rem', tt: 'none', tl: '0', sb: '', x: '.pn[data-d="lienzo"] .pn-card,.pn[data-d="lienzo"] .pn-cifras,.pn[data-d="lienzo"] .pn-franja{border-color:transparent;background:none}' }],
-  ['lateral', 'Panel lateral', { f: '#FFFFFF', c: '#FFFFFF', t: '#2A2A2A', s: '#8A8A8A', l: '#E4E4E4', a: '#111111', p: '#EEEEEE', hf: 'Jost,system-ui,sans-serif', hw: 400, h1: '1.7rem', hl: '.16em', ht: 'uppercase', rc: '0', rb: '0', rp: '0', ri: '0', rs: '0', rd: '0', sh: 'none', bt: 'uppercase', bl: '.14em', bs: '.74rem', tt: 'uppercase', tl: '.12em', sb: '#F1F1F1' }],
-  ['carriles', 'Acordeón con carriles', { f: '#F6F4F0', c: '#FFFFFF', t: '#262320', s: '#857E75', l: '#E2DDD5', a: '#6B8F71', p: '#EBE7E0', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.5rem', hl: '0', ht: 'none', rc: '8px', rb: '8px', rp: '6px', ri: '8px', rs: '6px', rd: '10px', sh: 'none', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
-  ['tiempo', 'Línea de tiempo', { f: '#FBFAF7', c: '#FFFFFF', t: '#2A2622', s: '#8B8379', l: '#E4DFD6', a: '#B5651D', p: '#F0EBE2', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '12px', rb: '999px', rp: '8px', ri: '10px', rs: '999px', rd: '14px', sh: 'none', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
-  ['terracota', 'Terracota cálido', { f: '#F3E6DA', c: '#FBF3EA', t: '#3B2416', s: '#8D6F5A', l: '#DCC6B3', a: '#A8643C', p: '#E8D3C0', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.8rem', hl: '0', ht: 'none', rc: '6px', rb: '999px', rp: '4px', ri: '6px', rs: '999px', rd: '8px', sh: 'none', bt: 'none', bl: '.04em', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
-  ['tarjetas', 'Tarjetas con sombra', { f: '#EFEEEA', c: '#FFFFFF', t: '#222222', s: '#7A7A75', l: '#E6E5E0', a: '#222222', p: '#F1F0EC', hf: 'Jost,system-ui,sans-serif', hw: 500, h1: '2.1rem', hl: '-.02em', ht: 'none', rc: '16px', rb: '10px', rp: '8px', ri: '10px', rs: '8px', rd: '16px', sh: '0 2px 14px rgba(0,0,0,.07)', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '' }]
+  ['vidrio', 'Marfil', { f: '#F8F4EE', c: '#FFFFFF', t: '#26231E', s: '#7D746A', l: '#E7DFD3', a: '#B98B5E', p: '#EFE8DD', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '22px', rb: '999px', rp: '14px', ri: '14px', rs: '999px', rd: '22px', sh: '0 8px 28px rgba(60,45,25,.07), inset 0 1px 0 rgba(255,255,255,.8)', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '', x: '.pn[data-d="vidrio"]{background:radial-gradient(560px 420px at 8% 4%,color-mix(in srgb,var(--a) 20%,transparent),transparent 70%),radial-gradient(620px 460px at 96% 28%,color-mix(in srgb,var(--a) 12%,transparent),transparent 70%),radial-gradient(520px 420px at 40% 104%,color-mix(in srgb,var(--a) 14%,transparent),transparent 70%),var(--f);background-attachment:fixed}.pn[data-d="vidrio"] .pn-card,.pn[data-d="vidrio"] .pn-cifras,.pn[data-d="vidrio"] .pn-franja{background:color-mix(in srgb,var(--c) 62%,transparent);border-color:color-mix(in srgb,#fff 60%,var(--l));-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4)}.pn[data-d="vidrio"] .pn-cifras div{border-color:color-mix(in srgb,var(--l) 70%,transparent)}.pn[data-d="vidrio"] .pn-tabs{display:inline-flex;gap:2px;padding:5px;border:1px solid color-mix(in srgb,#fff 60%,var(--l));border-radius:999px;max-width:100%;overflow-x:auto;background:color-mix(in srgb,var(--c) 58%,transparent);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);box-shadow:0 8px 28px rgba(60,45,25,.07),inset 0 1px 0 color-mix(in srgb,#fff 45%,var(--c));margin:.6rem 0 1.4rem}.pn[data-d="vidrio"] .pn-tabs button{padding:.5rem 1rem;border:0;border-radius:999px;white-space:nowrap}.pn[data-d="vidrio"] .pn-tabs button.on{background:color-mix(in srgb,var(--a) 20%,var(--c) 58%);color:var(--t);font-weight:600}.pn[data-d="vidrio"][data-e=dark]{background:radial-gradient(560px 420px at 8% 4%,color-mix(in srgb,var(--a0) 16%,transparent),transparent 70%),radial-gradient(620px 460px at 96% 28%,color-mix(in srgb,var(--a0) 9%,transparent),transparent 70%),var(--f);background-attachment:fixed}@media(min-width:761px){.pn[data-d="vidrio"] aside{background:color-mix(in srgb,var(--c) 66%,transparent)}}' }],
+  ['vidrio2', 'Niebla', { f: '#FFFFFF', c: '#FFFFFF', t: '#2A2A2A', s: '#8A8A8A', l: '#E4E4E4', a: '#111111', p: '#EEEEEE', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '22px', rb: '999px', rp: '14px', ri: '14px', rs: '999px', rd: '22px', sh: '0 8px 28px rgba(60,45,25,.07), inset 0 1px 0 rgba(255,255,255,.8)', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '#F1F1F1', x: '.pn[data-d="vidrio2"]{background:radial-gradient(560px 420px at 8% 4%,color-mix(in srgb,var(--a) 20%,transparent),transparent 70%),radial-gradient(620px 460px at 96% 28%,color-mix(in srgb,var(--a) 12%,transparent),transparent 70%),radial-gradient(520px 420px at 40% 104%,color-mix(in srgb,var(--a) 14%,transparent),transparent 70%),var(--f);background-attachment:fixed}.pn[data-d="vidrio2"] .pn-card,.pn[data-d="vidrio2"] .pn-cifras,.pn[data-d="vidrio2"] .pn-franja{background:color-mix(in srgb,var(--c) 62%,transparent);border-color:color-mix(in srgb,#fff 60%,var(--l));-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4)}.pn[data-d="vidrio2"] .pn-cifras div{border-color:color-mix(in srgb,var(--l) 70%,transparent)}.pn[data-d="vidrio2"] .pn-tabs{display:inline-flex;gap:2px;padding:5px;border:1px solid color-mix(in srgb,#fff 60%,var(--l));border-radius:999px;max-width:100%;overflow-x:auto;background:color-mix(in srgb,var(--c) 58%,transparent);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);box-shadow:0 8px 28px rgba(60,45,25,.07),inset 0 1px 0 color-mix(in srgb,#fff 45%,var(--c));margin:.6rem 0 1.4rem}.pn[data-d="vidrio2"] .pn-tabs button{padding:.5rem 1rem;border:0;border-radius:999px;white-space:nowrap}.pn[data-d="vidrio2"] .pn-tabs button.on{background:color-mix(in srgb,var(--a) 20%,var(--c) 58%);color:var(--t);font-weight:600}.pn[data-d="vidrio2"][data-e=dark]{background:radial-gradient(560px 420px at 8% 4%,color-mix(in srgb,var(--a0) 16%,transparent),transparent 70%),radial-gradient(620px 460px at 96% 28%,color-mix(in srgb,var(--a0) 9%,transparent),transparent 70%),var(--f);background-attachment:fixed}@media(min-width:761px){.pn[data-d="vidrio2"] aside{background:color-mix(in srgb,var(--c) 66%,transparent)}}' }],
+  ['suave', 'Suave', { f: '#FAFAF8', c: '#FFFFFF', t: '#2B2623', s: '#7D756D', l: '#E6E3DF', a: '#B8946A', p: '#EFEDE9', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '18px', rb: '999px', rp: '12px', ri: '12px', rs: '999px', rd: '18px', sh: '0 1px 3px rgba(0,0,0,.06)', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
+  ['editorial', 'Editorial', { f: '#F4F1EB', c: '#FBF9F5', t: '#2B1D14', s: '#7C6F63', l: '#D8D0C4', a: '#8B5E3C', p: '#E7E1D6', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.8rem', hl: '0', ht: 'none', rc: '2px', rb: '2px', rp: '0', ri: '2px', rs: '2px', rd: '2px', sh: 'none', bt: 'uppercase', bl: '.14em', bs: '.78rem', tt: 'none', tl: '0', sb: '' }],
+  ['lienzo', 'Lienzo', { f: '#FFFFFF', c: '#FFFFFF', t: '#222222', s: '#9A9A9A', l: '#EEEEEE', a: '#222222', p: '#F5F5F5', hf: 'Jost,system-ui,sans-serif', hw: 300, h1: '2.3rem', hl: '-.02em', ht: 'none', rc: '0', rb: '0', rp: '0', ri: '0', rs: '0', rd: '0', sh: 'none', bt: 'uppercase', bl: '.08em', bs: '.78rem', tt: 'none', tl: '0', sb: '', x: '.pn[data-d="lienzo"] .pn-card,.pn[data-d="lienzo"] .pn-cifras,.pn[data-d="lienzo"] .pn-franja{border-color:transparent;background:none}' }],
+  ['terracota', 'Terracota', { f: '#F3E6DA', c: '#FBF3EA', t: '#3B2416', s: '#8D6F5A', l: '#DCC6B3', a: '#A8643C', p: '#E8D3C0', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.8rem', hl: '0', ht: 'none', rc: '6px', rb: '999px', rp: '4px', ri: '6px', rs: '999px', rd: '8px', sh: 'none', bt: 'none', bl: '.04em', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
+  ['tiempo', 'Cronología', { f: '#FBFAF7', c: '#FFFFFF', t: '#2A2622', s: '#8B8379', l: '#E4DFD6', a: '#B5651D', p: '#F0EBE2', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '12px', rb: '999px', rp: '8px', ri: '10px', rs: '999px', rd: '14px', sh: 'none', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
+  ['moderno', 'Monocromo', { f: '#F3F3F0', c: '#FFFFFF', t: '#1D1D1B', s: '#777770', l: '#D4D4CD', a: '#1D1D1B', p: '#E8E8E3', hf: 'Jost,system-ui,sans-serif', hw: 500, h1: '2.2rem', hl: '-.03em', ht: 'uppercase', rc: '0', rb: '0', rp: '0', ri: '0', rs: '0', rd: '0', sh: 'none', bt: 'uppercase', bl: '.1em', bs: '.78rem', tt: 'uppercase', tl: '.06em', sb: '' }],
+  ['lateral', 'Estudio', { f: '#FFFFFF', c: '#FFFFFF', t: '#2A2A2A', s: '#8A8A8A', l: '#E4E4E4', a: '#111111', p: '#EEEEEE', hf: 'Jost,system-ui,sans-serif', hw: 400, h1: '1.7rem', hl: '.16em', ht: 'uppercase', rc: '0', rb: '0', rp: '0', ri: '0', rs: '0', rd: '0', sh: 'none', bt: 'uppercase', bl: '.14em', bs: '.74rem', tt: 'uppercase', tl: '.12em', sb: '#F1F1F1' }],
+  ['carriles', 'Carriles', { f: '#F6F4F0', c: '#FFFFFF', t: '#262320', s: '#857E75', l: '#E2DDD5', a: '#6B8F71', p: '#EBE7E0', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.5rem', hl: '0', ht: 'none', rc: '8px', rb: '8px', rp: '6px', ri: '8px', rs: '6px', rd: '10px', sh: 'none', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
+  ['tarjetas', 'Relieve', { f: '#EFEEEA', c: '#FFFFFF', t: '#222222', s: '#7A7A75', l: '#E6E5E0', a: '#222222', p: '#F1F0EC', hf: 'Jost,system-ui,sans-serif', hw: 500, h1: '2.1rem', hl: '-.02em', ht: 'none', rc: '16px', rb: '10px', rp: '8px', ri: '10px', rs: '8px', rd: '16px', sh: '0 2px 14px rgba(0,0,0,.07)', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
+  ['oscura', 'Medianoche', { f: '#141414', c: '#232323', t: '#EDE8E0', s: '#948D83', l: '#333333', a: '#C9A66B', p: '#242424', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '3px', rb: '3px', rp: '2px', ri: '3px', rs: '3px', rd: '4px', sh: 'none', bt: 'uppercase', bl: '.12em', bs: '.78rem', tt: 'uppercase', tl: '.1em', sb: '', fija: 1 }]
 ];
 function disenoGuardado(){ var v = 'vidrio'; try { v = localStorage.getItem('pn-dis') || 'vidrio'; } catch(e) {} return DIS.some(function(d){ return d[0] === v; }) ? v : 'vidrio'; }
 function disenoNombre(){ var id = disenoGuardado(); return DIS.filter(function(d){ return d[0] === id; })[0][1]; }
@@ -400,7 +403,7 @@ function pintarLado(){
     h = logo() + '<button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias"' + (vista === 'galerias' || vista === 'asist' ? ' class="on"' : '') + '>' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes"' + (vista === 'clientes' ? ' class="on"' : '') + '>' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz"' + (vista === 'cotiz' ? ' class="on"' : '') + '>' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda"' + (vista === 'agenda' ? ' class="on"' : '') + '>' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos"' + (vista === 'grupos' ? ' class="on"' : '') + '>' + ico('grupos') + '<span>Grupos de graduación</span></button><button data-v="ia"' + (vista === 'ia' ? ' class="on"' : '') + '>' + ico('ia') + '<span>Selección con IA</span></button>';
   }
   var tm = temaGuardado();
-  h += '<div class="pie"><button data-v="cuenta"' + (vista === 'cuenta' ? ' class="on"' : '') + '>' + ico('cuenta') + '<span>Mi cuenta</span></button>' + disenoSelHtml() + '<div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button></div>';
+  h += '<div class="pie"><button data-v="cuenta"' + (vista === 'cuenta' ? ' class="on"' : '') + '>' + ico('cuenta') + '<span>Mi cuenta</span></button>' + disenoSelHtml() + '<div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button><small class="pn-ver">' + VERSION + '</small></div>';
   a.innerHTML = h;
   var pnEl = root.querySelector('.pn'), bn = root.querySelector('#pn-bn');
   if (pnEl) { pnEl.classList.toggle('con-bn', true); pnEl.classList.toggle('bn-main', !g); if (!bn) { pnEl.insertAdjacentHTML('beforeend', '<div id="pn-bn"></div>'); bn = root.querySelector('#pn-bn'); } }
@@ -830,7 +833,7 @@ function plegar(abierta){
 var vidEscSel = {}, vidCal = 'fhd', vidIds = [], vidForm = 'v', vidSeg = 2.5, vidPart = true, vidCache = {}, vidTok = 0, vidBusy = false, vidCancel = false;
 function cargarSlideshow(){
   if (window.Slideshow) return Promise.resolve();
-  return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = 'slideshow.js?v=28'; sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró slideshow.js en GitHub. Súbelo junto a panel.js.')); }; document.head.appendChild(sc); });
+  return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = 'slideshow.js?v=' + VERSION.replace(/^V/, ''); sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró slideshow.js en GitHub. Súbelo junto a panel.js.')); }; document.head.appendChild(sc); });
 }
 function vidEstado(t){ var e = $('#pn-vst'); if (e) e.textContent = t || ''; }
 function vidBarra(x){ var b = $('#pn-vbar'); if (b) b.style.width = Math.round(clampN(x) * 100) + '%'; }
@@ -874,7 +877,7 @@ function vdSide(){
   return '<div class="vs-side"><div class="vs-g"><span class="vs-l">Calidad</span><div class="vs-seg" id="pn-vcal"><button type="button" data-act="vid-cal" data-v="fhd">Full HD</button><button type="button" data-act="vid-cal" data-v="4k">4K</button></div><small id="vs-res"></small></div>' +
     '<div class="vs-g"><span class="vs-l">Formato</span><div class="vs-fm" id="pn-vf">' + F.map(function(o){ return '<button type="button" class="pn-opt" data-act="vid-fmt" data-v="' + o[0] + '"><i class="' + o[2] + '"></i><span>' + o[1] + '</span></button>'; }).join('') + '</div></div></div>';
 }
-function vidThumb(x){ return '<figure class="pn-ph vsel" data-act="vid-foto" data-id="' + x.id + '"><span class="pn-vn"></span><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(sinExt(x.filename)) + '</figcaption></figure>'; }
+function vidThumb(x){ return '<figure class="pn-ph vsel" data-act="vid-foto" data-id="' + x.id + '"><span class="pn-vn"></span><img loading="lazy" alt="" src="' + esc(thumbSrc(x.id)) + '"><figcaption>' + esc(sinExt(x.filename)) + '</figcaption></figure>'; }
 function vidFinEsc(escId){ return cur.fotos.filter(function(x){ return x.photo_type === 'final' && (escId === '_none' ? !x.scene_id : (x.scene_id === escId || spTiene(escId, x.id))); }).sort(function(a, b){ return porNombre(a.filename, b.filename); }); }
 function vidGrupos(){
   var es = cur.escenas || [], gs = es.map(function(e, i){ return { id: e.id, rot: (i + 1) + ' · ' + e.name, n: vidFinEsc(e.id).length }; }).filter(function(x){ return x.n; });
@@ -971,7 +974,7 @@ function vidRefrescar(){ vidPestana(); vdLab(); root.querySelectorAll('#pn-vf .p
   var n = vidIds.length;
   vidMarcas();
   var tr = $('#pn-vtira');
-  if (tr) tr.innerHTML = '<button class="pn-vadd" data-act="vid-agregar" type="button"><b>+</b><span>Agregar fotos</span></button>' + vidIds.map(function(id, i){ return '<div class="pn-vt" draggable="true" data-i="' + i + '"><img draggable="false" alt="" src="' + (cur.tk[id] ? esc(src(cur.tk[id])) : '') + '"><i>' + (i + 1) + '</i>' + (vidEstilo === 'prisma' ? '<em class="pn-vl' + (i === n - 1 && n % 2 ? ' no' : '') + '">Par ' + (Math.floor(i / 2) + 1) + '</em>' : '') + '<button type="button" data-act="vid-quitar" data-i="' + i + '" aria-label="Quitar">×</button></div>'; }).join('');
+  if (tr) tr.innerHTML = '<button class="pn-vadd" data-act="vid-agregar" type="button"><b>+</b><span>Agregar fotos</span></button>' + vidIds.map(function(id, i){ return '<div class="pn-vt" draggable="true" data-i="' + i + '"><img draggable="false" alt="" src="' + esc(thumbSrc(id)) + '"><i>' + (i + 1) + '</i>' + (vidEstilo === 'prisma' ? '<em class="pn-vl' + (i === n - 1 && n % 2 ? ' no' : '') + '">Par ' + (Math.floor(i / 2) + 1) + '</em>' : '') + '<button type="button" data-act="vid-quitar" data-i="' + i + '" aria-label="Quitar">×</button></div>'; }).join('');
   var inf = $('#pn-vinfo'); if (inf) inf.textContent = n ? (vidEstilo === 'prisma' ? Math.floor(n / 2) + (Math.floor(n / 2) === 1 ? ' par' : ' pares') + (n % 2 ? ' (la última foto sobra: falta su pareja)' : '') : n + (n === 1 ? ' diapositiva' : ' diapositivas')) + ' · ' + mmss(window.Slideshow ? window.Slideshow.duracionTotal(n, vidSeg, vidEstilo, vidMarca) : n * vidSeg) + ' de duración' : 'Aún no hay fotos. Toca «Agregar fotos» en la tira de abajo.';
   var chip = function(id, t, v){ var e = $(id); if (e) e.innerHTML = '<small>' + t + '</small>' + v; };
   root.querySelectorAll('#pn-ve .pn-opt').forEach(function(o){ o.classList.toggle('on', o.dataset.v === vidEstilo); }); root.querySelectorAll('#pn-vm .pn-opt').forEach(function(o){ o.classList.toggle('on', (o.dataset.v === 'si') === vidMarca); }); chip('#pn-cr', 'Ritmo', VRIT[vidSeg] || 'Normal'); chip('#pn-cp', 'Partículas', vidPart ? 'Sí' : 'No');
@@ -1075,7 +1078,7 @@ async function vidGenerar(){
 function topFotosHtml(sel, fin){
   var ev = cur.eventos || [], vi = {}, de = {};
   ev.forEach(function(e){ if (!e.photo_id) return; if (e.kind === 'download') de[e.photo_id] = (de[e.photo_id] || 0) + 1; else vi[e.photo_id] = (vi[e.photo_id] || 0) + 1; });
-  var fig = function(x, pie){ return '<figure class="pn-ph"><img loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"><figcaption>' + esc(sinExt(x.filename)) + (pie ? ' · ' + pie : '') + '</figcaption></figure>'; };
+  var fig = function(x, pie){ return '<figure class="pn-ph"><img loading="lazy" alt="" src="' + esc(thumbSrc(x.id)) + '"><figcaption>' + esc(sinExt(x.filename)) + (pie ? ' · ' + pie : '') + '</figcaption></figure>'; };
   var h;
   if (fin.length) {
     var ls = fin.map(function(x){ return { x: x, v: vi[x.id] || 0, d: de[x.id] || 0 }; }).filter(function(o){ return o.v || o.d; }).sort(function(a, b){ return (b.d * 3 + b.v) - (a.d * 3 + a.v); }).slice(0, 10);
@@ -1152,7 +1155,7 @@ function pintarDetalle0(){
       var nom = ids.map(function(id){ return nombre[id] || '?'; }).join(', ');
       var cuerpoF = favVer === 'det' ? '<ol class="fv-lista">' + ids.map(function(id){ return '<li>' + esc(nombre[id] || '?') + '</li>'; }).join('') + '</ol>'
         : '<div class="pn-grid fv-' + favVer + '">' + ids.map(function(id){
-          return '<figure class="pn-ph"><img loading="lazy" alt="" title="' + esc(nombre[id] || '?') + '" src="' + (cur.tk[id] ? esc(src(cur.tk[id])) : '') + '"><figcaption>' + esc(nombre[id] || '?') + '</figcaption></figure>';
+          return '<figure class="pn-ph"><img loading="lazy" alt="" title="' + esc(nombre[id] || '?') + '" src="' + esc(thumbSrc(id)) + '"><figcaption>' + esc(nombre[id] || '?') + '</figcaption></figure>';
         }).join('') + '</div>';
       return '<div class="pn-card"><h2>' + (G.num ? G.num + ' · ' : '') + esc(G.nombre) + ' · ' + ids.length + (ids.length === 1 ? ' foto' : ' fotos') + '</h2>' + cuerpoF + '<div class="pn-row"><button class="pn-btn sec" data-act="copiar" data-t="' + esc(nom) + '">Copiar nombres</button><button class="pn-btn sec" data-act="sel-reiniciar" data-k="fav" data-id="' + esc(G.id) + '">Reiniciar selección</button></div></div>';
     }).reduce(function(a, b){ return a + b; }, favBarra())
@@ -1212,7 +1215,7 @@ function wmLab(){
   im.src = 'muestras/muestra3.jpg';
 }
 var wmTok = 0;
-var CALIDAD = { baja: [1000, 0.72], media: [1600, 0.85], alta: [2400, 0.9], vista: [1800, 0.86] };
+var CALIDAD = { baja: [1000, 0.72], media: [1600, 0.85], alta: [2400, 0.9], vista: [1800, 0.86], mini: [720, 0.8] };
 function reducir(file, marca, cal){
   var qd = CALIDAD[cal] || CALIDAD.media;
   return createImageBitmap(file).then(function(b){
@@ -1267,6 +1270,13 @@ async function subirVista(f, pid, tok){
     var dv = await rv.json().catch(function(){ return {}; }); return !!dv.ok;
   } catch (e) { return false; }
 }
+async function subirMini(f, pid, tok){
+  try {
+    var mm = await reducir(f, null, 'mini');
+    var rm = await fetch(W + '/api/upload-preview?photo=' + pid + '&thumb=1', { method: 'POST', headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'image/jpeg' }, body: mm.blob });
+    var dm = await rm.json().catch(function(){ return {}; }); return !!dm.ok;
+  } catch (e) { return false; }
+}
 async function repararVistas(){
   if (!cola.sinVista.length) return;
   var pend = cola.sinVista.splice(0), mal = 0, s2 = (await db.auth.getSession()).data.session;
@@ -1307,6 +1317,7 @@ async function subirUna(t){
       }
       if (!okv) cola.sinVista.push({ id: d.photo.id, file: f });
     }
+    subirMini(f, d.photo.id, s.access_token);
     for (var n = 0; n < 3 && !okp; n++) {
       try {
         var wc2 = wmCfg(), pv = await reducir(f, { text: t.texto || marcaBase(), opacity: wc2.op, size: wc2.tam }, t.tipo === 'selection' ? t.cal : 'media');
@@ -1450,7 +1461,7 @@ function figFoto(x, g, ic){
   var tipo = x.photo_type, esPort = g.cover_photo_id === x.id;
   return '<figure class="pn-ph' + (esPort ? ' cv' : '') + (marcadas.has(x.id) ? ' mk' : '') + (ic[x.id] ? ' pimp' : '') + '">' + (ic[x.id] ? '<span class="pn-pb" title="Marcada para imprimir">' + ico('impresiones') + (ic[x.id] > 1 ? '<i>' + ic[x.id] + '</i>' : '') + '</span>' : '') + '<span class="pn-ck' + (modoSel ? '' : ' off') + '" data-act="marcar" data-id="' + x.id + '">' + (marcadas.has(x.id) ? '✓' : '') + '</span>' +
     '<span class="pn-tb' + (tipo === 'final' ? ' f' : '') + '">' + (tipo === 'final' ? 'FINAL' : 'SEL') + '</span>' +
-    '<img data-act="' + (modoSel ? 'marcar' : 'ver') + '" data-id="' + x.id + '" loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '">' +
+    '<img data-act="' + (modoSel ? 'marcar' : 'ver') + '" data-id="' + x.id + '" loading="lazy" alt="" src="' + esc(thumbSrc(x.id)) + '">' +
     '<figcaption>' + esc(sinExt(x.filename)) + (esPort ? ' · Portada' : '') + (tipo === 'final' ? ' · ' + mb(x.file_size || 0) : '') + '</figcaption>' +
     '<button class="pn-ex" data-act="ver" data-id="' + x.id + '" type="button" aria-label="Ampliar" title="Ampliar">' + EXP + '</button></figure>';
 }
@@ -1486,7 +1497,7 @@ function fotosVista(g, sel, fin){
   var top = '<div class="fs-tools"><div class="pn-ncarp fs-new"><input type="text" id="pn-nesc" maxlength="80" placeholder="Nueva escena"><button class="pn-btn sec" data-act="esc-crear" type="button" aria-label="Agregar escena">+</button></div>' + ord +
     (hayF && !modoSel ? '<button class="pn-btn sec" data-act="modo-sel" type="button">Seleccionar varias</button>' : '') +
     '<button class="pn-btn" data-act="abrir-subir" data-tipo="' + tipoSub + '" data-esc="' + (fEsc && fEsc !== '_none' && fEsc !== '_ninguna' ? fEsc : '') + '" type="button">+ Subir fotos</button></div>' +
-    (nImp || fImp ? '<div class="pn-fh"><button class="pn-btn ' + (fImp ? '' : 'sec') + '" data-act="filtro-imp" type="button">' + ico('impresiones') + ' Para imprimir (' + nImp + ')' + (fImp ? ' ✕' : '') + '</button></div>' : '');
+    (function(){ var qm = (cur.fotos || []).filter(function(x){ return !miniTk[x.id]; }).length; return (nImp || fImp || qm) ? '<div class="pn-fh">' + (nImp || fImp ? '<button class="pn-btn ' + (fImp ? '' : 'sec') + '" data-act="filtro-imp" type="button">' + ico('impresiones') + ' Para imprimir (' + nImp + ')' + (fImp ? ' ✕' : '') + '</button> ' : '') + (qm ? '<button class="pn-btn sec" data-act="mini-crear" data-tipo="" type="button" title="Crea miniaturas livianas para que el panel cargue rápido. Tus originales no se tocan">Crear miniaturas (' + qm + ')</button>' : '') + '</div>' : ''; })();
   var secs = es.map(function(e){ return { id: e.id, name: e.name, real: true }; });
   if (es.length && delaEsc('_none').length) secs.push({ id: '_none', name: 'Sin escena', real: false });
   if (!es.length) secs = [{ id: '', name: 'Todas las fotos', real: false }];
@@ -1513,12 +1524,12 @@ function seccionFotos(tipo, titulo, lista, g){
   var ic = impCuenta(), nImp = Object.keys(ic).length;
   var ab = abiertas[tipo] || modoSel, mostrar = ab ? lista : lista.slice(0, PRIM), mas = lista.length > PRIM;
   var cab = '<div class="pn-sec"><h2>' + titulo + '</h2><span class="pn-s">' + lista.length + (lista.length === 1 ? ' artículo' : ' artículos') + '</span>' +
-    (tipo === 'final' && lista.length ? '<button class="pn-btn sec" data-act="fin-optimizar" type="button" title="Crea copias ligeras para que las fotos carguen rápido. Tus originales no se tocan">Optimizar' + (function(){ var q = lista.filter(function(x){ return !vistasOk[x.id]; }).length; return q ? ' (' + q + ' pendientes)' : ' ✓'; })() + '</button> ' : '') + (tipo === 'final' && (nImp || fImp) ? '<button class="pn-btn ' + (fImp ? '' : 'sec') + '" data-act="filtro-imp" type="button">' + ico('impresiones') + ' Para imprimir (' + nImp + ')' + (fImp ? ' ✕' : '') + '</button>' : '') + ' ' + (lista.length > 1 ? '<span class="pn-orden"><label class="pn-s">Clasificar</label><select data-ord="' + tipo + '"><option value="">Elegir orden…</option>' + ORDENES.filter(function(o){ return cur.conFecha || o[0].indexOf('carga') < 0; }).map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select></span>' : '') + '</div>';
+    (function(){ var q = lista.filter(function(x){ return !miniTk[x.id]; }).length; return q ? '<button class="pn-btn sec" data-act="mini-crear" data-tipo="' + tipo + '" type="button" title="Crea miniaturas livianas para que el panel cargue rápido. Tus originales no se tocan">Crear miniaturas (' + q + ')</button> ' : ''; })() + (tipo === 'final' && lista.length ? '<button class="pn-btn sec" data-act="fin-optimizar" type="button" title="Crea copias ligeras para que las fotos carguen rápido. Tus originales no se tocan">Optimizar' + (function(){ var q = lista.filter(function(x){ return !vistasOk[x.id]; }).length; return q ? ' (' + q + ' pendientes)' : ' ✓'; })() + '</button> ' : '') + (tipo === 'final' && (nImp || fImp) ? '<button class="pn-btn ' + (fImp ? '' : 'sec') + '" data-act="filtro-imp" type="button">' + ico('impresiones') + ' Para imprimir (' + nImp + ')' + (fImp ? ' ✕' : '') + '</button>' : '') + ' ' + (lista.length > 1 ? '<span class="pn-orden"><label class="pn-s">Clasificar</label><select data-ord="' + tipo + '"><option value="">Elegir orden…</option>' + ORDENES.filter(function(o){ return cur.conFecha || o[0].indexOf('carga') < 0; }).map(function(o){ return '<option value="' + o[0] + '">' + o[1] + '</option>'; }).join('') + '</select></span>' : '') + '</div>';
   var add = '<button class="pn-add" data-act="abrir-subir" data-tipo="' + tipo + '" type="button"><b>+</b><span>' + (tipo === 'selection' ? 'Subir fotos' : 'Subir finales') + '</span></button>';
   var fig = mostrar.map(function(x){
     var esPort = g.cover_photo_id === x.id;
     return '<figure class="pn-ph' + (esPort ? ' cv' : '') + (marcadas.has(x.id) ? ' mk' : '') + (ic[x.id] ? ' pimp' : '') + '">' + (ic[x.id] ? '<span class="pn-pb" title="Marcada para imprimir">' + ico('impresiones') + (ic[x.id] > 1 ? '<i>' + ic[x.id] + '</i>' : '') + '</span>' : '') + '<span class="pn-ck' + (modoSel ? '' : ' off') + '" data-act="marcar" data-id="' + x.id + '">' + (marcadas.has(x.id) ? '✓' : '') + '</span>' +
-      '<img data-act="' + (modoSel ? 'marcar' : 'ver') + '" data-id="' + x.id + '" loading="lazy" alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '">' +
+      '<img data-act="' + (modoSel ? 'marcar' : 'ver') + '" data-id="' + x.id + '" loading="lazy" alt="" src="' + esc(thumbSrc(x.id)) + '">' +
       '<figcaption>' + esc(sinExt(x.filename)) + (esPort ? ' · Portada' : '') + (tipo === 'final' ? ' · ' + mb(x.file_size || 0) : '') + '</figcaption>' +
       '<button class="pn-ex" data-act="ver" data-id="' + x.id + '" type="button" aria-label="Ampliar" title="Ampliar">' + EXP + '</button></figure>';
   }).join('');
@@ -1626,7 +1637,7 @@ function dsPreview(g, sel){
   var nomEsc = es.length ? es[0].name : 'Ceremonia', estilo = g.grid_style || 'clasico';
   var st = '--pf:' + c.f + ';--pt:' + c.t + ';--ps:' + c.s + ';--pl:' + c.l + ';--pa:' + c.a + ';--pff:' + L[2] + ';--pfs:' + L[3] + ';--ptt:' + L[4] + ';--pls:' + L[5];
   var fecha = g.event_date ? new Date(g.event_date + 'T12:00:00').toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
-  var ims = fotos.length ? fotos.map(function(x){ return '<figure><img alt="" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"></figure>'; }).join('') : [1, 2, 3, 4, 5, 6].map(function(){ return '<figure class="vc"></figure>'; }).join('');
+  var ims = fotos.length ? fotos.map(function(x){ return '<figure><img alt="" src="' + esc(thumbSrc(x.id)) + '"></figure>'; }).join('') : [1, 2, 3, 4, 5, 6].map(function(){ return '<figure class="vc"></figure>'; }).join('');
   var gal0 = '<div class="ds-mg" style="' + st + '"><div class="ds-cv">' + (cvSrc ? '<img alt="" src="' + esc(cvSrc) + '">' : '') + '<div><h2>' + esc(g.title) + '</h2><span>' + esc(fecha) + '</span></div></div>' +
     '<div class="ds-nv"><b>Todas</b><span>Mis favoritas</span><span class="r">' + esc(ph.studio_name || '') + '</span></div>' +
     (ts === 'ocultos' ? '' : '<h3 class="ds-et ' + ts + '">' + esc(nomEsc) + '</h3>') +
@@ -1816,6 +1827,26 @@ async function accion(a, el){
     aviso(a === 'esc-ojo' ? (nuevo2 ? 'Galería cerrada: tu cliente verá un aviso para contactarte' : 'Galería abierta: tu cliente ya puede ver sus fotos') : a === 'esc-pago' ? (nuevo2 ? 'Escena pagada y entregada: en su enlace verá las finales sin marca de agua y podrá descargarlas e imprimirlas' : 'Pago quitado: en su enlace solo verá las finales con marca de agua, sin descargar ni imprimir') : (nuevo2 ? 'Escena entregada: solo su enlace la muestra con las fotos finales' : 'Entrega quitada de la escena'));
     return pintar();
   }
+  if (a === 'mini-crear') {
+    var mt = el.dataset.tipo || '', mf = (cur.fotos || []).filter(function(x){ return (!mt || x.photo_type === mt) && !miniTk[x.id]; });
+    if (!mf.length) return aviso('Todas las fotos ya tienen miniatura.');
+    if (!await seguro('¿Crear miniaturas para ' + mf.length + ' fotos? Así el panel cargará mucho más rápido. Tus originales no se tocan. Deja esta pestaña abierta.')) return;
+    var mtk = await firmar(mf.map(function(x){ return x.id; })), mss = (await db.auth.getSession()).data.session, mok = 0, mi2 = 0, mhechas = 0;
+    async function mtrab(){
+      while (mi2 < mf.length) {
+        var fx = mf[mi2++];
+        try {
+          var mr = await fetch(src(mtk[fx.id])), mb = await mr.blob();
+          if (await subirMini(mb, fx.id, mss.access_token)) mok++;
+        } catch (e) {}
+        mhechas++; aviso('Creando miniaturas ' + mhechas + ' de ' + mf.length + '…');
+      }
+    }
+    await Promise.all([mtrab(), mtrab(), mtrab()]);
+    try { await firmar(mf.map(function(x){ return x.id; })); } catch (e) {}
+    aviso(mok === mf.length ? 'Listo: ' + mok + ' miniaturas creadas' : mok + ' de ' + mf.length + ' creadas. ¿Ya ejecutaste etapa25.sql y actualizaste el Worker?');
+    return pintar();
+  }
   if (a === 'esc-optimizar' || a === 'fin-optimizar') {
     var fo = (cur.fotos || []).filter(function(x){ return x.photo_type === 'final' && (a === 'fin-optimizar' || x.scene_id === id); });
     if (!fo.length) return aviso('No hay fotos finales para optimizar.');
@@ -1887,7 +1918,7 @@ async function accion(a, el){
   }
   if (a === 'elegir-portada') {
     var s0 = cur ? cur.fotos.filter(function(x){ return x.photo_type === 'selection'; }) : [];
-    $('#pn-gport').innerHTML = s0.map(function(x){ return '<button class="pn-pbtn" data-act="portada" data-id="' + x.id + '"><img loading="lazy" alt="' + esc(sinExt(x.filename)) + '" src="' + (cur.tk[x.id] ? esc(src(cur.tk[x.id])) : '') + '"></button>'; }).join('');
+    $('#pn-gport').innerHTML = s0.map(function(x){ return '<button class="pn-pbtn" data-act="portada" data-id="' + x.id + '"><img loading="lazy" alt="' + esc(sinExt(x.filename)) + '" src="' + esc(thumbSrc(x.id)) + '"></button>'; }).join('');
     $('#pn-gpt').hidden = !s0.length; $('#pn-gport').hidden = !s0.length;
     return $('#pn-dport').showModal();
   }
