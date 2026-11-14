@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Fotos para imprimir</title>
+<link rel="icon" href="imagenes/logo-icono.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--f:#FAF6EF;--c:#F1EADF;--t:#2A2622;--s:#8A7A62;--l:#E3D9C8;--a:#B48B58}
+*{box-sizing:border-box;margin:0}
+body{background:var(--f);color:var(--t);font-family:Jost,system-ui,sans-serif;min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;padding:1.5rem 1.2rem}
+.card{width:min(30rem,100%);text-align:center;border:1px solid var(--l);border-radius:20px;background:var(--c);padding:2.2rem 1.6rem 1.8rem;position:relative}
+.card::before{content:'';position:absolute;inset:7px;border:1px solid var(--l);border-radius:14px;pointer-events:none}
+.logo{display:block;margin:0 auto 1.2rem;width:min(15rem,70%);height:auto}
+.kick{letter-spacing:.3em;font-size:.72rem;color:var(--s);text-transform:uppercase}
+h1{font:500 2rem/1.15 "Cormorant Garamond",Georgia,serif;margin:.5rem 0 .3rem}
+.sub{color:var(--s);font-size:.92rem}
+ul{list-style:none;padding:0;margin:1.4rem 0;border-top:1px solid var(--l)}
+li{display:flex;justify-content:space-between;gap:1rem;padding:.7rem .2rem;border-bottom:1px solid var(--l);font-size:.95rem;text-align:left}
+li span:last-child{color:var(--s);white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.6rem;background:var(--t);color:var(--f);border:0;border-radius:999px;padding:.95rem 2rem;font:inherit;font-size:1rem;letter-spacing:.04em;cursor:pointer;width:100%}
+.btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.btn:disabled{opacity:.6;cursor:default}
+.nota{color:var(--s);font-size:.8rem;margin-top:1rem;line-height:1.5}
+.barra{height:6px;border-radius:99px;background:var(--l);overflow:hidden;margin-top:1rem;display:none}.barra i{display:block;height:100%;width:0;background:var(--a);transition:width .3s}
+.err{color:#9B3A3A;font-size:.9rem;margin-top:.8rem;min-height:1.2em}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main class="card" id="cargando"><p class="sub">Abriendo…</p></main>
+<main class="card" id="malo" hidden>
+  <h1>Este enlace ya no está disponible</h1>
+  <p class="sub" style="margin-top:.8rem">Venció o fue desactivado. Pide uno nuevo a quien te lo envió.</p>
+</main>
+<main class="card" id="ok" hidden>
+  <img class="logo" id="lg" alt="" hidden>
+  <p class="kick">Fotos para imprimir</p>
+  <h1 id="tit"></h1>
+  <p class="sub" id="sub"></p>
+  <ul id="lista"></ul>
+  <button class="btn" id="bajar" type="button"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg><span id="bt">Descargar ZIP</span></button>
+  <div class="barra" id="barra"><i id="bi"></i></div>
+  <p class="err" id="err" role="status"></p>
+  <p class="nota" id="nota"></p>
+</main>
+<script>
+(function(){
+  var W = 'https://galerias-api.alexandergeerre.workers.dev';
+  var $ = function(s){ return document.querySelector(s); };
+  var T = new URLSearchParams(location.search).get('t') || '';
+  var D = null, bajando = false;
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function mostrar(id){ ['cargando', 'malo', 'ok'].forEach(function(x){ $('#' + x).hidden = x !== id; }); }
+  function post(p, b){ return fetch(W + p, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) }).then(function(r){ return r.json(); }); }
+
+  /* ----- ZIP sin compresión (las fotos ya vienen comprimidas) ----- */
+  var CRC_T = null;
+  function crc32(u8){
+    if (!CRC_T) { CRC_T = new Uint32Array(256); for (var n = 0; n < 256; n++) { var c0 = n; for (var k = 0; k < 8; k++) c0 = c0 & 1 ? 0xEDB88320 ^ (c0 >>> 1) : c0 >>> 1; CRC_T[n] = c0 >>> 0; } }
+    var c = 0xFFFFFFFF; for (var i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 255] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+  function zipNuevo(sink){
+    var off = 0, cen = [], enc = new TextEncoder(), d = new Date();
+    var dt = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xFFFF;
+    var dd = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xFFFF;
+    return {
+      add: async function(nombre, u8){
+        var nb = enc.encode(nombre), crc = crc32(u8), h = new DataView(new ArrayBuffer(30));
+        h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+        h.setUint16(10, dt, true); h.setUint16(12, dd, true); h.setUint32(14, crc, true); h.setUint32(18, u8.length, true); h.setUint32(22, u8.length, true);
+        h.setUint16(26, nb.length, true); h.setUint16(28, 0, true);
+        if (off + 30 + nb.length + u8.length > 0xFFFFFFF0) throw new Error('zip-grande');
+        cen.push({ nb: nb, crc: crc, n: u8.length, off: off });
+        await sink.write(new Uint8Array(h.buffer)); await sink.write(nb); await sink.write(u8);
+        off += 30 + nb.length + u8.length;
+      },
+      fin: async function(){
+        var ini = off, tam = 0;
+        for (var i = 0; i < cen.length; i++) {
+          var e = cen[i], c = new DataView(new ArrayBuffer(46));
+          c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+          c.setUint16(12, dt, true); c.setUint16(14, dd, true); c.setUint32(16, e.crc, true); c.setUint32(20, e.n, true); c.setUint32(24, e.n, true);
+          c.setUint16(28, e.nb.length, true); c.setUint32(42, e.off, true);
+          await sink.write(new Uint8Array(c.buffer)); await sink.write(e.nb); tam += 46 + e.nb.length;
+        }
+        var f = new DataView(new ArrayBuffer(22));
+        f.setUint32(0, 0x06054b50, true); f.setUint16(8, cen.length, true); f.setUint16(10, cen.length, true); f.setUint32(12, tam, true); f.setUint32(16, ini, true);
+        await sink.write(new Uint8Array(f.buffer));
+      }
+    };
+  }
+  function nombreSeguro(s){ return String(s || '').replace(/[\\\/:*?"<>|\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().replace(/[. ]+$/, '') || 'Fotos'; }
+  function porNombre(a, b){ return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' }); }
+
+  /* ----- Logo: el del estudio, o los archivos de la carpeta imagenes ----- */
+  function logo(E){
+    var im = $('#lg'), c = E && (E.logo_para_claro || E.logo_para_oscuro);
+    var lista = c ? [] : ['imagenes/logo-oscuro.png', 'imagenes/logo-oscuro.svg', 'imagenes/logo-oscuro.png.jpg', 'imagenes/logo-oscuro.jpg', 'imagenes/logo-claro.png'];
+    var i = 0;
+    function sig(){ if (i >= lista.length) { im.hidden = true; return; } im.src = lista[i++]; }
+    im.onerror = sig; im.onload = function(){ im.hidden = false; };
+    im.alt = (E && E.studio_name) || '';
+    if (c) im.src = c; else sig();
+  }
+
+  function fmtFecha(t){ try { return new Date(t).toLocaleDateString('es-GT', { weekday: 'long', day: 'numeric', month: 'long' }); } catch (e) { return ''; } }
+  function total(){ return D.escenas.reduce(function(s, g){ return s + g.fotos.length; }, 0); }
+
+  function cargar(){
+    if (!/^[A-Za-z0-9-]{16,64}$/.test(T)) return mostrar('malo');
+    post('/api/print/open', { t: T }).then(function(d){
+      if (!d || !d.ok) return mostrar('malo');
+      D = d; var n = total();
+      $('#tit').textContent = d.galeria || 'Fotos para imprimir';
+      $('#sub').textContent = n + (n === 1 ? ' foto original' : ' fotos originales');
+      $('#lista').innerHTML = d.escenas.map(function(g){ return '<li><span>' + (g.num ? esc(g.num + ' - ') : '') + esc(g.nombre) + '</span><span>' + g.fotos.length + (g.fotos.length === 1 ? ' foto' : ' fotos') + '</span></li>'; }).join('') || '<li><span>Aún no hay fotos marcadas</span><span></span></li>';
+      $('#bajar').disabled = !n;
+      $('#nota').textContent = 'Se descarga un ZIP con una carpeta por escena. Las fotos conservan su nombre original. Este enlace vence el ' + fmtFecha(d.expira) + '.';
+      document.title = 'Fotos para imprimir · ' + (d.galeria || '');
+      logo(d.estudio); mostrar('ok');
+    }).catch(function(){ mostrar('malo'); });
+  }
+
+  async function descargar(){
+    if (bajando || !D) return; var n = total(); if (!n) return;
+    var uno = D.escenas.length === 1 ? D.escenas[0] : null;
+    var base = (uno ? nombreSeguro((uno.num ? uno.num + ' - ' : '') + uno.nombre) : 'Impresiones') + ' - ' + nombreSeguro(D.galeria || 'Galería') + '.zip';
+    var escritor = null, partes = [], sink;
+    if (window.showSaveFilePicker) {
+      try {
+        var h = await window.showSaveFilePicker({ suggestedName: base, types: [{ description: 'Carpeta comprimida', accept: { 'application/zip': ['.zip'] } }] });
+        escritor = await h.createWritable(); sink = { write: function(u8){ return escritor.write(u8); } };
+      } catch (e) { if (e && e.name === 'AbortError') return; escritor = null; }
+    }
+    if (!escritor) sink = { write: function(u8){ partes.push(u8); } };
+    bajando = true; $('#bajar').disabled = true; $('#barra').style.display = 'block'; $('#err').textContent = '';
+    var hechas = 0, fallas = [], usados = {};
+    try {
+      var z = zipNuevo(sink);
+      for (var gi = 0; gi < D.escenas.length; gi++) {
+        var G = D.escenas[gi], carp = nombreSeguro((G.num ? G.num + ' - ' : '') + G.nombre);
+        var fs = G.fotos.slice().sort(function(a, b){ return porNombre(a.nombre, b.nombre); });
+        for (var i = 0; i < fs.length; i++) {
+          var f = fs[i], nm = nombreSeguro(f.nombre), ruta = carp + '/' + nm, n2 = 1;
+          while (usados[ruta.toLowerCase()]) { n2++; ruta = carp + '/' + nm.replace(/(\.[^.]*)?$/, ' (' + n2 + ')$1'); }
+          usados[ruta.toLowerCase()] = 1;
+          var buf = null;
+          for (var t = 0; t < 3 && !buf; t++) {
+            try { var r = await fetch(W + '/api/img?t=' + encodeURIComponent(f.t)); if (r.ok) buf = new Uint8Array(await r.arrayBuffer()); } catch (e) {}
+            if (!buf) await new Promise(function(ok){ setTimeout(ok, 700 * (t + 1)); });
+          }
+          if (buf && buf.length) await z.add(ruta, buf); else fallas.push(f.nombre);
+          hechas++; $('#bt').textContent = 'Preparando… ' + hechas + ' de ' + n; $('#bi').style.width = Math.round(hechas * 100 / n) + '%';
+        }
+      }
+      await z.fin();
+      if (escritor) await escritor.close();
+      else { var blob = new Blob(partes, { type: 'application/zip' }), u = URL.createObjectURL(blob), l = document.createElement('a'); l.href = u; l.download = base; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000); }
+      post('/api/print/done', { t: T }).catch(function(){});
+      $('#err').style.color = fallas.length ? '#9B3A3A' : '#4C7A55';
+      $('#err').textContent = fallas.length ? 'Listo, pero faltaron ' + fallas.length + ' fotos: ' + fallas.slice(0, 4).join(', ') + '. Vuelve a intentarlo.' : 'Listo: ' + hechas + ' fotos descargadas.';
+    } catch (e) {
+      if (escritor) { try { await escritor.abort(); } catch (x) {} }
+      $('#err').style.color = '#9B3A3A';
+      $('#err').textContent = e && e.message === 'zip-grande' ? 'Es demasiado grande para un solo archivo. Pide el enlace de cada escena por separado.' : 'No se pudo crear el ZIP. Revisa tu conexión e inténtalo de nuevo.';
+    }
+    bajando = false; $('#bajar').disabled = false; $('#bt').textContent = 'Descargar ZIP'; $('#barra').style.display = 'none'; $('#bi').style.width = '0';
+  }
+  $('#bajar').addEventListener('click', descargar);
+  cargar();
+})();
+</script>
+</body>
+</html>
