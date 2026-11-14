@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-var VERSION = 'V1.0.0.3';
+var VERSION = 'V1.0.0.5';
 var W = 'https://galerias-api.alexandergeerre.workers.dev';
 var BASE = 'https://alexandergeerre.github.io/galeria/cliente.html?c=';
 var BASEG = 'https://galerias-api.alexandergeerre.workers.dev/g/';
@@ -1053,6 +1053,15 @@ function vidPlayToggle(){
     vidDibuja(); vidRaf = requestAnimationFrame(f);
   })(vidLast);
 }
+// Nombre del archivo del video: el de la escena de las fotos elegidas (si son de varias escenas, las junta; si no hay escena, usa el de la galería)
+function vidNombreArchivo(g){
+  var nombres = [], mapa = {};
+  ((cur && cur.escenas) || []).forEach(function(e){ mapa[e.id] = e.name; });
+  var porFoto = {}; ((cur && cur.fotos) || []).forEach(function(x){ porFoto[x.id] = x.scene_id; });
+  vidIds.forEach(function(id){ var n = mapa[porFoto[id]]; if (n && nombres.indexOf(n) < 0) nombres.push(n); });
+  if (nombres.length >= 1 && nombres.length <= 3) return nombres.map(function(n){ return slug(n); }).join('-y-').slice(0, 60);
+  return slug(g ? g.title : 'galeria');
+}
 async function vidGenerar(){
   if (vidBusy) return;
   if (vidIds.length < 2) return aviso('Agrega al menos 2 fotos.');
@@ -1069,7 +1078,7 @@ async function vidGenerar(){
       var dm2 = VDIM[fmts[q]] || VDIM.v, kq = vidCal === '4k' ? 2 : 1, W = dm2[0] * kq, H = dm2[1] * kq, esc2 = window.Slideshow.crearEscena(fotos, W, H, vidSeg, vidOp());
       vidEstado('Creando el video ' + dm2[2] + '… no cierres esta pestaña.');
       var blob = await window.Slideshow.exportar(esc2, { fps: 30, bitrate: kq === 2 ? 28e6 : 8e6, codecs: kq === 2 ? ['avc1.640033', 'avc1.640034', 'avc1.4D0033'] : undefined, cancelado: function(){ return vidCancel; }, progreso: function(x){ vidBarra(0.25 + 0.75 * (q + x) / fmts.length); vidEstado('Creando el video ' + dm2[2] + '… ' + Math.round(x * 100) + '%'); } });
-      var u = URL.createObjectURL(blob), l = document.createElement('a'); l.href = u; l.download = 'slideshow-' + slug(g ? g.title : 'galeria') + '-' + (vidEstilo === 'pantalla' ? 'pantalla-' : vidEstilo === 'prisma' ? 'prisma-' : vidEstilo === 'carriles' ? 'bandas-' : vidEstilo === 'postales' ? 'postales-' : vidEstilo === 'estudio' ? 'estudio-' : vidEstilo === 'navidad' ? 'navidad-' : '') + dm2[2] + (kq === 2 ? '-4k' : '') + (vidMarca ? '' : '-sin-logo') + '.mp4'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000);
+      var u = URL.createObjectURL(blob), l = document.createElement('a'); l.href = u; l.download = vidNombreArchivo(g) + '-' + (vidEstilo === 'pantalla' ? 'pantalla-' : vidEstilo === 'prisma' ? 'prisma-' : vidEstilo === 'carriles' ? 'bandas-' : vidEstilo === 'postales' ? 'postales-' : vidEstilo === 'estudio' ? 'estudio-' : vidEstilo === 'navidad' ? 'navidad-' : '') + dm2[2] + (kq === 2 ? '-4k' : '') + (vidMarca ? '' : '-sin-logo') + '.mp4'; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000);
     }
     vidSem = Math.floor(Math.random() * 4e9); vidBarra(1); fin = 'Listo. El video se descargó en tu computadora.';
   } catch(e) { vidBarra(0); fin = e && e.message === 'cancelado' ? 'Cancelado.' : 'No se pudo crear el video: ' + (e && e.message ? e.message : 'error') + (vidCal === '4k' ? ' Si tu equipo no soporta 4K, elige Full HD.' : ''); }

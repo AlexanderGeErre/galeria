@@ -71,8 +71,16 @@ function carasClave(f){
   var c = f.caras || []; if (!c.length) return null;
   var mx = 0, i; for (i = 0; i < c.length; i++) mx = Math.max(mx, c[i].h);
   var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9, n = 0;
-  for (i = 0; i < c.length; i++) if (c[i].h >= mx * 0.4) { x0 = Math.min(x0, c[i].x); y0 = Math.min(y0, c[i].y); x1 = Math.max(x1, c[i].x + c[i].w); y1 = Math.max(y1, c[i].y + c[i].h); n++; }
+  for (i = 0; i < c.length; i++) if (c[i].h >= mx * 0.4 && (c[i].s == null || c[i].s >= 0.55)) { x0 = Math.min(x0, c[i].x); y0 = Math.min(y0, c[i].y); x1 = Math.max(x1, c[i].x + c[i].w); y1 = Math.max(y1, c[i].y + c[i].h); n++; }
   return n ? { x: x0, y: y0, w: x1 - x0, h: y1 - y0 } : null;
+}
+// Caja de las personas importantes: del rostro se estima el ancho de hombros y brazos (~2,8 veces el ancho de la cara), para no cortar a nadie al recortar.
+function cuerpoCaras(f){
+  var c = f.caras || []; if (!c.length) return null;
+  var mx = 0, i, d; for (i = 0; i < c.length; i++) mx = Math.max(mx, c[i].h);
+  var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9, n = 0;
+  for (i = 0; i < c.length; i++) { d = c[i]; if (d.h >= mx * 0.4 && (d.s == null || d.s >= 0.55)) { x0 = Math.min(x0, d.x + d.w / 2 - d.w * 1.4); x1 = Math.max(x1, d.x + d.w / 2 + d.w * 1.4); y0 = Math.min(y0, d.y - d.h * 0.35); y1 = Math.max(y1, d.y + d.h * 1.1); n++; } }
+  return n ? { x0: Math.max(0, x0), x1: Math.min(f.w, x1), y0: Math.max(0, y0), y1: Math.min(f.h, y1) } : null;
 }
 // Dibuja la foto cubriendo el rectángulo, centrada en los rostros. Si los rostros no caben
 // (con margen para el movimiento de zoom), no dibuja nada y devuelve false: quien llama usa la foto completa sobre su fondo desenfocado.
@@ -117,12 +125,12 @@ async function detectarCaras(fotos, progreso, cancelado){
   var pend = fotos.filter(function(f){ return f && !f.carasListas; });
   if (!pend.length) return true;
   try { await Promise.race([cargarCaras(), new Promise(function(ok, no){ setTimeout(function(){ no(new Error('tiempo')); }, 15000); })]); } catch (e) { return false; }
-  var i, f, k, c, g, ds, op = new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.4 });
+  var i, f, k, c, g, ds, op = new faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.5 });
   for (i = 0; i < pend.length; i++) {
     if (cancelado && cancelado()) return false;
     if (progreso) progreso(i, pend.length);
     f = pend[i]; k = Math.min(1, 800 / Math.max(f.w, f.h)); c = lienzo(f.w * k, f.h * k); g = c.getContext('2d'); g.drawImage(f.bmp, 0, 0, c.width, c.height);
-    try { ds = await faceapi.detectAllFaces(c, op); f.caras = ds.map(function(d){ var b = d.box || d.detection.box; return { x: b.x / k, y: b.y / k, w: b.width / k, h: b.height / k }; }).filter(function(b){ return b.h > f.h * 0.04; }); }
+    try { ds = await faceapi.detectAllFaces(c, op); f.caras = ds.map(function(d){ var b = d.box || d.detection.box; return { x: b.x / k, y: b.y / k, w: b.width / k, h: b.height / k, s: d.score != null ? d.score : (d.detection && d.detection.score) || 1 }; }).filter(function(b){ return b.h > f.h * 0.04; }); }
     catch (e) { f.caras = []; }
     f.carasListas = true; await dormir(0);
   }
@@ -141,7 +149,7 @@ async function cargarFoto(url){
 
 // ---------- Escena: dibuja el cuadro del tiempo t (segundos) ----------
 function ease(p){ p = clamp(p, 0, 1); return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
-var INTRO = 2.8, FIN_NAV = 3.4;
+var INTRO = 2.8, FIN_NAV = 4.8;
 function dcPostales(n){ return clamp((clamp(n * 1.5 + 2, 10, 45) - 1.4) / n, 0.9, 3.2); }
 // ---------- Marca: lema + usuario bajo el logo (inicio) y pantalla de cierre con contacto ----------
 var OUTRO = 3.6;
@@ -469,14 +477,21 @@ function crearEscenaNavidad(fotos, W, H, seg, op){
   var covs = {}, vigC = null, bgFin = null, cardsC = {};
   function cover(i){
     if (covs[i]) return covs[i];
-    var f = fotos[i], c = lienzo(W, H), x = c.getContext('2d'), s = Math.max(W / f.w, H / f.h), dw = f.w * s, dh = f.h * s;
+    var f = fotos[i], c = lienzo(W, H), x = c.getContext('2d'), s = Math.max(W / f.w, H / f.h), dw = f.w * s, dh = f.h * s, cb = cuerpoCaras(f);
     x.imageSmoothingQuality = 'high';
-    if (!carasClave(f)) x.drawImage(f.bmp, (W - dw) / 2, -(dh - H) * 0.36, dw, dh);
-    else if (!cubrirCaras(x, f, 0, 0, W, H)) {
-      // Los rostros no caben en un recorte a pantalla completa: fondo = la misma foto desenfocada llenando todo, y encima la foto entera centrada.
-      x.drawImage(f.bmp, (W - dw) / 2, (H - dh) / 2, dw, dh);
-      try { desenfocar(c, Math.max(8, Math.round(Math.min(W, H) / 28))); } catch (e) {}
-      var k2 = Math.min(W / f.w, H / f.h); x.drawImage(f.bmp, (W - f.w * k2) / 2, (H - f.h * k2) / 2, f.w * k2, f.h * k2);
+    if (!cb) x.drawImage(f.bmp, (W - dw) / 2, -(dh - H) * 0.36, dw, dh);
+    else {
+      // Recorte a pantalla completa centrado en las personas; solo se usa si las personas COMPLETAS (rostro, hombros y brazos) caben con margen
+      var sw = W / s, sh = H / s, sx = clamp((cb.x0 + cb.x1) / 2 - sw / 2, 0, f.w - sw), sy = clamp((cb.y0 + cb.y1) / 2 - sh * 0.46, 0, f.h - sh), mx = sw * 0.055, my = sh * 0.06;
+      if (cb.x0 >= sx + mx && cb.x1 <= sx + sw - mx && cb.y0 >= sy + my && cb.y1 <= sy + sh - my) x.drawImage(f.bmp, sx, sy, sw, sh, 0, 0, W, H);
+      else {
+        // No caben: fondo = la misma foto desenfocada llenando todo; encima, la zona de las personas (con aire alrededor) ajustada a la pantalla
+        x.drawImage(f.bmp, (W - dw) / 2, (H - dh) / 2, dw, dh);
+        try { desenfocar(c, Math.max(8, Math.round(Math.min(W, H) / 28))); } catch (e) {}
+        x.fillStyle = 'rgba(0,0,0,.18)'; x.fillRect(0, 0, W, H);
+        var pad = (cb.x1 - cb.x0) * 0.08, rx0 = Math.max(0, cb.x0 - pad), rx1 = Math.min(f.w, cb.x1 + pad), rw = rx1 - rx0, k2 = Math.min(W / rw, H / f.h), ww = rw * k2, hh = f.h * k2;
+        x.save(); x.shadowColor = 'rgba(0,0,0,.45)'; x.shadowBlur = 26 * u; x.shadowOffsetY = 6 * u; x.drawImage(f.bmp, rx0, 0, rw, f.h, (W - ww) / 2, (H - hh) / 2, ww, hh); x.restore();
+      }
     }
     covs[i] = c; var ks = Object.keys(covs); if (ks.length > 4) delete covs[ks[0]];
     return c;
@@ -487,12 +502,38 @@ function crearEscenaNavidad(fotos, W, H, seg, op){
   }
   // Velocidad del barrido -> longitud del desenfoque de movimiento
   function velBlur(q){ var q0 = clamp(q - 0.02, 0, 1), q1 = clamp(q + 0.02, 0, 1), dq = q1 - q0 || 1; return Math.abs((ease(q1) - ease(q0)) / dq) * W * 1.05 / TW * 0.085; }
-  function muestras(bl){ return bl > 3 ? Math.min(64, Math.ceil(bl / (5 * u)) + 3) : 1; }
+  function muestras(bl){ return bl > 3 ? Math.min(26, Math.ceil(bl / (26 * u)) + 4) : 1; }
   // Dibuja una capa varias veces a lo largo de su recorrido y promedia (desenfoque de movimiento horizontal)
-  function barrido(cx, src, ox, bl, z){
-    var K = muestras(bl), kq, sx, zz = z || 1, dw = W * zz, dh = H * zz;
-    for (kq = 0; kq < K; kq++) { sx = K > 1 ? (kq / (K - 1) - 0.5) * bl : 0; cx.globalAlpha = 1 / (kq + 1); cx.drawImage(src, ox + sx + (W - dw) / 2, (H - dh) / 2, dw, dh); }
+  function barrido(cx, src, ox, bl, z, ga){
+    var K = muestras(bl), kq, sx, zz = z || 1, dw = W * zz, dh = H * zz, g0 = ga == null ? 1 : ga;
+    for (kq = 0; kq < K; kq++) { sx = K > 1 ? (kq / (K - 1) - 0.5) * bl : 0; cx.globalAlpha = g0 / (kq + 1); cx.drawImage(src, ox + sx + (W - dw) / 2, (H - dh) / 2, dw, dh); }
     cx.globalAlpha = 1;
+  }
+  // Blanco y negro -> color con una línea que recorre la foto (sin manijas): la parte que la línea ya pasó queda a color
+  var grisC = {}, compC = null;
+  function gris(i){
+    if (grisC[i]) return grisC[i];
+    var src = cover(i), c = lienzo(W, H), x = c.getContext('2d'); x.drawImage(src, 0, 0);
+    try {
+      var d = x.getImageData(0, 0, W, H), p = d.data, q, l;
+      for (q = 0; q < p.length; q += 4) { l = 0.299 * p[q] + 0.587 * p[q + 1] + 0.114 * p[q + 2]; l = (l - 128) * 1.06 + 128 + 4; l = l < 0 ? 0 : l > 255 ? 255 : l; p[q] = p[q + 1] = p[q + 2] = l; }
+      x.putImageData(d, 0, 0);
+    } catch (e) {}
+    grisC[i] = c; var ks = Object.keys(grisC); if (ks.length > 3) delete grisC[ks[0]];
+    return c;
+  }
+  var REV_T0 = 0.5, REV_DUR = 0.8;
+  function foto(i, t, be){
+    var r = ease(clamp((t - (be + REV_T0)) / REV_DUR, 0, 1));
+    if (r <= 0) return gris(i);
+    if (r >= 1) return cover(i);
+    if (!compC) compC = lienzo(W, H);
+    var x = compC.getContext('2d'), der = i % 2 === 0, lx = der ? r * W : (1 - r) * W;
+    x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.drawImage(gris(i), 0, 0);
+    x.save(); x.beginPath(); if (der) x.rect(0, 0, lx, H); else x.rect(lx, 0, W - lx, H); x.clip(); x.drawImage(cover(i), 0, 0); x.restore();
+    var lw = Math.max(2, 2.4 * u);
+    x.save(); x.shadowColor = 'rgba(255,255,255,.55)'; x.shadowBlur = 10 * u; x.fillStyle = 'rgba(255,255,255,.96)'; x.fillRect(lx - lw / 2, 0, lw, H); x.restore();
+    return compC;
   }
   function intro(cx, t){
     var a = clamp((t - 0.3) / 0.9, 0, 1), e = ease(a), sal = 1;
@@ -516,28 +557,64 @@ function crearEscenaNavidad(fotos, W, H, seg, op){
     }
     cx.drawImage(bgFin, 0, 0);
   }
-  function tarjetaFin(i){
-    if (cardsC[i]) return cardsC[i];
-    var f = fotos[i], bw = W * (vert ? 0.50 : 0.27), bh = H * (vert ? 0.40 : 0.62), kk = Math.min(bw / f.w, bh / f.h), dw = Math.round(f.w * kk), dh = Math.round(f.h * kk), m = Math.round(26 * u), r = 14 * u;
-    var c = lienzo(dw + 2 * m, dh + 2 * m), x = c.getContext('2d');
-    x.shadowColor = 'rgba(0,0,0,.55)'; x.shadowBlur = 22 * u; x.shadowOffsetY = 8 * u; x.fillStyle = '#000';
+  // Final: mosaico con TODAS las fotos de la escena llenando la pantalla. Las tarjetas (esquinas redondeadas, sombra, ligeramente inclinadas) se abren desde el centro, como el abanico del video de referencia.
+  var mos = null;
+  function mosaico(){
+    if (mos) return mos;
+    var M = Math.max(n, 12), it = [], R, j, r, q, ar = [], gut = 14 * u, Wl = W * 1.04, mejor = null, sumA = 0;
+    for (j = 0; j < M; j++) { it.push(j % n); ar.push(fotos[j % n].w / fotos[j % n].h); sumA += ar[j]; }
+    // reparte las fotos en filas equilibradas (R filas) y elige la cantidad de filas cuya altura total cubre la pantalla con el menor sobrante
+    function filas(R){
+      var out = [], pos = 0, rest = sumA, rr, fila, acum, objetivo;
+      for (rr = 0; rr < R; rr++) {
+        objetivo = rest / (R - rr); fila = []; acum = 0;
+        while (pos < M && (fila.length === 0 || rr === R - 1 || (M - pos > R - 1 - rr && acum + ar[pos] / 2 <= objetivo))) { fila.push(pos); acum += ar[pos]; pos++; }
+        rest -= acum; out.push({ idx: fila, suma: acum });
+      }
+      return out;
+    }
+    for (R = 1; R <= M; R++) {
+      var fl = filas(R), Ht = 0, ok2 = true;
+      for (r = 0; r < fl.length; r++) { if (!fl[r].idx.length) { ok2 = false; break; } fl[r].h = (Wl - gut * (fl[r].idx.length - 1)) / fl[r].suma; Ht += fl[r].h; }
+      if (!ok2) continue; Ht += gut * (R - 1);
+      var cumple = Ht >= H * 1.0, score = cumple ? Ht - H : 1e9 + (H - Ht);
+      if (!mejor || score < mejor.score) mejor = { score: score, fl: fl, Ht: Ht };
+    }
+    var fl2 = mejor.fl, Ht2 = mejor.Ht, k = Math.max(1, H * 1.02 / Ht2), y = (H - Ht2 * k) / 2, cards = [];
+    for (r = 0; r < fl2.length; r++) {
+      var hh = fl2[r].h * k, nW = fl2[r].idx.length, xx = (W - Wl * k) / 2;
+      for (q = 0; q < nW; q++) {
+        j = fl2[r].idx[q]; var ww = ar[j] * fl2[r].h * k;
+        cards.push({ j: j, i: it[j], x: xx + ww / 2, y: y + hh / 2, w: ww, h: hh, rot: (rnd() - 0.5) * 0.12 });
+        xx += ww + gut * k;
+      }
+      y += hh + gut * k;
+    }
+    // orden de aparición: del centro hacia afuera
+    cards.forEach(function(c){ c.d = Math.hypot(c.x - W / 2, (c.y - H / 2) * (W / H)); });
+    var ord = cards.slice().sort(function(a1, b1){ return a1.d - b1.d; });
+    ord.forEach(function(c, ix){ c.t0 = 0.12 + (ix / Math.max(1, ord.length - 1)) * 1.5; c.a0 = (rnd() - 0.5) * 0.9; c.fz = rnd() * 6.28; });
+    mos = { cards: cards, ord: ord };
+    return mos;
+  }
+  function tarjetaMos(c){
+    if (c.can) return c.can;
+    var sc = 1.07, m = Math.round(24 * u), dw = Math.max(8, Math.round(c.w * sc)), dh = Math.max(8, Math.round(c.h * sc)), r = Math.min(dw, dh) * 0.07;
+    var cv = lienzo(dw + 2 * m, dh + 2 * m), x = cv.getContext('2d'), f = fotos[c.i];
+    x.shadowColor = 'rgba(0,0,0,.5)'; x.shadowBlur = 16 * u; x.shadowOffsetY = 5 * u; x.fillStyle = '#000';
     x.beginPath(); if (x.roundRect) x.roundRect(m, m, dw, dh, r); else x.rect(m, m, dw, dh); x.fill();
     x.shadowColor = 'transparent'; x.save(); x.beginPath(); if (x.roundRect) x.roundRect(m, m, dw, dh, r); else x.rect(m, m, dw, dh); x.clip(); x.imageSmoothingQuality = 'high'; x.drawImage(f.bmp, m, m, dw, dh); x.restore();
-    c._m = m; cardsC[i] = c; return c;
+    c.can = cv; return cv;
   }
   function cartasFin(cx, ft){
     if (ft <= 0) return;
-    var cI = n - 1, lI = n >= 3 ? Math.max(0, n - 3) : (n === 2 ? 0 : -1), rI = n >= 3 ? n - 2 : -1;
-    var ce = ease(clamp((ft - 0.08) / 0.8, 0, 1)), fe = ease(clamp((ft - 0.5) / 0.8, 0, 1)), cy = H * (vert ? 0.50 : 0.52) + Math.sin(ft * 1.1) * 5 * u * fe;
-    function una(i, dx, rot, esc, al){
-      if (i < 0 || al <= 0.01) return; var c = tarjetaFin(i);
-      cx.save(); cx.globalAlpha = al; cx.translate(W / 2 + dx, cy); cx.rotate(rot); cx.scale(esc, esc); cx.drawImage(c, -c.width / 2, -c.height / 2); cx.restore();
+    var mo = mosaico(), fe = ease(clamp((ft - 2.2) / 1.2, 0, 1)), ix, c, p, e, cv, px, py, rt, es, al;
+    for (ix = mo.ord.length - 1; ix >= 0; ix--) {
+      c = mo.ord[ix]; p = clamp((ft - c.t0) / 0.9, 0, 1); if (p <= 0) continue; e = ease(p);
+      px = lerp(W / 2, c.x, e); py = lerp(H / 2, c.y, e) + Math.sin(ft * 1.1 + c.fz) * 3.5 * u * fe;
+      rt = lerp(c.a0, c.rot, e); es = lerp(0.3, 1, e); al = clamp(p * 2.4, 0, 1);
+      cv = tarjetaMos(c); cx.globalAlpha = al; cx.save(); cx.translate(px, py); cx.rotate(rt); cx.scale(es, es); cx.drawImage(cv, -cv.width / 2, -cv.height / 2); cx.restore();
     }
-    var cw = tarjetaFin(cI).width - 2 * tarjetaFin(cI)._m;
-    una(lI, -cw * 0.62 * fe, -0.10 * fe, 0.93, fe); una(rI, cw * 0.62 * fe, 0.10 * fe, 0.93, fe);
-    // la tarjeta central llega deslizándose desde la derecha con un poco de desenfoque
-    var ox = (1 - ce) * W * 0.95, bl = ce < 1 ? velBlur(clamp((ft - 0.08) / 0.8, 0, 1)) * 0.55 : 0, K = muestras(bl), kq, sx, c0 = tarjetaFin(cI);
-    for (kq = 0; kq < K; kq++) { sx = K > 1 ? (kq / (K - 1) - 0.5) * bl : 0; cx.globalAlpha = Math.min(1, ce * 3) / (kq + 1); cx.drawImage(c0, W / 2 + ox + sx - c0.width / 2, cy - c0.height / 2); }
     cx.globalAlpha = 1;
   }
   function dibujar(cx, t){
@@ -558,8 +635,10 @@ function crearEscenaNavidad(fotos, W, H, seg, op){
       pe = (i > 0 || I > 0) ? wp(t, be) : 1; px = wp(t, bx2);
       if (pe <= 0 || px >= 1) continue;
       ox = (1 - ease(pe)) * W * 1.05 - ease(px) * W * 1.05;
-      bl = pe < 1 ? velBlur(pe) : (px > 0 ? velBlur(px) : 0);
-      barrido(cx, cover(i), ox, bl, 1 + 0.05 * clamp((t - be) / (D + TW), 0, 1));
+      bl = (pe < 1 ? velBlur(pe) : (px > 0 ? velBlur(px) : 0)) * 1.2;
+      // zoom: la foto entra algo más cerca y se aleja despacio (como en el video de referencia); entra mezclándose con la anterior
+      var zq = clamp((t - be) / (D + TW * 0.5), 0, 1), zz = 1 + 0.10 * Math.pow(1 - zq, 2.4), ga = pe < 1 ? clamp(ease(pe) * 1.8, 0, 1) : 1;
+      barrido(cx, foto(i, t, be), ox, bl, zz, ga);
     }
     vineta(cx);
     cartasFin(cx, t - tFin);
