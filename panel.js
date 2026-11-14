@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-var VERSION = 'V1.0.0.1';
+var VERSION = 'V1.0.0.2';
 var W = 'https://galerias-api.alexandergeerre.workers.dev';
 var BASE = 'https://alexandergeerre.github.io/galeria/cliente.html?c=';
 var BASEG = 'https://galerias-api.alexandergeerre.workers.dev/g/';
@@ -294,6 +294,8 @@ async function firmar(ids, original){
   return out;
 }
 function src(t){ return W + '/api/img?t=' + encodeURIComponent(t); }
+// Bajar una imagen como archivo: si la copia guardada en caché no trae permiso CORS, se vuelve a pedir al servidor
+async function bajarImg(u){ try { return await fetch(u, { mode: 'cors' }); } catch (e) { return await fetch(u, { mode: 'cors', cache: 'reload' }); } }
 // Cuadrículas: usa la miniatura liviana si existe; si no, la copia normal
 function thumbSrc(id){ var t = miniTk[id] || (cur && cur.tk && cur.tk[id]); return t ? src(t) : ''; }
 
@@ -527,7 +529,7 @@ async function zipImpresiones(escId){
         usados[ruta.toLowerCase()] = 1;
         var buf = null;
         for (var t = 0; t < 3 && !buf && tk[id]; t++) {
-          try { var r = await fetch(src(tk[id])); if (r.ok) buf = new Uint8Array(await r.arrayBuffer()); } catch (e) {}
+          try { var r = await bajarImg(src(tk[id])); if (r.ok) buf = new Uint8Array(await r.arrayBuffer()); } catch (e) {}
           if (!buf) await new Promise(function(ok){ setTimeout(ok, 600 * (t + 1)); });
         }
         if (buf && buf.length) await z.add(ruta, buf); else fallas.push(nomF[id]);
@@ -1836,7 +1838,7 @@ async function accion(a, el){
       while (mi2 < mf.length) {
         var fx = mf[mi2++];
         try {
-          var mr = await fetch(src(mtk[fx.id])), mb = await mr.blob();
+          var mr = await bajarImg(src(mtk[fx.id])), mb = await mr.blob();
           if (await subirMini(mb, fx.id, mss.access_token)) mok++;
         } catch (e) {}
         mhechas++; aviso('Creando miniaturas ' + mhechas + ' de ' + mf.length + '…');
@@ -1858,7 +1860,7 @@ async function accion(a, el){
     for (var oi = 0; oi < pend.length; oi++) {
       aviso('Optimizando ' + (oi + 1) + ' de ' + pend.length + '…');
       try {
-        var rb = await fetch(src(tko[pend[oi].id])), bb = await rb.blob(), vv2 = await reducir(bb, null, 'vista');
+        var rb = await bajarImg(src(tko[pend[oi].id])), bb = await rb.blob(), vv2 = await reducir(bb, null, 'vista');
         var ru = await fetch(W + '/api/upload-preview?photo=' + pend[oi].id + '&view=1', { method: 'POST', headers: { Authorization: 'Bearer ' + sso.access_token, 'Content-Type': 'image/jpeg' }, body: vv2.blob });
         var dj = await ru.json().catch(function(){ return {}; }); if (dj.ok) okk++;
       } catch (e) {}

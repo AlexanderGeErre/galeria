@@ -132,7 +132,7 @@ async function detectarCaras(fotos, progreso, cancelado){
 
 // Fotos: se reducen a 1800 px por el lado largo para cuidar la memoria.
 async function cargarFoto(url){
-  var r = await fetch(url, { mode: 'cors' }); if (!r.ok) throw new Error('No se pudo leer una foto (' + r.status + ').');
+  var r; try { r = await fetch(url, { mode: 'cors' }); } catch (e0) { r = await fetch(url, { mode: 'cors', cache: 'reload' }); } if (!r.ok) throw new Error('No se pudo leer una foto (' + r.status + ').');
   var blob = await r.blob(), bmp = await createImageBitmap(blob, { imageOrientation: 'from-image' });
   var k = Math.min(1, 1800 / Math.max(bmp.width, bmp.height));
   if (k < 1) { var r2 = await createImageBitmap(bmp, { resizeWidth: Math.round(bmp.width * k), resizeHeight: Math.round(bmp.height * k), resizeQuality: 'high' }); bmp.close(); bmp = r2; }
