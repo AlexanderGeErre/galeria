@@ -106,6 +106,20 @@ body.cp .tabs{top:auto}
 .barra{left:0;right:0;margin:0 auto;transform:none;bottom:calc(88px + env(safe-area-inset-bottom));width:max-content;max-width:calc(100vw - 20px);border:1px solid var(--l);border-radius:999px;padding:.45rem .5rem .45rem 1.2rem;gap:.9rem;white-space:nowrap;box-shadow:0 8px 26px rgba(0,0,0,.18);z-index:19}
 @supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.barra{background:color-mix(in srgb,var(--c) 70%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5)}}
 .barra .btn{border-radius:999px;padding:.55rem 1.1rem}
+
+/* Visor: alto real visible (iPhone) y botones en una barra de vidrio abajo */
+#visor{height:100vh;height:100dvh;inset:0;overflow:hidden;background:#151413}
+#visor .pr,#visor .co,#visor .dlv{bottom:calc(1rem + env(safe-area-inset-bottom));z-index:4;height:46px;display:flex;align-items:center;justify-content:center;gap:.45rem;margin:0;border-radius:999px;font-size:.95rem;line-height:1;
+ background:color-mix(in srgb,#fff 20%,transparent);color:#fff;border:1px solid rgba(255,255,255,.38);backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);box-shadow:0 6px 22px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.35)}
+#visor .pr{left:1rem;transform:none;padding:0 1.05rem 0 .85rem}
+#visor .pr span{display:inline}
+#visor .pr[aria-pressed=true]{background:color-mix(in srgb,var(--a) 62%,transparent);border-color:var(--a)}
+#visor .co{left:50%;right:auto;transform:translateX(-50%);width:46px;padding:0}
+#visor .co svg{width:22px;height:22px}#visor .co[aria-pressed=true]{background:var(--a);border-color:var(--a);color:var(--o)}
+#visor .dlv{right:1rem;left:auto;padding:0 1.15rem;text-decoration:none}
+#visor .nm{bottom:auto;top:1.1rem;left:50%;transform:translateX(-50%);max-width:40%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+@media(max-width:600px){#visor img{inset:3.4rem 0 calc(5.2rem + env(safe-area-inset-bottom));height:calc(100% - 8.6rem - env(safe-area-inset-bottom))}#visor .nm{display:none}}
+#visor .pl,#visor .x{outline:none}
 </style>
 </head>
 <body>
