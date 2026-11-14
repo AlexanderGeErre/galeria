@@ -141,7 +141,7 @@ async function cargarFoto(url){
 
 // ---------- Escena: dibuja el cuadro del tiempo t (segundos) ----------
 function ease(p){ p = clamp(p, 0, 1); return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
-var INTRO = 2.8;
+var INTRO = 2.8, FIN_NAV = 3.4;
 function dcPostales(n){ return clamp((clamp(n * 1.5 + 2, 10, 45) - 1.4) / n, 0.9, 3.2); }
 // ---------- Marca: lema + usuario bajo el logo (inicio) y pantalla de cierre con contacto ----------
 var OUTRO = 3.6;
@@ -209,7 +209,7 @@ function crearEscena(fotos, W, H, seg, op){
   };
   return r;
 }
-function duracionTotal(n, seg, estilo, intro){ var d = seg || 2.5; if (estilo === 'postales') return n * dcPostales(n) + 1.4 + (intro ? INTRO : 0); if (estilo === 'carriles') return clamp(n * 1.7, 12, 45) + (intro ? INTRO : 0); if (estilo === 'prisma') return Math.floor(n / 2) * 2 * d + (intro ? INTRO : 0); return n * d + (estilo === 'pantalla' ? Math.max(0, Math.max(d, 3.2) - d) : 0) + (intro ? INTRO : 0); }
+function duracionTotal(n, seg, estilo, intro){ var d = seg || 2.5; if (estilo === 'postales') return n * dcPostales(n) + 1.4 + (intro ? INTRO : 0); if (estilo === 'carriles') return clamp(n * 1.7, 12, 45) + (intro ? INTRO : 0); if (estilo === 'prisma') return Math.floor(n / 2) * 2 * d + (intro ? INTRO : 0); if (estilo === 'navidad') return n * d + FIN_NAV + (intro ? INTRO : 0); return n * d + (estilo === 'pantalla' ? Math.max(0, Math.max(d, 3.2) - d) : 0) + (intro ? INTRO : 0); }
 // Desenfoque propio (no depende del navegador: funciona igual en iPhone y Android). Tres pasadas de promedio = suavidad tipo gaussiano.
 function desenfocar(c, r){
   var x = c.getContext('2d'), w = c.width, h = c.height, d = x.getImageData(0, 0, w, h), p = d.data, t = new Uint8ClampedArray(p.length), n = 3;
@@ -333,7 +333,7 @@ function crearEscenaEstudio(fotos, W, H, seg, op){
   for (k = 0; k < n; k++) { do { c = DIRS[Math.floor(rnd() * 3)]; } while (c === pd); dirs.push(c); pd = c; }
   // La foto es la protagonista. Se llena la pantalla solo si se ve casi toda la foto y NINGUNA persona queda cortada
   // (el recorte se centra en todas las caras detectadas). Si el formato no alcanza, la foto se muestra completa, centrada,
-  // sobre un fondo de estudio (luz suave, viñeta y filete dorado fino).
+  // sobre un fondo de estudio (luz suave, vineta y filete dorado fino).
   var vent = {}, fondosE = {};
   function carasTodas(f){
     var c = f.caras || []; if (!c.length) return null;
@@ -410,8 +410,169 @@ function crearEscenaEstudio(fotos, W, H, seg, op){
   return { W: W, H: H, duracion: duracion, dibujar: dibujar, n: n, seg: D, estilo: 'estudio' };
 }
 
+// ---------- Plantilla «Navidad»: tarjetas 3D que giran entre nieve con profundidad, dorado y brillos ----------
+function crearEscenaNavidad(fotos, W, H, seg, op){
+  var n = fotos.length, D = seg || 2.5, vert = H > W, u = Math.min(W, H) / 1080, I = op.intro ? INTRO : 0, TW = 0.42, duracion = n * D + I + FIN_NAV;
+  var logo = op.logo || null, rnd = mulberry((op.semilla != null ? op.semilla : 777) >>> 0), ORO = '#D9B77A';
+  var bufI = null, fondoBase = null, sprites = {}, bokeh = [], capas = [], k, j;
+  function lerp(a, b, p){ return a + (b - a) * p; }
+  // Sprites suaves de nieve (se dibujan miles de veces: se preparan una sola vez)
+  function sprite(r, blando){
+    var key = r + (blando ? 'b' : 'n'); if (sprites[key]) return sprites[key];
+    var s = Math.max(4, Math.ceil(r * 2 + 4)), c = lienzo(s, s), x = c.getContext('2d'), g = x.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+    if (blando) { g.addColorStop(0, 'rgba(255,248,235,.55)'); g.addColorStop(0.6, 'rgba(255,244,225,.22)'); g.addColorStop(1, 'rgba(255,240,215,0)'); }
+    else { g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.45, 'rgba(255,252,245,.85)'); g.addColorStop(1, 'rgba(255,250,240,0)'); }
+    x.fillStyle = g; x.fillRect(0, 0, s, s); sprites[key] = c; return c;
+  }
+  // Tres capas de nieve: fondo (pequeña y tenue), media y frente (grandes y desenfocadas, pasan delante de la foto)
+  var DEF = [{ n: 150, r0: 1.8, r1: 3.8, v0: 26, v1: 55, a: 0.75, blando: false, frente: false }, { n: 85, r0: 3.6, r1: 7.5, v0: 55, v1: 100, a: 0.95, blando: false, frente: false }, { n: 22, r0: 22, r1: 48, v0: 130, v1: 220, a: 1, blando: true, frente: true }];
+  DEF.forEach(function(d){ var arr = []; for (k = 0; k < d.n; k++) arr.push({ x: rnd(), y0: rnd(), r: lerp(d.r0, d.r1, rnd()), v: lerp(d.v0, d.v1, rnd()), ph: rnd() * 6.28, am: 14 + rnd() * 30, fr: 0.4 + rnd() * 0.9, al: d.a * (0.55 + rnd() * 0.45) }); capas.push({ d: d, p: arr }); });
+  for (k = 0; k < 22; k++) bokeh.push({ x: rnd(), y: rnd(), r: 18 + rnd() * 46, ph: rnd() * 6.28, f: 0.25 + rnd() * 0.4, al: 0.05 + rnd() * 0.09 });
+  // Viento: cada barrido empuja la nieve de lado (acumulado, para que el movimiento sea continuo)
+  var FRONT = [];
+  if (I > 0) FRONT.push(I);
+  for (k = 1; k <= n; k++) FRONT.push(I + k * D);
+  function wp(t, B){ return clamp((t - (B - TW / 2)) / TW, 0, 1); }
+  function viento(t){ var w = 0, q; for (q = 0; q < FRONT.length; q++) w += ease(wp(t, FRONT[q])); return w * W * 0.10; }
+  function nieve(cx, t, frente){
+    var wv = viento(t), c, p, i, d, x, y, rr, M = 60 * u;
+    for (c = 0; c < capas.length; c++) {
+      if (capas[c].d.frente !== frente) continue;
+      d = capas[c].d; var par = (c + 1) * 0.55;
+      for (i = 0; i < capas[c].p.length; i++) {
+        p = capas[c].p[i]; rr = p.r * u;
+        y = ((p.y0 * (H + 2 * M) + p.v * u * t) % (H + 2 * M)) - M;
+        x = (((p.x * (W + 2 * M) + Math.sin(t * p.fr + p.ph) * p.am * u + wv * par) % (W + 2 * M)) + (W + 2 * M)) % (W + 2 * M) - M;
+        var tw = 0.75 + 0.25 * Math.sin(t * 2 + p.ph * 3);
+        cx.globalAlpha = p.al * tw; var sp = sprite(Math.round(rr), d.blando), sz = sp.width * (d.blando ? 1 : 1); cx.drawImage(sp, x - sz / 2, y - sz / 2, sz, sz);
+      }
+    }
+    cx.globalAlpha = 1;
+  }
+  function fondo(cx, t, tono){
+    if (!fondoBase) {
+      fondoBase = lienzo(W, H); var x = fondoBase.getContext('2d'), M = Math.max(W, H);
+      x.fillStyle = '#0b0907'; x.fillRect(0, 0, W, H);
+      var g = x.createRadialGradient(W / 2, H * 0.42, 0, W / 2, H * 0.42, M * 0.75); g.addColorStop(0, '#2a2118'); g.addColorStop(0.5, '#15110d'); g.addColorStop(1, '#080605'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+      var g2 = x.createLinearGradient(0, H, 0, H * 0.55); g2.addColorStop(0, 'rgba(201,168,119,.13)'); g2.addColorStop(1, 'rgba(201,168,119,0)'); x.fillStyle = g2; x.fillRect(0, 0, W, H);
+    }
+    cx.drawImage(fondoBase, 0, 0);
+    if (tono) { var g3 = cx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.6); g3.addColorStop(0, 'rgba(' + tono.join(',') + ',.16)'); g3.addColorStop(1, 'rgba(' + tono.join(',') + ',0)'); cx.fillStyle = g3; cx.fillRect(0, 0, W, H); }
+    var i, b, sp;
+    for (i = 0; i < bokeh.length; i++) { b = bokeh[i]; sp = sprite(Math.round(b.r * u), true); var a = b.al * (0.6 + 0.4 * Math.sin(t * b.f + b.ph)); cx.globalAlpha = a * 2.2; cx.globalCompositeOperation = 'lighter'; var bx = b.x * W + Math.sin(t * b.f * 0.6 + b.ph) * 20 * u, by = b.y * H + Math.cos(t * b.f * 0.5 + b.ph) * 14 * u; cx.drawImage(sp, bx - sp.width / 2, by - sp.height / 2); }
+    cx.globalCompositeOperation = 'source-over'; cx.globalAlpha = 1;
+    // Marco dorado fino alrededor de toda la imagen
+    cx.strokeStyle = 'rgba(217,183,122,.45)'; cx.lineWidth = Math.max(1, 1.6 * u); var m1 = 26 * u; cx.strokeRect(m1, m1, W - 2 * m1, H - 2 * m1);
+    cx.strokeStyle = 'rgba(217,183,122,.22)'; var m2 = 36 * u; cx.strokeRect(m2, m2, W - 2 * m2, H - 2 * m2);
+  }
+  // Foto a pantalla completa (recorte tipo "cover", sin deformar; si sobra alto se prefiere conservar la parte de arriba donde suelen estar las caras)
+  var covs = {}, vigC = null, bgFin = null, cardsC = {};
+  function cover(i){
+    if (covs[i]) return covs[i];
+    var f = fotos[i], c = lienzo(W, H), x = c.getContext('2d'), s = Math.max(W / f.w, H / f.h), dw = f.w * s, dh = f.h * s;
+    x.imageSmoothingQuality = 'high';
+    if (!carasClave(f)) x.drawImage(f.bmp, (W - dw) / 2, -(dh - H) * 0.36, dw, dh);
+    else if (!cubrirCaras(x, f, 0, 0, W, H)) {
+      // Los rostros no caben en un recorte a pantalla completa: fondo = la misma foto desenfocada llenando todo, y encima la foto entera centrada.
+      x.drawImage(f.bmp, (W - dw) / 2, (H - dh) / 2, dw, dh);
+      try { desenfocar(c, Math.max(8, Math.round(Math.min(W, H) / 28))); } catch (e) {}
+      var k2 = Math.min(W / f.w, H / f.h); x.drawImage(f.bmp, (W - f.w * k2) / 2, (H - f.h * k2) / 2, f.w * k2, f.h * k2);
+    }
+    covs[i] = c; var ks = Object.keys(covs); if (ks.length > 4) delete covs[ks[0]];
+    return c;
+  }
+  function vineta(cx){
+    if (!vigC) { vigC = lienzo(W, H); var x = vigC.getContext('2d'), g = x.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.35, W / 2, H / 2, Math.max(W, H) * 0.78); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(8,5,2,.42)'); x.fillStyle = g; x.fillRect(0, 0, W, H); }
+    cx.drawImage(vigC, 0, 0);
+  }
+  // Velocidad del barrido -> longitud del desenfoque de movimiento
+  function velBlur(q){ var q0 = clamp(q - 0.02, 0, 1), q1 = clamp(q + 0.02, 0, 1), dq = q1 - q0 || 1; return Math.abs((ease(q1) - ease(q0)) / dq) * W * 1.05 / TW * 0.085; }
+  function muestras(bl){ return bl > 3 ? Math.min(64, Math.ceil(bl / (5 * u)) + 3) : 1; }
+  // Dibuja una capa varias veces a lo largo de su recorrido y promedia (desenfoque de movimiento horizontal)
+  function barrido(cx, src, ox, bl, z){
+    var K = muestras(bl), kq, sx, zz = z || 1, dw = W * zz, dh = H * zz;
+    for (kq = 0; kq < K; kq++) { sx = K > 1 ? (kq / (K - 1) - 0.5) * bl : 0; cx.globalAlpha = 1 / (kq + 1); cx.drawImage(src, ox + sx + (W - dw) / 2, (H - dh) / 2, dw, dh); }
+    cx.globalAlpha = 1;
+  }
+  function intro(cx, t){
+    var a = clamp((t - 0.3) / 0.9, 0, 1), e = ease(a), sal = 1;
+    cx.save(); cx.globalAlpha = e * sal; cx.translate(W / 2, H / 2); cx.scale(0.94 + 0.06 * e, 0.94 + 0.06 * e);
+    var ty = 0;
+    if (logo && logo.bmp) { var lw = (vert ? 0.62 : 0.30) * W, lh = lw * logo.h / logo.w, mh = H * (vert ? 0.22 : 0.34); if (lh > mh) { lw *= mh / lh; lh = mh; } cx.imageSmoothingQuality = 'high'; cx.drawImage(logo.bmp, -lw / 2, -lh / 2 - H * 0.05, lw, lh); ty = lh / 2 - H * 0.05; }
+    else { var fs = vert ? W * 0.085 : H * 0.1; cx.fillStyle = '#E9D9B8'; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.font = '300 ' + fs + 'px "Cormorant Garamond", Georgia, serif'; try { cx.letterSpacing = (fs * 0.12) + 'px'; } catch (e2) {} cx.fillText(String(op.nombre || '').toUpperCase(), 0, -H * 0.05); ty = fs * 0.5 - H * 0.05; }
+    var fs2 = (vert ? W * 0.12 : H * 0.115), a2 = clamp((t - 0.9) / 0.9, 0, 1);
+    cx.globalAlpha = e * sal * ease(a2); cx.fillStyle = ORO; cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.font = 'italic 500 ' + fs2 + 'px "Cormorant Garamond", Georgia, serif'; try { cx.letterSpacing = '0px'; } catch (e3) {}
+    cx.fillText('Feliz Navidad', 0, ty + fs2 * 0.95);
+    cx.restore();
+    pieMarca(cx, W, H, op, logo);
+  }
+  // Final: fondo desenfocado y tarjetas abiertas en abanico (como en el video de referencia)
+  function fondoFin(cx){
+    if (!bgFin) {
+      bgFin = lienzo(W, H); var x = bgFin.getContext('2d'), sw = Math.max(48, Math.round(W / 7)), sh = Math.max(48, Math.round(H / 7)), sm = lienzo(sw, sh);
+      sm.getContext('2d').drawImage(cover(0), 0, 0, sw, sh); try { desenfocar(sm, Math.max(3, Math.round(sw / 14))); } catch (e) {}
+      x.imageSmoothingQuality = 'high'; x.drawImage(sm, 0, 0, W, H); x.fillStyle = 'rgba(16,11,7,.52)'; x.fillRect(0, 0, W, H);
+      var g = x.createRadialGradient(W / 2, H * 0.5, 0, W / 2, H * 0.5, Math.max(W, H) * 0.7); g.addColorStop(0, 'rgba(201,168,119,.10)'); g.addColorStop(1, 'rgba(0,0,0,.30)'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+    }
+    cx.drawImage(bgFin, 0, 0);
+  }
+  function tarjetaFin(i){
+    if (cardsC[i]) return cardsC[i];
+    var f = fotos[i], bw = W * (vert ? 0.50 : 0.27), bh = H * (vert ? 0.40 : 0.62), kk = Math.min(bw / f.w, bh / f.h), dw = Math.round(f.w * kk), dh = Math.round(f.h * kk), m = Math.round(26 * u), r = 14 * u;
+    var c = lienzo(dw + 2 * m, dh + 2 * m), x = c.getContext('2d');
+    x.shadowColor = 'rgba(0,0,0,.55)'; x.shadowBlur = 22 * u; x.shadowOffsetY = 8 * u; x.fillStyle = '#000';
+    x.beginPath(); if (x.roundRect) x.roundRect(m, m, dw, dh, r); else x.rect(m, m, dw, dh); x.fill();
+    x.shadowColor = 'transparent'; x.save(); x.beginPath(); if (x.roundRect) x.roundRect(m, m, dw, dh, r); else x.rect(m, m, dw, dh); x.clip(); x.imageSmoothingQuality = 'high'; x.drawImage(f.bmp, m, m, dw, dh); x.restore();
+    c._m = m; cardsC[i] = c; return c;
+  }
+  function cartasFin(cx, ft){
+    if (ft <= 0) return;
+    var cI = n - 1, lI = n >= 3 ? Math.max(0, n - 3) : (n === 2 ? 0 : -1), rI = n >= 3 ? n - 2 : -1;
+    var ce = ease(clamp((ft - 0.08) / 0.8, 0, 1)), fe = ease(clamp((ft - 0.5) / 0.8, 0, 1)), cy = H * (vert ? 0.50 : 0.52) + Math.sin(ft * 1.1) * 5 * u * fe;
+    function una(i, dx, rot, esc, al){
+      if (i < 0 || al <= 0.01) return; var c = tarjetaFin(i);
+      cx.save(); cx.globalAlpha = al; cx.translate(W / 2 + dx, cy); cx.rotate(rot); cx.scale(esc, esc); cx.drawImage(c, -c.width / 2, -c.height / 2); cx.restore();
+    }
+    var cw = tarjetaFin(cI).width - 2 * tarjetaFin(cI)._m;
+    una(lI, -cw * 0.62 * fe, -0.10 * fe, 0.93, fe); una(rI, cw * 0.62 * fe, 0.10 * fe, 0.93, fe);
+    // la tarjeta central llega deslizándose desde la derecha con un poco de desenfoque
+    var ox = (1 - ce) * W * 0.95, bl = ce < 1 ? velBlur(clamp((ft - 0.08) / 0.8, 0, 1)) * 0.55 : 0, K = muestras(bl), kq, sx, c0 = tarjetaFin(cI);
+    for (kq = 0; kq < K; kq++) { sx = K > 1 ? (kq / (K - 1) - 0.5) * bl : 0; cx.globalAlpha = Math.min(1, ce * 3) / (kq + 1); cx.drawImage(c0, W / 2 + ox + sx - c0.width / 2, cy - c0.height / 2); }
+    cx.globalAlpha = 1;
+  }
+  function dibujar(cx, t){
+    t = clamp(t, 0, duracion - 0.0001);
+    cx.setTransform(1, 0, 0, 1, 0, 0); cx.globalAlpha = 1; cx.filter = 'none'; cx.globalCompositeOperation = 'source-over';
+    cx.fillStyle = '#0b0907'; cx.fillRect(0, 0, W, H);
+    var tFin = I + n * D, i, pe, px, ox, bl;
+    // fondo del final (queda debajo de la última foto, que sale hacia la izquierda)
+    if (t > tFin - TW / 2) fondoFin(cx);
+    // introducción: sale con el mismo barrido
+    if (I > 0 && t < I + TW / 2) {
+      if (!bufI) bufI = lienzo(W, H);
+      var bx = bufI.getContext('2d'); bx.setTransform(1, 0, 0, 1, 0, 0); bx.clearRect(0, 0, W, H); fondo(bx, t, null); intro(bx, t);
+      px = wp(t, I); barrido(cx, bufI, -ease(px) * W * 1.05, px > 0 && px < 1 ? velBlur(px) : 0);
+    }
+    for (i = 0; i < n; i++) {
+      var be = I + i * D, bx2 = I + (i + 1) * D;
+      pe = (i > 0 || I > 0) ? wp(t, be) : 1; px = wp(t, bx2);
+      if (pe <= 0 || px >= 1) continue;
+      ox = (1 - ease(pe)) * W * 1.05 - ease(px) * W * 1.05;
+      bl = pe < 1 ? velBlur(pe) : (px > 0 ? velBlur(px) : 0);
+      barrido(cx, cover(i), ox, bl, 1 + 0.05 * clamp((t - be) / (D + TW), 0, 1));
+    }
+    vineta(cx);
+    cartasFin(cx, t - tFin);
+    nieve(cx, t, false); nieve(cx, t, true);
+    var fin = duracion - t, neg = Math.max(clamp(1 - fin / 0.7, 0, 1), I > 0 ? clamp(1 - t / 0.5, 0, 1) : clamp(1 - t / 0.3, 0, 1));
+    if (neg > 0) { cx.fillStyle = 'rgba(0,0,0,' + neg.toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
+  }
+  return { W: W, H: H, duracion: duracion, dibujar: dibujar, n: n, seg: D, estilo: 'navidad' };
+}
+
 function crearEscenaBase(fotos, W, H, seg, op){
   op = op || {};
+  if (op.estilo === 'navidad') return crearEscenaNavidad(fotos, W, H, seg, op);
   if (op.estilo === 'estudio') return crearEscenaEstudio(fotos, W, H, seg, op);
   if (op.estilo === 'prisma') return crearEscenaPrisma(fotos, W, H, seg, op);
   if (op.estilo === 'carriles') return crearEscenaCarriles(fotos, W, H, seg, op);
