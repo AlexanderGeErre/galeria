@@ -91,6 +91,21 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
 #visor .bar{position:absolute;left:0;bottom:0;height:3px;background:var(--a);width:0;z-index:3}#visor.show .bar{animation:bar var(--d,4.5s) linear forwards}@keyframes bar{from{width:0}to{width:100%}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.f img{opacity:1}.f.pre{opacity:1;transform:none}}
 @media(max-width:600px){#visor img{inset:3.2rem 0 4rem;width:100%;height:calc(100% - 7.2rem)}}
+
+/* ===== Barra de vidrio inferior ===== */
+#galeria{padding-bottom:9.5rem}
+.tabs{position:fixed;top:auto;left:0;right:0;margin-left:auto!important;margin-right:auto!important;bottom:calc(14px + env(safe-area-inset-bottom));margin:0;padding:6px;gap:3px;border:1px solid var(--l);border-radius:999px;flex-wrap:nowrap;justify-content:center;width:max-content;max-width:calc(100vw - 20px);z-index:20;background:var(--c);box-shadow:0 10px 32px rgba(0,0,0,.2)}
+body.cp .tabs{top:auto}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.tabs{background:color-mix(in srgb,var(--c) 58%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6);border-color:color-mix(in srgb,var(--o) 55%,transparent);box-shadow:0 10px 32px rgba(0,0,0,.22),inset 0 1px 0 color-mix(in srgb,var(--o) 70%,transparent)}}
+.tabs button{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:64px;min-height:54px;padding:0 12px;border:0;border-radius:999px;background:none;color:var(--t);font-size:.68rem;letter-spacing:.03em;white-space:nowrap;border-bottom:0}
+.tabs button::before{content:'';width:22px;height:22px;background:currentColor;-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
+.tabs button[data-tab=todas]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='4' width='7' height='7' rx='1.5'/%3E%3Crect x='13' y='4' width='7' height='7' rx='1.5'/%3E%3Crect x='4' y='13' width='7' height='7' rx='1.5'/%3E%3Crect x='13' y='13' width='7' height='7' rx='1.5'/%3E%3C/svg%3E")}.tabs button[data-tab=favoritas]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.7a4.3 4.3 0 0 1 7.5 2.6c0 5.6-7.5 10.2-7.5 10.2z'/%3E%3C/svg%3E")}.tabs button[data-tab=finales]{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.5 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z'/%3E%3C/svg%3E")}
+.tabs button.on{background:color-mix(in srgb,var(--o) 70%,transparent);color:var(--a);box-shadow:0 2px 10px rgba(0,0,0,.12);border:0}
+.tabs button.dtd{--ic:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v11M7 11l5 5 5-5M5 20h14'/%3E%3C/svg%3E");background:var(--t);color:var(--f);flex-direction:row;gap:7px;padding:0 18px;font-size:.78rem;margin-left:3px}
+@media(min-width:760px){.tabs button{flex-direction:row;gap:8px;min-height:48px;padding:0 20px;font-size:.82rem}.tabs button::before{width:20px;height:20px}}
+.barra{left:0;right:0;margin:0 auto;transform:none;bottom:calc(88px + env(safe-area-inset-bottom));width:max-content;max-width:calc(100vw - 20px);border:1px solid var(--l);border-radius:999px;padding:.45rem .5rem .45rem 1.2rem;gap:.9rem;white-space:nowrap;box-shadow:0 8px 26px rgba(0,0,0,.18);z-index:19}
+@supports ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.barra{background:color-mix(in srgb,var(--c) 70%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5)}}
+.barra .btn{border-radius:999px;padding:.55rem 1.1rem}
 </style>
 </head>
 <body>
@@ -130,7 +145,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   <nav class="tabs" id="tabs"></nav>
   <div class="escs" id="escs" hidden></div>
   <div class="rej" id="rej"></div>
-  <div class="barra" id="barraI" hidden><span id="cntI"></span><button class="btn" id="enviarI" type="button">Enviar pedido de impresión</button></div>
+  <div class="barra" id="barraI" hidden><span id="cntI"></span><button class="btn" id="enviarI" type="button">Enviar pedido</button></div>
   <div class="barra" id="barra" hidden><span id="cnt"></span><button class="btn" id="enviar" type="button">Enviar selección</button></div>
 </section>
 
@@ -244,7 +259,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
       document.title = G.titulo;
       $('#est').textContent = E && E.studio_name ? E.studio_name : '';
       $('#tit').textContent = G.titulo; $('#fec').textContent = fechaLarga(G.fecha);
-      $('#guia').textContent = G.estado === 'delivered' && G.bloqueada ? 'Tus fotos finales están listas. Las verás con marca de agua y podrás descargarlas sin ella cuando se confirme el pago.' : G.estado === 'delivered' ? 'Tus fotos finales ya están listas. Descárgalas en la pestaña Fotos finales.' : puede() ? 'Toca el corazón en tus fotos favoritas y luego envía tu selección.' : '';
+      $('#guia').textContent = G.estado === 'delivered' && G.bloqueada ? 'Tus fotos finales están listas. Las verás con marca de agua y podrás descargarlas sin ella cuando se confirme el pago.' : G.estado === 'delivered' ? 'Tus fotos finales ya están listas. Descárgalas en la pestaña Finales.' : puede() ? 'Toca el corazón en tus fotos favoritas y luego envía tu selección.' : '';
       $('#desc').textContent = [G.escenaUnica, G.tipo, G.ubicacion, G.descripcion].filter(Boolean).join(' · ');
       document.documentElement.setAttribute('data-pal', paletaDe(G)); document.documentElement.setAttribute('data-letra', G.letra || 'elegante');
       if (E && (E.logo_para_claro || E.logo_para_oscuro)) { var lc = E.logo_para_claro || E.logo_para_oscuro, lo = E.logo_para_oscuro || E.logo_para_claro; document.querySelectorAll('.lgL').forEach(function(i){ i.removeAttribute('data-n'); i.src = lc; i.alt = E.studio_name || ''; }); document.querySelectorAll('.lgD').forEach(function(i){ i.removeAttribute('data-n'); i.src = lo; i.alt = E.studio_name || ''; }); }
@@ -309,18 +324,18 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
   document.addEventListener('error', function(e){ var t = e.target; if (t && t.tagName === 'IMG' && t.closest && t.closest('.f')) t.classList.add('ld'); }, true);
   function pintar(){
     var s = sel().filter(enEsc), fn = fin().filter(enEsc), mias = s.filter(function(f){ return favs.has(f.id); });
-    var tabs = [['todas', 'Todas ' + s.length]];
-    if (puede() || favs.size) tabs.push(['favoritas', 'Mis favoritas ' + mias.length]);
-    if (G.estado === 'delivered') tabs.push(['finales', 'Fotos finales ' + fn.length]);
+    var tabs = (s.length || !(G.estado === 'delivered' && fn.length)) ? [['todas', 'Todas ' + s.length]] : [];
+    if (puede() || favs.size) tabs.push(['favoritas', 'Favoritas ' + mias.length]);
+    if (G.estado === 'delivered') tabs.push(['finales', 'Finales ' + fn.length]);
     var es = G.escenas || [], ce = $('#escs'); ce.hidden = es.length < 2 || !!G.escenaUnica;
     if (!ce.hidden) ce.innerHTML = [['', 'Todas']].concat(es.map(function(x){ return [x.id, x.nombre]; })).map(function(x){ return '<button data-esc="' + esc(x[0]) + '"' + (escSel === x[0] ? ' class="on"' : '') + '>' + esc(x[1]) + '</button>'; }).join('');
-    $('#tabs').innerHTML = tabs.map(function(t){ return '<button data-tab="' + t[0] + '"' + (tab === t[0] ? ' class="on"' : '') + '>' + t[1] + '</button>'; }).join('');
+    $('#tabs').innerHTML = tabs.map(function(t){ return '<button data-tab="' + t[0] + '"' + (tab === t[0] ? ' class="on"' : '') + '>' + t[1] + '</button>'; }).join('') + (tab === 'finales' && G.estado === 'delivered' && G.descargas && fn.length ? '<button class="dtd" id="dtodas" type="button" title="Descargar todas las fotos">Descargar</button>' : '');
     var h = '', cg;
     if (tab === 'todas') { cg = conTitulos(s, tarjeta); lista = cg.l; h = s.length ? cg.h : '<p class="vacio">Pronto verás aquí tus fotos.</p>'; }
     else if (tab === 'favoritas') { cg = conTitulos(mias, tarjeta); lista = cg.l; h = mias.length ? cg.h : '<p class="vacio">Aún no tienes favoritas. Toca el corazón en las fotos que más te gusten.</p>'; }
     else {
       lista = fn;
-      h = fn.length ? (G.descargas ? '<div class="masivo"><button class="btn" id="dtodas" type="button">Descargar todas</button></div>' : '') + fn.map(tarjetaFinal).join('') : '<p class="vacio">Tus fotos finales aparecerán aquí.</p>';
+      h = fn.length ? fn.map(tarjetaFinal).join('') : '<p class="vacio">Tus fotos finales aparecerán aquí.</p>';
     }
     $('#rej').innerHTML = h;
     setTimeout(function(){ document.querySelectorAll('.f img').forEach(function(i){ if (i.complete) i.classList.add('ld'); }); }, 0);
@@ -330,7 +345,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     $('#enviar').disabled = !favs.size;
   }
 
-  function contarImp(){ $('#cntI').textContent = imps.size + (imps.size === 1 ? ' foto para imprimir' : ' fotos para imprimir'); $('#enviarI').disabled = !imps.size; }
+  function contarImp(){ $('#cntI').textContent = imps.size + ' para imprimir'; $('#enviarI').disabled = !imps.size; }
   function marcarImp(id, on){ document.querySelectorAll('[data-pr="' + id + '"]').forEach(function(b){ b.setAttribute('aria-pressed', on); var f = b.closest('.f'); if (f) f.classList.toggle('imp', on); }); }
   // Descarga una por una (esperando a que termine cada foto) para que el navegador no bloquee las demás
   var bajando = false;
@@ -341,7 +356,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     function estado(t){ if (btn) btn.textContent = t; }
     function guardar(blob, nombre){ var u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000); }
     function intentar(f, n){ return fetch(url(f.t, true)).then(function(r){ if (!r.ok) throw new Error('x'); return r.blob(); }).catch(function(e){ if (n >= 2) throw e; return new Promise(function(res){ setTimeout(res, 900 * (n + 1)); }).then(function(){ return intentar(f, n + 1); }); }); }
-    function terminar(){ bajando = false; estado('Descargar todas'); aviso(mal.length ? 'Se descargaron ' + ok + ' de ' + arr.length + '. Faltaron ' + mal.length + ': bájalas una por una con el botón de cada foto.' : 'Listo: se descargaron las ' + ok + ' fotos.'); }
+    function terminar(){ bajando = false; estado('Descargar'); aviso(mal.length ? 'Se descargaron ' + ok + ' de ' + arr.length + '. Faltaron ' + mal.length + ': bájalas una por una con el botón de cada foto.' : 'Listo: se descargaron las ' + ok + ' fotos.'); }
     function una(i){
       if (i >= arr.length) return terminar();
       var f = arr[i]; estado('Descargando ' + (i + 1) + ' de ' + arr.length + '…');
@@ -369,7 +384,7 @@ dialog h2{font-size:1.8rem;margin-bottom:.5rem}.fil{display:flex;gap:.6rem;margi
     $('#vco').setAttribute('aria-pressed', lista[vi] && favs.has(lista[vi].id));
     $('#cnt').textContent = favs.size + (favs.size === 1 ? ' favorita' : ' favoritas'); $('#enviar').disabled = !favs.size;
     var m = sel().filter(function(f){ return favs.has(f.id); }).length;
-    var tb = document.querySelector('[data-tab="favoritas"]'); if (tb) tb.textContent = 'Mis favoritas ' + m;
+    var tb = document.querySelector('[data-tab="favoritas"]'); if (tb) tb.textContent = 'Favoritas ' + m;
   }
   function alternar(id){
     var on = !favs.has(id); poner(id, on);
