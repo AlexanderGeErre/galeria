@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-var VERSION = 'V1.0.0.6';
+var VERSION = 'V1.0.0.8';
 var W = 'https://galerias-api.alexandergeerre.workers.dev';
 var BASE = 'https://alexandergeerre.github.io/galeria/cliente.html?c=';
 var BASEG = 'https://galerias-api.alexandergeerre.workers.dev/g/';
@@ -209,7 +209,7 @@ CSS += '#pn-bn{display:none}#pn-denl{padding:0;border:0;border-radius:18px;width
 '.pn-mas-dim{position:fixed;inset:0;background:rgba(30,25,20,.38);z-index:38}.pn-mas{position:fixed;left:0;right:0;bottom:calc(3.9rem + env(safe-area-inset-bottom));z-index:39;background:var(--c);border-radius:20px 20px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.18);padding:1rem 1.1rem .6rem}.pn-mas h4{margin:.7rem 0 .2rem;font:600 .7rem Jost,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--s)}.pn-mas button{display:flex;gap:.8rem;align-items:center;width:100%;background:none;border:0;border-bottom:1px solid var(--l);color:var(--t);font:inherit;padding:.75rem .2rem;text-align:left;cursor:pointer}.pn-mas button:last-child{border:0}.pn-mas button.on{color:var(--a);font-weight:600}}';
 CSS += '@media(min-width:761px){.pn{grid-template-columns:240px 1fr}.pn aside{margin:14px 0 14px 14px;top:14px;height:calc(100vh - 28px);border-radius:var(--rasd,22px);overflow-y:auto;border:1px solid color-mix(in srgb,#fff 55%,var(--l));background:color-mix(in srgb,var(--c) 68%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);box-shadow:0 10px 34px rgba(60,45,25,.08),inset 0 1px 0 color-mix(in srgb,#fff 45%,var(--c))}.pn aside button.on{background:color-mix(in srgb,var(--a) 15%,var(--c) 72%)}.pn-tema button.on{background:var(--l)!important}}' +
 '@media(max-width:760px){.pn.bn-main aside{display:none}.pn-bn{left:0;right:0;margin:auto;width:max-content;max-width:calc(100% - 20px);bottom:calc(12px + env(safe-area-inset-bottom));padding:6px;gap:2px;border-radius:var(--rbar,30px);border:1px solid color-mix(in srgb,#fff 55%,var(--l));background:color-mix(in srgb,var(--c) var(--gl,62%),transparent);-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6);box-shadow:0 10px 30px rgba(60,45,25,.16),inset 0 1px 0 color-mix(in srgb,#fff 45%,var(--c))}.pn-bn button{flex:none;min-width:58px;padding:.5rem .7rem;border-radius:var(--rbtn,22px);white-space:nowrap}.pn-bn button.on{background:color-mix(in srgb,var(--a) 18%,var(--c) 62%);color:var(--t)}.pn-bn button.on .pn-i{color:var(--a)}' +
-'.pn-mas{left:10px;right:10px;bottom:calc(5.4rem + env(safe-area-inset-bottom));max-height:62vh;overflow-y:auto;border-radius:var(--rasd,24px);border:1px solid color-mix(in srgb,#fff 55%,var(--l));background:color-mix(in srgb,var(--c) var(--gl2,78%),transparent);-webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6);box-shadow:0 14px 40px rgba(60,45,25,.2)}.pn-mas .pn-tema{display:flex;gap:.3rem;padding:.6rem 0}.pn-mas .pn-tema button{width:auto!important;flex:1;justify-content:center;border:1px solid var(--l);border-radius:999px;padding:.45rem .5rem}.pn-mas .pn-dis{padding:.2rem 0}}';
+'.pn-mas{left:10px;right:10px;bottom:calc(5.4rem + env(safe-area-inset-bottom));max-height:62vh;overflow-y:auto;border-radius:var(--rasd,24px);border:1px solid color-mix(in srgb,#fff 55%,var(--l));background:color-mix(in srgb,var(--c) var(--gl2,78%),transparent);-webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6);box-shadow:0 14px 40px rgba(60,45,25,.2)}.pn-mas .pn-tema{display:flex;gap:.3rem;padding:.6rem 0}.pn-mas .pn-tema button{width:auto!important;flex:1;justify-content:center;border:1px solid var(--l);border-radius:999px;padding:.45rem .5rem}.pn-mas .pn-dis{padding:.2rem 0}.pn-mas{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}.pn-mas .pn-dis ul{position:static!important;max-height:none;margin:.3rem 0 0;box-shadow:none;border-radius:12px}}';
 
 CSS += '.fv-tb{display:flex;justify-content:flex-end;margin:0 0 .8rem;position:relative;z-index:30}.fv-wr{position:relative}.fv-mn{position:absolute;right:0;top:calc(100% + 6px);z-index:20;min-width:15rem;background:var(--c);border:1px solid var(--l);border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.18);padding:.4rem}.fv-mn button{display:flex;gap:.6rem;align-items:center;width:100%;text-align:left;background:none;border:0;color:var(--t);font:inherit;padding:.6rem .7rem;border-radius:10px;cursor:pointer}.fv-mn button:hover{background:var(--p)}.fv-mn button.on{font-weight:600}.fv-mn i{width:1rem;color:var(--a);font-style:normal;font-size:.7rem}' +
 '.pn-grid.fv-gra{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}.pn-grid.fv-peq{grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:.4rem}.pn-grid.fv-peq figcaption{display:none}.pn-grid.fv-gra figcaption{font-size:.68rem}' +
@@ -786,10 +786,11 @@ async function pintarInicio(){
   $('#pn-main').innerHTML = '<h1>Hola, ' + esc(ph.studio_name) + '</h1><p class="pn-s ay">Un resumen de tu estudio. Desde aquí creas una galería nueva o revisas lo que necesita tu atención.</p><div class="pn-row"><input type="text" id="pn-q" placeholder="Buscar galerías"><button class="pn-btn" data-act="nueva">+ Crear galería</button></div>' +
     '<h2>Métricas</h2><div class="pn-cifras"><div><b>' + gals.length + '</b><span class="pn-s">Galerías</span></div><div><b>' + ent + '</b><span class="pn-s">Entregadas</span></div><div><b id="pn-nv">–</b><span class="pn-s">Vistas</span></div><div><b id="pn-nd">–</b><span class="pn-s">Descargas</span></div></div>' +
     '<div class="pn-row" style="justify-content:space-between;margin-top:-.8rem"><button class="pn-btn sec" data-act="met-ver" id="pn-mv">' + (metAbierto ? 'Ver menos' : 'Ver más') + '</button><button class="pn-btn" data-act="act-card">Crear imagen para compartir</button></div><div id="pn-met"' + (metAbierto ? '' : ' hidden') + '></div>' +
-    '<div id="pn-neg"></div><h2>Actividad reciente</h2><div class="pn-card">' + act + '</div><h2>Galerías recientes</h2><div class="pn-rej">' + gals.slice(0, 4).map(tarjeta).join('') + '</div>';
+    '<div id="pn-neg"></div><h2>Actividad reciente</h2><div class="pn-card">' + act + '</div><h2>Galerías recientes</h2><div class="pn-rej">' + gals.slice(0, 4).map(tarjeta).join('') + '</div><div id="pn-seg"></div>';
   $('#pn-q').addEventListener('keydown', function(e){ if (e.key === 'Enter') { busca = e.target.value; vista = 'galerias'; pintar(); } });
   metDatos = null; if (metAbierto) metTabPintar();
   negInicio().then(function(h){ var z = $('#pn-neg'); if (z) z.innerHTML = h; }).catch(function(){});
+  segInicio();
   (async function(){ var c = await db.from('gallery_views').select('id', { count: 'exact', head: true }); var el = $('#pn-nv'); if (el && !c.error) el.textContent = c.count; })();
   (async function(){ var c = await db.from('photo_events').select('id', { count: 'exact', head: true }).eq('kind', 'download'); var el = $('#pn-nd'); if (el) el.textContent = c.error ? '0' : c.count; })();
 }
@@ -1787,6 +1788,7 @@ async function accion(a, el){
   if (a === 'act-per') { actDias = +id || 30; return actIniciar(); }
   if (a === 'act-todas') { actVerTodas = !actVerTodas; return metPintarGal(); }
   if (a === 'met-ver') return metToggle();
+  if (a === 'seg-probar') return segProbar(el);
   if (a === 'met-tab') return metTab_(id);
   if (a === 'act-gal') return actGaleria(id);
   if (a === 'act-gal-cerrar') { var dmB = $('#pn-dact'); if (dmB) dmB.close(); return; }
@@ -1877,7 +1879,7 @@ async function accion(a, el){
   if (a === 'reabrir') return cambiar({ status: 'selection', selection_enabled: true, downloads_enabled: false }, 'Selección reabierta');
   if (a === 'salir') return window.cerrarSesion();
   if (a === 'pal-panel') { try { localStorage.setItem('pn-pal', el.dataset.v); } catch(e) {} aplicarTema(); return pintar(); }
-  if (a === 'dis-dd') { var du = el.parentNode.querySelector('ul'); if (du) du.hidden = !du.hidden; return; }
+  if (a === 'dis-dd') { var du = el.parentNode.querySelector('ul'); if (du) { du.hidden = !du.hidden; if (!du.hidden && du.scrollIntoView) setTimeout(function(){ du.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, 30); } return; }
   if (a === 'dis-set') { try { localStorage.setItem('pn-dis', el.dataset.k); } catch(e) {} aplicarTema(); return pintar(); }
   if (a === 'tema') { try { localStorage.setItem('pn-tema', el.dataset.t); } catch(e) {} return pintar(); }
   if (a === 'bloqueo') return g.finals_locked ? cambiar({ finals_locked: false, status: 'delivered', selection_enabled: false, downloads_enabled: true }, 'Galería pagada y entregada: el cliente ya ve las finales sin marca de agua') : cambiar({ finals_locked: true, downloads_enabled: false }, 'Pago quitado: el cliente solo ve las finales con marca de agua');
@@ -2405,6 +2407,26 @@ function icsDe(lista){
 function icsBajar(lista, nombre){ var b = new Blob([icsDe(lista)], { type: 'text/calendar;charset=utf-8' }), l = document.createElement('a'); l.href = URL.createObjectURL(b); l.download = nombre + '.ics'; l.click(); setTimeout(function(){ URL.revokeObjectURL(l.href); }, 4000); }
 
 /* ---------- Inicio: próximos y pendientes ---------- */
+/* Seguridad: alertas por actividad sospechosa (las genera el Worker) */
+async function segInicio(){
+  var z = $('#pn-seg'); if (!z) return;
+  var r = null; try { r = await api('/api/admin/security', {}); } catch (e) {}
+  if (!$('#pn-seg')) return;
+  if (!r || !r.ok) { z.innerHTML = ''; return; }
+  var ev = r.eventos || [], al = ev.filter(function(e){ return e.kind === 'alerta'; }), intentos = ev.length - al.length;
+  var NOM = { codigo: 'Códigos de galería probados', imagen: 'Enlaces de foto falsos o vencidos', sesion: 'Accesos al panel sin sesión' };
+  var fecha = function(x){ try { return new Date(x).toLocaleString('es-GT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return ''; } };
+  var estado = !r.tabla ? '<p class="pn-s">Para activar la vigilancia ejecuta etapa28.sql en Supabase.</p>' :
+    '<p style="margin:.2rem 0"><b>' + (al.length ? al.length + (al.length === 1 ? ' alerta' : ' alertas') + ' en los últimos 7 días' : 'Sin alertas en los últimos 7 días') + '</b></p><p class="pn-s" style="margin:.2rem 0">Intentos sospechosos bloqueados o registrados: ' + intentos + '. Si hay actividad fuerte, te llega un correo.</p>';
+  var lista = al.length ? '<div class="pn-card" style="padding:0;overflow:auto;margin-top:.6rem"><table class="pn-tb pn-ta pn-tm"><tr><th>Cuándo</th><th>Qué</th><th>IP</th><th>País</th></tr>' + al.slice(0, 6).map(function(e){ return '<tr><td>' + fecha(e.created_at) + '</td><td>' + esc(NOM[e.detail] || e.detail) + '</td><td>' + esc(e.ip) + '</td><td>' + esc(e.country || '–') + '</td></tr>'; }).join('') + '</table></div><p class="pn-s">Si no reconoces una IP, bloquéala en Cloudflare: Security, WAF, Tools, IP Access Rules.</p>' : '';
+  z.innerHTML = '<h2>Seguridad</h2><div class="pn-card">' + estado + lista + (r.tabla ? '<p style="margin:.8rem 0 0"><button class="pn-btn sec" data-act="seg-probar">Enviarme un correo de prueba</button></p>' : '') + '</div>';
+}
+async function segProbar(b){
+  if (b) b.disabled = true;
+  var r = null; try { r = await api('/api/admin/security', { probar: true }); } catch (e) {}
+  if (b) b.disabled = false;
+  aviso(r && r.ok ? 'Correo de prueba enviado. Revisa tu bandeja (y spam).' : (r && r.error === 'sin_correo' ? 'Falta configurar el correo de avisos en Cloudflare (RESEND_API_KEY y NOTIFY_EMAIL).' : 'No se pudo enviar el correo de prueba.'));
+}
 async function negInicio(){
   await negCargar(); if (!neg.ok) return '';
   var prox = neg.evs.filter(function(e){ return new Date(e.starts_at) >= new Date(new Date().toDateString()); }).slice(0, 3);
