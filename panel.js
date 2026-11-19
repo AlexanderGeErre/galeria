@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-var VERSION = 'V1.0.0.10';
+var VERSION = 'V1.0.0.13';
 var W = 'https://galerias-api.alexandergeerre.workers.dev';
 var BASE = 'https://alexandergeerre.github.io/galeria/cliente.html?c=';
 var BASEG = 'https://galerias-api.alexandergeerre.workers.dev/g/';
@@ -404,7 +404,7 @@ function pintarLado(){
       '<button data-v="inicio" class="nd">' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias" class="nd on">' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes" class="nd">' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz" class="nd">' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda" class="nd">' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos" class="nd">' + ico('grupos') + '<span>Grupos</span></button><button data-v="ia" class="nd">' + ico('ia') + '<span>IA</span></button>' +
       TABS.map(function(t){ return '<button data-act="tab" data-t="' + t[0] + '" class="ta' + (tab === t[0] ? ' on' : '') + '">' + ico(t[0]) + '<span>' + t[1] + '</span></button>'; }).join('');
   } else {
-    h = logo() + '<button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias"' + (vista === 'galerias' || vista === 'asist' ? ' class="on"' : '') + '>' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes"' + (vista === 'clientes' ? ' class="on"' : '') + '>' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz"' + (vista === 'cotiz' ? ' class="on"' : '') + '>' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda"' + (vista === 'agenda' ? ' class="on"' : '') + '>' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos"' + (vista === 'grupos' ? ' class="on"' : '') + '>' + ico('grupos') + '<span>Grupos de graduación</span></button><button data-v="ia"' + (vista === 'ia' ? ' class="on"' : '') + '>' + ico('ia') + '<span>Selección con IA</span></button><button data-v="clips"' + (vista === 'clips' ? ' class="on"' : '') + '>' + ico('video') + '<span>Videos con clips</span></button>';
+    h = logo() + '<button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias"' + (vista === 'galerias' || vista === 'asist' ? ' class="on"' : '') + '>' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes"' + (vista === 'clientes' ? ' class="on"' : '') + '>' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz"' + (vista === 'cotiz' ? ' class="on"' : '') + '>' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda"' + (vista === 'agenda' ? ' class="on"' : '') + '>' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos"' + (vista === 'grupos' ? ' class="on"' : '') + '>' + ico('grupos') + '<span>Grupos de graduación</span></button><button data-v="ia"' + (vista === 'ia' ? ' class="on"' : '') + '>' + ico('ia') + '<span>Selección con IA</span></button><button data-v="clips"' + (vista === 'clips' ? ' class="on"' : '') + '>' + ico('video') + '<span>Tráilers</span></button>';
   }
   var tm = temaGuardado();
   h += '<div class="pie"><button data-v="cuenta"' + (vista === 'cuenta' ? ' class="on"' : '') + '>' + ico('cuenta') + '<span>Mi cuenta</span></button>' + disenoSelHtml() + '<div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button><small class="pn-ver">' + VERSION + '</small></div>';
@@ -852,13 +852,13 @@ function actividad(){
 
 function dt(titulo, resumen, html, abierta){ return '<details class="pn-det"' + (abierta ? ' open' : '') + '><summary><b>' + titulo + '</b><span>' + esc(resumen || '') + '</span></summary><div class="in">' + html + '</div></details>'; }
 function errCuenta(e){ var m = e && e.message ? e.message : ''; if (!e || /column|schema cache|permission|policy|row-level/i.test(m)) return 'No se pudo guardar. Falta ejecutar el SQL de la Actualización 1 en Supabase (archivo etapa8.sql).'; return m; }
-/* Videos con clips (antes y después): corre en clips.js */
+/* Tráilers: corre en clips.js */
 var clipsInst = null;
 function cargarScript(src){ return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = src + '?v=' + VERSION.replace(/^V/, ''); sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró ' + src + ' en GitHub. Súbelo junto con panel.js.')); }; document.head.appendChild(sc); }); }
 async function pintarClips(){
   $('#pn-main').innerHTML = '<div id="pn-clips"><p class="pn-s">Cargando…</p></div>';
   try {
-    await cargarSlideshow(); if (!window.Clips) await cargarScript('clips.js');
+    await cargarSlideshow(); if (!window.Trailer) { try { await cargarScript('trailer.js'); } catch (e) {} } if (!window.Clips) await cargarScript('clips.js');
     window.Clips.cargar(window.Slideshow);
     if (vista !== 'clips' || !$('#pn-clips')) return;
     if (clipsInst) { try { clipsInst.liberar(); } catch (e) {} }
@@ -1550,7 +1550,7 @@ function navPrincipal(){
   var enMas = vista === 'cotiz' || vista === 'grupos' || vista === 'ia' || vista === 'clips' || vista === 'cuenta', tm = temaGuardado();
   var b = function(v, ic, lab, on){ return '<button type="button" data-v="' + v + '"' + (on ? ' class="on"' : '') + '>' + ico(ic) + '<span>' + lab + '</span></button>'; };
   var it = function(v, ic, lab){ return '<button type="button" data-v="' + v + '"' + (vista === v ? ' class="on"' : '') + '>' + ico(ic) + '<span>' + lab + '</span></button>'; };
-  var hoja = masAb ? '<div class="pn-mas-dim" data-act="mas-cerrar"></div><div class="pn-mas">' + it('cotiz', 'cotiz', 'Cotizaciones') + it('grupos', 'grupos', 'Grupos de graduación') + it('ia', 'ia', 'Selección con IA') + it('clips', 'video', 'Videos con clips') + it('cuenta', 'cuenta', 'Mi cuenta') + '<h4>Apariencia</h4>' + disenoSelHtml() + '<div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button type="button" data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button type="button" data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button></div>' : '';
+  var hoja = masAb ? '<div class="pn-mas-dim" data-act="mas-cerrar"></div><div class="pn-mas">' + it('cotiz', 'cotiz', 'Cotizaciones') + it('grupos', 'grupos', 'Grupos de graduación') + it('ia', 'ia', 'Selección con IA') + it('clips', 'video', 'Tráilers') + it('cuenta', 'cuenta', 'Mi cuenta') + '<h4>Apariencia</h4>' + disenoSelHtml() + '<div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button type="button" data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button type="button" data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button></div>' : '';
   return hoja + '<nav class="pn-bn" aria-label="Secciones">' + b('inicio', 'inicio', 'Inicio', vista === 'inicio') + b('galerias', 'galerias', 'Galerías', vista === 'galerias' || vista === 'asist') + b('clientes', 'clientes', 'Clientes', vista === 'clientes') + b('agenda', 'agenda', 'Agenda', vista === 'agenda') + '<button type="button" data-act="mas-abrir"' + (enMas || masAb ? ' class="on"' : '') + '>' + ico('mas') + '<span>Más</span></button></nav>';
 }
 function navHtml(){
