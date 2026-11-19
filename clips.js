@@ -35,9 +35,9 @@ function efectosDe(tpl){ return tpl === 'tr' && root.Trailer ? [['auto', 'Autom�
 function abrirClip(file){
   return new Promise(function(ok, no){
     var v = document.createElement('video');
-    v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(file);
+    v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = typeof file === 'string' ? file : URL.createObjectURL(file);
     var fin = false, t = setTimeout(function(){ if (!fin) { fin = true; no(new Error('no_lee')); } }, 15000);
-    v.onloadeddata = function(){ if (fin) return; fin = true; clearTimeout(t); if (!v.videoWidth) return no(new Error('no_lee')); ok({ v: v, w: v.videoWidth, h: v.videoHeight, dur: v.duration || 0, nombre: file.name, url: v.src }); };
+    v.onloadeddata = function(){ if (fin) return; fin = true; clearTimeout(t); if (!v.videoWidth) return no(new Error('no_lee')); ok({ v: v, w: v.videoWidth, h: v.videoHeight, dur: v.duration || 0, nombre: typeof file === 'string' ? file.split('/').pop() : file.name, url: v.src }); };
     v.onerror = function(){ if (fin) return; fin = true; clearTimeout(t); no(new Error('no_lee')); };
   });
 }
@@ -317,44 +317,58 @@ function montar(el, A){
   A = A || {};
   var aviso = A.aviso || function(t){ alert(t); };
   var st = { clips: [], audio: null, bpm: 120, ini: 0, ocupado: false, cancelar: false, fmt: 'v', titulo: '', subtitulo: '', beatsEsc: 4, cierre: true, efectos: true, volM: 0.9, volE: 0.7, esc: null, fases: {}, tpl: 'tr', n1: '', e1: 'Novia', n2: '', e2: 'Novio', semilla: 1 + Math.floor(Math.random() * 9970), total: 45, alinear: true, marca: marcaGuardada(), cal: 'fhd', t: 0, play: false, caras: {}, mix: null, mixK: '' };
-  var h = '<style>.cl-ad[hidden],.cl-tr[hidden],#cl-mcd[hidden]{display:none!important}</style><h1>Tráilers</h1><p class="pn-s ay">Crea un tráiler de evento con tus clips ya editados y una canción: nombres, cámara lenta, transiciones y sonidos al azar en cada versión. Todo se hace en tu computadora: nada se sube a internet.</p>' +
+  st.ev = 'boda'; st.total = 45; st.bpm = 85; st.n2on = false; st.demo = false;
+  var ETQ = { boda: ['Novia', 'Novio'], quince: ['Quinceañera', ''], revelacion: ['Mamá', 'Papá'], baby: ['Mamá', 'Papá'], bautizo: ['Bautizo', ''], graduacion: ['Graduada', 'Graduado'] };
+  st.e1 = ETQ.boda[0]; st.e2 = ETQ.boda[1];
+  function PERFIL(){ return root.Trailer && root.Trailer.PERFILES[st.ev]; }
+  var EVS = Object.keys(root.Trailer ? root.Trailer.PERFILES : {}).map(function(k){ return [k, root.Trailer.PERFILES[k].n]; });
+  var DURS = [15, 20, 30, 45, 60, 75, 90];
+  var h = '<style>.cl-ad[hidden],#cl-mcd[hidden]{display:none!important}.cl-wrap{display:grid;gap:1.2rem;grid-template-columns:minmax(0,1fr);align-items:start}@media(min-width:1100px){.cl-wrap{grid-template-columns:minmax(0,1fr) 20rem}.cl-side{position:sticky;top:4.5rem}}' +
+  '.np-tb select.cl-sel{border:0!important;background:none!important;box-shadow:none!important;color:var(--t);font:inherit;font-size:.9rem;padding:.4rem .2rem!important;cursor:pointer;max-width:100%;width:auto!important;font-weight:500;border-radius:0}.cl-tx>div{display:flex;gap:.4rem 1.4rem;flex-wrap:wrap;align-items:center}.cl-tx input{width:11rem!important;padding:.4rem .7rem!important}.cl-tx label{margin:0!important;display:inline!important}.cl-lb{color:var(--s);font-size:.9rem}.cl-g{display:flex;align-items:center;gap:.35rem}.cl-g .pn-s{margin:0}#cl-n2[hidden],#cl-nt[hidden],.cl-tx[hidden]{display:none!important}.np-tb input[type=text].cl-nm{flex:1 1 9rem;min-width:7rem}.cl-more{margin:.6rem 0 0}.cl-more summary{cursor:pointer;color:var(--s);font-size:.9rem}.cl-hd{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}.cl-hd h2{margin:0}.cl-hd .pn-btn{margin-left:auto}.cl-ejem{font-size:.72rem;opacity:.6}</style>' +
+  '<h1>Tráilers</h1><p class="pn-s ay">Elige el tipo de evento, la duración y los nombres. El tráiler se arma solo con tus clips, usa todo el material sin repetir y compone la música y los sonidos. Todo se hace en tu computadora: nada se sube a internet.</p>' +
   '<input id="cl-tpl" type="hidden" value="tr">' +
-  '<div class="pn-card"><h2>1. Tus clips</h2><p class="pn-s">Pon un número al inicio del nombre para el orden: <b>01.mp4, 02.mp4, 03.mp4…</b> (puede decir más, como 01_novia.mp4). <span class="cl-ad">Cada clip dura una escena.</span><span class="cl-tr"> Aunque duren más, se usan solo los segundos necesarios para que no haya espacios en negro.</span></p>' +
-  '<div class="pn-row"><label class="pn-btn" style="cursor:pointer">Elegir clips<input id="cl-f" type="file" accept="video/*,.mp4,.mov" multiple hidden></label><span class="pn-s" id="cl-n"></span></div><div id="cl-l"></div></div>' +
-  '<div class="pn-card"><h2>2. Música</h2><p class="pn-s">Sube la canción completa. Se detecta el ritmo y los cortes caen justo en el compás.</p>' +
-  '<div class="pn-row"><label class="pn-btn" style="cursor:pointer">Elegir canción<input id="cl-a" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac" hidden></label><span class="pn-s" id="cl-an"></span></div>' +
-  '<div id="cl-au" hidden><div class="pn-row"><label>Ritmo (pulsos por minuto) <input id="cl-bpm" type="number" min="50" max="220" step="0.5" style="width:6rem"></label><label>Empezar en el segundo <input id="cl-ini" type="number" min="0" step="0.1" style="width:6rem"></label></div>' +
-  '<div class="pn-row"><label><input id="cl-fx" type="checkbox" checked> Efectos de sonido (subida, golpe y un sonido en cada transición)</label></div><div class="pn-row cl-tr"><label><input id="cl-al" type="checkbox" checked> Hacer coincidir la parte más fuerte de la canción con el golpe del video</label></div>' +
-  '<div class="pn-row"><label>Volumen música <input id="cl-vm" type="range" min="0" max="1" step="0.05" value="0.9"></label><label>Volumen efectos <input id="cl-ve" type="range" min="0" max="1" step="0.05" value="0.7"></label></div></div></div>' +
-  '<div class="pn-card cl-tr"><h2>3. Nombres y cierre</h2><p class="pn-s">Los nombres salen grandes al inicio con niebla. Déjalos vacíos si no los quieres.</p><div class="pn-row"><label>Nombre 1 <input id="cl-n1" type="text" maxlength="16" placeholder="Ej: RIYA"></label><label>Etiqueta <input id="cl-e1" type="text" maxlength="16" value="Novia"></label></div><div class="pn-row"><label>Nombre 2 <input id="cl-n2" type="text" maxlength="16" placeholder="Ej: UDAY"></label><label>Etiqueta <input id="cl-e2" type="text" maxlength="16" value="Novio"></label></div><div class="pn-row"><label><input id="cl-ci2" type="checkbox" checked> Cierre con mis datos</label><label>Duración del video <select id="cl-dtot"><option value="30">30 segundos</option><option value="45" selected>45 segundos</option><option value="60">60 segundos</option><option value="90">90 segundos</option></select></label></div><div id="cl-mc"></div><div class="pn-row"><button class="pn-btn sec" type="button" id="cl-otra">Otra versión (efectos distintos)</button></div><p class="pn-s">Cada versión combina los efectos de forma distinta: cámara lenta, zoom crash, tirones de cámara, fugas de luz, glitch y sonidos. El audio original de tus clips nunca se usa.</p></div>' +
-  '<div class="pn-card cl-ad"><h2>3. Estilo</h2><div class="pn-row"><label>Título (opcional) <input id="cl-t" type="text" maxlength="30" placeholder="Ej: Antes y después"></label><label>Subtítulo (opcional) <input id="cl-s" type="text" maxlength="50" placeholder="Ej: Edición de color"></label></div>' +
-  '<div class="pn-row"><label>Duración de cada escena <select id="cl-be"><option value="2">2 pulsos (rápido)</option><option value="4" selected>4 pulsos (normal)</option><option value="8">8 pulsos (lento)</option></select></label><label><input id="cl-ci" type="checkbox" checked> Cierre con tarjetas</label></div></div>' +
-  '<div class="pn-card"><h2>4. Vista previa y descarga</h2><div class="np-pv vs-pv" style="border-radius:16px"><div class="vs-pcol"><div class="np-dev v" id="cl-dev"><canvas id="cl-cv" width="360" height="640"></canvas></div>' +
+  '<div class="cl-wrap"><div class="vs"><div class="np-tb vs-tb">' +
+  '<input type="text" id="cl-n1" class="cl-nm" maxlength="16" placeholder="Nombre (ej: RIYA)" aria-label="Nombre">' +
+  '<input type="text" id="cl-n2" class="cl-nm" maxlength="16" placeholder="Segundo nombre (opcional)" aria-label="Segundo nombre" hidden>' +
+  '<button class="vs-chip" type="button" id="cl-n2b">+ Segundo nombre</button>' +
+  '<span class="cl-g"><span class="cl-lb">Evento:</span><select class="cl-sel" id="cl-ev">' + EVS.map(function(e){ return '<option value="' + e[0] + '">' + e[1] + '</option>'; }).join('') + '</select></span>' +
+  '<span class="cl-g"><span class="cl-lb">Duración:</span><select class="cl-sel" id="cl-dtot">' + DURS.map(function(d){ return '<option value="' + d + '">' + d + ' s</option>'; }).join('') + '</select></span>' +
+  '<span class="cl-g"><span class="cl-lb">Música:</span><select class="cl-sel" id="cl-mus"><option value="auto">Automática</option><option value="mia">Subir mi canción…</option></select></span>' +
+  '<button class="vs-chip" type="button" id="cl-otra">↻ Otra versión</button></div>' +
+  '<div class="vs-tx cl-tx" id="cl-etqs"><div><label class="pn-s" for="cl-e1">Etiqueta 1</label><input type="text" id="cl-e1" maxlength="16"><label class="pn-s" for="cl-e2">Etiqueta 2</label><input type="text" id="cl-e2" maxlength="16"></div></div>' +
+  '<div class="np-pv vs-pv"><div class="vs-pcol"><div class="np-dev v" id="cl-dev"><canvas id="cl-cv" width="360" height="640"></canvas></div>' +
   '<div class="pn-vctl vs-ctl"><button type="button" id="cl-play" aria-label="Reproducir">▶</button><input type="range" id="cl-t0" min="0" max="1000" value="0" aria-label="Posición del video"><span id="cl-tm">00:00 / 00:00</span></div>' +
-  '<div class="pn-s" id="cl-st"></div><div id="cl-av" hidden style="background:#fff3cd;color:#664d03;border:1px solid #ecd078;border-radius:10px;padding:.7rem .9rem;margin:.4rem 0;font-size:.9rem"></div><progress id="cl-pr" value="0" max="1" hidden style="width:100%"></progress>' +
+  '<div class="pn-s" id="cl-st"></div><div id="cl-nt" hidden style="background:#fff3cd;color:#664d03;border:1px solid #ecd078;border-radius:10px;padding:.7rem .9rem;margin:.4rem 0;font-size:.9rem"></div><div id="cl-av" hidden style="background:#fff3cd;color:#664d03;border:1px solid #ecd078;border-radius:10px;padding:.7rem .9rem;margin:.4rem 0;font-size:.9rem"></div><progress id="cl-pr" value="0" max="1" hidden style="width:100%"></progress>' +
   '<div class="vs-bar"><div class="vs-pill" id="cl-fm">' + FORMATOS.map(function(f){ return '<button type="button" class="pn-opt" data-clf="' + f[0] + '"><i class="' + f[4] + '"></i>' + f[1] + '</button>'; }).join('') + '</div>' +
-  '<div class="vs-pill" id="cl-cal"><button type="button" data-clq="fhd">Full HD</button><button type="button" data-clq="4k">4K</button></div>' +
+  '<div class="vs-pill" id="cl-cal"><button type="button" data-clq="bor">Rápido 720p</button><button type="button" data-clq="fhd">Full HD</button><button type="button" data-clq="4k">4K</button></div>' +
   '<button class="pn-btn" type="button" id="cl-gen">Generar y descargar MP4</button><button class="pn-btn sec" type="button" id="cl-can" hidden>Cancelar</button></div><small class="vs-res" id="cl-res"></small><small class="vs-res" id="cl-plan"></small></div></div>' +
-  '<p class="pn-s">La vista previa puede verse con saltos en computadoras lentas; el video final sale perfecto. Si subes una canción con derechos de autor, Instagram o TikTok pueden silenciar o bloquear el video. Conviene usar música con licencia.</p></div>';
+  '<details class="cl-more"><summary>Más opciones (sonido, cierre con tu marca)</summary><div class="pn-card" style="margin-top:.6rem">' +
+  '<div class="pn-row"><label><input id="cl-fx" type="checkbox" checked> Efectos de sonido en las transiciones</label><label><input id="cl-ci2" type="checkbox" checked> Tarjeta final con mi marca (4 s)</label></div>' +
+  '<div class="pn-row"><label>Volumen música <input id="cl-vm" type="range" min="0" max="1" step="0.05" value="0.9"></label><label>Volumen efectos <input id="cl-ve" type="range" min="0" max="1" step="0.05" value="0.7"></label></div>' +
+  '<div id="cl-au" hidden><p class="pn-s">Usando tu canción: <b id="cl-an"></b> <button class="pn-btn sec" type="button" id="cl-aq">Quitar y usar música automática</button></p><div class="pn-row"><label>Ritmo (pulsos por minuto) <input id="cl-bpm" type="number" min="50" max="220" step="0.5" style="width:6rem"></label><label>Empezar en el segundo <input id="cl-ini" type="number" min="0" step="0.1" style="width:6rem"></label></div><div class="pn-row"><label><input id="cl-al" type="checkbox" checked> Hacer coincidir la parte más fuerte de la canción con el golpe del video</label></div></div>' +
+  '<input id="cl-a" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac" hidden><div id="cl-mc"></div></div></details>' +
+  '<p class="pn-s">La vista previa puede verse con saltos en computadoras lentas; el video final sale perfecto. Si subes una canción con derechos de autor, Instagram o TikTok pueden silenciarla. La música automática la crea el programa y no tiene ese problema.</p></div>' +
+  '<div class="pn-card cl-side"><div class="cl-hd"><h2>Clips</h2><label class="pn-btn sec" style="cursor:pointer">+ Agregar clips<input id="cl-f" type="file" accept="video/*,.mp4,.mov" multiple hidden></label></div><p class="pn-s ay">Pon un número al inicio del nombre si quieres orden (01.mp4, 02.mp4…). Se usan todos los trozos, sin repetir. <span id="cl-n"></span></p><div id="cl-l"></div></div></div>' +
+  '<div class="pn-card cl-ad" hidden><div class="pn-row"><label>Título <input id="cl-t" type="text" maxlength="30"></label><label>Subtítulo <input id="cl-s" type="text" maxlength="50"></label></div><div class="pn-row"><label>Escena <select id="cl-be"><option value="2">2</option><option value="4" selected>4</option><option value="8">8</option></select></label><label><input id="cl-ci" type="checkbox" checked></label></div></div>';
   el.innerHTML = h;
   var q = function(id){ return el.querySelector('#' + id); };
   var estado = function(t){ q('cl-st').textContent = t || ''; };
 
   function pintarLista(){
-    q('cl-n').textContent = st.clips.length ? st.clips.length + (st.clips.length === 1 ? ' clip' : ' clips') : '';
+    q('cl-n').textContent = st.clips.length ? '· ' + st.clips.length + (st.clips.length === 1 ? ' clip' : ' clips') + (st.demo ? ' de ejemplo (solo vista previa)' : '') + ' · ' + Math.round(st.clips.reduce(function(a, c){ return a + c.dur; }, 0)) + ' s de material' : '';
     q('cl-l').innerHTML = st.clips.length ? '<div class="pn-card" style="padding:0;overflow:auto;margin-top:.6rem"><table class="pn-tb pn-ta"><tr><th>N.º</th><th>Clip</th><th></th></tr>' + st.clips.map(function(c, i){
-      return '<tr><td><b>' + String(i + 1).padStart(2, '0') + '</b></td><td>' + esc(c.nombre) + '<br><span class="pn-s">' + c.w + '×' + c.h + ' · ' + c.dur.toFixed(1) + ' s</span></td><td><button class="pn-btn sec" type="button" data-qt="' + i + '">Quitar</button></td></tr>';
+      return '<tr><td><b>' + String(i + 1).padStart(2, '0') + '</b></td><td>' + esc(c.nombre) + (c.demo ? ' <span class="cl-ejem">(ejemplo)</span>' : '') + '<br><span class="pn-s">' + c.w + '×' + c.h + ' · ' + c.dur.toFixed(1) + ' s</span></td><td><button class="pn-btn sec" type="button" data-qt="' + i + '">Quitar</button></td></tr>';
     }).join('') + '</table></div>' : '';
-    q('cl-l').querySelectorAll('[data-qt]').forEach(function(b){ b.onclick = function(){ var c = st.clips.splice(+b.dataset.qt, 1)[0]; try { URL.revokeObjectURL(c.url); } catch (e) {} st.esc = null; pintarLista(); vista(); }; });
+    q('cl-l').querySelectorAll('[data-qt]').forEach(function(b){ b.onclick = function(){ var c = st.clips.splice(+b.dataset.qt, 1)[0]; if (!c.demo) { try { URL.revokeObjectURL(c.url); } catch (e) {} } if (!st.clips.length) st.demo = false; st.esc = null; st.mix = null; pintarLista(); vista(); if (!st.clips.length) cargarDemo(); }; });
   }
-  function dims(){ var f = FORMATOS.filter(function(x){ return x[0] === st.fmt; })[0] || FORMATOS[0], k = st.cal === '4k' ? 2 : 1; return [f[2] * k, f[3] * k]; }
+  function dims(){ var f = FORMATOS.filter(function(x){ return x[0] === st.fmt; })[0] || FORMATOS[0], k = st.cal === '4k' ? 2 : st.cal === 'bor' ? 2 / 3 : 1; return [Math.round(f[2] * k), Math.round(f[3] * k)]; }
   function mmss(t){ t = Math.max(0, Math.round(t)); return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
-  function resumenPlan(){ var P = st.esc && st.esc.plan; q('cl-plan').textContent = P ? 'Acto 1: ' + P.nIntro + ' clips lentos · Ráfaga: ' + P.nRapido + ' cortes de ' + P.u.toFixed(2) + ' s · Acto 3: ' + P.nCalma + ' clips lentos + tarjeta · Versión ' + st.semilla : ''; }
+  function resumenPlan(){ var P = st.esc && st.esc.plan; var nt = q('cl-nt'); nt.hidden = !(P && P.aviso); nt.textContent = P && P.aviso ? '⚠ ' + P.aviso : ''; q('cl-plan').textContent = P ? 'Duración: ' + Math.round(P.total) + ' s · Acto 1: ' + P.nIntro + ' clips lentos · Ráfaga: ' + P.nRapido + ' cortes de ' + P.u.toFixed(2) + ' s · Acto 3: ' + P.nCalma + ' clips lentos + tarjeta · Versión ' + st.semilla : ''; }
   function alerta(t){ var a = q('cl-av'); a.hidden = !t; a.textContent = t || ''; }
   function controles(){ var d = st.esc ? st.esc.duracion : duracionTotal(), sk = q('cl-t0'); if (document.activeElement !== sk) sk.value = d ? Math.round(st.t / d * 1000) : 0; q('cl-tm').textContent = mmss(st.t) + ' / ' + mmss(d); q('cl-play').textContent = st.play ? '❚❚' : '▶'; }
   function pintarOpc(){ var d = dims(); q('cl-dev').className = 'np-dev ' + st.fmt; q('cl-res').textContent = d[0] + ' × ' + d[1] + ' px'; el.querySelectorAll('[data-clf]').forEach(function(b){ b.classList.toggle('on', b.dataset.clf === st.fmt); }); el.querySelectorAll('[data-clq]').forEach(function(b){ b.classList.toggle('on', b.dataset.clq === st.cal); }); }
-  function totalPedido(){ var T = st.total; if (st.audio) T = Math.min(T, Math.max(20, Math.floor(st.audio.dur - 1))); return T; }
-  function opcionesPlan(){ return { bpm: st.bpm, clips: st.clips, nombre1: st.n1, nombre2: st.n2, cierre: st.cierre, semilla: st.semilla, total: totalPedido() }; }
+  function totalPedido(){ var T = st.total; if (st.audio) T = Math.min(T, Math.max(10, Math.floor(st.audio.dur - 1))); return T; }
+  function opcionesPlan(){ var pf = PERFIL(); return { bpm: st.audio ? st.bpm : (pf ? pf.bpm : st.bpm), clips: st.clips, nombre1: st.n1, nombre2: st.n2on || (pf && pf.nombres2) ? st.n2 : '', cierre: st.cierre, semilla: st.semilla, total: totalPedido(), perfil: pf, musicaAuto: !st.audio }; }
   function duracionTotal(){ if (!st.clips.length) return 0; if (st.tpl === 'tr' && root.Trailer) return root.Trailer.planear(opcionesPlan()).total; var beat = 60 / st.bpm; return st.clips.length * beat * st.beatsEsc + (st.cierre ? beat * 8 : 0); }
   function actualizarDur(){ controles(); }
 
@@ -368,7 +382,7 @@ function montar(el, A){
     st.caras[key] = f.caras || []; return st.caras[key];
   }
   async function crear(Wd, Hd, esc){
-    if (st.tpl === 'tr' && root.Trailer) { var o2 = opcionesPlan(); o2.W = Wd; o2.H = Hd; o2.etq1 = st.e1; o2.etq2 = st.e2; o2.marca = st.marca; o2.color = true; o2.textoAtras = true; o2.detectarCaras = caras; o2.cargarSegmentador = function(){ return cargarSegmentador(estado); }; o2.segmentar = segmentar; return root.Trailer.crearEscena(o2); }
+    if (st.tpl === 'tr' && root.Trailer) { var o2 = opcionesPlan(); o2.W = Wd; o2.H = Hd; o2.etq1 = st.e1; o2.etq2 = st.e2; o2.perfil = PERFIL(); o2.marca = st.marca; o2.color = true; o2.textoAtras = true; o2.detectarCaras = caras; o2.cargarSegmentador = function(){ return cargarSegmentador(estado); }; o2.segmentar = segmentar; return root.Trailer.crearEscena(o2); }
     return crearEscena({ W: Wd, H: Hd, clips: st.clips, bpm: st.bpm, beatsEsc: st.beatsEsc, beatsCierre: 8, cierre: st.cierre, titulo: st.titulo, subtitulo: st.subtitulo });
   }
   function medidasVista(){ var d = dims(), k = 640 / Math.max(d[0], d[1]); return [Math.round(d[0] * k), Math.round(d[1] * k)]; }
@@ -394,7 +408,7 @@ function montar(el, A){
   var ac = null, fuente = null, rafId = 0, t0r = 0;
   function parar(){ st.play = false; cancelAnimationFrame(rafId); if (fuente) { try { fuente.stop(); } catch (e) {} fuente = null; } controles(); }
   async function mezcla(esc){
-    if (esc.estilo === 'trailer') return root.Trailer.mezclar(st.audio || { buf: null, dur: 0 }, { dur: esc.duracion, ini: iniTrailer(esc), volMusica: st.volM, volEfectos: st.volE, efectos: st.efectos, plan: esc.plan, cierre: st.cierre });
+    if (esc.estilo === 'trailer') return root.Trailer.mezclar(st.audio || { buf: null, dur: 0 }, { dur: esc.duracion, ini: iniTrailer(esc), volMusica: st.volM, volEfectos: st.volE, efectos: st.efectos, plan: esc.plan, cierre: st.cierre, perfil: PERFIL(), semilla: st.semilla, musicaAuto: !st.audio });
     return mezclar(st.audio, { dur: esc.duracion, ini: st.ini, volMusica: st.volM, volEfectos: st.volE, efectos: st.efectos, cortes: esc.cortes(), barridos: esc.barridos(), whoosh: Math.min(0.45, esc.S * 0.22), durBarrido: esc.S * 0.325 });
   }
   async function alternar(){
@@ -404,7 +418,7 @@ function montar(el, A){
     st.play = true; controles();
     try {
       var m = medidasVista(); if (!st.esc || st.esc.W !== m[0] || st.esc.H !== m[1]) { estado('Preparando la vista previa…'); st.mix = null; st.esc = await crear(m[0], m[1]); estado(''); }
-      var esc = st.esc, k = JSON.stringify([st.tpl, st.semilla, st.total, !!st.audio, st.n1, st.n2, st.bpm, st.ini, st.volM, st.volE, st.efectos, st.cierre, st.alinear, esc.duracion, st.clips.length]);
+      var esc = st.esc, k = JSON.stringify([st.ev, st.tpl, st.semilla, st.total, !!st.audio, st.n1, st.n2, st.bpm, st.ini, st.volM, st.volE, st.efectos, st.cierre, st.alinear, esc.duracion, st.clips.length]);
       if (!st.mix || st.mixK !== k) { estado('Preparando el sonido…'); st.mix = await mezcla(esc); st.mixK = k; estado(''); }
       if (!st.play) return;
       if (st.t >= esc.duracion - 0.2) st.t = 0;
@@ -429,7 +443,7 @@ function montar(el, A){
     var fs = Array.prototype.slice.call(q('cl-f').files || []); q('cl-f').value = '';
     if (!fs.length) return;
     fs.sort(function(a, b){ return numNombre(a.name) - numNombre(b.name) || a.name.localeCompare(b.name); });
-    estado('Leyendo clips…');
+    estado('Leyendo clips…'); if (st.demo) { st.clips = []; st.demo = false; st.esc = null; st.mix = null; }
     for (var i = 0; i < fs.length; i++) {
       try { var c = await abrirClip(fs[i]); c.ef = st.tpl === 'tr' ? 'auto' : 'ad'; st.clips.push(c); }
       catch (e) { aviso('No se pudo leer «' + fs[i].name + '». Expórtalo desde Premiere en H.264 (MP4) a 1080p y vuelve a intentar.'); }
@@ -444,9 +458,9 @@ function montar(el, A){
     estado('Analizando la canción y buscando el ritmo…'); q('cl-an').textContent = f.name;
     try {
       st.audio = await analizarAudio(f); if (root.Trailer) { try { st.audio.drop = root.Trailer.detectarDrop(st.audio.buf, 6); } catch (e) { st.audio.drop = null; } } st.bpm = Math.round(st.audio.bpm * 2) / 2; st.ini = Math.round(st.audio.fase * 100) / 100;
-      q('cl-bpm').value = st.bpm; q('cl-ini').value = st.ini.toFixed(2); q('cl-au').hidden = false; estado('Ritmo detectado: ' + st.bpm + ' pulsos por minuto. Si no suena bien, cámbialo a mano.');
+      q('cl-bpm').value = st.bpm; q('cl-ini').value = st.ini.toFixed(2); q('cl-au').hidden = false; q('cl-mus').value = 'mia'; st.mix = null; estado('Ritmo detectado: ' + st.bpm + ' pulsos por minuto. Si no suena bien, cámbialo a mano.');
       st.esc = null; vista();
-    } catch (e) { st.audio = null; q('cl-an').textContent = ''; estado(''); aviso('No se pudo leer esa canción. Prueba con un MP3 o WAV.'); }
+    } catch (e) { st.audio = null; q('cl-an').textContent = ''; q('cl-mus').value = 'auto'; estado(''); aviso('No se pudo leer esa canción. Prueba con un MP3 o WAV.'); }
   };
   q('cl-bpm').onchange = function(){ var v = clamp(parseFloat(q('cl-bpm').value) || 120, 50, 220); st.bpm = v; q('cl-bpm').value = v; if (st.audio) { st.ini = Math.round(fasePara(st.audio, v) * 100) / 100; q('cl-ini').value = st.ini.toFixed(2); } st.esc = null; vista(); };
   q('cl-ini').onchange = function(){ var v = Math.max(0, parseFloat(q('cl-ini').value) || 0); if (st.audio) { var beat = 60 / st.bpm, ph = st.audio.fase; v = ph + Math.round((v - ph) / beat) * beat; if (v < 0) v += beat; } st.ini = Math.round(v * 100) / 100; q('cl-ini').value = st.ini.toFixed(2); };
@@ -473,7 +487,7 @@ function montar(el, A){
   }
   if (!root.Trailer) { st.tpl = 'ad'; }
   q('cl-tpl').onchange = function(){ st.tpl = q('cl-tpl').value; aplicarTpl(); };
-  q('cl-n1').oninput = function(){ st.n1 = q('cl-n1').value.trim(); st.esc = null; vista(); };
+  q('cl-n1').oninput = function(){ st.n1 = q('cl-n1').value.trim(); q('cl-etqs').hidden = !(st.n1 || !q('cl-n2').hidden); st.esc = null; vista(); };
   q('cl-n2').oninput = function(){ st.n2 = q('cl-n2').value.trim(); st.esc = null; vista(); };
   q('cl-e1').oninput = function(){ st.e1 = q('cl-e1').value.trim(); st.esc = null; vista(); };
   q('cl-e2').oninput = function(){ st.e2 = q('cl-e2').value.trim(); st.esc = null; vista(); };
@@ -482,6 +496,24 @@ function montar(el, A){
   q('cl-otra').onclick = function(){ st.semilla = 1 + Math.floor(Math.random() * 9970); st.esc = null; vista(); estado('Nueva versión: los efectos y su orden cambiaron.'); };
   q('cl-dtot').onchange = function(){ st.total = +q('cl-dtot').value; st.esc = null; st.mix = null; vista(); };
   q('cl-al').onchange = function(){ st.alinear = q('cl-al').checked; };
+  function aplicarEvento(){
+    var pf = PERFIL(), et = ETQ[st.ev] || ['', '']; st.e1 = et[0]; st.e2 = et[1]; q('cl-e1').value = st.e1; q('cl-e2').value = st.e2;
+    var dos = !!(pf && pf.nombres2) || st.n2on; q('cl-n2').hidden = !dos; q('cl-n2b').hidden = !!(pf && pf.nombres2) || st.n2on; q('cl-etqs').hidden = !(dos || st.n1);
+    q('cl-n1').placeholder = st.ev === 'boda' ? 'Nombre de ella (ej: RIYA)' : 'Nombre (ej: RIYA)'; q('cl-n2').placeholder = st.ev === 'boda' ? 'Nombre de él (ej: UDAY)' : 'Segundo nombre (opcional)';
+    if (!st.audio && pf) st.bpm = pf.bpm; st.esc = null; st.mix = null;
+  }
+  q('cl-ev').onchange = function(){ parar(); st.ev = q('cl-ev').value; aplicarEvento(); vista(); };
+  q('cl-n2b').onclick = function(){ st.n2on = true; aplicarEvento(); q('cl-n2').focus(); };
+  q('cl-mus').onchange = function(){ if (q('cl-mus').value === 'mia') { q('cl-mus').value = st.audio ? 'mia' : 'auto'; q('cl-a').click(); } else if (st.audio) q('cl-aq').click(); };
+  q('cl-aq').onclick = function(){ st.audio = null; q('cl-au').hidden = true; q('cl-an').textContent = ''; q('cl-mus').value = 'auto'; aplicarEvento(); vista(); };
+  q('cl-dtot').value = String(st.total);
+  async function cargarDemo(){
+    if (st.clips.length || A.sinDemo) return;
+    var ids = [1, 2, 3, 4, 5, 6, 7, 8].sort(function(){ return Math.random() - .5; }).slice(0, 5 + Math.floor(Math.random() * 4)), cs = [];
+    for (var i = 0; i < ids.length; i++) { try { var c = await abrirClip('muestras/clip' + ids[i] + '.mp4'); c.demo = true; c.ef = 'auto'; cs.push(c); } catch (e) {} }
+    if (st.clips.length || !cs.length) return;
+    st.clips = cs; st.demo = true; st.esc = null; pintarLista(); vista();
+  }
   pintarMarca();
   q('cl-can').onclick = function(){ st.cancelar = true; estado('Cancelando…'); };
 
@@ -496,7 +528,7 @@ function montar(el, A){
   }
   async function generar(){
     if (st.ocupado) return;
-    if (!st.clips.length) return aviso('Elige primero tus clips.');
+    if (!st.clips.length || st.demo) return aviso('Para generar el video agrega tus propios clips con «+ Agregar clips». Los de ejemplo son solo para la vista previa.');
     parar();
     if (!S || !S.soportado()) return aviso('Tu navegador no puede crear el video. Usa Chrome o Edge actualizados en la computadora.');
     st.ocupado = true; st.cancelar = false; q('cl-gen').disabled = true; q('cl-can').hidden = false; q('cl-pr').hidden = false; q('cl-pr').value = 0;
@@ -526,8 +558,8 @@ function montar(el, A){
     st.ocupado = false; q('cl-gen').disabled = false; q('cl-can').hidden = true; q('cl-pr').hidden = true; st.semilla = 1 + Math.floor(Math.random() * 9970); st.esc = null; vista();
   }
   q('cl-gen').onclick = generar;
-  aplicarTpl();
-  return { estado: st, generar: generar, liberar: function(){ parar(); try { ac && ac.close(); } catch (e) {} st.clips.forEach(function(c){ try { URL.revokeObjectURL(c.url); } catch (e) {} }); } };
+  aplicarTpl(); aplicarEvento(); cargarDemo();
+  return { estado: st, generar: generar, liberar: function(){ parar(); try { ac && ac.close(); } catch (e) {} st.clips.forEach(function(c){ if (!c.demo) { try { URL.revokeObjectURL(c.url); } catch (e) {} } }); } };
 }
 
 function cargar(Slideshow){ S = Slideshow; }

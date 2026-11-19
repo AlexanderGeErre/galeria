@@ -124,11 +124,12 @@ function niebla(cx, W, H, t, fuerza){
   var g2 = cx.createLinearGradient(0, H * .58, 0, H); g2.addColorStop(0, 'rgba(255,255,255,0)'); g2.addColorStop(1, 'rgba(255,255,255,' + (.62 * fuerza).toFixed(3) + ')'); cx.fillStyle = g2; cx.fillRect(0, H * .58, W, H * .42);
   cx.restore();
 }
+var FPESO = '900', FUENTE = '"Arial Black",Impact,sans-serif', FILTRO = 'saturate(1.35) contrast(1.15) brightness(.97)', TINTE = 'rgba(255,160,80,.32)';
 function titulo(cx, W, H, txt, etq, col, p){
   if (!txt) return;
   var fs = Math.min(W * .5, H * .26); cx.save();
-  cx.font = '900 ' + fs + 'px "Arial Black",Impact,sans-serif'; var mw = cx.measureText(txt).width; if (mw > W * .88) fs *= W * .88 / mw;
-  cx.globalAlpha = clamp(p * 4, 0, 1) * cx.globalAlpha; cx.font = '900 ' + fs + 'px "Arial Black",Impact,sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  cx.font = FPESO + ' ' + fs + 'px ' + FUENTE; var mw = cx.measureText(txt).width; if (mw > W * .88) fs *= W * .88 / mw;
+  cx.globalAlpha = clamp(p * 4, 0, 1) * cx.globalAlpha; cx.font = FPESO + ' ' + fs + 'px ' + FUENTE; cx.textAlign = 'center'; cx.textBaseline = 'middle';
   var y = H * .5 + (1 - easeOut(p * 2)) * H * .03, g = cx.createLinearGradient(0, y - fs / 2, 0, y + fs / 2); g.addColorStop(0, col[0]); g.addColorStop(1, col[1]);
   cx.shadowColor = 'rgba(0,0,0,.28)'; cx.shadowBlur = W * .02; cx.fillStyle = g; cx.fillText(txt, W / 2, y); cx.shadowBlur = 0;
   if (etq) { cx.font = '600 ' + Math.round(fs * .13) + 'px Jost,Arial,sans-serif'; if ('letterSpacing' in cx) cx.letterSpacing = Math.round(fs * .05) + 'px'; cx.fillStyle = '#fff'; cx.shadowColor = 'rgba(0,0,0,.55)'; cx.shadowBlur = 8; cx.fillText(etq.toUpperCase(), W / 2, y - fs * .66); }
@@ -160,8 +161,8 @@ function microGlitch(cx, W, H, a, sem){
 /* ---------- Plan de 3 actos ---------- */
 // Acto 1 (15 %): clips de 2-3 s en cámara lenta con los nombres. Acto 2 (45 %): ráfaga de cortes de 0.25-0.35 s.
 // Acto 3 (40 %): clips largos en cámara lenta + tarjeta final de 4 s. Sirve con cualquier número de clips (reutiliza fragmentos distintos).
-function planear(o){
-  var beat = 60 / o.bpm, N = Math.max(1, o.clips.length), R = rng(o.semilla || 1), T = Math.max(20, o.total || 45), C = o.cierre ? 4 : 0, i, j;
+function planear1(o){
+  var beat = 60 / o.bpm, N = Math.max(1, o.clips.length), R = rng(o.semilla || 1), T = Math.max(10, o.total || 45), C = o.cierre ? 4 : 0, i, j;
   var k1 = Math.max(1, Math.round(2.5 / beat)); while (k1 * beat > 3.1 && k1 > 1) k1--; while (k1 * beat < 1.9) k1++;
   var d1 = k1 * beat, n1 = Math.max(o.nombre2 ? 2 : 1, Math.round(.15 * T / d1));
   var u = null, mejor = 9, n;
@@ -169,21 +170,33 @@ function planear(o){
   for (n = 0; n < cand.length; n++) { var x = cand[n]; if (x >= .245 && x <= .35) { u = x; break; } if (Math.abs(x - .3) < mejor) { mejor = Math.abs(x - .3); u = x; } }
   var n2 = Math.max(8, Math.round(.45 * T / u));
   var k3 = Math.max(2, Math.round(4.5 / beat)); while (k3 * beat > 6) k3--; var d3 = k3 * beat, n3 = Math.max(1, Math.round((.40 * T - C) / d3));
-  var usado = {}, segs = [], t = 0, ci;
+  var segs = [], t = 0, ci, agotado = false, prevCi = -1;
   function C_(k){ return o.clips[((k % N) + N) % N]; }
-  function elegirOff(k, S){
-    var c = C_(k), mx = Math.max(0, c.dur - S - .08); if (mx <= .05) return 0;
-    var us = usado[k] || (usado[k] = []), mejorO = 0, bd = -1, q2;
-    for (q2 = 0; q2 < 8; q2++) { var off = R() * mx, dm = us.length ? Math.min.apply(null, us.map(function(z){ return Math.abs(z - off); })) : 9; if (dm > bd) { bd = dm; mejorO = off; } }
-    us.push(mejorO); return mejorO;
+  // Aprovechamiento total: cada clip se parte en bloques de ~2-3 s; todos van a una cola mezclada y cada trozo se usa una sola vez.
+  var blocks = [], cola = [];
+  o.clips.forEach(function(c, k){ var nb = Math.max(1, Math.round(c.dur / 2.6)), L = (c.dur - .1) / nb; for (var q = 0; q < nb; q++) blocks.push({ k: k, a: .04 + q * L, b: .04 + (q + 1) * L, cur: .04 + q * L }); });
+  function mezclarCola(){
+    var arr = blocks.map(function(x){ x.cur = x.a; return x; });
+    for (var q = arr.length - 1; q > 0; q--) { var r = Math.floor(R() * (q + 1)), tm = arr[q]; arr[q] = arr[r]; arr[r] = tm; }
+    // evita el mismo clip dos veces seguidas
+    for (q = 1; q < arr.length; q++) if (arr[q].k === arr[q - 1].k) { for (var w = q + 1; w < arr.length; w++) if (arr[w].k !== arr[q - 1].k && (w + 1 >= arr.length || arr[w].k !== arr[q + 1 < arr.length ? q + 1 : q].k || true)) { var x2 = arr[q]; arr[q] = arr[w]; arr[w] = x2; break; } }
+    cola = arr;
+  }
+  mezclarCola();
+  function tomar(S){
+    if (!cola.length) { agotado = true; mezclarCola(); }
+    var q, idx = -1, mx = -1, mi = -1;
+    for (q = 0; q < cola.length; q++) { var bl = cola[q], rem = bl.b - bl.cur; if (rem >= S + .02 && (bl.k !== prevCi || cola.length < 2)) { idx = q; break; } if (rem > mx) { mx = rem; mi = q; } }
+    if (idx < 0) { for (q = 0; q < cola.length; q++) if (cola[q].b - cola[q].cur >= S + .02) { idx = q; break; } }
+    return idx < 0 ? { i: mi, corto: true } : { i: idx, corto: false };
   }
   function nuevo(sec, ci2, dur, v, ramp, extra){
-    var c = C_(ci2), S = ramp ? dur * G1 : dur * v;
-    if (ramp && c.dur < S + .15) { ramp = false; S = dur * v; }
-    if (c.dur < S + .12) { v = Math.max(.25, (c.dur - .12) / dur); S = dur * v; }
-    var s = { i: segs.length, sec: sec, ci: ((ci2 % N) + N) % N, start: t, dur: dur, off: elegirOff(((ci2 % N) + N) % N, S), vel: v, ramp: ramp,
+    var S = ramp ? dur * G1 : dur * v, tk = tomar(S), bl = cola[tk.i], rem = bl.b - bl.cur;
+    if (tk.corto) { ramp = false; v = Math.max(.2, (rem - .02) / dur); S = dur * v; }
+    var s = { i: segs.length, sec: sec, ci: bl.k, start: t, dur: dur, off: bl.cur, vel: v, ramp: ramp,
       z0: 1, z1: 1.08, fx: .5, fy: .5, pulse: false, crash: false, leak: false, glitch: false, fuegos: null };
     for (var kk in (extra || {})) s[kk] = extra[kk];
+    bl.cur += S + .01; prevCi = bl.k; cola.splice(tk.i, 1); if (bl.b - bl.cur >= .4) cola.push(bl);
     segs.push(s); t += dur; return s;
   }
   // Acto 1
@@ -200,7 +213,7 @@ function planear(o){
   var reus = N < n2;
   for (i = 0; i < n2; i++) {
     var ramp = R() < .26, z0 = reus ? 1.05 + R() * .3 : 1.02 + R() * .08;
-    nuevo('rapido', seq[i], u, 1, ramp, { z0: z0, z1: z0 + .04 + R() * .08, fx: .3 + R() * .4, fy: .3 + R() * .4, pulse: R() < .6, crash: R() < .14, leak: R() < .08, glitch: R() < .1 });
+    nuevo('rapido', seq[i], u, 1, ramp, { z0: z0, z1: z0 + .04 + R() * .08, fx: .3 + R() * .4, fy: .3 + R() * .4, pulse: R() < .6, crash: R() < .14, leak: R() < ((o.perfil && o.perfil.leaks) || .08), glitch: R() < .1 });
   }
   var tAct3 = t;
   // Acto 3: los últimos clips (en orden), cámara lenta
@@ -213,7 +226,7 @@ function planear(o){
     else if (a.sec === 'intro' && b.sec === 'rapido') tipo = ['flash', 'crash', 'glitch', 'flash'][Math.floor(R() * 4)];
     else if (a.sec === 'rapido' && b.sec === 'rapido') {
       if (hayPrev || R() < .55) tipo = 'corte';
-      else { var pool = POOL_RAPIDO.filter(function(x){ return x !== prev && !(x === 'franja') && !(x === 'glitch' && rec.slice(-3).indexOf('glitch') >= 0) && !(x === 'crash' && rec.slice(-3).indexOf('crash') >= 0); }); tipo = pool[Math.floor(R() * pool.length)]; }
+      else { var pool = (((o.perfil && o.perfil.pool) || POOL_RAPIDO).filter(function(x){ return x !== 'fundido' && x !== 'fuga'; })).filter(function(x){ return x !== prev && !(x === 'franja') && !(x === 'glitch' && rec.slice(-3).indexOf('glitch') >= 0) && !(x === 'crash' && rec.slice(-3).indexOf('crash') >= 0); }); tipo = pool[Math.floor(R() * pool.length)]; }
     }
     else if (a.sec === 'rapido' && b.sec === 'calma') tipo = R() < .6 ? 'fuga' : 'fundido';
     else tipo = 'fundido';
@@ -225,7 +238,18 @@ function planear(o){
   var tCierre = t, ult = segs[segs.length - 1];
   if (o.cierre) trs.push({ t: t, tipo: 'fundido', d: .9, a: segs.length - 1, b: -1, sem: 1, mayor: false });
   void ult;
-  return { beat: beat, u: u, segs: segs, trs: trs, tAct2: tAct2, tAct3: tAct3, tDrop: tAct2, tCalma: tAct3, tCierre: tCierre, C: C, total: t + C, nIntro: n1, nRapido: n2, nCalma: n3, d1: d1 };
+  return { agotado: agotado, beat: beat, u: u, segs: segs, trs: trs, tAct2: tAct2, tAct3: tAct3, tDrop: tAct2, tCalma: tAct3, tCierre: tCierre, C: C, total: t + C, nIntro: n1, nRapido: n2, nCalma: n3, d1: d1 };
+}
+
+function planear(o){
+  var T0 = Math.max(10, o.total || 45), T = T0, P, q, o2 = {};
+  for (var k in o) o2[k] = o[k];
+  for (q = 0; q < 8; q++) { o2.total = T; P = planear1(o2); if (!P.agotado || T <= 10) break; T = Math.max(10, T * .88); }
+  P.pedido = T0; P.aviso = '';
+  var usable = Math.round(P.total);
+  if (P.agotado) P.aviso = 'Con el material subido no alcanza ni para ' + Math.round(T) + ' s sin repetir. Se repiten algunos trozos; agrega más clips para evitarlo.';
+  else if (T < T0 - .5) P.aviso = 'Con el material subido el máximo sin repetir es de ' + usable + ' s (pediste ' + Math.round(T0) + ' s). Se ajustó la duración.';
+  return P;
 }
 
 /* ---------- Detección simple de luces (para fuegos artificiales), una vez por clip ---------- */
@@ -246,7 +270,61 @@ async function buscarLuces(clips){
 
 /* ---------- Escena ---------- */
 async function crearEscena(o){
-  var W = o.W, H = o.H, clips = o.clips, P = planear(o), N = P.segs.length, marco = {}, marcoB = {}, marcoF = {}, maskSeg = {}, i;
+  var pf = o.perfil || {}; FUENTE = pf.fuente || '"Arial Black",Impact,sans-serif'; FPESO = pf.peso || '900'; FILTRO = pf.filtro || 'saturate(1.35) contrast(1.15) brightness(.97)'; TINTE = pf.tinte || 'rgba(255,160,80,.32)';
+  var W = o.W, H = o.H, clips = o.clips, P = planear(o), N = P.segs.length, marco = {}, marcoB = {}, marcoF = {}, maskSeg = {}, marcoP = {}, marcoB2 = {}, i;
+  // Lector de cuadros: busca (seek) solo al empezar un clip y después lee los cuadros seguidos reproduciendo el clip rápido
+  // (mucho más veloz que buscar cuadro por cuadro). Guarda unos pocos cuadros para la cámara lenta.
+  var RVFC = typeof HTMLVideoElement !== 'undefined' && 'requestVideoFrameCallback' in HTMLVideoElement.prototype && o.lectorRapido === true;
+  function lector(c){
+    var key = W + 'x' + H, r = c._rd;
+    if (r && r.key === key) return r;
+    if (r) soltar(r);
+    r = c._rd = { key: key, c: c, buf: [], pool: [], playing: false, last: -1, esperando: [], uso: 0 };
+    return r;
+  }
+  function soltar(r){ try { r.c.v.pause(); } catch (e) {} r.playing = false; r.buf = []; r.pool = []; r.esperando.forEach(function(f){ f(); }); r.esperando = []; }
+  function reciclar(r, hasta){ while (r.buf.length > 1 && r.buf[1].mt <= hasta) r.pool.push(r.buf.shift().cv); }
+  function capturar(r){
+    var v = r.c.v;
+    var cb = function(now, meta){
+      if (!r.playing) return;
+      var cv = r.pool.pop() || lienzo(W, H); cubrir(cv.getContext('2d'), v, r.c.w, r.c.h, W, H);
+      r.buf.push({ mt: meta.mediaTime, cv: cv }); r.last = meta.mediaTime;
+      var ws = r.esperando; r.esperando = []; ws.forEach(function(f){ f(); });
+      if (r.buf.length > 14) { r.playing = false; try { v.pause(); } catch (e) {} return; }
+      v.requestVideoFrameCallback(cb);
+    };
+    v.requestVideoFrameCallback(cb);
+  }
+  function arrancar(r){ if (r.playing) return; r.playing = true; var v = r.c.v; v.playbackRate = r.rate || 1.6; capturar(r); var pr = v.play(); if (pr && pr.catch) pr.catch(function(){ r.playing = false; }); }
+  function esperar(r){ return new Promise(function(ok){ var fin = false, h = function(){ if (fin) return; fin = true; ok(); }; r.esperando.push(h); setTimeout(h, 700); }); }
+  async function dame(c, ts, t){
+    ts = clamp(ts, 0, Math.max(0, c.dur - .04));
+    if (!RVFC) {
+      // memoria de 4 cuadros por clip: la cámara lenta usa cada cuadro dos veces y así se lee una sola vez
+      var key = W + 'x' + H, fc = (c._fc && c._fc.key === key) ? c._fc : (c._fc = { key: key, m: {}, ord: [] }), idx = Math.round(ts * FPSV);
+      if (fc.m[idx]) return fc.m[idx];
+      var cvm; if (fc.ord.length >= 4) { var viejo = fc.ord.shift(); cvm = fc.m[viejo]; delete fc.m[viejo]; } else cvm = lienzo(W, H);
+      await irA(c.v, idx / FPSV); cubrir(cvm.getContext('2d'), c.v, c.w, c.h, W, H); fc.m[idx] = cvm; fc.ord.push(idx); return cvm;
+    }
+    var r = lector(c); r.uso = t;
+    if (r.pt != null && t > r.pt && t - r.pt < .25 && ts >= r.ps) { var rate = clamp((ts - r.ps) / (t - r.pt) * 1.6, .5, 4); if (!r.rate || Math.abs(rate - r.rate) > .15 * r.rate) { r.rate = rate; if (r.playing) { try { c.v.playbackRate = rate; } catch (e) {} } } }
+    if (r.pt == null || t !== r.pt) { r.pt = t; r.ps = ts; }
+    for (var vuelta = 0; vuelta < 40; vuelta++) {
+      var i, k = -1; for (i = 0; i < r.buf.length; i++) { if (r.buf[i].mt <= ts + .002) k = i; else break; }
+      if (k >= 0 && (k < r.buf.length - 1 || c.v.ended)) { reciclar(r, ts + .002); return r.buf[0].mt <= ts + .002 && r.buf.length > 1 && r.buf[1].mt <= ts + .002 ? r.buf[1].cv : r.buf[0].cv; }
+      if (r.playing && r.buf.length && ts >= r.last - .001 && ts - r.last < 1.5 && !c.v.ended) { await esperar(r); continue; }
+      if (!r.playing && r.buf.length && ts >= r.last - .001 && ts - r.last < 1.5 && !c.v.ended && k >= 0) { arrancar(r); await esperar(r); continue; }
+      // empezar de nuevo desde este punto: una sola búsqueda
+      r.playing = false; try { c.v.pause(); } catch (e) {} r.buf.forEach(function(q2){ r.pool.push(q2.cv); }); r.buf = [];
+      await irA(c.v, ts); var cv0 = r.pool.pop() || lienzo(W, H); cubrir(cv0.getContext('2d'), c.v, c.w, c.h, W, H); r.buf.push({ mt: ts - .0005, cv: cv0 }); r.last = ts - .0005;
+      arrancar(r); await esperar(r);
+    }
+    return r.buf.length ? r.buf[r.buf.length - 1].cv : lienzo(W, H);
+  }
+  function liberarInactivos(t, enUso){
+    clips.forEach(function(c, ci){ var r = c._rd; if (!r || r.key !== W + 'x' + H) return; if (enUso[ci]) return; if (t < r.uso || t - r.uso > 1.2) soltar(r); else if (r.playing && r.buf.length > 4) { r.playing = false; try { c.v.pause(); } catch (e) {} } });
+  }
   var COLS = [['#ff5fd6', '#a64bff'], ['#35c8ff', '#1769e0']], masc = {}, vig = vigneta(W, H), color = o.color !== false;
   try { await buscarLuces(clips); } catch (e) {}
   P.segs.forEach(function(s){ var c = clips[s.ci]; if (c.luz != null && s.sec !== 'rapido' || (c.luz != null && s.dur >= .5)) { var span = s.ramp ? s.dur * G1 : s.dur * s.vel; if (c.luz >= s.off && c.luz <= s.off + span) s.fuegos = clamp((c.luz - s.off) / Math.max(.01, span), 0, 1) * s.dur; } });
@@ -277,19 +355,17 @@ async function crearEscena(o){
     if (s.pulse && u >= 0) z *= 1 + .022 * Math.exp(-(u % P.beat) / .11);
     var FX = W * s.fx, FY = H * s.fy;
     var xf = function(c2){ c2.translate(FX + dx, FY + dy); c2.scale(z, z); c2.translate(-FX, -FY); };
-    var dibujar = function(c2){ c2.save(); xf(c2); if (fr) { if (color) c2.filter = 'saturate(1.35) contrast(1.15) brightness(.97)'; c2.drawImage(fr, 0, 0); c2.filter = 'none'; if (marcoF[k] > .02 && marcoB[k]) { c2.globalAlpha = marcoF[k]; if (color) c2.filter = 'saturate(1.35) contrast(1.15) brightness(.97)'; c2.drawImage(marcoB[k], 0, 0); c2.filter = 'none'; c2.globalAlpha = 1; } } c2.restore(); };
+    var dibujar = function(c2){ c2.save(); xf(c2); if (fr) { if (color) c2.filter = FILTRO; c2.drawImage(fr, 0, 0); c2.filter = 'none'; if (marcoF[k] > .02 && marcoB[k]) { c2.globalAlpha = marcoF[k]; if (color) c2.filter = FILTRO; c2.drawImage(marcoB[k], 0, 0); c2.filter = 'none'; c2.globalAlpha = 1; } } c2.restore(); };
     // Capa 1: video de fondo (con color vibrante y tinte cálido en las altas luces)
     dibujar(cx);
-    if (color) { cx.save(); cx.globalCompositeOperation = 'soft-light'; cx.fillStyle = 'rgba(255,160,80,.32)'; cx.fillRect(0, 0, W, H); cx.restore(); }
+    if (color) { cx.save(); cx.globalCompositeOperation = 'soft-light'; cx.fillStyle = TINTE; cx.fillRect(0, 0, W, H); cx.restore(); }
     if (s.sec === 'intro') {
       var nm = k === 0 ? o.nombre1 : o.nombre2, et = k === 0 ? o.etq1 : o.etq2;
       if (nm) {
         var a = clamp((p - .02) / .12, 0, 1) * clamp((1 - p) / .15, 0, 1);
         // Capa 2: texto grande
         cx.globalAlpha = a; titulo(cx, W, H, nm, et, COLS[k % 2], clamp(p / .35, 0, 1)); cx.globalAlpha = 1;
-        // Capa 3: niebla
-        niebla(cx, W, H, t, clamp(1.1 - p * .5, 0, 1));
-        // Capa 4: sujeto recortado (por delante del texto y la niebla)
+        // Capa 3: sujeto recortado (por delante del texto; sin niebla)
         var mk = maskSeg[k] || masc[k];
         if (mk && a > 0) {
           var tm = lienzo(W, H), tx = tm.getContext('2d');
@@ -297,7 +373,7 @@ async function crearEscena(o){
           tx.globalCompositeOperation = 'source-in'; dibujar(tx);
           cx.globalAlpha = a; cx.drawImage(tm, 0, 0); cx.globalAlpha = 1;
         }
-      } else niebla(cx, W, H, t, clamp(1.1 - p * .5, 0, 1) * .5);
+      }
     }
     if (s.crash && u >= 0 && u < .16) { cx.fillStyle = 'rgba(255,255,255,' + (.35 * Math.exp(-u / .05)).toFixed(3) + ')'; cx.fillRect(0, 0, W, H); }
     if (s.leak && u >= 0 && u < .7) fugaLuz(cx, W, H, Math.sin(clamp(u / .7, 0, 1) * PI) * .9, u / .7, k + 11);
@@ -325,20 +401,31 @@ async function crearEscena(o){
       if (trc0 && t > P.tCierre + trc0.d / 2) return;
       var nec = {}, k = segEn(t), tr = trActiva(t), j;
       nec[k] = 1; if (tr) { if (tr.a >= 0) nec[tr.a] = 1; if (tr.b >= 0) nec[tr.b] = 1; }
-      var ks = Object.keys(nec);
+      // Adelanto: empieza a buscar el cuadro del siguiente clip mientras se prepara este (ahorra la espera en cada corte)
+      var kn = segEn(t + .15), trn = trActiva(t + .12), pre = {};
+      if (kn !== k && !nec[kn]) pre[kn] = P.segs[kn].start; if (trn) { if (trn.b >= 0 && !nec[trn.b]) pre[trn.b] = trn.b === kn ? P.segs[kn].start : P.segs[trn.b].start; }
+      var enUso = {}; Object.keys(nec).forEach(function(q2){ enUso[P.segs[+q2].ci] = 1; });
+      Object.keys(pre).forEach(function(id){ var sg = P.segs[+id], cc = clips[sg.ci]; if (enUso[sg.ci]) return; var tt = srcT(+id, Math.max(pre[id], sg.start)); if (Math.abs(cc.v.currentTime - tt) > .02) { try { cc.v.currentTime = clamp(tt, 0, Math.max(0, cc.dur - .03)); } catch (e) {} } });
+      var ks = Object.keys(nec), porClip = {};
+      ks.forEach(function(q2){ var cc2 = P.segs[+q2].ci; porClip[cc2] = (porClip[cc2] || 0) + 1; });
       for (j = 0; j < ks.length; j++) {
         var id = +ks[j], s = P.segs[id], c = clips[s.ci], ts = srcT(id, t), lento = velAct(id, t) < .62;
-        var cvA = marco[id] || (marco[id] = lienzo(W, H));
-        if (lento) {
-          var ta = Math.floor(ts * FPSV) / FPSV, f = (ts - ta) * FPSV;
-          await irA(c.v, ta); cubrir(cvA.getContext('2d'), c.v, c.w, c.h, W, H);
-          if (f > .04 && ta + 1 / FPSV < c.dur - .03) { var cvB = marcoB[id] || (marcoB[id] = lienzo(W, H)); await irA(c.v, ta + 1 / FPSV); cubrir(cvB.getContext('2d'), c.v, c.w, c.h, W, H); marcoF[id] = f; } else marcoF[id] = 0;
-        } else { await irA(c.v, ts); cubrir(cvA.getContext('2d'), c.v, c.w, c.h, W, H); marcoF[id] = 0; }
+        if (porClip[s.ci] > 1) {
+          // dos escenas del mismo clip a la vez: se lee con búsqueda directa
+          var cvA = marcoP[id] || (marcoP[id] = lienzo(W, H)); await irA(c.v, ts); cubrir(cvA.getContext('2d'), c.v, c.w, c.h, W, H); marco[id] = cvA; marcoF[id] = 0;
+        } else if (lento) {
+          var ta = Math.floor(ts * FPSV + 1e-6) / FPSV, f = (ts - ta) * FPSV;
+          marco[id] = await dame(c, ta, t);
+          if (f > .04 && ta + 1 / FPSV < c.dur - .03) { var cB = await dame(c, ta + 1 / FPSV, t), cvB = cB; if (RVFC) { cvB = marcoB2[id] || (marcoB2[id] = lienzo(W, H)); cvB.getContext('2d').drawImage(cB, 0, 0); } marcoB[id] = cvB; marcoF[id] = f; } else marcoF[id] = 0;
+        } else {
+          marco[id] = await dame(c, ts, t); marcoF[id] = 0;
+        }
         if (usaSeg && s.sec === 'intro' && (id === 0 ? o.nombre1 : o.nombre2)) {
-          try { var mk = await o.segmentar(cvA); if (mk) { var mc = maskSeg[id] || (maskSeg[id] = lienzo(W, H)); var mx = mc.getContext('2d'); mx.clearRect(0, 0, W, H); mx.drawImage(mk, 0, 0, W, H); } } catch (e) {}
+          try { var mk = await o.segmentar(marco[id]); if (mk) { var mc = maskSeg[id] || (maskSeg[id] = lienzo(W, H)); var mx = mc.getContext('2d'); mx.clearRect(0, 0, W, H); mx.drawImage(mk, 0, 0, W, H); } } catch (e) {}
         }
       }
-      Object.keys(marco).forEach(function(id){ if (!(id in nec)) { delete marco[id]; delete marcoB[id]; delete marcoF[id]; delete maskSeg[id]; } });
+      Object.keys(marco).forEach(function(id){ if (!(id in nec)) { delete marco[id]; delete marcoB[id]; delete marcoF[id]; delete maskSeg[id]; delete marcoP[id]; delete marcoB2[id]; } });
+      liberarInactivos(t, enUso);
     },
     dibujar: function(cx, t){
       t = clamp(t, 0, P.total - 1e-6);
@@ -372,6 +459,86 @@ function detectarDrop(buf, minT){
 }
 
 /* ---------- Sonido: SOLO música + efectos creados aquí (nunca el audio de los clips). Sin canción: solo efectos. ---------- */
+/* ---------- Perfiles de evento (Guatemala) ---------- */
+var PERFILES = {
+  boda: { n: 'Boda', bpm: 85, fuente: '"Cormorant Garamond",Georgia,serif', peso: '700', filtro: 'saturate(1.2) contrast(1.1) brightness(1.0) sepia(.12)', tinte: 'rgba(255,190,110,.34)',
+    pool: ['fuga', 'fundido', 'flash', 'zoom', 'barrido'], sfx: ['riser', 'swish', 'hit', 'sparkle'], leaks: .16, nombres2: true, musica: { escala: 'mayor', a1: 'piano', a2: 'piano', a3: 'piano', cuerdas: 1, bajo: 'sub', perc: 'suave', hit: 'bombo' } },
+  quince: { n: 'Quinceaños', bpm: 120, fuente: '"Arial Black",Impact,sans-serif', peso: '900', filtro: 'saturate(1.5) contrast(1.22) brightness(1.0)', tinte: 'rgba(255,120,190,.26)',
+    pool: ['flash', 'crash', 'glitch', 'barrido', 'barridoV', 'golpe', 'zoom'], sfx: ['whip', 'sparkle', 'hit', 'swish'], leaks: .1, musica: { escala: 'pent', a1: 'arpa', a2: 'pluck', a3: 'campana', cuerdas: 0, bajo: 'synth', perc: 'baile', hit: 'crash' } },
+  revelacion: { n: 'Revelación de género', bpm: 90, fuente: '"Arial Black",Impact,sans-serif', peso: '900', filtro: 'saturate(1.3) contrast(1.1) brightness(1.04)', tinte: 'rgba(255,190,220,.22)',
+    pool: ['flash', 'zoom', 'barrido', 'fuga', 'golpe'], sfx: ['sparkle', 'swish', 'whip', 'hit'], leaks: .1, revelacion: true, musica: { escala: 'mayor', a1: 'cajita', a2: 'piano', a3: 'cajita', cuerdas: 1, bajo: 'sub', perc: 'suave', hit: 'bombo' } },
+  baby: { n: 'Baby Shower', bpm: 95, fuente: '"Jost",Arial,sans-serif', peso: '700', filtro: 'saturate(1.05) contrast(.98) brightness(1.08)', tinte: 'rgba(255,215,230,.28)',
+    pool: ['fundido', 'fuga', 'zoom', 'flash', 'barrido'], sfx: ['sparkle', 'swish', 'hit'], leaks: .1, musica: { escala: 'pent', a1: 'piano', a2: 'marimba', a3: 'piano', cuerdas: 0, bajo: 'sub', perc: 'suave', hit: 'suave' } },
+  bautizo: { n: 'Bautizo / Primera Comunión', bpm: 80, fuente: '"Cormorant Garamond",Georgia,serif', peso: '600', filtro: 'saturate(.98) contrast(1.02) brightness(1.1)', tinte: 'rgba(255,250,235,.3)',
+    pool: ['fundido', 'flash', 'fuga', 'zoom'], sfx: ['sparkle', 'swish', 'hit'], leaks: .2, flashBlanco: true, musica: { escala: 'mayor', a1: 'piano', a2: 'piano', a3: 'piano', cuerdas: 0, pad: 1, bajo: 'sub', perc: 'ninguna', hit: 'suave' } },
+  graduacion: { n: 'Graduación', bpm: 110, fuente: '"Arial Black",Impact,sans-serif', peso: '900', filtro: 'saturate(1.25) contrast(1.3) brightness(.95)', tinte: 'rgba(255,170,80,.22)',
+    pool: ['barrido', 'barridoV', 'golpe', 'crash', 'glitch', 'flash', 'zoom'], sfx: ['whip', 'hit', 'riser', 'swish'], leaks: .06, musica: { escala: 'menor', a1: 'pad', a2: 'pluck', a3: 'piano', cuerdas: 1, bajo: 'synth', perc: 'epica', hit: 'taiko' } }
+};
+
+/* ---------- Compositor musical por código (sin archivos): arpegio continuo sobre una progresión de 4 acordes ---------- */
+function componer(ctx, out, P, pf, dur, mv, R, nz){
+  var M = pf.musica, beat = P.beat, bus = ctx.createGain(); bus.gain.value = 1;
+  // reverb larga (impulso de ruido que decae)
+  var cv = ctx.createConvolver(), L = Math.floor(SR * 3.2), imp = ctx.createBuffer(2, L, SR), ch, q;
+  for (ch = 0; ch < 2; ch++) { var d = imp.getChannelData(ch); for (q = 0; q < L; q++) d[q] = (R() * 2 - 1) * Math.pow(1 - q / L, 2.6); }
+  cv.buffer = imp; var wet = ctx.createGain(); wet.gain.value = .5; bus.connect(cv); cv.connect(wet); wet.connect(out);
+  var dry = ctx.createGain(); dry.gain.value = .9; bus.connect(dry); dry.connect(out);
+  // curva general
+  var g0 = ctx.createGain(); g0.gain.value = 1; // (el nivel se controla en cada nota con mv)
+  var f = function(m){ return 440 * Math.pow(2, (m - 69) / 12); };
+  function env(g, t, a, d2, pk, hold){ g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(.0002, pk * mv), t + a); if (hold) g.gain.setValueAtTime(Math.max(.0002, pk * mv), t + a + hold); g.gain.exponentialRampToValueAtTime(.0001, t + a + (hold || 0) + d2); }
+  function osc(tipo, fr, t, d2){ var o2 = ctx.createOscillator(); o2.type = tipo; o2.frequency.value = fr; o2.start(t); o2.stop(t + d2 + .1); return o2; }
+  function piano(t, m, v, d2){ var g = ctx.createGain(); env(g, t, .006, d2, .17 * v); [[1, 'triangle', 1], [2, 'sine', .45], [3, 'sine', .2], [4, 'sine', .1]].forEach(function(p){ var o2 = osc(p[1], f(m) * p[0], t, d2), gg = ctx.createGain(); gg.gain.value = p[2]; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
+  function arpa(t, m, v){ var g = ctx.createGain(); env(g, t, .004, 1.3, .15 * v); [[1, 'sine', 1], [2, 'triangle', .35], [3, 'sine', .12]].forEach(function(p){ var o2 = osc(p[1], f(m) * p[0], t, 1.3), gg = ctx.createGain(); gg.gain.value = p[2]; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
+  function campana(t, m, v){ var g = ctx.createGain(); env(g, t, .003, 1.8, .12 * v); [1, 2.76, 5.4].forEach(function(p, i){ var o2 = osc('sine', f(m + 12) * p, t, 1.8), gg = ctx.createGain(); gg.gain.value = 1 / (1 + i * 1.6); o2.connect(gg); gg.connect(g); }); g.connect(bus); }
+  function cajita(t, m, v){ var g = ctx.createGain(); env(g, t, .002, .9, .13 * v); [1, 4.01].forEach(function(p, i){ var o2 = osc(i ? 'sine' : 'triangle', f(m + 12) * p, t, .9), gg = ctx.createGain(); gg.gain.value = i ? .2 : 1; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
+  function marimba(t, m, v){ var g = ctx.createGain(); env(g, t, .003, .35, .2 * v); [1, 4].forEach(function(p, i){ var o2 = osc('sine', f(m) * p, t, .35), gg = ctx.createGain(); gg.gain.value = i ? .25 : 1; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
+  function pluck(t, m, v){ var g = ctx.createGain(); env(g, t, .004, .28, .13 * v); var o2 = osc('sawtooth', f(m), t, .3), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(5000, t); lp.frequency.exponentialRampToValueAtTime(500, t + .25); o2.connect(lp); lp.connect(g); g.connect(bus); }
+  function cuerdas(t, notas, d2){ notas.forEach(function(m){ [-6, 6].forEach(function(dt){ var g = ctx.createGain(); env(g, t, Math.min(.9, d2 * .4), d2 * .5, .05, d2 * .2); var o2 = osc('sawtooth', f(m), t, d2 * 1.3); o2.detune.value = dt; var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1500; o2.connect(lp); lp.connect(g); g.connect(bus); }); }); }
+  function pad(t, notas, d2){ notas.forEach(function(m){ var g = ctx.createGain(); env(g, t, d2 * .45, d2 * .45, .06, d2 * .1); var o2 = osc('sine', f(m), t, d2 * 1.2); o2.connect(g); g.connect(bus); var o3 = osc('triangle', f(m + 12), t, d2 * 1.2), g3 = ctx.createGain(); g3.gain.value = .25; o3.connect(g3); g3.connect(g); }); }
+  function bajo(t, m, d2, tipo){ var g = ctx.createGain(); env(g, t, .02, d2, .3); var o2 = osc(tipo === 'synth' ? 'sawtooth' : 'sine', f(m), t, d2); var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = tipo === 'synth' ? 380 : 260; o2.connect(lp); lp.connect(g); g.connect(out); }
+  function ruidoM(t, d2, tipo, fr, pk, rosa){ var s = ctx.createBufferSource(); s.buffer = nz; var fl = ctx.createBiquadFilter(); fl.type = tipo; fl.frequency.value = fr; var g = ctx.createGain(); env(g, t, .002, d2, pk); s.connect(fl); fl.connect(g); g.connect(out); s.start(t, R() * 1.5, d2 + .1); }
+  function bombo(t, v){ var o2 = ctx.createOscillator(); o2.frequency.setValueAtTime(140, t); o2.frequency.exponentialRampToValueAtTime(42, t + .16); var g = ctx.createGain(); env(g, t, .004, .22, .42 * v); o2.connect(g); g.connect(out); o2.start(t); o2.stop(t + .3); }
+  function taiko(t, v){ var o2 = ctx.createOscillator(); o2.frequency.setValueAtTime(110, t); o2.frequency.exponentialRampToValueAtTime(45, t + .35); var g = ctx.createGain(); env(g, t, .004, .5, .55 * v); o2.connect(g); g.connect(out); o2.start(t); o2.stop(t + .6); ruidoM(t, .08, 'lowpass', 1500, .25 * v); }
+  // escala, progresión de 4 acordes al azar y tónica al azar
+  var ESC = M.escala === 'menor' ? [0, 2, 3, 5, 7, 8, 10] : (M.escala === 'pent' ? [0, 2, 4, 7, 9, 12, 14] : [0, 2, 4, 5, 7, 9, 11]);
+  var PROGS = M.escala === 'menor' ? [[0, 5, 2, 6], [0, 3, 5, 4], [0, 5, 6, 4]] : [[0, 4, 5, 3], [0, 5, 3, 4], [0, 3, 4, 3], [5, 3, 0, 4]];
+  var prog = PROGS[Math.floor(R() * PROGS.length)], ton = [57, 60, 62, 55, 59][Math.floor(R() * 5)];
+  function nota(gr){ var oc = Math.floor(gr / 7), i = ((gr % 7) + 7) % 7; return ton + ESC[i] + 12 * oc; }
+  function acorde(gr){ return [nota(gr), nota(gr + 2), nota(gr + 4)]; }
+  var INS = { piano: piano, arpa: arpa, campana: campana, cajita: cajita, marimba: marimba, pluck: pluck, pad: function(t, m, v){ piano(t, m, v * .8, 1.1); } };
+  var act, cut = pf.revelacion ? [P.tAct2 - .55, P.tAct2 - .02] : null;
+  var step = beat / 2, n = Math.ceil(dur / step), bar = 4 * beat, pat = [0, 1, 2, 3, 2, 1, 2, 1];
+  for (q = 0; q < n; q++) {
+    var t = q * step; if (t >= dur - .05) break;
+    var a = t < P.tAct2 - 1e-6 ? 1 : (t < P.tAct3 - 1e-6 ? 2 : 3), a0 = a === 1 ? 0 : (a === 2 ? P.tAct2 : P.tAct3);
+    var ib = Math.floor((t - a0 + 1e-6) / bar), ps = Math.round(((t - a0) % bar) / step), ch2 = prog[((ib % 4) + 4) % 4], ac = acorde(ch2);
+    if (cut && t >= cut[0] && t < cut[1]) continue;
+    var ins = INS[a === 1 ? M.a1 : (a === 2 ? M.a2 : M.a3)];
+    var idx = pat[ps % 8], m = idx === 3 ? ac[0] + 12 : ac[idx], vel = a === 1 ? .7 : (a === 2 ? 1 : .85), humano = (R() - .5) * .012;
+    var dur2 = a === 3 ? 1.4 : .6;
+    if (a === 3 && ps % 2) { /* arpegio de cierre: un poco más suelto */ }
+    ins(t + humano, m + 12 * (a === 3 ? 0 : 0), vel * (.8 + .2 * (ps % 2 ? 0 : 1)), dur2);
+    if (ps === 0) {
+      if (a === 1 && M.pad) pad(t, acorde(ch2).map(function(x){ return x - 12; }), bar);
+      if (a === 1) bajo(t, ac[0] - 24, bar * .9, 'sub');
+      if (a === 2) {
+        if (M.cuerdas) cuerdas(t, [ac[0] - 12, ac[1] - 12, ac[2] - 12, ac[0]], bar);
+        else pad(t, [ac[0], ac[1], ac[2]], bar);
+        bajo(t, ac[0] - 24, bar * .45, M.bajo);
+      }
+      if (a === 3) { pad(t, [ac[0] - 12, ac[1] - 12, ac[2] - 12], bar * 1.1); bajo(t, ac[0] - 24, bar * .9, 'sub'); }
+    }
+    if (a === 2) {
+      if (ps === 4) bajo(t, ac[0] - 24, bar * .45, M.bajo);
+      if (M.perc === 'baile') { if (ps % 2 === 0) bombo(t, 1); if (ps % 2 === 1) ruidoM(t, .05, 'highpass', 7000, .12); if (ps === 2 || ps === 6) ruidoM(t, .12, 'bandpass', 1800, .2); }
+      else if (M.perc === 'epica') { if (ps === 0 || ps === 4) taiko(t, 1); if (ps === 2 || ps === 6) taiko(t, .55); if (ps % 2) ruidoM(t, .04, 'highpass', 8000, .08); }
+      else if (M.perc === 'suave') { if (ps === 0 || ps === 4) bombo(t, .6); if (ps === 2 || ps === 6) ruidoM(t, .08, 'bandpass', 2400, .07); }
+    }
+  }
+  return bus;
+}
+
 async function mezclar(info, o){
   var dur = o.dur, OA = root.OfflineAudioContext || root.webkitOfflineAudioContext, ctx = new OA(2, Math.ceil(dur * SR), SR);
   var out = ctx.createGain(); out.gain.value = 1; var comp = ctx.createDynamicsCompressor(); comp.threshold.value = -10; comp.ratio.value = 4; comp.attack.value = .003; comp.release.value = .2;
@@ -393,6 +560,11 @@ async function mezclar(info, o){
     pts.sort(function(a, b){ return a[0] - b[0]; });
     gm.gain.setValueAtTime(.0001, 0); for (i = 1; i < pts.length; i++) gm.gain.linearRampToValueAtTime(Math.max(.0001, pts[i][1]), Math.max(pts[i - 1][0] + .001, pts[i][0]));
     src.start(0, ini, Math.min(dur, info.dur - ini));
+  }
+  else if (o.perfil && o.musicaAuto !== false) {
+    var gmA = ctx.createGain(); gmA.gain.setValueAtTime(.0001, 0); gmA.gain.linearRampToValueAtTime(1, .35); gmA.gain.setValueAtTime(1, Math.max(.5, dur - 1.8)); gmA.gain.linearRampToValueAtTime(.0001, dur); gmA.connect(out);
+    var RM = rng((o.semilla || 1) * 7 + 3), pk2 = ctx.createBuffer(1, SR * 2, SR), dd2 = pk2.getChannelData(0); for (i = 0; i < dd2.length; i++) dd2[i] = RM() * 2 - 1;
+    componer(ctx, gmA, P, o.perfil, dur, mv, RM, pk2);
   }
   if (!o.efectos) return ctx.startRendering();
   function ruido(t0, d, tipo, f0, f1, qq, g0, gpico, gfin, rosa){
@@ -425,8 +597,25 @@ async function mezclar(info, o){
     tono(t0 - .5, .5, 'sine', 700, 2400, .12, .3); tono(t0, 1.0, 'sine', 70, 28, .9); ruido(t0, .25, 'lowpass', 4000, 300, .6, .05, .6, .5);
     for (var k = 0; k < 30; k++) { var tt = t0 + .12 + Math.pow(R(), 1.6) * 1.0; ruido(tt, .01 + R() * .02, 'highpass', 2500 + R() * 3500, 9000, 1.5, .4, .25 * (1 - (tt - t0) / 1.4), .01); }
   }
+  // SFX variados (se alternan al azar en cada transición)
+  function whipWhoosh(t, d, fz){ whoosh(t, d, fz); golpeGrave(t, .35 * fz); }
+  function swishAir(t, d, fz){ ruido(t - d * 1.1, d * 1.3, 'bandpass', 1800, 9000, .9, .7, .5 * fz, .15, true); }
+  function cinematicHit(t, fz){ tono(t, 1.1, 'sine', 120, 34, .95 * fz, .005); ruido(t, .5, 'lowpass', 5000, 200, .6, .03, .7 * fz, .6); ruido(t, .1, 'highpass', 6000, 10000, .6, .1, .3 * fz, .3); }
+  function magicSparkle(t, fz){ for (var q2 = 0; q2 < 9; q2++) { var f0 = [1568, 1976, 2349, 2637, 3136, 3951][Math.floor(R() * 6)]; tono(t + q2 * .045 + R() * .02, .5 + R() * .4, 'sine', f0, f0 * .998, .06 * fz, .004); } ruido(t, .5, 'highpass', 6000, 12000, .7, .2, .12 * fz, .4, true); }
+  function heartbeat(t0, t1, b0, b1){ var tt = t0, per = 60 / b0; while (tt < t1) { var pr = (tt - t0) / Math.max(.1, t1 - t0), bb = b0 + (b1 - b0) * pr; per = 60 / bb; var gz = .6 + .5 * pr; tono(tt, .2, 'sine', 90, 45, gz, .004); tono(tt + per * .22, .17, 'sine', 80, 40, gz * .7, .004); tt += per; } }
+  function riserTension(t1, len, fz){ riser(t1, len, fz); ruido(t1 - len, len, 'highpass', 1500, 9000, .5, .95, .1 * fz, .1, true); }
+  function confeti(t){ cinematicHit(t, .9); magicSparkle(t + .02, 1.2); for (var q3 = 0; q3 < 40; q3++) ruido(t + .05 + Math.pow(R(), 1.5) * 1.2, .012 + R() * .02, 'highpass', 2500 + R() * 4000, 9000, 1.5, .4, .2, .01); }
+  var ultSfx = '', pfx = (o.perfil && o.perfil.sfx) || ['whip', 'swish', 'hit', 'sparkle'];
+  function variar(t, d, fx){
+    var op = pfx.filter(function(x){ return x !== ultSfx; }); var nm = op[Math.floor(R() * op.length)]; ultSfx = nm; d = Math.max(.2, d);
+    if (nm === 'whip') whipWhoosh(t, d * .95, 1); else if (nm === 'swish') { swishAir(t, d, 1); golpeGrave(t, .3); }
+    else if (nm === 'hit') { cinematicHit(t, .8); whoosh(t, d * .4, .4); } else if (nm === 'sparkle') { magicSparkle(t, 1); whoosh(t, d * .6, .4); }
+    else riserTension(t + .02, Math.min(1.2, d * 3), .6), cinematicHit(t + .02, .6);
+    return nm;
+  }
   /* Riser 1.5 s antes de la ráfaga + golpe grande en el primer corte */
   var ta2 = P.tAct2; riser(ta2 - .02, 1.5, 1);
+  if (o.perfil && o.perfil.revelacion) { heartbeat(Math.max(.3, ta2 - 3.6), ta2 - .08, 70, 190); riserTension(ta2 - .02, Math.min(3, ta2 - .3), .9); confeti(ta2); }
   tono(ta2, 1.3, 'sine', 150, 38, 1.15, .006); tono(ta2, .5, 'triangle', 160, 50, .45);
   ruido(ta2, .35, 'lowpass', 5000, 250, .6, .04, .9, .9); ruido(ta2 + .02, 1.5, 'lowpass', 1400, 200, .5, .02, .28, 1.2); ruido(ta2, .12, 'highpass', 6000, 9000, .6, .1, .35, .5);
   /* Riser suave y acordes antes del cierre lento */
@@ -436,12 +625,10 @@ async function mezclar(info, o){
   P.trs.forEach(function(tr){
     var t = tr.t, d = tr.d, fx = TRANS[tr.tipo].sfx;
     if (fx === 'corte') { if (tr.mayor) golpeGrave(t, .8); else { ruido(t - .004, .02, 'highpass', 3500, 9000, 1, .4, .22, .02); tono(t, .12, 'sine', 150, 50, .22, .004); } return; }
-    if (fx === 'zoom') { whoosh(t, d * .95, .9); golpeGrave(t, .6); }
+    if (fx === 'zoom' || fx === 'barrido' || fx === 'golpe') { variar(t, d, fx); }
     else if (fx === 'flash') { ruido(t - d * 1.1, d * 1.1, 'highpass', 2500, 12000, .8, .9, .6, .45, true); tono(t, .7, 'sine', 1760, 1740, .09); tono(t, .55, 'sine', 2637, 2620, .06); golpeGrave(t, .9); }
     else if (fx === 'glitch') { for (var k = 0; k < 7; k++) { var tt = t - d / 2 + R() * d; tono(tt, .015 + R() * .03, 'square', 250 + R() * 3500, 150 + R() * 2500, .12); ruido(tt, .02 + R() * .03, 'highpass', 1500 + R() * 4000, 6000, 2, .5, .22, .01); } golpeGrave(t, .5); }
     else if (fx === 'franja') { ruido(t - d / 2, .012, 'highpass', 2500, 5000, 1, .5, .6, .02); tono(t - d / 2, .09, 'sine', 240, 150, .4); whoosh(t, d * .5, .5); ruido(t + d / 2 - .02, .012, 'highpass', 2500, 5000, 1, .5, .6, .02); tono(t + d / 2 - .02, .09, 'sine', 200, 120, .4); golpeGrave(t, .6); }
-    else if (fx === 'barrido') { whoosh(t, d * 1.0, 1); golpeGrave(t, .5); }
-    else if (fx === 'golpe') { golpeGrave(t, 1); whoosh(t, .12, .5); }
     else if (fx === 'crash') { tono(t, .8, 'sine', 150, 32, 1.0, .006); ruido(t - .1, .12, 'bandpass', 1500, 9000, 1.1, .8, .8, .06); ruido(t, .5, 'lowpass', 6000, 300, .5, .03, .75, .3); ruido(t - .02, .08, 'highpass', 5000, 10000, 1, .3, .5, .2); }
     else if (fx === 'fuga') { whoosh(t, d * 1.0, .5); ruido(t - d * .5, d, 'highpass', 3500, 9000, .8, .8, .22, .4); tono(t, .9, 'sine', 1319, 1310, .05, .08); golpeGrave(t, .4); }
     else if (fx === 'suave') { ruido(t - d * .5, d * 1.2, 'bandpass', 300, 1800, .8, .8, .16, .4, true); [523, 659, 784].forEach(function(f){ tono(t - .1, 1.6, 'sine', f, f * .999, .04, .35); }); }
@@ -455,5 +642,5 @@ async function mezclar(info, o){
   return ctx.startRendering();
 }
 
-root.Trailer = { crearEscena: crearEscena, planear: planear, mezclar: mezclar, detectarDrop: detectarDrop, TRANS: TRANS, abrirClip: null };
+root.Trailer = { PERFILES: PERFILES, crearEscena: crearEscena, planear: planear, mezclar: mezclar, detectarDrop: detectarDrop, TRANS: TRANS, abrirClip: null };
 })(typeof window !== 'undefined' ? window : this);
