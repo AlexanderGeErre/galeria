@@ -459,6 +459,24 @@ function detectarDrop(buf, minT){
 }
 
 /* ---------- Sonido: SOLO música + efectos creados aquí (nunca el audio de los clips). Sin canción: solo efectos. ---------- */
+/* ---------- Instrumentos grabados (carpeta instrumentos/) ---------- */
+var INST_LISTA = {"piano": ["A2", "A3", "A4", "A5", "A6", "C2", "C3", "C4", "C5", "C6", "Ds2", "Ds3", "Ds4", "Ds5", "Ds6", "Fs2", "Fs3", "Fs4", "Fs5", "Fs6"], "violin": ["A3", "A4", "A5", "A6", "C4", "C5", "C6", "C7", "E4", "E5", "E6", "G3", "G4", "G5", "G6"], "xylophone": ["C5", "C6", "C7", "C8", "G4", "G5", "G6", "G7"], "cello": ["C2", "C3", "C4", "C5", "E2", "E3", "E4", "Gs2", "Gs3", "Gs4"], "harp": ["A2", "A4", "A6", "B1", "B3", "B5", "B6", "C3", "C5", "D2", "D4", "D6", "D7", "E1", "E3", "E5", "F2", "F4", "F6", "F7", "G1", "G3", "G5"]};
+var INST_CACHE = null, INST_P = null;
+function notaMidi(n){ var m = /^([A-G])(s?)(\d)$/.exec(n); if (!m) return null; return ({ C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 })[m[1]] + (m[2] ? 1 : 0) + 12 * (+m[3] + 1); }
+function cargarInstrumentos(base){
+  if (INST_CACHE) return Promise.resolve(INST_CACHE); if (INST_P) return INST_P;
+  var OA = root.OfflineAudioContext || root.webkitOfflineAudioContext; if (!OA || typeof fetch === 'undefined') return Promise.resolve(null);
+  INST_P = (async function(){
+    var dc = new OA(1, 1, SR), res = {}, jobs = [];
+    Object.keys(INST_LISTA).forEach(function(ins){ res[ins] = []; INST_LISTA[ins].forEach(function(n){ jobs.push((async function(){
+      try { var r = await fetch((base || 'instrumentos/') + ins + '/' + n + '.mp3'); if (!r.ok) return; var b = await dc.decodeAudioData(await r.arrayBuffer()); res[ins].push({ m: notaMidi(n), b: b }); } catch (e) {} })()); }); });
+    await Promise.all(jobs);
+    Object.keys(res).forEach(function(k){ res[k].sort(function(a, b){ return a.m - b.m; }); if (!res[k].length) delete res[k]; });
+    INST_CACHE = Object.keys(res).length ? res : null; if (!INST_CACHE) INST_P = null; return INST_CACHE;
+  })().catch(function(){ INST_P = null; return null; });
+  return INST_P;
+}
+
 /* ---------- Perfiles de evento (Guatemala) ---------- */
 var PERFILES = {
   boda: { n: 'Boda', bpm: 85, fuente: '"Cormorant Garamond",Georgia,serif', peso: '700', filtro: 'saturate(1.2) contrast(1.1) brightness(1.0) sepia(.12)', tinte: 'rgba(255,190,110,.34)',
@@ -476,7 +494,7 @@ var PERFILES = {
 };
 
 /* ---------- Compositor musical por código (sin archivos): arpegio continuo sobre una progresión de 4 acordes ---------- */
-function componer(ctx, out, P, pf, dur, mv, R, nz){
+function componer(ctx, out, P, pf, dur, mv, R, nz, INS_S){
   var M = pf.musica, beat = P.beat, bus = ctx.createGain(); bus.gain.value = 1;
   // reverb larga (impulso de ruido que decae)
   var cv = ctx.createConvolver(), L = Math.floor(SR * 3.2), imp = ctx.createBuffer(2, L, SR), ch, q;
@@ -488,13 +506,24 @@ function componer(ctx, out, P, pf, dur, mv, R, nz){
   var f = function(m){ return 440 * Math.pow(2, (m - 69) / 12); };
   function env(g, t, a, d2, pk, hold){ g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(.0002, pk * mv), t + a); if (hold) g.gain.setValueAtTime(Math.max(.0002, pk * mv), t + a + hold); g.gain.exponentialRampToValueAtTime(.0001, t + a + (hold || 0) + d2); }
   function osc(tipo, fr, t, d2){ var o2 = ctx.createOscillator(); o2.type = tipo; o2.frequency.value = fr; o2.start(t); o2.stop(t + d2 + .1); return o2; }
-  function piano(t, m, v, d2){ var g = ctx.createGain(); env(g, t, .006, d2, .17 * v); [[1, 'triangle', 1], [2, 'sine', .45], [3, 'sine', .2], [4, 'sine', .1]].forEach(function(p){ var o2 = osc(p[1], f(m) * p[0], t, d2), gg = ctx.createGain(); gg.gain.value = p[2]; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
-  function arpa(t, m, v){ var g = ctx.createGain(); env(g, t, .004, 1.3, .15 * v); [[1, 'sine', 1], [2, 'triangle', .35], [3, 'sine', .12]].forEach(function(p){ var o2 = osc(p[1], f(m) * p[0], t, 1.3), gg = ctx.createGain(); gg.gain.value = p[2]; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
+  // muestra grabada: se usa la nota más cercana y se ajusta el tono (igual que hace Tone.js con su Sampler)
+  function muestra(ins, t, m, v, d2, ataque, soltar, dest){
+    var L = INS_S && INS_S[ins]; if (!L) return false; var best = L[0], q2; for (q2 = 1; q2 < L.length; q2++) if (Math.abs(L[q2].m - m) < Math.abs(best.m - m)) best = L[q2];
+    var s = ctx.createBufferSource(); s.buffer = best.b; s.playbackRate.value = Math.pow(2, (m - best.m) / 12); var g = ctx.createGain(), at = ataque || .004, fin = Math.min(best.b.duration / s.playbackRate.value - .05, d2 + (soltar || .25));
+    g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(Math.max(.0002, v * mv), t + at); g.gain.setValueAtTime(Math.max(.0002, v * mv), t + Math.max(at, d2)); g.gain.exponentialRampToValueAtTime(.0001, t + Math.max(at + .05, fin));
+    s.connect(g); g.connect(dest || bus); s.start(t); s.stop(t + Math.max(at + .1, fin) + .05); return true;
+  }
+  function pianoSyn(t, m, v, d2){ var g = ctx.createGain(); env(g, t, .006, d2, .17 * v); [[1, 'triangle', 1], [2, 'sine', .45], [3, 'sine', .2], [4, 'sine', .1]].forEach(function(p){ var o2 = osc(p[1], f(m) * p[0], t, d2), gg = ctx.createGain(); gg.gain.value = p[2]; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
+  function piano(t, m, v, d2){ if (!muestra('piano', t, m, .4 * v, d2 + .5, .004, 1.2)) pianoSyn(t, m, v, d2); }
+  function arpaSyn(t, m, v){ var g = ctx.createGain(); env(g, t, .004, 1.3, .15 * v); [[1, 'sine', 1], [2, 'triangle', .35], [3, 'sine', .12]].forEach(function(p){ var o2 = osc(p[1], f(m) * p[0], t, 1.3), gg = ctx.createGain(); gg.gain.value = p[2]; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
+  function arpa(t, m, v){ if (!muestra('harp', t, m, .4 * v, 1.2, .003, .5)) arpaSyn(t, m, v); }
   function campana(t, m, v){ var g = ctx.createGain(); env(g, t, .003, 1.8, .12 * v); [1, 2.76, 5.4].forEach(function(p, i){ var o2 = osc('sine', f(m + 12) * p, t, 1.8), gg = ctx.createGain(); gg.gain.value = 1 / (1 + i * 1.6); o2.connect(gg); gg.connect(g); }); g.connect(bus); }
   function cajita(t, m, v){ var g = ctx.createGain(); env(g, t, .002, .9, .13 * v); [1, 4.01].forEach(function(p, i){ var o2 = osc(i ? 'sine' : 'triangle', f(m + 12) * p, t, .9), gg = ctx.createGain(); gg.gain.value = i ? .2 : 1; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
-  function marimba(t, m, v){ var g = ctx.createGain(); env(g, t, .003, .35, .2 * v); [1, 4].forEach(function(p, i){ var o2 = osc('sine', f(m) * p, t, .35), gg = ctx.createGain(); gg.gain.value = i ? .25 : 1; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
+  function marimbaSyn(t, m, v){ var g = ctx.createGain(); env(g, t, .003, .35, .2 * v); [1, 4].forEach(function(p, i){ var o2 = osc('sine', f(m) * p, t, .35), gg = ctx.createGain(); gg.gain.value = i ? .25 : 1; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
+  function marimba(t, m, v){ if (!muestra('xylophone', t, m + 12, .4 * v, .5, .002, .3)) marimbaSyn(t, m, v); }
   function pluck(t, m, v){ var g = ctx.createGain(); env(g, t, .004, .28, .13 * v); var o2 = osc('sawtooth', f(m), t, .3), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(5000, t); lp.frequency.exponentialRampToValueAtTime(500, t + .25); o2.connect(lp); lp.connect(g); g.connect(bus); }
-  function cuerdas(t, notas, d2){ notas.forEach(function(m){ [-6, 6].forEach(function(dt){ var g = ctx.createGain(); env(g, t, Math.min(.9, d2 * .4), d2 * .5, .05, d2 * .2); var o2 = osc('sawtooth', f(m), t, d2 * 1.3); o2.detune.value = dt; var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1500; o2.connect(lp); lp.connect(g); g.connect(bus); }); }); }
+  function cuerdas(t, notas, d2){ if (INS_S && (INS_S.violin || INS_S.cello)) { notas.forEach(function(m){ var ins = (m < 55 && INS_S.cello) ? 'cello' : (INS_S.violin && m >= 52 ? 'violin' : 'cello'); if (!INS_S[ins] || !muestra(ins, t, m, .3, d2 * .8, Math.min(.7, d2 * .3), d2 * .35)) { } }); return; }
+    notas.forEach(function(m){ [-6, 6].forEach(function(dt){ var g = ctx.createGain(); env(g, t, Math.min(.9, d2 * .4), d2 * .5, .05, d2 * .2); var o2 = osc('sawtooth', f(m), t, d2 * 1.3); o2.detune.value = dt; var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1500; o2.connect(lp); lp.connect(g); g.connect(bus); }); }); }
   function pad(t, notas, d2){ notas.forEach(function(m){ var g = ctx.createGain(); env(g, t, d2 * .45, d2 * .45, .06, d2 * .1); var o2 = osc('sine', f(m), t, d2 * 1.2); o2.connect(g); g.connect(bus); var o3 = osc('triangle', f(m + 12), t, d2 * 1.2), g3 = ctx.createGain(); g3.gain.value = .25; o3.connect(g3); g3.connect(g); }); }
   function bajo(t, m, d2, tipo){ var g = ctx.createGain(); env(g, t, .02, d2, .3); var o2 = osc(tipo === 'synth' ? 'sawtooth' : 'sine', f(m), t, d2); var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = tipo === 'synth' ? 380 : 260; o2.connect(lp); lp.connect(g); g.connect(out); }
   function ruidoM(t, d2, tipo, fr, pk, rosa){ var s = ctx.createBufferSource(); s.buffer = nz; var fl = ctx.createBiquadFilter(); fl.type = tipo; fl.frequency.value = fr; var g = ctx.createGain(); env(g, t, .002, d2, pk); s.connect(fl); fl.connect(g); g.connect(out); s.start(t, R() * 1.5, d2 + .1); }
@@ -540,6 +569,7 @@ function componer(ctx, out, P, pf, dur, mv, R, nz){
 }
 
 async function mezclar(info, o){
+  var INSTS = (o.perfil && o.musicaAuto !== false && !(info && info.buf) && o.instrumentos !== false) ? await cargarInstrumentos(o.instBase) : null;
   var dur = o.dur, OA = root.OfflineAudioContext || root.webkitOfflineAudioContext, ctx = new OA(2, Math.ceil(dur * SR), SR);
   var out = ctx.createGain(); out.gain.value = 1; var comp = ctx.createDynamicsCompressor(); comp.threshold.value = -10; comp.ratio.value = 4; comp.attack.value = .003; comp.release.value = .2;
   var sh = ctx.createWaveShaper(), cu = new Float32Array(4096), q; for (q = 0; q < 4096; q++) { var xx = q / 2047.5 - 1; cu[q] = Math.tanh(xx * 1.2) / Math.tanh(1.2) * .97; } sh.curve = cu; sh.oversample = '2x'; var mg = ctx.createGain(); mg.gain.value = .8; out.connect(comp); comp.connect(mg); mg.connect(sh); sh.connect(ctx.destination);
@@ -564,7 +594,7 @@ async function mezclar(info, o){
   else if (o.perfil && o.musicaAuto !== false) {
     var gmA = ctx.createGain(); gmA.gain.setValueAtTime(.0001, 0); gmA.gain.linearRampToValueAtTime(1, .35); gmA.gain.setValueAtTime(1, Math.max(.5, dur - 1.8)); gmA.gain.linearRampToValueAtTime(.0001, dur); gmA.connect(out);
     var RM = rng((o.semilla || 1) * 7 + 3), pk2 = ctx.createBuffer(1, SR * 2, SR), dd2 = pk2.getChannelData(0); for (i = 0; i < dd2.length; i++) dd2[i] = RM() * 2 - 1;
-    componer(ctx, gmA, P, o.perfil, dur, mv, RM, pk2);
+    componer(ctx, gmA, P, o.perfil, dur, mv, RM, pk2, INSTS);
   }
   if (!o.efectos) return ctx.startRendering();
   function ruido(t0, d, tipo, f0, f1, qq, g0, gpico, gfin, rosa){
@@ -642,5 +672,5 @@ async function mezclar(info, o){
   return ctx.startRendering();
 }
 
-root.Trailer = { PERFILES: PERFILES, crearEscena: crearEscena, planear: planear, mezclar: mezclar, detectarDrop: detectarDrop, TRANS: TRANS, abrirClip: null };
+root.Trailer = { cargarInstrumentos: cargarInstrumentos, PERFILES: PERFILES, crearEscena: crearEscena, planear: planear, mezclar: mezclar, detectarDrop: detectarDrop, TRANS: TRANS, abrirClip: null };
 })(typeof window !== 'undefined' ? window : this);
