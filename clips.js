@@ -446,7 +446,7 @@ function montar(el, A){
     estado('Leyendo clips…'); if (st.demo) { st.clips = []; st.demo = false; st.esc = null; st.mix = null; }
     for (var i = 0; i < fs.length; i++) {
       try { var c = await abrirClip(fs[i]); c.ef = st.tpl === 'tr' ? 'auto' : 'ad'; st.clips.push(c); }
-      catch (e) { aviso('No se pudo leer «' + fs[i].name + '». Expórtalo desde Premiere en H.264 (MP4) a 1080p y vuelve a intentar.'); }
+      catch (e) { aviso('No se pudo leer «' + fs[i].name + '». Si viene de un iPhone, casi seguro está en formato HEVC. Soluciones: en el iPhone usa Ajustes → Cámara → Formatos → Más compatible; o instala «Extensiones de video HEVC» en Windows; o expórtalo desde Premiere en H.264 (MP4).'); }
     }
     st.clips.sort(function(a, b){ return numNombre(a.nombre) - numNombre(b.nombre) || a.nombre.localeCompare(b.nombre); });
     var nums = st.clips.map(function(c){ return numNombre(c.nombre); });
@@ -559,6 +559,7 @@ function montar(el, A){
   }
   q('cl-gen').onclick = generar;
   aplicarTpl(); aplicarEvento(); cargarDemo();
+  if (/iPhone|iPad|Android/i.test(navigator.userAgent)) { var nt0 = q('cl-av'); nt0.hidden = false; nt0.textContent = 'ℹ Desde el celular puedes ver la vista previa, pero para generar el MP4 usa Chrome o Edge en una computadora.'; }
   return { estado: st, generar: generar, liberar: function(){ parar(); try { ac && ac.close(); } catch (e) {} st.clips.forEach(function(c){ if (!c.demo) { try { URL.revokeObjectURL(c.url); } catch (e) {} } }); } };
 }
 

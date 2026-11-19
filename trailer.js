@@ -504,12 +504,12 @@ function componer(ctx, out, P, pf, dur, mv, R, nz, INS_S){
   // curva general
   var g0 = ctx.createGain(); g0.gain.value = 1; // (el nivel se controla en cada nota con mv)
   var f = function(m){ return 440 * Math.pow(2, (m - 69) / 12); };
-  function env(g, t, a, d2, pk, hold){ g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(.0002, pk * mv), t + a); if (hold) g.gain.setValueAtTime(Math.max(.0002, pk * mv), t + a + hold); g.gain.exponentialRampToValueAtTime(.0001, t + a + (hold || 0) + d2); }
-  function osc(tipo, fr, t, d2){ var o2 = ctx.createOscillator(); o2.type = tipo; o2.frequency.value = fr; o2.start(t); o2.stop(t + d2 + .1); return o2; }
+  function env(g, t, a, d2, pk, hold){ t = Math.max(0, t); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(.0002, pk * mv), t + a); if (hold) g.gain.setValueAtTime(Math.max(.0002, pk * mv), t + a + hold); g.gain.exponentialRampToValueAtTime(.0001, t + a + (hold || 0) + d2); }
+  function osc(tipo, fr, t, d2){ t = Math.max(0, t); var o2 = ctx.createOscillator(); o2.type = tipo; o2.frequency.value = fr; o2.start(t); o2.stop(t + d2 + .1); return o2; }
   // muestra grabada: se usa la nota más cercana y se ajusta el tono (igual que hace Tone.js con su Sampler)
   function muestra(ins, t, m, v, d2, ataque, soltar, dest){
     var L = INS_S && INS_S[ins]; if (!L) return false; var best = L[0], q2; for (q2 = 1; q2 < L.length; q2++) if (Math.abs(L[q2].m - m) < Math.abs(best.m - m)) best = L[q2];
-    var s = ctx.createBufferSource(); s.buffer = best.b; s.playbackRate.value = Math.pow(2, (m - best.m) / 12); var g = ctx.createGain(), at = ataque || .004, fin = Math.min(best.b.duration / s.playbackRate.value - .05, d2 + (soltar || .25));
+    t = Math.max(0, t); var s = ctx.createBufferSource(); s.buffer = best.b; s.playbackRate.value = Math.pow(2, (m - best.m) / 12); var g = ctx.createGain(), at = ataque || .004, fin = Math.min(best.b.duration / s.playbackRate.value - .05, d2 + (soltar || .25));
     g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(Math.max(.0002, v * mv), t + at); g.gain.setValueAtTime(Math.max(.0002, v * mv), t + Math.max(at, d2)); g.gain.exponentialRampToValueAtTime(.0001, t + Math.max(at + .05, fin));
     s.connect(g); g.connect(dest || bus); s.start(t); s.stop(t + Math.max(at + .1, fin) + .05); return true;
   }
@@ -544,7 +544,7 @@ function componer(ctx, out, P, pf, dur, mv, R, nz, INS_S){
     var ib = Math.floor((t - a0 + 1e-6) / bar), ps = Math.round(((t - a0) % bar) / step), ch2 = prog[((ib % 4) + 4) % 4], ac = acorde(ch2);
     if (cut && t >= cut[0] && t < cut[1]) continue;
     var ins = INS[a === 1 ? M.a1 : (a === 2 ? M.a2 : M.a3)];
-    var idx = pat[ps % 8], m = idx === 3 ? ac[0] + 12 : ac[idx], vel = a === 1 ? .7 : (a === 2 ? 1 : .85), humano = (R() - .5) * .012;
+    var idx = pat[ps % 8], m = idx === 3 ? ac[0] + 12 : ac[idx], vel = a === 1 ? .7 : (a === 2 ? 1 : .85), humano = (R() - .5) * .012; if (t + humano < 0) humano = 0;
     var dur2 = a === 3 ? 1.4 : .6;
     if (a === 3 && ps % 2) { /* arpegio de cierre: un poco más suelto */ }
     ins(t + humano, m + 12 * (a === 3 ? 0 : 0), vel * (.8 + .2 * (ps % 2 ? 0 : 1)), dur2);
@@ -629,11 +629,11 @@ async function mezclar(info, o){
   }
   // SFX variados (se alternan al azar en cada transición)
   function whipWhoosh(t, d, fz){ whoosh(t, d, fz); golpeGrave(t, .35 * fz); }
-  function swishAir(t, d, fz){ ruido(t - d * 1.1, d * 1.3, 'bandpass', 1800, 9000, .9, .7, .5 * fz, .15, true); }
+  function swishAir(t, d, fz){ ruido(Math.max(0, t - d * 1.1), d * 1.3, 'bandpass', 1800, 9000, .9, .7, .5 * fz, .15, true); }
   function cinematicHit(t, fz){ tono(t, 1.1, 'sine', 120, 34, .95 * fz, .005); ruido(t, .5, 'lowpass', 5000, 200, .6, .03, .7 * fz, .6); ruido(t, .1, 'highpass', 6000, 10000, .6, .1, .3 * fz, .3); }
   function magicSparkle(t, fz){ for (var q2 = 0; q2 < 9; q2++) { var f0 = [1568, 1976, 2349, 2637, 3136, 3951][Math.floor(R() * 6)]; tono(t + q2 * .045 + R() * .02, .5 + R() * .4, 'sine', f0, f0 * .998, .06 * fz, .004); } ruido(t, .5, 'highpass', 6000, 12000, .7, .2, .12 * fz, .4, true); }
   function heartbeat(t0, t1, b0, b1){ var tt = t0, per = 60 / b0; while (tt < t1) { var pr = (tt - t0) / Math.max(.1, t1 - t0), bb = b0 + (b1 - b0) * pr; per = 60 / bb; var gz = .6 + .5 * pr; tono(tt, .2, 'sine', 90, 45, gz, .004); tono(tt + per * .22, .17, 'sine', 80, 40, gz * .7, .004); tt += per; } }
-  function riserTension(t1, len, fz){ riser(t1, len, fz); ruido(t1 - len, len, 'highpass', 1500, 9000, .5, .95, .1 * fz, .1, true); }
+  function riserTension(t1, len, fz){ riser(t1, len, fz); ruido(Math.max(0, t1 - len), len, 'highpass', 1500, 9000, .5, .95, .1 * fz, .1, true); }
   function confeti(t){ cinematicHit(t, .9); magicSparkle(t + .02, 1.2); for (var q3 = 0; q3 < 40; q3++) ruido(t + .05 + Math.pow(R(), 1.5) * 1.2, .012 + R() * .02, 'highpass', 2500 + R() * 4000, 9000, 1.5, .4, .2, .01); }
   var ultSfx = '', pfx = (o.perfil && o.perfil.sfx) || ['whip', 'swish', 'hit', 'sparkle'];
   function variar(t, d, fx){
