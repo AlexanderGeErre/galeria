@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-var VERSION = 'V1.0.0.8';
+var VERSION = 'V1.0.0.10';
 var W = 'https://galerias-api.alexandergeerre.workers.dev';
 var BASE = 'https://alexandergeerre.github.io/galeria/cliente.html?c=';
 var BASEG = 'https://galerias-api.alexandergeerre.workers.dev/g/';
@@ -234,6 +234,7 @@ CSS += '.fs-n{color:var(--s);font-weight:400;opacity:.7}.pn-ov .pn-tb td{white-s
 '.vp-chips{display:flex;flex-wrap:wrap;gap:.45rem;margin:.7rem 0 1rem}.vp-chip{border:1px solid var(--l);background:var(--c);color:var(--s);border-radius:99px;padding:.42rem .95rem;font:inherit;font-size:.86rem;cursor:pointer}.vp-chip small{opacity:.6;margin-left:.2rem}.vp-chip.on{background:var(--t);color:var(--c);border-color:var(--t)}.vp-chip.todas{border-style:dashed}.vp-body{max-height:50vh;overflow:auto;padding-right:.2rem}.vp-g{margin-bottom:1.2rem}.vp-gh{display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem}.vp-gh b{font-weight:500}.vp-gh .pn-btn{margin-left:auto}#pn-dvp .pn-row{margin-top:.9rem}' +
 '.pn dialog.vs-dlg{max-height:min(94vh,calc(100dvh - 1.5rem))}.vs-dlg .np-dev.v canvas,.vs-dlg .np-dev.f canvas{height:min(42vh,470px);width:auto}.vs-dlg .np-dev.s canvas{height:min(40vh,440px);width:auto}.vs-dlg .np-dev.h canvas{width:min(560px,78vw);height:auto}.vs-dlg .vs-pv{padding:.7rem .8rem .8rem;min-height:0}.vs-dlg .vs-pcol{gap:.45rem}.vs-dlg .np-dev{padding:9px}@media(max-height:860px){.vs-dlg .np-dev.v canvas,.vs-dlg .np-dev.f canvas{height:min(32vh,360px)}.vs-dlg .np-dev.s canvas{height:min(30vh,320px)}.vs-dlg .np-dev.h canvas{width:min(400px,60vw)}}' +
 '@media(min-width:1100px){.pn dialog.vs-dlg[open]{display:grid;grid-template-columns:minmax(0,1fr) 20rem;align-items:start}.vs-dlg>.np-hd{grid-column:1/-1}.vs-dlg>.vs{grid-column:1;grid-row:2}.vs-dlg>.pn-card{grid-column:2;grid-row:2;margin:1rem 1.2rem 1rem 0;position:sticky;top:4.5rem;max-height:calc(90vh - 6rem);overflow:auto}.vs-dlg .pn-vtira{flex-wrap:wrap;overflow-x:visible}}';
+CSS += '.vs-dlg .np-hd{gap:.6rem;flex-wrap:wrap}.vs-hbtn{display:flex;gap:.5rem;align-items:center;margin-left:auto}.vs-addh{display:none;white-space:nowrap}@media(max-width:1099px){.vs-addh{display:inline-flex}.vs-dlg .vs-bar{position:sticky;bottom:0;z-index:2;background:#14110d;margin:.4rem -.8rem -.8rem;padding:.6rem .8rem;border-top:1px solid rgba(239,230,212,.12)}}@media(max-width:560px){.pn dialog.vs-dlg{width:100vw;max-width:100vw;max-height:100dvh;height:100dvh;border-radius:0;margin:0}.vs-dlg .np-hd h2{font-size:1.15rem}.vs-dlg .np-dev.v canvas,.vs-dlg .np-dev.f canvas{height:min(30dvh,300px)}.vs-dlg .np-dev.s canvas{height:min(28dvh,270px)}.vs-dlg .np-dev.h canvas{width:min(300px,70vw)}.vs-dlg .vs-bar{gap:.35rem;padding:.45rem .6rem}.vs-dlg .vs-pill{padding:3px}.vs-dlg .vs-pill button{padding:.35rem .45rem;font-size:.74rem;gap:.25rem}.vs-dlg .vs-bar .pn-btn{width:100%;padding:.6rem}}.vs-bar [hidden]{display:none!important}';
 CSS += '.pn-tm{table-layout:fixed;width:100%}.pn-tm th:first-child{width:38%}.pn-tm td:first-child{overflow-wrap:anywhere}@media(max-width:760px){.pn-tm th,.pn-tm td{padding:.65rem .4rem;font-size:.82rem}.pn-tm th{font-size:.56rem;letter-spacing:.02em}.pn-tm th:first-child,.pn-tm td:first-child{padding-left:.7rem}}';
 CSS += '#pn-dlogo{width:min(32rem,94vw)}#pn-dlogo input[type=file]{width:100%;margin:.6rem 0;font:inherit;font-size:.85rem;color:var(--s)}#pn-dlogo input[type=file]::file-selector-button{background:var(--a);color:var(--f);border:0;border-radius:99px;padding:.55rem 1.3rem;margin-right:.8rem;font:inherit;cursor:pointer}';
 CSS += '.fs-p{width:22px;height:22px;border-radius:50%;border:1px solid var(--l);background:none;color:var(--s);font-size:.68rem;cursor:pointer;padding:0;margin-left:-.2rem}.fs-p:hover{border-color:var(--s);color:var(--t)}.fs-p.on{background:#2f8f55;border-color:#2f8f55;color:#fff}.fs-d.off{background:#2B2623;border-color:#2B2623;color:#fff}.fs-ent.fs-cer{color:#8a8178;border-color:#8a8178}.fs-ent{font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:#2f8f55;border:1px solid #2f8f55;border-radius:99px;padding:.1rem .55rem}';
@@ -352,7 +353,7 @@ var DIS = [
   ['tarjetas', 'Relieve', { f: '#EFEEEA', c: '#FFFFFF', t: '#222222', s: '#7A7A75', l: '#E6E5E0', a: '#222222', p: '#F1F0EC', hf: 'Jost,system-ui,sans-serif', hw: 500, h1: '2.1rem', hl: '-.02em', ht: 'none', rc: '16px', rb: '10px', rp: '8px', ri: '10px', rs: '8px', rd: '16px', sh: '0 2px 14px rgba(0,0,0,.07)', bt: 'none', bl: '0', bs: 'inherit', tt: 'none', tl: '0', sb: '' }],
   ['oscura', 'Medianoche', { f: '#141414', c: '#232323', t: '#EDE8E0', s: '#948D83', l: '#333333', a: '#C9A66B', p: '#242424', hf: '"Cormorant Garamond",Georgia,serif', hw: 500, h1: '2.6rem', hl: '0', ht: 'none', rc: '3px', rb: '3px', rp: '2px', ri: '3px', rs: '3px', rd: '4px', sh: 'none', bt: 'uppercase', bl: '.12em', bs: '.78rem', tt: 'uppercase', tl: '.1em', sb: '', fija: 1 }]
 ];
-function disenoGuardado(){ var v = 'vidrio'; try { v = localStorage.getItem('pn-dis') || 'vidrio'; } catch(e) {} return DIS.some(function(d){ return d[0] === v; }) ? v : 'vidrio'; }
+function disenoGuardado(){ var v = 'vidrio2'; try { v = localStorage.getItem('pn-dis') || 'vidrio2'; } catch(e) {} return DIS.some(function(d){ return d[0] === v; }) ? v : 'vidrio2'; }
 function disenoNombre(){ var id = disenoGuardado(); return DIS.filter(function(d){ return d[0] === id; })[0][1]; }
 function disCss(){
   var c = '.pn[data-d]{font-family:Jost,system-ui,sans-serif}' +
@@ -403,7 +404,7 @@ function pintarLado(){
       '<button data-v="inicio" class="nd">' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias" class="nd on">' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes" class="nd">' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz" class="nd">' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda" class="nd">' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos" class="nd">' + ico('grupos') + '<span>Grupos</span></button><button data-v="ia" class="nd">' + ico('ia') + '<span>IA</span></button>' +
       TABS.map(function(t){ return '<button data-act="tab" data-t="' + t[0] + '" class="ta' + (tab === t[0] ? ' on' : '') + '">' + ico(t[0]) + '<span>' + t[1] + '</span></button>'; }).join('');
   } else {
-    h = logo() + '<button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias"' + (vista === 'galerias' || vista === 'asist' ? ' class="on"' : '') + '>' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes"' + (vista === 'clientes' ? ' class="on"' : '') + '>' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz"' + (vista === 'cotiz' ? ' class="on"' : '') + '>' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda"' + (vista === 'agenda' ? ' class="on"' : '') + '>' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos"' + (vista === 'grupos' ? ' class="on"' : '') + '>' + ico('grupos') + '<span>Grupos de graduación</span></button><button data-v="ia"' + (vista === 'ia' ? ' class="on"' : '') + '>' + ico('ia') + '<span>Selección con IA</span></button>';
+    h = logo() + '<button data-v="inicio"' + (vista === 'inicio' ? ' class="on"' : '') + '>' + ico('inicio') + '<span>Inicio</span></button><button data-v="galerias"' + (vista === 'galerias' || vista === 'asist' ? ' class="on"' : '') + '>' + ico('galerias') + '<span>Galerías de clientes</span></button><button data-v="clientes"' + (vista === 'clientes' ? ' class="on"' : '') + '>' + ico('clientes') + '<span>Clientes</span></button><button data-v="cotiz"' + (vista === 'cotiz' ? ' class="on"' : '') + '>' + ico('cotiz') + '<span>Cotizaciones</span></button><button data-v="agenda"' + (vista === 'agenda' ? ' class="on"' : '') + '>' + ico('agenda') + '<span>Agenda</span></button><button data-v="grupos"' + (vista === 'grupos' ? ' class="on"' : '') + '>' + ico('grupos') + '<span>Grupos de graduación</span></button><button data-v="ia"' + (vista === 'ia' ? ' class="on"' : '') + '>' + ico('ia') + '<span>Selección con IA</span></button><button data-v="clips"' + (vista === 'clips' ? ' class="on"' : '') + '>' + ico('video') + '<span>Videos con clips</span></button>';
   }
   var tm = temaGuardado();
   h += '<div class="pie"><button data-v="cuenta"' + (vista === 'cuenta' ? ' class="on"' : '') + '>' + ico('cuenta') + '<span>Mi cuenta</span></button>' + disenoSelHtml() + '<div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button><small class="pn-ver">' + VERSION + '</small></div>';
@@ -418,8 +419,10 @@ function navLeer(){ try { return JSON.parse(localStorage.getItem('pn-nav') || 'n
 function pintar(){
   AS.show = false; navGuardar();
   if (!(vista === 'detalle' && tab === 'video')) vidLiberar();
+  if (vista !== 'clips' && clipsInst) { try { clipsInst.liberar(); } catch (e) {} clipsInst = null; }
   pintarLado(); aplicarTema(); setTimeout(marcarCargadas, 0);
   if (vista === 'cuenta') return pintarCuenta();
+  if (vista === 'clips') return pintarClips();
   if (vista === 'inicio') return pintarInicio();
   if (vista === 'galerias') return pintarLista();
   if (vista === 'clientes') return pintarClientes();
@@ -849,6 +852,19 @@ function actividad(){
 
 function dt(titulo, resumen, html, abierta){ return '<details class="pn-det"' + (abierta ? ' open' : '') + '><summary><b>' + titulo + '</b><span>' + esc(resumen || '') + '</span></summary><div class="in">' + html + '</div></details>'; }
 function errCuenta(e){ var m = e && e.message ? e.message : ''; if (!e || /column|schema cache|permission|policy|row-level/i.test(m)) return 'No se pudo guardar. Falta ejecutar el SQL de la Actualización 1 en Supabase (archivo etapa8.sql).'; return m; }
+/* Videos con clips (antes y después): corre en clips.js */
+var clipsInst = null;
+function cargarScript(src){ return new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = src + '?v=' + VERSION.replace(/^V/, ''); sc.onload = ok; sc.onerror = function(){ no(new Error('No se encontró ' + src + ' en GitHub. Súbelo junto con panel.js.')); }; document.head.appendChild(sc); }); }
+async function pintarClips(){
+  $('#pn-main').innerHTML = '<div id="pn-clips"><p class="pn-s">Cargando…</p></div>';
+  try {
+    await cargarSlideshow(); if (!window.Clips) await cargarScript('clips.js');
+    window.Clips.cargar(window.Slideshow);
+    if (vista !== 'clips' || !$('#pn-clips')) return;
+    if (clipsInst) { try { clipsInst.liberar(); } catch (e) {} }
+    clipsInst = window.Clips.montar($('#pn-clips'), { aviso: aviso });
+  } catch (e) { var z = $('#pn-clips'); if (z) z.innerHTML = '<div class="pn-card"><p>' + esc(e.message || 'No se pudo abrir esta sección.') + '</p></div>'; }
+}
 function pintarCuenta(){
   var pv = function(cual, n, dato){ return '<div class="pn-lg-pv ' + (cual === 'claro' ? 'cl' : 'os') + '">' + logoImg('', n, dato).replace('<img class=""', '<img id="pn-lgp-' + cual + '"') + '</div>'; };
   $('#pn-main').innerHTML = '<h1>Mi cuenta</h1><p class="pn-s ay">Aquí configuras cómo se ve tu estudio en las galerías de tus clientes.</p><div class="pn-form">' +
@@ -1238,7 +1254,7 @@ function pintarDetalle0(){
       '<div class="pn-card"><h2>Eliminar galería</h2><p class="pn-s">Se borran la galería y todas sus fotos. No se puede deshacer.</p><button class="pn-btn rojo" data-act="eliminar-galeria">Eliminar galería</button></div>';
   } else if (tab === 'video') {
     cuerpo = '<div class="pn-card pn-vabre"><h2>Video</h2><p class="pn-s">Crea un video con las fotos de esta galería.</p><button class="pn-btn" type="button" data-act="vid-abrir-ed">Abrir editor de video</button></div>' +
-      '<dialog id="pn-dvid" class="np vs-dlg"><div class="np-hd"><h2>Presentación de video</h2><button class="pn-btn sec" type="button" data-act="vid-cerrar-ed">Cerrar</button></div>' + vidHtml(g, sel, fin) + '</dialog>';
+      '<dialog id="pn-dvid" class="np vs-dlg"><div class="np-hd"><h2>Presentación de video</h2><div class="vs-hbtn"><button class="pn-btn sec vs-addh" type="button" data-act="vid-agregar">+ Agregar fotos</button><button class="pn-btn sec" type="button" data-act="vid-cerrar-ed">Cerrar</button></div></div>' + vidHtml(g, sel, fin) + '</dialog>';
   } else if (tab === 'favoritas') {
     var nombre = {}; cur.fotos.forEach(function(x){ nombre[x.id] = sinExt(x.filename); });
     var grF = gruposEsc(cur.favs.map(function(x){ return x.photo_id; }));
@@ -1531,10 +1547,10 @@ function enlHtml(){
 function enlRefrescar(){ var d = $('#pn-denl'); if (d && d.open && cur) d.innerHTML = enlHtml(); }
 var MAS = [['favoritas', 'Favoritas', 'Contenido'], ['impresiones', 'Impresiones', 'Contenido'], ['video', 'Video', 'Contenido'], ['detalles', 'Detalles', 'Ajustes'], ['config', 'Configuración', 'Ajustes']], masAb = false;
 function navPrincipal(){
-  var enMas = vista === 'cotiz' || vista === 'grupos' || vista === 'ia' || vista === 'cuenta', tm = temaGuardado();
+  var enMas = vista === 'cotiz' || vista === 'grupos' || vista === 'ia' || vista === 'clips' || vista === 'cuenta', tm = temaGuardado();
   var b = function(v, ic, lab, on){ return '<button type="button" data-v="' + v + '"' + (on ? ' class="on"' : '') + '>' + ico(ic) + '<span>' + lab + '</span></button>'; };
   var it = function(v, ic, lab){ return '<button type="button" data-v="' + v + '"' + (vista === v ? ' class="on"' : '') + '>' + ico(ic) + '<span>' + lab + '</span></button>'; };
-  var hoja = masAb ? '<div class="pn-mas-dim" data-act="mas-cerrar"></div><div class="pn-mas">' + it('cotiz', 'cotiz', 'Cotizaciones') + it('grupos', 'grupos', 'Grupos de graduación') + it('ia', 'ia', 'Selección con IA') + it('cuenta', 'cuenta', 'Mi cuenta') + '<h4>Apariencia</h4>' + disenoSelHtml() + '<div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button type="button" data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button type="button" data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button></div>' : '';
+  var hoja = masAb ? '<div class="pn-mas-dim" data-act="mas-cerrar"></div><div class="pn-mas">' + it('cotiz', 'cotiz', 'Cotizaciones') + it('grupos', 'grupos', 'Grupos de graduación') + it('ia', 'ia', 'Selección con IA') + it('clips', 'video', 'Videos con clips') + it('cuenta', 'cuenta', 'Mi cuenta') + '<h4>Apariencia</h4>' + disenoSelHtml() + '<div class="pn-tema" role="group" aria-label="Tema">' + [['auto', 'Auto'], ['light', 'Claro'], ['dark', 'Oscuro']].map(function(x){ return '<button type="button" data-act="tema" data-t="' + x[0] + '"' + (tm === x[0] ? ' class="on"' : '') + '>' + x[1] + '</button>'; }).join('') + '</div><button type="button" data-act="salir">' + ico('salir') + '<span>Cerrar sesión</span></button></div>' : '';
   return hoja + '<nav class="pn-bn" aria-label="Secciones">' + b('inicio', 'inicio', 'Inicio', vista === 'inicio') + b('galerias', 'galerias', 'Galerías', vista === 'galerias' || vista === 'asist') + b('clientes', 'clientes', 'Clientes', vista === 'clientes') + b('agenda', 'agenda', 'Agenda', vista === 'agenda') + '<button type="button" data-act="mas-abrir"' + (enMas || masAb ? ' class="on"' : '') + '>' + ico('mas') + '<span>Más</span></button></nav>';
 }
 function navHtml(){

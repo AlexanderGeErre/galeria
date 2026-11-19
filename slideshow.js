@@ -14,7 +14,14 @@ function box(tipo){ var p = u8.apply(null, Array.prototype.slice.call(arguments,
 function ceros(n){ return new Uint8Array(n); }
 var MATRIZ = u8(u32(0x10000), u32(0), u32(0), u32(0), u32(0x10000), u32(0), u32(0), u32(0), u32(0x40000000));
 
-function Mp4Mux(w, h){ this.w = w; this.h = h; this.s = []; this.avcC = null; }
+function Mp4Mux(w, h){ this.w = w; this.h = h; this.s = []; this.avcC = null; this.a = []; this.aCfg = null; this.aRate = 48000; this.aCh = 2; }
+Mp4Mux.prototype.agregarAudio = function(chunk, meta){
+  if (!this.aCfg && meta && meta.decoderConfig && meta.decoderConfig.description) {
+    var d = meta.decoderConfig.description; this.aCfg = d instanceof ArrayBuffer ? new Uint8Array(d.slice(0)) : new Uint8Array(d.buffer.slice(d.byteOffset, d.byteOffset + d.byteLength));
+    if (meta.decoderConfig.sampleRate) this.aRate = meta.decoderConfig.sampleRate; if (meta.decoderConfig.numberOfChannels) this.aCh = meta.decoderConfig.numberOfChannels;
+  }
+  var b = new Uint8Array(chunk.byteLength); chunk.copyTo(b); this.a.push({ d: b, ts: chunk.timestamp });
+};
 Mp4Mux.prototype.agregar = function(chunk, meta){
   if (!this.avcC && meta && meta.decoderConfig && meta.decoderConfig.description) {
     var d = meta.decoderConfig.description;
@@ -39,6 +46,8 @@ Mp4Mux.prototype.finalizar = function(){
   var avc1 = box('avc1', ceros(6), u16(1), ceros(16), u16(w), u16(h), u32(0x00480000), u32(0x00480000), u32(0), u16(1), ceros(32), u16(0x18), u16(0xFFFF), box('avcC', this.avcC));
   var stsd = box('stsd', u32(0), u32(1), avc1);
   var tam = 0; s.forEach(function(x){ tam += x.d.length; });
+  var A = this.a, tieneA = A.length > 0 && !!this.aCfg, tamA = 0, aRate = this.aRate, aCh = this.aCh, aCfg = this.aCfg;
+  if (tieneA) A.forEach(function(x){ tamA += x.d.length; });
   var ftyp = box('ftyp', txt('isom'), u32(512), txt('isom'), txt('iso2'), txt('avc1'), txt('mp41'));
   function moov(off){
     var stco = box('stco', u32(0), u32(1), u32(off));
@@ -47,12 +56,25 @@ Mp4Mux.prototype.finalizar = function(){
     var mdia = box('mdia', box('mdhd', u32(0), u32(0), u32(0), u32(T), u32(total), u16(0x55C4), u16(0)),
       box('hdlr', u32(0), u32(0), txt('vide'), ceros(12), txt('VideoHandler'), ceros(1)), minf);
     var trak = box('trak', box('tkhd', u32(3), u32(0), u32(0), u32(1), u32(0), u32(ms), ceros(8), u16(0), u16(0), u16(0), u16(0), MATRIZ, u32(w * 65536), u32(h * 65536)), mdia);
-    var mvhd = box('mvhd', u32(0), u32(0), u32(0), u32(1000), u32(ms), u32(0x10000), u16(0x100), u16(0), ceros(8), MATRIZ, ceros(24), u32(2));
-    return box('moov', mvhd, trak);
+    var mvhd = box('mvhd', u32(0), u32(0), u32(0), u32(1000), u32(ms), u32(0x10000), u16(0x100), u16(0), ceros(8), MATRIZ, ceros(24), u32(tieneA ? 3 : 2));
+    if (!tieneA) return box('moov', mvhd, trak);
+    var na = A.length, durA = 1024 * na;
+    var len = function(n){ return u8([n]); };
+    var asc = aCfg;
+    var dsi = u8(u8([5]), len(asc.length), asc);
+    var dcd = u8(u8([4]), len(13 + dsi.length), u8([0x40, 0x15, 0, 0, 0]), u32(160000), u32(128000), dsi);
+    var esd = u8(u8([3]), len(3 + dcd.length + 3), u16(0), u8([0]), dcd, u8([6, 1, 2]));
+    var mp4a = box('mp4a', ceros(6), u16(1), ceros(8), u16(aCh), u16(16), u16(0), u16(0), u32(aRate * 65536), box('esds', u32(0), esd));
+    var stblA = box('stbl', box('stsd', u32(0), u32(1), mp4a), box('stts', u32(0), u32(1), u32(na), u32(1024)), box('stsc', u32(0), u32(1), u32(1), u32(na), u32(1)),
+      box('stsz', u32(0), u32(0), u32(na), u8.apply(null, A.map(function(x){ return u32(x.d.length); }))), box('stco', u32(0), u32(1), u32(off + tam)));
+    var minfA = box('minf', box('smhd', u32(0), u16(0), u16(0)), box('dinf', box('dref', u32(0), u32(1), box('url ', u32(1)))), stblA);
+    var mdiaA = box('mdia', box('mdhd', u32(0), u32(0), u32(0), u32(aRate), u32(durA), u16(0x55C4), u16(0)), box('hdlr', u32(0), u32(0), txt('soun'), ceros(12), txt('SoundHandler'), ceros(1)), minfA);
+    var trakA = box('trak', box('tkhd', u32(3), u32(0), u32(0), u32(2), u32(0), u32(ms), ceros(8), u16(0), u16(0), u16(0x100), u16(0), MATRIZ, u32(0), u32(0)), mdiaA);
+    return box('moov', mvhd, trak, trakA);
   }
   var m0 = moov(0), m = moov(ftyp.length + m0.length + 8);
-  var cab = u8(u32(tam + 8), txt('mdat'));
-  var partes = [ftyp, m, cab]; s.forEach(function(x){ partes.push(x.d); });
+  var cab = u8(u32(tam + tamA + 8), txt('mdat'));
+  var partes = [ftyp, m, cab]; s.forEach(function(x){ partes.push(x.d); }); if (tieneA) A.forEach(function(x){ partes.push(x.d); });
   return new Blob(partes, { type: 'video/mp4' });
 };
 
@@ -1242,6 +1264,28 @@ function crearEscenaPostales(fotos, W, H, seg, op){
 function soportado(){ return typeof VideoEncoder === 'function' && typeof VideoFrame === 'function'; }
 var CODECS = ['avc1.640028', 'avc1.4D0028', 'avc1.42E028', 'avc1.640032'];
 function dormir(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+async function aacSoportado(){
+  try { if (typeof AudioEncoder !== 'function' || typeof AudioData !== 'function') return false; var r = await AudioEncoder.isConfigSupported({ codec: 'mp4a.40.2', sampleRate: 48000, numberOfChannels: 2, bitrate: 160000 }); return !!(r && r.supported); } catch (e) { return false; }
+}
+async function codificarAudio(buf, mux){
+  if (typeof AudioEncoder !== 'function' || typeof AudioData !== 'function') throw new Error('Este navegador no puede guardar el audio en el MP4. Usa Chrome o Edge actualizados.');
+  var cfg = { codec: 'mp4a.40.2', sampleRate: buf.sampleRate, numberOfChannels: buf.numberOfChannels, bitrate: 160000 };
+  var sp = null; try { sp = await AudioEncoder.isConfigSupported(cfg); } catch (e) {}
+  if (!sp || !sp.supported) throw new Error('Este navegador no tiene el codificador de audio AAC. Usa Chrome o Edge actualizados.');
+  var err = null, ae = new AudioEncoder({ output: function(ch, meta){ try { mux.agregarAudio(ch, meta); } catch (e) { err = e; } }, error: function(e){ err = e; } });
+  ae.configure(cfg);
+  var n = buf.length, paso = 4096, ch = buf.numberOfChannels, dat = []; for (var c = 0; c < ch; c++) dat.push(buf.getChannelData(c));
+  for (var i = 0; i < n; i += paso) {
+    var m = Math.min(paso, n - i), pl = new Float32Array(m * ch);
+    for (var c2 = 0; c2 < ch; c2++) pl.set(dat[c2].subarray(i, i + m), c2 * m);
+    var ad = new AudioData({ format: 'f32-planar', sampleRate: buf.sampleRate, numberOfFrames: m, numberOfChannels: ch, timestamp: Math.round(i * 1e6 / buf.sampleRate), data: pl });
+    ae.encode(ad); ad.close();
+    while (ae.encodeQueueSize > 16) await dormir(2);
+    if (err) throw err;
+  }
+  await ae.flush(); try { ae.close(); } catch (e) {}
+  if (err) throw err;
+}
 async function exportar(escena, o){
   o = o || {};
   if (!soportado()) throw new Error('Este navegador no puede crear el video. Usa Chrome o Edge actualizados en la computadora.');
@@ -1259,6 +1303,7 @@ async function exportar(escena, o){
   for (var f = 0; f < total; f++) {
     if (o.cancelado && o.cancelado()) { try { enc.close(); } catch (e) {} throw new Error('cancelado'); }
     if (err) throw err;
+    if (escena.preparar) await escena.preparar(f / fps);
     escena.dibujar(cx, f / fps);
     var vf = new VideoFrame(cv, { timestamp: Math.round(f * 1e6 / fps), duration: Math.round(1e6 / fps) });
     enc.encode(vf, { keyFrame: f % (fps * 2) === 0 }); vf.close();
@@ -1267,10 +1312,11 @@ async function exportar(escena, o){
   }
   await enc.flush(); try { enc.close(); } catch (e) {}
   if (err) throw err;
+  if (o.audio) await codificarAudio(o.audio, mux);
   if (o.progreso) o.progreso(1);
   return mux.finalizar();
 }
 
-var API = { Mp4Mux: Mp4Mux, soportado: soportado, crearEscena: crearEscena, duracionTotal: duracionTotal, exportar: exportar, cargarFoto: cargarFoto, detectarCaras: detectarCaras };
+var API = { aacSoportado: aacSoportado, lienzo: lienzo, clamp: clamp, Mp4Mux: Mp4Mux, soportado: soportado, crearEscena: crearEscena, duracionTotal: duracionTotal, exportar: exportar, cargarFoto: cargarFoto, detectarCaras: detectarCaras };
 if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.Slideshow = API;
 })(typeof window !== 'undefined' ? window : this);
