@@ -286,11 +286,37 @@ async function crearEscena(o){
   return esc;
 }
 
+/* ---------- Recorte de persona (MediaPipe Selfie Segmentation) ---------- */
+var SEG = { p: null, ss: null, cb: null, mal: false, copia: null };
+var SEG_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/';
+function cargarSegmentador(avisar){
+  if (SEG.ss) return Promise.resolve(true); if (SEG.mal) return Promise.resolve(false); if (SEG.p) return SEG.p;
+  SEG.p = (async function(){
+    if (avisar) avisar('Cargando modelo de recorte…');
+    var tiempo = function(ms){ return new Promise(function(ok, no){ setTimeout(function(){ no(new Error('tiempo')); }, ms); }); };
+    if (!root.SelfieSegmentation) await Promise.race([new Promise(function(ok, no){ var sc = document.createElement('script'); sc.src = SEG_BASE + 'selfie_segmentation.js'; sc.crossOrigin = 'anonymous'; sc.onload = ok; sc.onerror = function(){ no(new Error('red')); }; document.head.appendChild(sc); }), tiempo(25000)]);
+    var ss = new root.SelfieSegmentation({ locateFile: function(f){ return SEG_BASE + f; } });
+    ss.setOptions({ modelSelection: 0 });
+    ss.onResults(function(r){ if (SEG.cb) { var f = SEG.cb; SEG.cb = null; f(r.segmentationMask); } });
+    await Promise.race([ss.initialize(), tiempo(40000)]);
+    SEG.ss = ss; return true;
+  })().catch(function(){ SEG.mal = true; SEG.p = null; return false; });
+  return SEG.p;
+}
+function segmentar(cnv){
+  return new Promise(function(ok){
+    if (!SEG.ss) return ok(null);
+    var fin = false, to = setTimeout(function(){ if (!fin) { fin = true; SEG.cb = null; ok(null); } }, 8000);
+    SEG.cb = function(m){ if (fin) return; fin = true; clearTimeout(to); var c = SEG.copia; if (!c || c.width !== m.width || c.height !== m.height) { c = SEG.copia = document.createElement('canvas'); c.width = m.width; c.height = m.height; } var x = c.getContext('2d'); x.clearRect(0, 0, c.width, c.height); x.drawImage(m, 0, 0); ok(c); };
+    try { SEG.ss.send({ image: cnv }).catch(function(){ if (!fin) { fin = true; clearTimeout(to); SEG.cb = null; ok(null); } }); } catch (e) { if (!fin) { fin = true; clearTimeout(to); ok(null); } }
+  });
+}
+
 /* ---------- Pantalla del panel ---------- */
 function montar(el, A){
   A = A || {};
   var aviso = A.aviso || function(t){ alert(t); };
-  var st = { clips: [], audio: null, bpm: 120, ini: 0, ocupado: false, cancelar: false, fmt: 'v', titulo: '', subtitulo: '', beatsEsc: 4, cierre: true, efectos: true, volM: 0.9, volE: 0.7, esc: null, fases: {}, tpl: 'tr', n1: '', e1: 'Novia', n2: '', e2: 'Novio', semilla: 1, alinear: true, marca: marcaGuardada(), cal: 'fhd', t: 0, play: false, caras: {}, mix: null, mixK: '' };
+  var st = { clips: [], audio: null, bpm: 120, ini: 0, ocupado: false, cancelar: false, fmt: 'v', titulo: '', subtitulo: '', beatsEsc: 4, cierre: true, efectos: true, volM: 0.9, volE: 0.7, esc: null, fases: {}, tpl: 'tr', n1: '', e1: 'Novia', n2: '', e2: 'Novio', semilla: 1 + Math.floor(Math.random() * 9970), total: 45, alinear: true, marca: marcaGuardada(), cal: 'fhd', t: 0, play: false, caras: {}, mix: null, mixK: '' };
   var h = '<style>.cl-ad[hidden],.cl-tr[hidden],#cl-mcd[hidden]{display:none!important}</style><h1>Tráilers</h1><p class="pn-s ay">Crea un tráiler de evento con tus clips ya editados y una canción: nombres, cámara lenta, transiciones y sonidos al azar en cada versión. Todo se hace en tu computadora: nada se sube a internet.</p>' +
   '<input id="cl-tpl" type="hidden" value="tr">' +
   '<div class="pn-card"><h2>1. Tus clips</h2><p class="pn-s">Pon un número al inicio del nombre para el orden: <b>01.mp4, 02.mp4, 03.mp4…</b> (puede decir más, como 01_novia.mp4). <span class="cl-ad">Cada clip dura una escena.</span><span class="cl-tr"> Aunque duren más, se usan solo los segundos necesarios para que no haya espacios en negro.</span></p>' +
@@ -300,15 +326,15 @@ function montar(el, A){
   '<div id="cl-au" hidden><div class="pn-row"><label>Ritmo (pulsos por minuto) <input id="cl-bpm" type="number" min="50" max="220" step="0.5" style="width:6rem"></label><label>Empezar en el segundo <input id="cl-ini" type="number" min="0" step="0.1" style="width:6rem"></label></div>' +
   '<div class="pn-row"><label><input id="cl-fx" type="checkbox" checked> Efectos de sonido (subida, golpe y un sonido en cada transición)</label></div><div class="pn-row cl-tr"><label><input id="cl-al" type="checkbox" checked> Hacer coincidir la parte más fuerte de la canción con el golpe del video</label></div>' +
   '<div class="pn-row"><label>Volumen música <input id="cl-vm" type="range" min="0" max="1" step="0.05" value="0.9"></label><label>Volumen efectos <input id="cl-ve" type="range" min="0" max="1" step="0.05" value="0.7"></label></div></div></div>' +
-  '<div class="pn-card cl-tr"><h2>3. Nombres y cierre</h2><p class="pn-s">Los nombres salen grandes al inicio con niebla. Déjalos vacíos si no los quieres.</p><div class="pn-row"><label>Nombre 1 <input id="cl-n1" type="text" maxlength="16" placeholder="Ej: RIYA"></label><label>Etiqueta <input id="cl-e1" type="text" maxlength="16" value="Novia"></label></div><div class="pn-row"><label>Nombre 2 <input id="cl-n2" type="text" maxlength="16" placeholder="Ej: UDAY"></label><label>Etiqueta <input id="cl-e2" type="text" maxlength="16" value="Novio"></label></div><div class="pn-row"><label><input id="cl-ci2" type="checkbox" checked> Cierre con mis datos</label></div><div id="cl-mc"></div><div class="pn-row"><button class="pn-btn sec" type="button" id="cl-otra">Otra versión (efectos distintos)</button></div><p class="pn-s">Cada versión combina los efectos de forma distinta: cámara lenta, zoom crash, tirones de cámara, fugas de luz, glitch y sonidos. El audio original de tus clips nunca se usa.</p></div>' +
+  '<div class="pn-card cl-tr"><h2>3. Nombres y cierre</h2><p class="pn-s">Los nombres salen grandes al inicio con niebla. Déjalos vacíos si no los quieres.</p><div class="pn-row"><label>Nombre 1 <input id="cl-n1" type="text" maxlength="16" placeholder="Ej: RIYA"></label><label>Etiqueta <input id="cl-e1" type="text" maxlength="16" value="Novia"></label></div><div class="pn-row"><label>Nombre 2 <input id="cl-n2" type="text" maxlength="16" placeholder="Ej: UDAY"></label><label>Etiqueta <input id="cl-e2" type="text" maxlength="16" value="Novio"></label></div><div class="pn-row"><label><input id="cl-ci2" type="checkbox" checked> Cierre con mis datos</label><label>Duración del video <select id="cl-dtot"><option value="30">30 segundos</option><option value="45" selected>45 segundos</option><option value="60">60 segundos</option><option value="90">90 segundos</option></select></label></div><div id="cl-mc"></div><div class="pn-row"><button class="pn-btn sec" type="button" id="cl-otra">Otra versión (efectos distintos)</button></div><p class="pn-s">Cada versión combina los efectos de forma distinta: cámara lenta, zoom crash, tirones de cámara, fugas de luz, glitch y sonidos. El audio original de tus clips nunca se usa.</p></div>' +
   '<div class="pn-card cl-ad"><h2>3. Estilo</h2><div class="pn-row"><label>Título (opcional) <input id="cl-t" type="text" maxlength="30" placeholder="Ej: Antes y después"></label><label>Subtítulo (opcional) <input id="cl-s" type="text" maxlength="50" placeholder="Ej: Edición de color"></label></div>' +
   '<div class="pn-row"><label>Duración de cada escena <select id="cl-be"><option value="2">2 pulsos (rápido)</option><option value="4" selected>4 pulsos (normal)</option><option value="8">8 pulsos (lento)</option></select></label><label><input id="cl-ci" type="checkbox" checked> Cierre con tarjetas</label></div></div>' +
   '<div class="pn-card"><h2>4. Vista previa y descarga</h2><div class="np-pv vs-pv" style="border-radius:16px"><div class="vs-pcol"><div class="np-dev v" id="cl-dev"><canvas id="cl-cv" width="360" height="640"></canvas></div>' +
   '<div class="pn-vctl vs-ctl"><button type="button" id="cl-play" aria-label="Reproducir">▶</button><input type="range" id="cl-t0" min="0" max="1000" value="0" aria-label="Posición del video"><span id="cl-tm">00:00 / 00:00</span></div>' +
-  '<div class="pn-s" id="cl-st"></div><progress id="cl-pr" value="0" max="1" hidden style="width:100%"></progress>' +
+  '<div class="pn-s" id="cl-st"></div><div id="cl-av" hidden style="background:#fff3cd;color:#664d03;border:1px solid #ecd078;border-radius:10px;padding:.7rem .9rem;margin:.4rem 0;font-size:.9rem"></div><progress id="cl-pr" value="0" max="1" hidden style="width:100%"></progress>' +
   '<div class="vs-bar"><div class="vs-pill" id="cl-fm">' + FORMATOS.map(function(f){ return '<button type="button" class="pn-opt" data-clf="' + f[0] + '"><i class="' + f[4] + '"></i>' + f[1] + '</button>'; }).join('') + '</div>' +
   '<div class="vs-pill" id="cl-cal"><button type="button" data-clq="fhd">Full HD</button><button type="button" data-clq="4k">4K</button></div>' +
-  '<button class="pn-btn" type="button" id="cl-gen">Generar y descargar MP4</button><button class="pn-btn sec" type="button" id="cl-can" hidden>Cancelar</button></div><small class="vs-res" id="cl-res"></small></div></div>' +
+  '<button class="pn-btn" type="button" id="cl-gen">Generar y descargar MP4</button><button class="pn-btn sec" type="button" id="cl-can" hidden>Cancelar</button></div><small class="vs-res" id="cl-res"></small><small class="vs-res" id="cl-plan"></small></div></div>' +
   '<p class="pn-s">La vista previa puede verse con saltos en computadoras lentas; el video final sale perfecto. Si subes una canción con derechos de autor, Instagram o TikTok pueden silenciar o bloquear el video. Conviene usar música con licencia.</p></div>';
   el.innerHTML = h;
   var q = function(id){ return el.querySelector('#' + id); };
@@ -316,17 +342,20 @@ function montar(el, A){
 
   function pintarLista(){
     q('cl-n').textContent = st.clips.length ? st.clips.length + (st.clips.length === 1 ? ' clip' : ' clips') : '';
-    q('cl-l').innerHTML = st.clips.length ? '<div class="pn-card" style="padding:0;overflow:auto;margin-top:.6rem"><table class="pn-tb pn-ta"><tr><th>N.º</th><th>Clip</th><th>' + (st.tpl === 'tr' ? 'Transición al entrar' : 'Efecto') + '</th><th></th></tr>' + st.clips.map(function(c, i){
-      return '<tr><td><b>' + String(i + 1).padStart(2, '0') + '</b></td><td>' + esc(c.nombre) + '<br><span class="pn-s">' + c.w + '×' + c.h + ' · ' + c.dur.toFixed(1) + ' s</span></td><td><select data-ef="' + i + '">' + efectosDe(st.tpl).map(function(e){ return '<option value="' + e[0] + '"' + (c.ef === e[0] ? ' selected' : '') + '>' + e[1] + '</option>'; }).join('') + '</select></td><td><button class="pn-btn sec" type="button" data-qt="' + i + '">Quitar</button></td></tr>';
+    q('cl-l').innerHTML = st.clips.length ? '<div class="pn-card" style="padding:0;overflow:auto;margin-top:.6rem"><table class="pn-tb pn-ta"><tr><th>N.º</th><th>Clip</th><th></th></tr>' + st.clips.map(function(c, i){
+      return '<tr><td><b>' + String(i + 1).padStart(2, '0') + '</b></td><td>' + esc(c.nombre) + '<br><span class="pn-s">' + c.w + '×' + c.h + ' · ' + c.dur.toFixed(1) + ' s</span></td><td><button class="pn-btn sec" type="button" data-qt="' + i + '">Quitar</button></td></tr>';
     }).join('') + '</table></div>' : '';
-    q('cl-l').querySelectorAll('[data-ef]').forEach(function(s){ s.onchange = function(){ st.clips[+s.dataset.ef].ef = s.value; st.esc = null; vista(); }; });
     q('cl-l').querySelectorAll('[data-qt]').forEach(function(b){ b.onclick = function(){ var c = st.clips.splice(+b.dataset.qt, 1)[0]; try { URL.revokeObjectURL(c.url); } catch (e) {} st.esc = null; pintarLista(); vista(); }; });
   }
   function dims(){ var f = FORMATOS.filter(function(x){ return x[0] === st.fmt; })[0] || FORMATOS[0], k = st.cal === '4k' ? 2 : 1; return [f[2] * k, f[3] * k]; }
   function mmss(t){ t = Math.max(0, Math.round(t)); return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
+  function resumenPlan(){ var P = st.esc && st.esc.plan; q('cl-plan').textContent = P ? 'Acto 1: ' + P.nIntro + ' clips lentos · Ráfaga: ' + P.nRapido + ' cortes de ' + P.u.toFixed(2) + ' s · Acto 3: ' + P.nCalma + ' clips lentos + tarjeta · Versión ' + st.semilla : ''; }
+  function alerta(t){ var a = q('cl-av'); a.hidden = !t; a.textContent = t || ''; }
   function controles(){ var d = st.esc ? st.esc.duracion : duracionTotal(), sk = q('cl-t0'); if (document.activeElement !== sk) sk.value = d ? Math.round(st.t / d * 1000) : 0; q('cl-tm').textContent = mmss(st.t) + ' / ' + mmss(d); q('cl-play').textContent = st.play ? '❚❚' : '▶'; }
   function pintarOpc(){ var d = dims(); q('cl-dev').className = 'np-dev ' + st.fmt; q('cl-res').textContent = d[0] + ' × ' + d[1] + ' px'; el.querySelectorAll('[data-clf]').forEach(function(b){ b.classList.toggle('on', b.dataset.clf === st.fmt); }); el.querySelectorAll('[data-clq]').forEach(function(b){ b.classList.toggle('on', b.dataset.clq === st.cal); }); }
-  function duracionTotal(){ if (!st.clips.length) return 0; if (st.tpl === 'tr' && root.Trailer) return root.Trailer.planear({ bpm: st.bpm, clips: st.clips, nombre2: st.n2, cierre: st.cierre, semilla: st.semilla }).total; var beat = 60 / st.bpm; return st.clips.length * beat * st.beatsEsc + (st.cierre ? beat * 8 : 0); }
+  function totalPedido(){ var T = st.total; if (st.audio) T = Math.min(T, Math.max(20, Math.floor(st.audio.dur - 1))); return T; }
+  function opcionesPlan(){ return { bpm: st.bpm, clips: st.clips, nombre1: st.n1, nombre2: st.n2, cierre: st.cierre, semilla: st.semilla, total: totalPedido() }; }
+  function duracionTotal(){ if (!st.clips.length) return 0; if (st.tpl === 'tr' && root.Trailer) return root.Trailer.planear(opcionesPlan()).total; var beat = 60 / st.bpm; return st.clips.length * beat * st.beatsEsc + (st.cierre ? beat * 8 : 0); }
   function actualizarDur(){ controles(); }
 
   var vistaOcupada = false, vistaPend = false;
@@ -339,7 +368,7 @@ function montar(el, A){
     st.caras[key] = f.caras || []; return st.caras[key];
   }
   async function crear(Wd, Hd, esc){
-    if (st.tpl === 'tr' && root.Trailer) return root.Trailer.crearEscena({ W: Wd, H: Hd, clips: st.clips, bpm: st.bpm, semilla: st.semilla, cierre: st.cierre, nombre1: st.n1, etq1: st.e1, nombre2: st.n2, etq2: st.e2, marca: st.marca, color: true, textoAtras: true, detectarCaras: caras });
+    if (st.tpl === 'tr' && root.Trailer) { var o2 = opcionesPlan(); o2.W = Wd; o2.H = Hd; o2.etq1 = st.e1; o2.etq2 = st.e2; o2.marca = st.marca; o2.color = true; o2.textoAtras = true; o2.detectarCaras = caras; o2.cargarSegmentador = function(){ return cargarSegmentador(estado); }; o2.segmentar = segmentar; return root.Trailer.crearEscena(o2); }
     return crearEscena({ W: Wd, H: Hd, clips: st.clips, bpm: st.bpm, beatsEsc: st.beatsEsc, beatsCierre: 8, cierre: st.cierre, titulo: st.titulo, subtitulo: st.subtitulo });
   }
   function medidasVista(){ var d = dims(), k = 640 / Math.max(d[0], d[1]); return [Math.round(d[0] * k), Math.round(d[1] * k)]; }
@@ -353,7 +382,8 @@ function montar(el, A){
     try {
       var m = medidasVista(), Wd = m[0], Hd = m[1];
       var cv = q('cl-cv'); if (cv.width !== Wd || cv.height !== Hd) { cv.width = Wd; cv.height = Hd; }
-      if (!st.esc || st.esc.W !== Wd || st.esc.H !== Hd) { estado('Preparando la vista previa…'); st.mix = null; st.esc = await crear(Wd, Hd); estado(''); }
+      if (!st.esc || st.esc.W !== Wd || st.esc.H !== Hd) { estado('Preparando la vista previa…'); st.mix = null; st.esc = await crear(Wd, Hd); estado(st.esc.usaSegmentacion || !(st.n1 || st.n2) ? '' : 'No se pudo cargar el modelo de recorte: el nombre usa un recorte aproximado.'); }
+      resumenPlan();
       var d = st.esc.duracion; st.t = clamp(st.t, 0, d - 0.01);
       var t = st.t; if (st.esc.estilo === 'trailer' && t < 0.4) t = 0.4;
       await st.esc.preparar(t); st.esc.dibujar(cv.getContext('2d'), t); controles();
@@ -364,8 +394,7 @@ function montar(el, A){
   var ac = null, fuente = null, rafId = 0, t0r = 0;
   function parar(){ st.play = false; cancelAnimationFrame(rafId); if (fuente) { try { fuente.stop(); } catch (e) {} fuente = null; } controles(); }
   async function mezcla(esc){
-    if (!st.audio) return null;
-    if (esc.estilo === 'trailer') return root.Trailer.mezclar(st.audio, { dur: esc.duracion, ini: iniTrailer(esc), volMusica: st.volM, volEfectos: st.volE, efectos: st.efectos, plan: esc.plan, cierre: st.cierre });
+    if (esc.estilo === 'trailer') return root.Trailer.mezclar(st.audio || { buf: null, dur: 0 }, { dur: esc.duracion, ini: iniTrailer(esc), volMusica: st.volM, volEfectos: st.volE, efectos: st.efectos, plan: esc.plan, cierre: st.cierre });
     return mezclar(st.audio, { dur: esc.duracion, ini: st.ini, volMusica: st.volM, volEfectos: st.volE, efectos: st.efectos, cortes: esc.cortes(), barridos: esc.barridos(), whoosh: Math.min(0.45, esc.S * 0.22), durBarrido: esc.S * 0.325 });
   }
   async function alternar(){
@@ -375,8 +404,8 @@ function montar(el, A){
     st.play = true; controles();
     try {
       var m = medidasVista(); if (!st.esc || st.esc.W !== m[0] || st.esc.H !== m[1]) { estado('Preparando la vista previa…'); st.mix = null; st.esc = await crear(m[0], m[1]); estado(''); }
-      var esc = st.esc, k = JSON.stringify([st.tpl, st.semilla, st.bpm, st.ini, st.volM, st.volE, st.efectos, st.cierre, st.alinear, esc.duracion, st.clips.length]);
-      if (st.audio && (!st.mix || st.mixK !== k)) { estado('Preparando el sonido…'); st.mix = await mezcla(esc); st.mixK = k; estado(''); }
+      var esc = st.esc, k = JSON.stringify([st.tpl, st.semilla, st.total, !!st.audio, st.n1, st.n2, st.bpm, st.ini, st.volM, st.volE, st.efectos, st.cierre, st.alinear, esc.duracion, st.clips.length]);
+      if (!st.mix || st.mixK !== k) { estado('Preparando el sonido…'); st.mix = await mezcla(esc); st.mixK = k; estado(''); }
       if (!st.play) return;
       if (st.t >= esc.duracion - 0.2) st.t = 0;
       if (st.mix) { ac = ac || new (root.AudioContext || root.webkitAudioContext)(); if (ac.state === 'suspended') await ac.resume(); fuente = ac.createBufferSource(); fuente.buffer = st.mix; fuente.connect(ac.destination); fuente.start(0, st.t); }
@@ -450,7 +479,8 @@ function montar(el, A){
   q('cl-e2').oninput = function(){ st.e2 = q('cl-e2').value.trim(); st.esc = null; vista(); };
   q('cl-ci2').onchange = function(){ st.cierre = q('cl-ci2').checked; q('cl-ci').checked = st.cierre; st.esc = null; vista(); };
   q('cl-ci').onchange = function(){ st.cierre = q('cl-ci').checked; q('cl-ci2').checked = st.cierre; st.esc = null; vista(); };
-  q('cl-otra').onclick = function(){ st.semilla = (st.semilla * 7 + 13) % 9973; st.esc = null; vista(); estado('Nueva versión: los efectos y su orden cambiaron.'); };
+  q('cl-otra').onclick = function(){ st.semilla = 1 + Math.floor(Math.random() * 9970); st.esc = null; vista(); estado('Nueva versión: los efectos y su orden cambiaron.'); };
+  q('cl-dtot').onchange = function(){ st.total = +q('cl-dtot').value; st.esc = null; st.mix = null; vista(); };
   q('cl-al').onchange = function(){ st.alinear = q('cl-al').checked; };
   pintarMarca();
   q('cl-can').onclick = function(){ st.cancelar = true; estado('Cancelando…'); };
@@ -473,23 +503,27 @@ function montar(el, A){
     try {
       var d = dims(), Wd = d[0], Hd = d[1];
       estado('Preparando el video…'); var esc = await crear(Wd, Hd);
-      var audio = null;
-      if (st.audio) {
-        estado('Mezclando la música y los efectos…');
-        audio = await mezcla(esc);
-      }
-      var aacOk = audio ? await S.aacSoportado() : true, wavAparte = !!audio && !aacOk;
+      alerta('');
+      estado(st.audio ? 'Mezclando la música y los efectos…' : 'Creando los efectos de sonido…');
+      var audio = await mezcla(esc);
+      var aacOk = await S.aacSoportado(), wavAparte = !aacOk;
+      if (wavAparte) alerta('⚠ Tu navegador no puede guardar el audio dentro del MP4 (necesita el formato AAC). Se descargarán DOS archivos: el video y el audio (WAV). Para que salga con sonido en un solo archivo, usa Chrome o Edge actualizados en computadora.');
       estado('Creando el video… no cierres esta pestaña.');
       var blob = await S.exportar(esc, { fps: 30, bitrate: 10e6, audio: wavAparte ? null : audio, cancelado: function(){ return st.cancelar; }, progreso: function(p){ q('cl-pr').value = p; estado('Creando el video… ' + Math.round(p * 100) + '%'); } });
+      if (!wavAparte) {
+        var cab = await blob.slice(0, 3000000).arrayBuffer(), col = await blob.slice(Math.max(0, blob.size - 3000000)).arrayBuffer(), hay = false;
+        [cab, col].forEach(function(ab){ var u8 = new Uint8Array(ab), i3; for (i3 = 0; i3 < u8.length - 3 && !hay; i3++) if (u8[i3] === 0x6d && u8[i3 + 1] === 0x70 && u8[i3 + 2] === 0x34 && u8[i3 + 3] === 0x61) hay = true; });
+        if (!hay) { wavAparte = true; alerta('⚠ El video salió sin pista de audio dentro del MP4. Se descargará también el audio en un archivo aparte (WAV) para que lo unas en tu editor.'); }
+      }
       var nombre = (st.tpl === 'tr' ? [st.n1, st.n2].filter(Boolean).join('-') || 'trailer' : st.titulo || 'antes-y-despues').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'video';
       var bajar = function(bl, nom){ var u = URL.createObjectURL(bl), l = document.createElement('a'); l.href = u; l.download = nom; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function(){ URL.revokeObjectURL(u); }, 60000); };
       bajar(blob, nombre + '-' + st.fmt + '.mp4');
       if (wavAparte) { await dormir(400); bajar(aWav(audio), nombre + '-audio.wav'); estado('Listo. Tu navegador no puede unir el audio al MP4, así que se descargaron dos archivos: el video y el audio (WAV). Júntalos en Premiere, CapCut o tu editor.'); aviso('Video y audio descargados'); }
-      else { estado('Listo: el video se descargó' + (audio ? ' con música.' : ' (sin música).')); aviso('Video listo'); }
+      else { estado('Listo: el video se descargó con ' + (st.audio ? 'música y efectos de sonido.' : 'efectos de sonido (sin canción).') + ' La próxima versión saldrá distinta.'); aviso('Video listo'); }
     } catch (e) {
       estado(e && e.message === 'cancelado' ? 'Cancelado.' : 'No se pudo crear el video: ' + ((e && e.message) || 'error'));
     }
-    st.ocupado = false; q('cl-gen').disabled = false; q('cl-can').hidden = true; q('cl-pr').hidden = true; st.esc = null; vista();
+    st.ocupado = false; q('cl-gen').disabled = false; q('cl-can').hidden = true; q('cl-pr').hidden = true; st.semilla = 1 + Math.floor(Math.random() * 9970); st.esc = null; vista();
   }
   q('cl-gen').onclick = generar;
   aplicarTpl();
