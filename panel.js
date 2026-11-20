@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-var VERSION = 'V1.0.0.23';
+var VERSION = 'V1.0.0.24';
 var W = 'https://galerias-api.alexandergeerre.workers.dev';
 var BASE = 'https://alexandergeerre.github.io/galeria/cliente.html?c=';
 var BASEG = 'https://galerias-api.alexandergeerre.workers.dev/g/';
@@ -2363,7 +2363,7 @@ function cotLienzo(cv, c, dis){
   else if (o === 'marco') { marco(44, tx, 2); x.fillStyle = tx; x.fillRect(W / 2 - 30, 44 - 2, 60, 6); x.fillRect(W / 2 - 30, H - 48, 60, 6); }
   else if (o === 'geo') { x.save(); x.strokeStyle = ac; x.globalAlpha = .22; x.lineWidth = 2; var gi; for (gi = 0; gi < 9; gi++) { x.beginPath(); x.moveTo(W - 40 - gi * 34, 40); x.lineTo(W - 40, 40 + gi * 34); x.stroke(); x.beginPath(); x.moveTo(40 + gi * 34, H - 40); x.lineTo(40, H - 40 - gi * 34); x.stroke(); } x.restore(); x.fillStyle = ac; x.fillRect(80, 100, 6, 70); }
   else if (o === 'revela') { x.save(); x.globalAlpha = .3; x.fillStyle = '#E7A9BC'; x.beginPath(); x.arc(0, 0, 270, 0, 7); x.fill(); x.fillStyle = '#9DC1E3'; x.beginPath(); x.arc(W, H, 290, 0, 7); x.fill(); x.restore(); }
-  emblema(x, T.k, W / 2, 800, 330, ac, 3.6, T.niebla ? .26 : T.dark ? .3 : .3, null, CT2);
+  if (T.lay === 'e') emblema(x, T.k, W - 170, 400, 74, ac, 3, .9, INI, CT2); else emblema(x, T.k, W / 2, 812, 212, ac, 3.6, T.niebla ? .3 : .34, null, CT2);
   /* logo + WhatsApp */
   var LG = neg.logosR ? (T.dark ? neg.logosR.oscuro : neg.logosR.claro) : null, estudio = ph.studio_name || 'Alexander Ge Erre';
   function logo(cx, top, maxW, maxH, al){ if (!LG) { t(estudio, al === 'left' ? cx : cx, top + maxH * .7, '500 ' + Math.round(maxH * .55) + 'px ' + SER, tx, al || 'center'); return; } var s = Math.min(maxW / LG.naturalWidth, maxH / LG.naturalHeight), w = LG.naturalWidth * s, h = LG.naturalHeight * s; x.drawImage(LG, al === 'left' ? cx : cx - w / 2, top + (maxH - h) / 2, w, h); }
@@ -2386,7 +2386,7 @@ function cotLienzo(cv, c, dis){
   function chipVideo(cx, cy, al){ x.font = '400 32px ' + SAN; var w = x.measureText(vid).width + 96, x0 = al === 'left' ? cx : cx - w / 2; x.strokeStyle = ac; x.lineWidth = 2; rr(x0, cy - 30, w, 60, 30); x.stroke(); x.fillStyle = ac; x.beginPath(); x.moveTo(x0 + 28, cy - 11); x.lineTo(x0 + 28, cy + 11); x.lineTo(x0 + 46, cy); x.closePath(); x.fill(); t(vid, x0 + 62, cy + 11, '400 32px ' + SAN, tx, 'left'); }
   if (T.lay === 'e') {
     x.fillStyle = tx; x.fillRect(80, 190, W - 160, 2); logo(80, 60, 330, 100, 'left'); t('Cotización N.º ' + String(c.num).padStart(4, '0'), W - 80, 140, '400 26px ' + SAN, mu, 'right', 2);
-    t('COTIZACIÓN PARA', 80, 306, '400 24px ' + SAN, ac, 'left', 8); fit(c.client_name, 80, 410, 88, tx, 'left', W - 160, SER);
+    t('COTIZACIÓN PARA', 80, 306, '400 24px ' + SAN, ac, 'left', 8); fit(c.client_name, 80, 410, 88, tx, 'left', W - 380, SER);
     t(linea, 80, 475, '300 34px ' + SAN, mu, 'left'); if (c.location) t(c.location, 80, 522, '300 34px ' + SAN, mu, 'left');
     x.fillRect(80, 580, W - 160, 2);
     t(String(c.digital_count), 80, 790, '500 160px ' + SER, tx, 'left'); t('fotografías digitales', 80, 895, '300 34px ' + SAN, mu, 'left');
