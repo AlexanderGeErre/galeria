@@ -174,7 +174,7 @@ function planear1(o){
   var k1 = Math.max(1, Math.round(3.2 / beat)); while (k1 * beat > 4.2 && k1 > 1) k1--; while (k1 * beat < 2.4) k1++;
   var d1 = k1 * beat, n1 = Math.max(o.nombre2 ? 2 : 1, Math.round(.15 * T / d1));
   var rt = (o.perfil && o.perfil.ritmo) || { lo: .8, hi: 2, largo: 3, pL: .12, rafaga: 1 }, n;
-  var qd = beat > .62 ? beat / 2 : beat, u = beat / 2 >= .22 ? beat / 2 : beat, n2 = 0;
+  var qd = beat > .62 ? beat / 2 : beat, u = beat / 2 >= .35 ? beat / 2 : beat, n2 = 0, EN = o.energia || null, fd = Math.max(.8, Math.min(1.4, .7 + T / 60 * .6));
   var k3 = Math.max(2, Math.round(4.5 / beat)); while (k3 * beat > 6) k3--; var d3 = k3 * beat, n3 = Math.max(1, Math.round((.40 * T - C) / d3));
   var segs = [], t = 0, ci, agotado = false, prevCi = -1;
   function C_(k){ return o.clips[((k % N) + N) % N]; }
@@ -209,15 +209,15 @@ function planear1(o){
   for (i = 0; i < n1; i++) nuevo('intro', i, d1, .5, false, { z0: 1.03, z1: 1.12 });
   var tAct2 = t;
   // Acto 2 (estilo plantilla): tomas de 0.8-2.5 s sobre el pulso, alguna larga en cámara lenta y 1-2 ráfagas cortas
-  var D2 = .45 * T, burstAt = [], nbur = rt.rafaga || 0, acc = 0, bi = 0;
+  var D2 = .45 * T, burstAt = [], nbur = Math.min(rt.rafaga || 0, T < 45 ? 1 : 2), acc = 0, bi = 0;
   for (j = 0; j < nbur; j++) burstAt.push(D2 * (nbur === 1 ? .58 : .3 + .42 * j) + (R() - .5) * .06 * D2);
   while (acc < D2 - .35) {
-    if (bi < burstAt.length && acc >= burstAt[bi]) {
-      var nb2 = 5 + Math.floor(R() * 4); bi++;
+    if (bi < burstAt.length && acc >= burstAt[bi] && (!EN || EN(t) > .6 || acc > burstAt[bi] + D2 * .25)) {
+      var nb2 = 4 + Math.floor(R() * 3); bi++;
       for (j = 0; j < nb2; j++) { nuevo('rapido', 0, u, 1, false, { z0: 1.02 + R() * .1, z1: 1.08 + R() * .1, fx: .3 + R() * .4, fy: .3 + R() * .4, pulse: true, burst: true, glitch: j === 0 && R() < .3 }); n2++; }
       acc += nb2 * u; continue;
     }
-    var tg = R() < (rt.pL || .1) ? rt.largo + R() * .8 : rt.lo + (rt.hi - rt.lo) * Math.pow(R(), 1.2), len = Math.max(1, Math.round(tg / qd)) * qd, larga = len >= rt.largo - .15;
+    var en = EN ? EN(t) : .5, tg = R() < (rt.pL || .1) ? rt.largo + R() * .8 : Math.max(.95, fd * (rt.lo + (rt.hi - rt.lo) * Math.pow(R(), 1.2) * (EN ? 1.15 - en : 1))), len = Math.max(1, Math.round(tg / qd)) * qd, larga = len >= rt.largo - .15;
     if (acc + len > D2 + 1.2) len = Math.max(qd, Math.round((D2 - acc) / qd) * qd);
     var z0 = 1.02 + R() * .08;
     nuevo('rapido', 0, len, larga ? .6 : 1, !larga && len < 1.3 && R() < .22, { z0: z0, z1: z0 + .04 + R() * .08, fx: .3 + R() * .4, fy: .3 + R() * .4, pulse: R() < .25, crash: R() < .08, leak: R() < ((o.perfil && o.perfil.leaks) || .08), glitch: R() < .06 });
@@ -226,6 +226,22 @@ function planear1(o){
   var tAct3 = t;
   // Acto 3: los últimos clips (en orden), cámara lenta
   for (i = 0; i < n3; i++) nuevo('calma', N - n3 + i, d3, .5, false, { z0: 1, z1: 1.07 });
+  // Pulsos reales: cada corte se pega al pulso más cercano de la canción
+  if (o.pulsos && o.pulsos.length > 3) {
+    var pl = [], prevT = 0; o.pulsos.forEach(function(x, q2){ pl.push(x); if (q2 + 1 < o.pulsos.length) pl.push((x + o.pulsos[q2 + 1]) / 2); });
+    for (i = 1; i < segs.length; i++) {
+      var tb = segs[i].start, bp = tb, bd = 1e9;
+      for (j = 0; j < pl.length; j++) { var dd = Math.abs(pl[j] - tb); if (dd < bd) { bd = dd; bp = pl[j]; } }
+      if (bd > beat * .3) bp = tb;
+      if (bp < prevT + .4) { var bq = pl.find(function(x){ return x >= prevT + .4; }); bp = bq != null ? bq : prevT + .4; }
+      var sg = segs[i - 1], d0 = sg.dur, nd = bp - sg.start;
+      if (nd > .3) { if (!sg.ramp) sg.vel *= d0 / nd; sg.dur = nd; segs[i].start = bp; }
+      prevT = segs[i].start;
+    }
+    var ult = segs[segs.length - 1], tot0 = t; ult.dur = Math.max(.3, tot0 - ult.start);
+    tAct2 = segs.find(function(q){ return q.sec === 'rapido'; }) ? segs.find(function(q){ return q.sec === 'rapido'; }).start : tAct2;
+    var s3 = segs.find(function(q){ return q.sec === 'calma'; }); if (s3) tAct3 = s3.start;
+  }
   // Transiciones
   var trs = [], prev = '', rec = [], tipo, d, hayPrev = false;
   for (i = 0; i < segs.length - 1; i++) {
@@ -236,12 +252,13 @@ function planear1(o){
       if (a.burst && b.burst) tipo = 'corte';
       else if (!a.burst && b.burst) tipo = ['crash', 'golpe', 'flash'][Math.floor(R() * 3)];
       else if (a.burst && !b.burst) tipo = 'flash';
-      else if (hayPrev || R() < .38) tipo = 'corte';
+      else if (hayPrev || R() < .38 || (o.esFuerte && !o.esFuerte(b.start))) tipo = 'corte';
       else { var pool = (((o.perfil && o.perfil.pool) || POOL_RAPIDO).filter(function(x){ return x !== 'fundido' && x !== 'fuga'; })).filter(function(x){ return x !== prev && !(x === 'franja') && !(x === 'glitch' && rec.slice(-4).indexOf('glitch') >= 0) && !(x === 'crash' && rec.slice(-4).indexOf('crash') >= 0); }); tipo = pool[Math.floor(R() * pool.length)]; }
     }
     else if (a.sec === 'rapido' && b.sec === 'calma') tipo = R() < .6 ? 'fuga' : 'fundido';
     else tipo = 'fundido';
     d = tipo === 'corte' ? 0 : Math.min(TRANS[tipo].d, dm * (b.sec === 'rapido' && a.sec === 'rapido' ? .5 : .8));
+    if (o.pulsos && d > 0 && a.sec === 'rapido' && b.sec === 'rapido') d = Math.min(d, Math.max(.12, beat * .55));
     hayPrev = tipo !== 'corte'; if (tipo !== 'corte') { prev = tipo; rec.push(tipo); }
     if (tipo === 'crash' && b.sec === 'rapido') b.crash = true;
     trs.push({ t: b.start, tipo: tipo, d: d, a: i, b: i + 1, sem: Math.floor(R() * 1000), mayor: i + 1 === segs.findIndex(function(s){ return s.sec === 'rapido'; }) || i + 1 === segs.findIndex(function(s){ return s.sec === 'calma'; }) || tipo === 'flash' || tipo === 'crash' || tipo === 'golpe' });
@@ -486,7 +503,9 @@ var PERFILES = {
   bautizo: { ritmo: { lo: 1.3, hi: 3, largo: 4, pL: .2, rafaga: 0 }, fuentes: [{ f: '"Cormorant Garamond",Georgia,serif', w: '600' }, { f: '"Playfair Display",Georgia,serif', w: '400' }, { f: '"Great Vibes",cursive', w: '400' }, { f: '"Cinzel",Georgia,serif', w: '500' }], cols: [['#ffffff', '#e9e4d6'], ['#fff8e1', '#d6e6f5'], ['#ffffff', '#f3e3c3']], n: 'Bautizo / Primera Comunión', bpm: 80, fuente: '"Cormorant Garamond",Georgia,serif', peso: '600', filtro: 'saturate(.98) contrast(1.02) brightness(1.1)', tinte: 'rgba(255,250,235,.3)',
     pool: ['fundido', 'flash', 'fuga', 'zoom'], sfx: ['sparkle', 'swish', 'hit'], leaks: .2, flashBlanco: true, musica: { escala: 'mayor', a1: 'piano', a2: 'piano', a3: 'piano', cuerdas: 0, pad: 1, bajo: 'sub', perc: 'ninguna', hit: 'suave' } },
   graduacion: { ritmo: { lo: .6, hi: 1.5, largo: 2.6, pL: .12, rafaga: 2 }, fuentes: [{ f: '"Anton",Impact,sans-serif', w: '400' }, { f: '"Bebas Neue",Impact,sans-serif', w: '400' }, { f: '"Oswald",Arial,sans-serif', w: '700' }, { f: '"Archivo Black",Arial,sans-serif', w: '400' }, { f: '"Alfa Slab One",serif', w: '400' }], cols: [['#ffd36b', '#ff8a00'], ['#ffffff', '#9ec5ff'], ['#f5f5f5', '#aab3c2'], ['#ffe27a', '#d4a017']], n: 'Graduación', bpm: 110, fuente: '"Arial Black",Impact,sans-serif', peso: '900', filtro: 'saturate(1.25) contrast(1.3) brightness(.95)', tinte: 'rgba(255,170,80,.22)',
-    pool: ['barrido', 'barridoV', 'golpe', 'crash', 'glitch', 'flash', 'zoom'], sfx: ['whip', 'hit', 'riser', 'swish'], leaks: .06, musica: { escala: 'menor', a1: 'pad', a2: 'pluck', a3: 'piano', cuerdas: 1, bajo: 'synth', perc: 'epica', hit: 'taiko' } }
+    pool: ['barrido', 'barridoV', 'golpe', 'crash', 'glitch', 'flash', 'zoom'], sfx: ['whip', 'hit', 'riser', 'swish'], leaks: .06, musica: { escala: 'menor', a1: 'pad', a2: 'pluck', a3: 'piano', cuerdas: 1, bajo: 'synth', perc: 'epica', hit: 'taiko' } },
+  otro: { ritmo: { lo: .8, hi: 2, largo: 3, pL: .1, rafaga: 1 }, fuentes: [{ f: '"Montserrat",Arial,sans-serif', w: '800' }, { f: '"Poppins",Arial,sans-serif', w: '700' }, { f: '"Bebas Neue",Impact,sans-serif', w: '400' }, { f: '"Space Grotesk",Arial,sans-serif', w: '700' }, { f: '"Archivo Black",Arial,sans-serif', w: '400' }, { f: '"Playfair Display",serif', w: '700' }], cols: [['#ffffff', '#cfd8e3'], ['#ffe27a', '#ffb703'], ['#ffffff', '#ff9bb0'], ['#e8f1ff', '#8fb8ff']], n: 'Otro (detrás de cámaras, promoción)', bpm: 100, fuente: '"Montserrat",Arial,sans-serif', peso: '800', filtro: 'saturate(1.12) contrast(1.12)', tinte: 'rgba(255,255,255,0)',
+    pool: ['barrido', 'zoom', 'flash', 'golpe', 'glitch', 'crash'], sfx: ['whip', 'hit', 'swish'], leaks: .05, musica: { escala: 'mayor', a1: 'pad', a2: 'pluck', a3: 'piano', cuerdas: 0, bajo: 'synth', perc: 'suave', hit: 'taiko' } },
 };
 
 async function mezclar(info, o){

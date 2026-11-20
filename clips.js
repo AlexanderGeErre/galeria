@@ -316,9 +316,9 @@ function segmentar(cnv){
 function montar(el, A){
   A = A || {};
   var aviso = A.aviso || function(t){ alert(t); };
-  var st = { clips: [], audio: null, bpm: 120, ini: 0, ocupado: false, cancelar: false, fmt: 'v', titulo: '', subtitulo: '', beatsEsc: 4, cierre: true, efectos: true, volM: 0.9, volE: 0.7, esc: null, fases: {}, tpl: 'tr', n1: '', e1: 'Novia', n2: '', e2: 'Novio', semilla: 1 + Math.floor(Math.random() * 9970), total: 45, alinear: true, marca: marcaGuardada(), cal: 'fhd', t: 0, play: false, caras: {}, mix: null, mixK: '' };
+  var st = { clips: [], audio: null, bpm: 120, ini: 0, ocupado: false, cancelar: false, fmt: 'v', titulo: '', subtitulo: '', beatsEsc: 4, cierre: true, efectos: false, volM: 0.9, volE: 0.7, esc: null, fases: {}, tpl: 'tr', n1: '', e1: 'Novia', n2: '', e2: 'Novio', semilla: 1 + Math.floor(Math.random() * 9970), total: 45, alinear: true, marca: marcaGuardada(), cal: 'fhd', t: 0, play: false, caras: {}, mix: null, mixK: '' };
   st.ev = 'boda'; st.total = 30; st.bpm = 85; st.n2on = false; st.demo = false;
-  var ETQ = { boda: ['Novia', 'Novio'], quince: ['Quinceañera', ''], revelacion: ['Mamá', 'Papá'], baby: ['Mamá', 'Papá'], bautizo: ['Bautizo', ''], graduacion: ['Graduada', 'Graduado'] };
+  var ETQ = { boda: ['Novia', 'Novio'], quince: ['Quinceañera', ''], revelacion: ['Mamá', 'Papá'], baby: ['Mamá', 'Papá'], bautizo: ['Bautizo', ''], graduacion: ['Graduada', 'Graduado'], otro: ['', ''] };
   st.e1 = ETQ.boda[0]; st.e2 = ETQ.boda[1];
   function PERFIL(){ return root.Trailer && root.Trailer.PERFILES[st.ev]; }
   var EVS = Object.keys(root.Trailer ? root.Trailer.PERFILES : {}).map(function(k){ return [k, root.Trailer.PERFILES[k].n]; });
@@ -333,7 +333,7 @@ function montar(el, A){
   '<button class="vs-chip" type="button" id="cl-n2b">+ Segundo nombre</button>' +
   '<span class="cl-g"><span class="cl-lb">Evento:</span><select class="cl-sel" id="cl-ev">' + EVS.map(function(e){ return '<option value="' + e[0] + '">' + e[1] + '</option>'; }).join('') + '</select></span>' +
   '<span class="cl-g"><span class="cl-lb">Duración:</span><select class="cl-sel" id="cl-dtot">' + DURS.map(function(d){ return '<option value="' + d + '">' + d + ' s</option>'; }).join('') + '</select></span>' +
-  '<span class="cl-g"><span class="cl-lb">Música:</span><select class="cl-sel" id="cl-mus"><option value="auto">Automática</option><option value="mia">Subir mi canción…</option></select></span>' +
+  '<span class="cl-g"><span class="cl-lb">Música:</span><select class="cl-sel" id="cl-mus"><option value="auto">Sin música</option><option value="mia">Subir mi canción…</option></select></span>' +
   '<button class="vs-chip" type="button" id="cl-otra">↻ Otra versión</button></div>' +
   '<div class="vs-tx cl-tx" id="cl-etqs"><div><label class="pn-s" for="cl-e1">Etiqueta 1</label><input type="text" id="cl-e1" maxlength="16"><label class="pn-s" for="cl-e2">Etiqueta 2</label><input type="text" id="cl-e2" maxlength="16"></div></div>' +
   '<div class="np-pv vs-pv"><div class="vs-pcol"><div class="np-dev v" id="cl-dev"><canvas id="cl-cv" width="360" height="640"></canvas></div>' +
@@ -343,7 +343,7 @@ function montar(el, A){
   '<div class="vs-pill" id="cl-cal"><button type="button" data-clq="bor">Rápido 720p</button><button type="button" data-clq="fhd">Full HD</button><button type="button" data-clq="4k">4K</button></div>' +
   '<button class="pn-btn" type="button" id="cl-gen">Generar y descargar MP4</button><button class="pn-btn sec" type="button" id="cl-can" hidden>Cancelar</button></div><small class="vs-res" id="cl-res"></small><small class="vs-res" id="cl-plan"></small></div></div>' +
   '<details class="cl-more"><summary>Más opciones (sonido, cierre con tu marca)</summary><div class="pn-card" style="margin-top:.6rem">' +
-  '<div class="pn-row"><label><input id="cl-fx" type="checkbox" checked> Efectos de sonido en las transiciones</label><label><input id="cl-ci2" type="checkbox" checked> Tarjeta final con mi marca (4 s)</label></div>' +
+  '<div class="pn-row"><label><input id="cl-fx" type="checkbox"> Efectos de sonido (opcional)</label><label><input id="cl-ci2" type="checkbox" checked> Tarjeta final con mi marca (4 s)</label></div>' +
   '<div class="pn-row"><label>Volumen música <input id="cl-vm" type="range" min="0" max="1" step="0.05" value="0.9"></label><label>Volumen efectos <input id="cl-ve" type="range" min="0" max="1" step="0.05" value="0.7"></label></div>' +
   '<div id="cl-au" hidden><p class="pn-s">Usando tu canción: <b id="cl-an"></b> <button class="pn-btn sec" type="button" id="cl-aq">Quitar y usar música automática</button></p><div class="pn-row"><label>Ritmo (pulsos por minuto) <input id="cl-bpm" type="number" min="50" max="220" step="0.5" style="width:6rem"></label><label>Empezar en el segundo <input id="cl-ini" type="number" min="0" step="0.1" style="width:6rem"></label></div><div class="pn-row"><label><input id="cl-al" type="checkbox" checked> Hacer coincidir la parte más fuerte de la canción con el golpe del video</label></div></div>' +
   '<input id="cl-a" type="file" accept="audio/*,.mp3,.wav,.m4a,.aac" hidden><div id="cl-mc"></div></div></details>' +
@@ -355,11 +355,12 @@ function montar(el, A){
   var estado = function(t){ q('cl-st').textContent = t || ''; };
 
   function pintarLista(){
+    if (st.demo) { q('cl-n').textContent = ''; q('cl-l').innerHTML = ''; return; } // los clips de ejemplo van ocultos: solo sirven para la vista previa
     q('cl-n').textContent = st.clips.length ? '· ' + st.clips.length + (st.clips.length === 1 ? ' clip' : ' clips') + (st.demo ? ' de ejemplo (solo vista previa)' : '') + ' · ' + Math.round(st.clips.reduce(function(a, c){ return a + c.dur; }, 0)) + ' s de material' : '';
     q('cl-l').innerHTML = st.clips.length ? '<div class="pn-card" style="padding:0;overflow:auto;margin-top:.6rem"><table class="pn-tb pn-ta"><tr><th>N.º</th><th>Clip</th><th></th></tr>' + st.clips.map(function(c, i){
       return '<tr><td><b>' + String(i + 1).padStart(2, '0') + '</b></td><td>' + esc(c.nombre) + (c.demo ? ' <span class="cl-ejem">(ejemplo)</span>' : '') + '<br><span class="pn-s">' + c.w + '×' + c.h + ' · ' + c.dur.toFixed(1) + ' s</span></td><td><button class="pn-btn sec" type="button" data-qt="' + i + '">Quitar</button></td></tr>';
     }).join('') + '</table></div>' : '';
-    q('cl-l').querySelectorAll('[data-qt]').forEach(function(b){ b.onclick = function(){ var c = st.clips.splice(+b.dataset.qt, 1)[0]; if (!c.demo) { try { URL.revokeObjectURL(c.url); } catch (e) {} } if (!st.clips.length) st.demo = false; st.esc = null; st.mix = null; pintarLista(); vista();  }; });
+    q('cl-l').querySelectorAll('[data-qt]').forEach(function(b){ b.onclick = function(){ var c = st.clips.splice(+b.dataset.qt, 1)[0]; if (!c.demo) { try { URL.revokeObjectURL(c.url); } catch (e) {} } if (!st.clips.length) st.demo = false; st.esc = null; st.mix = null; pintarLista(); vista(); if (!st.clips.length) cargarDemo();  }; });
   }
   function dims(){ var f = FORMATOS.filter(function(x){ return x[0] === st.fmt; })[0] || FORMATOS[0], k = st.cal === '4k' ? 2 : st.cal === 'bor' ? 2 / 3 : 1; return [Math.round(f[2] * k), Math.round(f[3] * k)]; }
   function mmss(t){ t = Math.max(0, Math.round(t)); return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
@@ -368,7 +369,11 @@ function montar(el, A){
   function controles(){ var d = st.esc ? st.esc.duracion : duracionTotal(), sk = q('cl-t0'); if (document.activeElement !== sk) sk.value = d ? Math.round(st.t / d * 1000) : 0; q('cl-tm').textContent = mmss(st.t) + ' / ' + mmss(d); q('cl-play').textContent = st.play ? '❚❚' : '▶'; }
   function pintarOpc(){ var d = dims(); q('cl-dev').className = 'np-dev ' + st.fmt; q('cl-res').textContent = d[0] + ' × ' + d[1] + ' px'; el.querySelectorAll('[data-clf]').forEach(function(b){ b.classList.toggle('on', b.dataset.clf === st.fmt); }); el.querySelectorAll('[data-clq]').forEach(function(b){ b.classList.toggle('on', b.dataset.clq === st.cal); }); }
   function totalPedido(){ var T = st.total; if (st.audio) T = Math.min(T, Math.max(10, Math.floor(st.audio.dur - 1))); return T; }
-  function opcionesPlan(){ var pf = PERFIL(); return { bpm: st.audio ? st.bpm : (pf ? pf.bpm : st.bpm), clips: st.clips, nombre1: st.n1, nombre2: st.n2on || (pf && pf.nombres2) ? st.n2 : '', cierre: st.cierre, semilla: st.semilla, total: totalPedido(), perfil: pf, musicaAuto: !st.audio }; }
+  function opcionesPlan(){ var pf = PERFIL(); return { bpm: st.audio ? st.bpm : (pf ? pf.bpm : st.bpm), clips: st.clips, nombre1: st.n1, nombre2: st.n2on || (pf && pf.nombres2) ? st.n2 : '', cierre: st.cierre, semilla: st.semilla, total: totalPedido(), perfil: pf, musicaAuto: false, pulsos: pulsosPlan(), energia: energiaPlan(), esFuerte: fuertePlan() }; }
+  function ini0(){ var R = st.audio && st.audio.ritmo; if (!R || R.beats.length < 8) return null; var b = R.beats.find(function(t){ return t >= .1; }); return b == null ? 0 : b; }
+  function pulsosPlan(){ var R = st.audio && st.audio.ritmo, i0 = ini0(); if (i0 == null) return null; return R.beats.filter(function(t){ return t >= i0; }).map(function(t){ return t - i0; }); }
+  function energiaPlan(){ var R = st.audio && st.audio.ritmo, i0 = ini0(); if (i0 == null) return null; return function(t){ return root.Ritmo.energiaEn(R, i0 + t); }; }
+  function fuertePlan(){ var R = st.audio && st.audio.ritmo, i0 = ini0(); if (i0 == null) return null; return function(t){ var bi = -1, bd = 1e9; R.beats.forEach(function(x, n){ var d = Math.abs(x - i0 - t); if (d < bd) { bd = d; bi = n; } }); return bd < .12 && R.fuertes[bi]; }; }
   function duracionTotal(){ if (!st.clips.length) return 0; if (st.tpl === 'tr' && root.Trailer) return root.Trailer.planear(opcionesPlan()).total; var beat = 60 / st.bpm; return st.clips.length * beat * st.beatsEsc + (st.cierre ? beat * 8 : 0); }
   function actualizarDur(){ controles(); }
 
@@ -418,7 +423,7 @@ function montar(el, A){
   var ac = null, fuente = null, rafId = 0, t0r = 0;
   function parar(){ st.play = false; cancelAnimationFrame(rafId); if (fuente) { try { fuente.stop(); } catch (e) {} fuente = null; } controles(); }
   async function mezcla(esc){
-    if (esc.estilo === 'trailer') return root.Trailer.mezclar(st.audio || { buf: null, dur: 0 }, { dur: esc.duracion, ini: iniTrailer(esc), volMusica: st.volM, volEfectos: st.volE, efectos: st.efectos, plan: esc.plan, cierre: st.cierre, perfil: PERFIL(), semilla: st.semilla, musicaAuto: !st.audio });
+    if (esc.estilo === 'trailer') return root.Trailer.mezclar(st.audio || { buf: null, dur: 0 }, { dur: esc.duracion, ini: iniTrailer(esc), volMusica: st.volM, volEfectos: st.volE, efectos: st.efectos, plan: esc.plan, cierre: st.cierre, perfil: PERFIL(), semilla: st.semilla, musicaAuto: false });
     return mezclar(st.audio, { dur: esc.duracion, ini: st.ini, volMusica: st.volM, volEfectos: st.volE, efectos: st.efectos, cortes: esc.cortes(), barridos: esc.barridos(), whoosh: Math.min(0.45, esc.S * 0.22), durBarrido: esc.S * 0.325 });
   }
   async function alternar(){
@@ -467,7 +472,7 @@ function montar(el, A){
     var f = q('cl-a').files && q('cl-a').files[0]; q('cl-a').value = ''; if (!f) return;
     estado('Analizando la canción y buscando el ritmo…'); q('cl-an').textContent = f.name;
     try {
-      st.audio = await analizarAudio(f); if (root.Trailer) { try { st.audio.drop = root.Trailer.detectarDrop(st.audio.buf, 6); } catch (e) { st.audio.drop = null; } } st.bpm = Math.round(st.audio.bpm * 2) / 2; st.ini = Math.round(st.audio.fase * 100) / 100;
+      st.audio = await analizarAudio(f); if (root.Trailer) { try { st.audio.drop = root.Trailer.detectarDrop(st.audio.buf, 6); } catch (e) { st.audio.drop = null; } } try { if (root.Ritmo) { estado('Analizando los pulsos de tu canción…'); st.audio.ritmo = root.Ritmo.analizar(st.audio.buf); if (st.audio.ritmo.beats.length > 8) { st.audio.bpm = st.audio.ritmo.bpm; st.audio.fase = st.audio.ritmo.beats[0]; } } } catch (e) { st.audio.ritmo = null; } st.bpm = Math.round(st.audio.bpm * 2) / 2; st.ini = Math.round(st.audio.fase * 100) / 100;
       q('cl-bpm').value = st.bpm; q('cl-ini').value = st.ini.toFixed(2); q('cl-au').hidden = false; q('cl-mus').value = 'mia'; st.mix = null; estado('Ritmo detectado: ' + st.bpm + ' pulsos por minuto. Si no suena bien, cámbialo a mano.');
       st.esc = null; vista();
     } catch (e) { st.audio = null; q('cl-an').textContent = ''; q('cl-mus').value = 'auto'; estado(''); aviso('No se pudo leer esa canción. Prueba con un MP3 o WAV.'); }
@@ -528,6 +533,7 @@ function montar(el, A){
   q('cl-can').onclick = function(){ st.cancelar = true; estado('Cancelando…'); };
 
   function iniTrailer(esc){
+    if (ini0() != null) return ini0();
     var beat = 60 / st.bpm, ini = st.ini, dr = st.audio && st.audio.drop;
     if (st.alinear && dr && esc.plan.tDrop != null) {
       var ph = ((st.ini % beat) + beat) % beat, tb = ph + Math.round((dr.t - ph) / beat) * beat, i2 = tb - esc.plan.tDrop;
@@ -568,7 +574,7 @@ function montar(el, A){
     st.ocupado = false; q('cl-gen').disabled = false; q('cl-can').hidden = true; q('cl-pr').hidden = true; st.semilla = 1 + Math.floor(Math.random() * 9970); st.esc = null; vista();
   }
   q('cl-gen').onclick = generar;
-  aplicarTpl(); aplicarEvento();
+  aplicarTpl(); aplicarEvento(); cargarDemo();
   if (/iPhone|iPad|Android/i.test(navigator.userAgent)) { var nt0 = q('cl-av'); nt0.hidden = false; nt0.textContent = 'ℹ Desde el celular puedes ver la vista previa, pero para generar el MP4 usa Chrome o Edge en una computadora.'; }
   return { estado: st, generar: generar, liberar: function(){ parar(); try { ac && ac.close(); } catch (e) {} st.clips.forEach(function(c){ if (!c.demo) { try { URL.revokeObjectURL(c.url); } catch (e) {} } }); } };
 }
