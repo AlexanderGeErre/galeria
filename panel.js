@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-var VERSION = 'V1.0.0.18';
+var VERSION = 'V1.0.0.20';
 var W = 'https://galerias-api.alexandergeerre.workers.dev';
 var BASE = 'https://alexandergeerre.github.io/galeria/cliente.html?c=';
 var BASEG = 'https://galerias-api.alexandergeerre.workers.dev/g/';
@@ -858,7 +858,7 @@ function cargarScript(src){ return new Promise(function(ok, no){ var sc = docume
 async function pintarClips(){
   $('#pn-main').innerHTML = '<div id="pn-clips"><p class="pn-s">Cargando…</p></div>';
   try {
-    await cargarSlideshow(); if (!window.Trailer) { try { await cargarScript('trailer.js'); } catch (e) {} } if (!window.Clips) await cargarScript('clips.js');
+    await cargarSlideshow(); if (!window.Musica) { try { await cargarScript('musica.js'); } catch (e) {} } if (!window.Trailer) { try { await cargarScript('trailer.js'); } catch (e) {} } if (!window.Clips) await cargarScript('clips.js');
     window.Clips.cargar(window.Slideshow);
     if (vista !== 'clips' || !$('#pn-clips')) return;
     if (clipsInst) { try { clipsInst.liberar(); } catch (e) {} }

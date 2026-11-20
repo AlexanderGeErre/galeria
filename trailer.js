@@ -58,14 +58,14 @@ function fugaLuz(cx, W, H, a, p, sem){
   cx.save(); cx.globalCompositeOperation = 'lighter';
   for (i = 0; i < 3; i++) {
     var x = W * (-.1 + 1.2 * clamp(p + (R() - .5) * .5, 0, 1)), y = H * (.15 + R() * .7), r = Math.max(W, H) * (.45 + R() * .35), c = cols[i];
-    var g = cx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, 'rgba(' + c.join(',') + ',' + clamp(.62 * a, 0, 1).toFixed(3) + ')'); g.addColorStop(1, 'rgba(' + c.join(',') + ',0)'); cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+    var g = cx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, 'rgba(' + c.join(',') + ',' + clamp(.42 * a, 0, 1).toFixed(3) + ')'); g.addColorStop(1, 'rgba(' + c.join(',') + ',0)'); cx.fillStyle = g; cx.fillRect(0, 0, W, H);
   }
   cx.restore();
 }
 function trFlash(cx, W, H, A, B, q){
   var a = Math.sin(q * PI), src = q < .5 ? A : B;
-  cx.save(); cx.filter = 'brightness(' + (1 + 1.5 * a).toFixed(2) + ') saturate(' + (1 + .5 * a).toFixed(2) + ')'; src(cx); cx.restore();
-  fugaLuz(cx, W, H, a * 1.3, q, 7); cx.fillStyle = 'rgba(255,255,255,' + (Math.pow(a, 4) * .55).toFixed(3) + ')'; cx.fillRect(0, 0, W, H);
+  cx.save(); cx.filter = 'brightness(' + (1 + .7 * a).toFixed(2) + ') saturate(' + (1 + .35 * a).toFixed(2) + ')'; src(cx); cx.restore();
+  fugaLuz(cx, W, H, a * .8, q, 7); cx.fillStyle = 'rgba(255,240,215,' + (Math.pow(a, 4) * .22).toFixed(3) + ')'; cx.fillRect(0, 0, W, H);
 }
 function trFuga(cx, W, H, A, B, q, sem){
   var a = Math.sin(q * PI); A(cx); cx.save(); cx.globalAlpha = ease(q); B(cx); cx.restore(); fugaLuz(cx, W, H, a, q, sem);
@@ -125,14 +125,22 @@ function niebla(cx, W, H, t, fuerza){
   cx.restore();
 }
 var FPESO = '900', FUENTE = '"Arial Black",Impact,sans-serif', FILTRO = 'saturate(1.35) contrast(1.15) brightness(.97)', TINTE = 'rgba(255,160,80,.32)';
+var ANIM = 'sube';
 function titulo(cx, W, H, txt, etq, col, p){
   if (!txt) return;
   var fs = Math.min(W * .5, H * .26); cx.save();
   cx.font = FPESO + ' ' + fs + 'px ' + FUENTE; var mw = cx.measureText(txt).width; if (mw > W * .88) fs *= W * .88 / mw;
-  cx.globalAlpha = clamp(p * 4, 0, 1) * cx.globalAlpha; cx.font = FPESO + ' ' + fs + 'px ' + FUENTE; cx.textAlign = 'center'; cx.textBaseline = 'middle';
-  var y = H * .5 + (1 - easeOut(p * 2)) * H * .03, g = cx.createLinearGradient(0, y - fs / 2, 0, y + fs / 2); g.addColorStop(0, col[0]); g.addColorStop(1, col[1]);
-  cx.shadowColor = 'rgba(0,0,0,.28)'; cx.shadowBlur = W * .02; cx.fillStyle = g; cx.fillText(txt, W / 2, y); cx.shadowBlur = 0;
-  if (etq) { cx.font = '600 ' + Math.round(fs * .13) + 'px Jost,Arial,sans-serif'; if ('letterSpacing' in cx) cx.letterSpacing = Math.round(fs * .05) + 'px'; cx.fillStyle = '#fff'; cx.shadowColor = 'rgba(0,0,0,.55)'; cx.shadowBlur = 8; cx.fillText(etq.toUpperCase(), W / 2, y - fs * .66); }
+  cx.font = FPESO + ' ' + fs + 'px ' + FUENTE; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+  var e = easeOut(clamp(p * 2, 0, 1)), x = W / 2, y = H * .5, esc = 1, al = clamp(p * 4, 0, 1) * cx.globalAlpha;
+  if (ANIM === 'sube') y += (1 - e) * H * .03;
+  else if (ANIM === 'escala') esc = 1.35 - .35 * e;
+  else if (ANIM === 'desliza') x += (1 - e) * W * -.12;
+  else if (ANIM === 'difumina') cx.filter = 'blur(' + ((1 - e) * W * .02).toFixed(1) + 'px)';
+  else if (ANIM === 'revela') { cx.beginPath(); cx.rect(0, 0, W * clamp(p * 2.2, 0, 1), H); cx.clip(); al = Math.max(al, .001) * (p > 0 ? 1 : 0); }
+  cx.globalAlpha = al; var g = cx.createLinearGradient(0, y - fs / 2, 0, y + fs / 2); g.addColorStop(0, col[0]); g.addColorStop(1, col[1]);
+  cx.translate(x, y); cx.scale(esc, esc); cx.translate(-x, -y);
+  cx.shadowColor = 'rgba(0,0,0,.35)'; cx.shadowBlur = W * .02; cx.fillStyle = g; cx.fillText(txt, x, y); cx.shadowBlur = 0;
+  if (etq) { cx.font = '600 ' + Math.round(fs * .13) + 'px Jost,Arial,sans-serif'; if ('letterSpacing' in cx) cx.letterSpacing = Math.round(fs * .05) + 'px'; cx.fillStyle = '#fff'; cx.shadowColor = 'rgba(0,0,0,.55)'; cx.shadowBlur = 8; cx.fillText(etq.toUpperCase(), x, y - fs * .66); }
   cx.restore();
 }
 // Respaldo si no carga el modelo de recorte: forma aproximada de cabeza y cuerpo con las caras (máscara con transparencia)
@@ -163,18 +171,16 @@ function microGlitch(cx, W, H, a, sem){
 // Acto 3 (40 %): clips largos en cámara lenta + tarjeta final de 4 s. Sirve con cualquier número de clips (reutiliza fragmentos distintos).
 function planear1(o){
   var beat = 60 / o.bpm, N = Math.max(1, o.clips.length), R = rng(o.semilla || 1), T = Math.max(10, o.total || 45), C = o.cierre ? 4 : 0, i, j;
-  var k1 = Math.max(1, Math.round(2.5 / beat)); while (k1 * beat > 3.1 && k1 > 1) k1--; while (k1 * beat < 1.9) k1++;
+  var k1 = Math.max(1, Math.round(3.2 / beat)); while (k1 * beat > 4.2 && k1 > 1) k1--; while (k1 * beat < 2.4) k1++;
   var d1 = k1 * beat, n1 = Math.max(o.nombre2 ? 2 : 1, Math.round(.15 * T / d1));
-  var u = null, mejor = 9, n;
-  var cand = []; for (n = 1; n <= 6; n++) cand.push(beat / n); cand.push(beat * .75, beat * 2 / 3, beat * 1.5 / 2.5);
-  for (n = 0; n < cand.length; n++) { var x = cand[n]; if (x >= .245 && x <= .35) { u = x; break; } if (Math.abs(x - .3) < mejor) { mejor = Math.abs(x - .3); u = x; } }
-  var n2 = Math.max(8, Math.round(.45 * T / u));
+  var rt = (o.perfil && o.perfil.ritmo) || { lo: .8, hi: 2, largo: 3, pL: .12, rafaga: 1 }, n;
+  var qd = beat > .62 ? beat / 2 : beat, u = beat / 2 >= .22 ? beat / 2 : beat, n2 = 0;
   var k3 = Math.max(2, Math.round(4.5 / beat)); while (k3 * beat > 6) k3--; var d3 = k3 * beat, n3 = Math.max(1, Math.round((.40 * T - C) / d3));
   var segs = [], t = 0, ci, agotado = false, prevCi = -1;
   function C_(k){ return o.clips[((k % N) + N) % N]; }
   // Aprovechamiento total: cada clip se parte en bloques de ~2-3 s; todos van a una cola mezclada y cada trozo se usa una sola vez.
   var blocks = [], cola = [];
-  o.clips.forEach(function(c, k){ var nb = Math.max(1, Math.round(c.dur / 2.6)), L = (c.dur - .1) / nb; for (var q = 0; q < nb; q++) blocks.push({ k: k, a: .04 + q * L, b: .04 + (q + 1) * L, cur: .04 + q * L }); });
+  o.clips.forEach(function(c, k){ var nb = Math.max(1, Math.round(c.dur / 3.8)), L = (c.dur - .1) / nb; for (var q = 0; q < nb; q++) blocks.push({ k: k, a: .04 + q * L, b: .04 + (q + 1) * L, cur: .04 + q * L }); });
   function mezclarCola(){
     var arr = blocks.map(function(x){ x.cur = x.a; return x; });
     for (var q = arr.length - 1; q > 0; q--) { var r = Math.floor(R() * (q + 1)), tm = arr[q]; arr[q] = arr[r]; arr[r] = tm; }
@@ -202,18 +208,20 @@ function planear1(o){
   // Acto 1
   for (i = 0; i < n1; i++) nuevo('intro', i, d1, .5, false, { z0: 1.03, z1: 1.12 });
   var tAct2 = t;
-  // Acto 2: ciclos mezclados de todos los clips, sin repetir el mismo clip seguido
-  var seq = [], last = -1;
-  while (seq.length < n2) {
-    var perm = []; for (j = 0; j < N; j++) perm.push(j);
-    for (j = N - 1; j > 0; j--) { var r = Math.floor(R() * (j + 1)), tmp = perm[j]; perm[j] = perm[r]; perm[r] = tmp; }
-    if (N > 1 && perm[0] === last) { var tm2 = perm[0]; perm[0] = perm[N - 1]; perm[N - 1] = tm2; }
-    perm.forEach(function(p){ seq.push(p); }); last = perm[N - 1];
-  }
-  var reus = N < n2;
-  for (i = 0; i < n2; i++) {
-    var ramp = R() < .26, z0 = reus ? 1.05 + R() * .3 : 1.02 + R() * .08;
-    nuevo('rapido', seq[i], u, 1, ramp, { z0: z0, z1: z0 + .04 + R() * .08, fx: .3 + R() * .4, fy: .3 + R() * .4, pulse: R() < .6, crash: R() < .14, leak: R() < ((o.perfil && o.perfil.leaks) || .08), glitch: R() < .1 });
+  // Acto 2 (estilo plantilla): tomas de 0.8-2.5 s sobre el pulso, alguna larga en cámara lenta y 1-2 ráfagas cortas
+  var D2 = .45 * T, burstAt = [], nbur = rt.rafaga || 0, acc = 0, bi = 0;
+  for (j = 0; j < nbur; j++) burstAt.push(D2 * (nbur === 1 ? .58 : .3 + .42 * j) + (R() - .5) * .06 * D2);
+  while (acc < D2 - .35) {
+    if (bi < burstAt.length && acc >= burstAt[bi]) {
+      var nb2 = 5 + Math.floor(R() * 4); bi++;
+      for (j = 0; j < nb2; j++) { nuevo('rapido', 0, u, 1, false, { z0: 1.02 + R() * .1, z1: 1.08 + R() * .1, fx: .3 + R() * .4, fy: .3 + R() * .4, pulse: true, burst: true, glitch: j === 0 && R() < .3 }); n2++; }
+      acc += nb2 * u; continue;
+    }
+    var tg = R() < (rt.pL || .1) ? rt.largo + R() * .8 : rt.lo + (rt.hi - rt.lo) * Math.pow(R(), 1.2), len = Math.max(1, Math.round(tg / qd)) * qd, larga = len >= rt.largo - .15;
+    if (acc + len > D2 + 1.2) len = Math.max(qd, Math.round((D2 - acc) / qd) * qd);
+    var z0 = 1.02 + R() * .08;
+    nuevo('rapido', 0, len, larga ? .6 : 1, !larga && len < 1.3 && R() < .22, { z0: z0, z1: z0 + .04 + R() * .08, fx: .3 + R() * .4, fy: .3 + R() * .4, pulse: R() < .25, crash: R() < .08, leak: R() < ((o.perfil && o.perfil.leaks) || .08), glitch: R() < .06 });
+    n2++; acc += len;
   }
   var tAct3 = t;
   // Acto 3: los últimos clips (en orden), cámara lenta
@@ -225,12 +233,15 @@ function planear1(o){
     if (a.sec === 'intro' && b.sec === 'intro') tipo = R() < .5 ? 'zoom' : 'fuga';
     else if (a.sec === 'intro' && b.sec === 'rapido') tipo = ['flash', 'crash', 'glitch', 'flash'][Math.floor(R() * 4)];
     else if (a.sec === 'rapido' && b.sec === 'rapido') {
-      if (hayPrev || R() < .55) tipo = 'corte';
-      else { var pool = (((o.perfil && o.perfil.pool) || POOL_RAPIDO).filter(function(x){ return x !== 'fundido' && x !== 'fuga'; })).filter(function(x){ return x !== prev && !(x === 'franja') && !(x === 'glitch' && rec.slice(-3).indexOf('glitch') >= 0) && !(x === 'crash' && rec.slice(-3).indexOf('crash') >= 0); }); tipo = pool[Math.floor(R() * pool.length)]; }
+      if (a.burst && b.burst) tipo = 'corte';
+      else if (!a.burst && b.burst) tipo = ['crash', 'golpe', 'flash'][Math.floor(R() * 3)];
+      else if (a.burst && !b.burst) tipo = 'flash';
+      else if (hayPrev || R() < .38) tipo = 'corte';
+      else { var pool = (((o.perfil && o.perfil.pool) || POOL_RAPIDO).filter(function(x){ return x !== 'fundido' && x !== 'fuga'; })).filter(function(x){ return x !== prev && !(x === 'franja') && !(x === 'glitch' && rec.slice(-4).indexOf('glitch') >= 0) && !(x === 'crash' && rec.slice(-4).indexOf('crash') >= 0); }); tipo = pool[Math.floor(R() * pool.length)]; }
     }
     else if (a.sec === 'rapido' && b.sec === 'calma') tipo = R() < .6 ? 'fuga' : 'fundido';
     else tipo = 'fundido';
-    d = tipo === 'corte' ? 0 : Math.min(TRANS[tipo].d, dm * (b.sec === 'rapido' && a.sec === 'rapido' ? .6 : .8));
+    d = tipo === 'corte' ? 0 : Math.min(TRANS[tipo].d, dm * (b.sec === 'rapido' && a.sec === 'rapido' ? .5 : .8));
     hayPrev = tipo !== 'corte'; if (tipo !== 'corte') { prev = tipo; rec.push(tipo); }
     if (tipo === 'crash' && b.sec === 'rapido') b.crash = true;
     trs.push({ t: b.start, tipo: tipo, d: d, a: i, b: i + 1, sem: Math.floor(R() * 1000), mayor: i + 1 === segs.findIndex(function(s){ return s.sec === 'rapido'; }) || i + 1 === segs.findIndex(function(s){ return s.sec === 'calma'; }) || tipo === 'flash' || tipo === 'crash' || tipo === 'golpe' });
@@ -270,7 +281,7 @@ async function buscarLuces(clips){
 
 /* ---------- Escena ---------- */
 async function crearEscena(o){
-  var pf = o.perfil || {}; FUENTE = pf.fuente || '"Arial Black",Impact,sans-serif'; FPESO = pf.peso || '900'; FILTRO = pf.filtro || 'saturate(1.35) contrast(1.15) brightness(.97)'; TINTE = pf.tinte || 'rgba(255,160,80,.32)';
+  var pf = o.perfil || {}, RT = rng((o.semilla || 1) * 13 + 7), fu = pf.fuentes && pf.fuentes[Math.floor(RT() * pf.fuentes.length)]; FUENTE = fu ? fu.f : (pf.fuente || '"Arial Black",Impact,sans-serif'); FPESO = fu ? fu.w : (pf.peso || '900'); ANIM = ['sube', 'escala', 'desliza', 'difumina', 'revela'][Math.floor(RT() * 5)]; FILTRO = pf.filtro || 'saturate(1.35) contrast(1.15) brightness(.97)'; TINTE = pf.tinte || 'rgba(255,160,80,.32)';
   var W = o.W, H = o.H, clips = o.clips, P = planear(o), N = P.segs.length, marco = {}, marcoB = {}, marcoF = {}, maskSeg = {}, marcoP = {}, marcoB2 = {}, i;
   // Lector de cuadros: busca (seek) solo al empezar un clip y después lee los cuadros seguidos reproduciendo el clip rápido
   // (mucho más veloz que buscar cuadro por cuadro). Guarda unos pocos cuadros para la cámara lenta.
@@ -325,7 +336,7 @@ async function crearEscena(o){
   function liberarInactivos(t, enUso){
     clips.forEach(function(c, ci){ var r = c._rd; if (!r || r.key !== W + 'x' + H) return; if (enUso[ci]) return; if (t < r.uso || t - r.uso > 1.2) soltar(r); else if (r.playing && r.buf.length > 4) { r.playing = false; try { c.v.pause(); } catch (e) {} } });
   }
-  var COLS = [['#ff5fd6', '#a64bff'], ['#35c8ff', '#1769e0']], masc = {}, vig = vigneta(W, H), color = o.color !== false;
+  var COLS = (function(){ var cl = pf.cols; if (!cl) return [['#ff5fd6', '#a64bff'], ['#35c8ff', '#1769e0']]; var a0 = Math.floor(RT() * cl.length); return [cl[a0], cl[(a0 + 1 + Math.floor(RT() * (cl.length - 1))) % cl.length]]; })(), masc = {}, vig = vigneta(W, H), color = o.color !== false;
   try { await buscarLuces(clips); } catch (e) {}
   P.segs.forEach(function(s){ var c = clips[s.ci]; if (c.luz != null && s.sec !== 'rapido' || (c.luz != null && s.dur >= .5)) { var span = s.ramp ? s.dur * G1 : s.dur * s.vel; if (c.luz >= s.off && c.luz <= s.off + span) s.fuegos = clamp((c.luz - s.off) / Math.max(.01, span), 0, 1) * s.dur; } });
   // evitar fuegos demasiado seguidos
@@ -459,114 +470,24 @@ function detectarDrop(buf, minT){
 }
 
 /* ---------- Sonido: SOLO música + efectos creados aquí (nunca el audio de los clips). Sin canción: solo efectos. ---------- */
-/* ---------- Instrumentos grabados (carpeta instrumentos/) ---------- */
-var INST_LISTA = {"piano": ["A2", "A3", "A4", "A5", "A6", "C2", "C3", "C4", "C5", "C6", "Ds2", "Ds3", "Ds4", "Ds5", "Ds6", "Fs2", "Fs3", "Fs4", "Fs5", "Fs6"], "violin": ["A3", "A4", "A5", "A6", "C4", "C5", "C6", "C7", "E4", "E5", "E6", "G3", "G4", "G5", "G6"], "xylophone": ["C5", "C6", "C7", "C8", "G4", "G5", "G6", "G7"], "cello": ["C2", "C3", "C4", "C5", "E2", "E3", "E4", "Gs2", "Gs3", "Gs4"], "harp": ["A2", "A4", "A6", "B1", "B3", "B5", "B6", "C3", "C5", "D2", "D4", "D6", "D7", "E1", "E3", "E5", "F2", "F4", "F6", "F7", "G1", "G3", "G5"]};
-var INST_CACHE = null, INST_P = null;
-function notaMidi(n){ var m = /^([A-G])(s?)(\d)$/.exec(n); if (!m) return null; return ({ C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 })[m[1]] + (m[2] ? 1 : 0) + 12 * (+m[3] + 1); }
-function cargarInstrumentos(base){
-  if (INST_CACHE) return Promise.resolve(INST_CACHE); if (INST_P) return INST_P;
-  var OA = root.OfflineAudioContext || root.webkitOfflineAudioContext; if (!OA || typeof fetch === 'undefined') return Promise.resolve(null);
-  INST_P = (async function(){
-    var dc = new OA(1, 1, SR), res = {}, jobs = [];
-    Object.keys(INST_LISTA).forEach(function(ins){ res[ins] = []; INST_LISTA[ins].forEach(function(n){ jobs.push((async function(){
-      try { var r = await fetch((base || 'instrumentos/') + ins + '/' + n + '.mp3'); if (!r.ok) return; var b = await dc.decodeAudioData(await r.arrayBuffer()); res[ins].push({ m: notaMidi(n), b: b }); } catch (e) {} })()); }); });
-    await Promise.all(jobs);
-    Object.keys(res).forEach(function(k){ res[k].sort(function(a, b){ return a.m - b.m; }); if (!res[k].length) delete res[k]; });
-    INST_CACHE = Object.keys(res).length ? res : null; if (!INST_CACHE) INST_P = null; return INST_CACHE;
-  })().catch(function(){ INST_P = null; return null; });
-  return INST_P;
-}
+function cargarInstrumentos(b){ return root.Musica ? root.Musica.cargarInstrumentos(b) : Promise.resolve(null); }
+function componer(){ return root.Musica.componer.apply(null, arguments); }
 
 /* ---------- Perfiles de evento (Guatemala) ---------- */
 var PERFILES = {
-  boda: { n: 'Boda', bpm: 85, fuente: '"Cormorant Garamond",Georgia,serif', peso: '700', filtro: 'saturate(1.2) contrast(1.1) brightness(1.0) sepia(.12)', tinte: 'rgba(255,190,110,.34)',
+  boda: { ritmo: { lo: 1.1, hi: 2.6, largo: 3.6, pL: .18, rafaga: 1 }, fuentes: [{ f: '"Great Vibes",cursive', w: '400' }, { f: '"Playfair Display",Georgia,serif', w: '700' }, { f: '"Cormorant Garamond",Georgia,serif', w: '700' }, { f: '"Parisienne",cursive', w: '400' }, { f: '"Cinzel",Georgia,serif', w: '600' }], cols: [['#fff4dc', '#e8b96a'], ['#ffffff', '#f1d6c4'], ['#f9d9e5', '#d98aa8'], ['#f6e7c1', '#c9a24b']], n: 'Boda', bpm: 85, fuente: '"Cormorant Garamond",Georgia,serif', peso: '700', filtro: 'saturate(1.2) contrast(1.1) brightness(1.0) sepia(.12)', tinte: 'rgba(255,190,110,.34)',
     pool: ['fuga', 'fundido', 'flash', 'zoom', 'barrido'], sfx: ['riser', 'swish', 'hit', 'sparkle'], leaks: .16, nombres2: true, musica: { escala: 'mayor', a1: 'piano', a2: 'piano', a3: 'piano', cuerdas: 1, bajo: 'sub', perc: 'suave', hit: 'bombo' } },
-  quince: { n: 'Quinceaños', bpm: 120, fuente: '"Arial Black",Impact,sans-serif', peso: '900', filtro: 'saturate(1.5) contrast(1.22) brightness(1.0)', tinte: 'rgba(255,120,190,.26)',
+  quince: { ritmo: { lo: .6, hi: 1.5, largo: 2.4, pL: .12, rafaga: 2 }, fuentes: [{ f: '"Bebas Neue",Impact,sans-serif', w: '400' }, { f: '"Pacifico",cursive', w: '400' }, { f: '"Abril Fatface",serif', w: '400' }, { f: '"Righteous",Arial,sans-serif', w: '400' }, { f: '"Montserrat",Arial,sans-serif', w: '900' }], cols: [['#ff6ec7', '#9b5cff'], ['#7df9ff', '#3b82f6'], ['#ffd34d', '#ff5d8f'], ['#ffffff', '#ff8ad8']], n: 'Quinceaños', bpm: 120, fuente: '"Arial Black",Impact,sans-serif', peso: '900', filtro: 'saturate(1.5) contrast(1.22) brightness(1.0)', tinte: 'rgba(255,120,190,.26)',
     pool: ['flash', 'crash', 'glitch', 'barrido', 'barridoV', 'golpe', 'zoom'], sfx: ['whip', 'sparkle', 'hit', 'swish'], leaks: .1, musica: { escala: 'pent', a1: 'arpa', a2: 'pluck', a3: 'campana', cuerdas: 0, bajo: 'synth', perc: 'baile', hit: 'crash' } },
-  revelacion: { n: 'Revelación de género', bpm: 90, fuente: '"Arial Black",Impact,sans-serif', peso: '900', filtro: 'saturate(1.3) contrast(1.1) brightness(1.04)', tinte: 'rgba(255,190,220,.22)',
+  revelacion: { ritmo: { lo: .9, hi: 2.1, largo: 3, pL: .15, rafaga: 1 }, fuentes: [{ f: '"Fredoka",Arial,sans-serif', w: '600' }, { f: '"Pacifico",cursive', w: '400' }, { f: '"Quicksand",Arial,sans-serif', w: '700' }, { f: '"Lobster",cursive', w: '400' }], cols: [['#ffb6d9', '#8ecbff'], ['#ffffff', '#ffc6e0'], ['#bfe6ff', '#ff9ecb']], n: 'Revelación de género', bpm: 90, fuente: '"Arial Black",Impact,sans-serif', peso: '900', filtro: 'saturate(1.3) contrast(1.1) brightness(1.04)', tinte: 'rgba(255,190,220,.22)',
     pool: ['flash', 'zoom', 'barrido', 'fuga', 'golpe'], sfx: ['sparkle', 'swish', 'whip', 'hit'], leaks: .1, revelacion: true, musica: { escala: 'mayor', a1: 'cajita', a2: 'piano', a3: 'cajita', cuerdas: 1, bajo: 'sub', perc: 'suave', hit: 'bombo' } },
-  baby: { n: 'Baby Shower', bpm: 95, fuente: '"Jost",Arial,sans-serif', peso: '700', filtro: 'saturate(1.05) contrast(.98) brightness(1.08)', tinte: 'rgba(255,215,230,.28)',
+  baby: { ritmo: { lo: .9, hi: 2.3, largo: 3.2, pL: .16, rafaga: 0 }, fuentes: [{ f: '"Fredoka",Arial,sans-serif', w: '600' }, { f: '"Quicksand",Arial,sans-serif', w: '700' }, { f: '"Sacramento",cursive', w: '400' }, { f: '"Dancing Script",cursive', w: '700' }], cols: [['#ffd1dc', '#b5e3ff'], ['#fff3b0', '#ffc8dd'], ['#ffffff', '#c9e8d8']], n: 'Baby Shower', bpm: 95, fuente: '"Jost",Arial,sans-serif', peso: '700', filtro: 'saturate(1.05) contrast(.98) brightness(1.08)', tinte: 'rgba(255,215,230,.28)',
     pool: ['fundido', 'fuga', 'zoom', 'flash', 'barrido'], sfx: ['sparkle', 'swish', 'hit'], leaks: .1, musica: { escala: 'pent', a1: 'piano', a2: 'marimba', a3: 'piano', cuerdas: 0, bajo: 'sub', perc: 'suave', hit: 'suave' } },
-  bautizo: { n: 'Bautizo / Primera Comunión', bpm: 80, fuente: '"Cormorant Garamond",Georgia,serif', peso: '600', filtro: 'saturate(.98) contrast(1.02) brightness(1.1)', tinte: 'rgba(255,250,235,.3)',
+  bautizo: { ritmo: { lo: 1.3, hi: 3, largo: 4, pL: .2, rafaga: 0 }, fuentes: [{ f: '"Cormorant Garamond",Georgia,serif', w: '600' }, { f: '"Playfair Display",Georgia,serif', w: '400' }, { f: '"Great Vibes",cursive', w: '400' }, { f: '"Cinzel",Georgia,serif', w: '500' }], cols: [['#ffffff', '#e9e4d6'], ['#fff8e1', '#d6e6f5'], ['#ffffff', '#f3e3c3']], n: 'Bautizo / Primera Comunión', bpm: 80, fuente: '"Cormorant Garamond",Georgia,serif', peso: '600', filtro: 'saturate(.98) contrast(1.02) brightness(1.1)', tinte: 'rgba(255,250,235,.3)',
     pool: ['fundido', 'flash', 'fuga', 'zoom'], sfx: ['sparkle', 'swish', 'hit'], leaks: .2, flashBlanco: true, musica: { escala: 'mayor', a1: 'piano', a2: 'piano', a3: 'piano', cuerdas: 0, pad: 1, bajo: 'sub', perc: 'ninguna', hit: 'suave' } },
-  graduacion: { n: 'Graduación', bpm: 110, fuente: '"Arial Black",Impact,sans-serif', peso: '900', filtro: 'saturate(1.25) contrast(1.3) brightness(.95)', tinte: 'rgba(255,170,80,.22)',
+  graduacion: { ritmo: { lo: .6, hi: 1.5, largo: 2.6, pL: .12, rafaga: 2 }, fuentes: [{ f: '"Anton",Impact,sans-serif', w: '400' }, { f: '"Bebas Neue",Impact,sans-serif', w: '400' }, { f: '"Oswald",Arial,sans-serif', w: '700' }, { f: '"Archivo Black",Arial,sans-serif', w: '400' }, { f: '"Alfa Slab One",serif', w: '400' }], cols: [['#ffd36b', '#ff8a00'], ['#ffffff', '#9ec5ff'], ['#f5f5f5', '#aab3c2'], ['#ffe27a', '#d4a017']], n: 'Graduación', bpm: 110, fuente: '"Arial Black",Impact,sans-serif', peso: '900', filtro: 'saturate(1.25) contrast(1.3) brightness(.95)', tinte: 'rgba(255,170,80,.22)',
     pool: ['barrido', 'barridoV', 'golpe', 'crash', 'glitch', 'flash', 'zoom'], sfx: ['whip', 'hit', 'riser', 'swish'], leaks: .06, musica: { escala: 'menor', a1: 'pad', a2: 'pluck', a3: 'piano', cuerdas: 1, bajo: 'synth', perc: 'epica', hit: 'taiko' } }
 };
-
-/* ---------- Compositor musical por código (sin archivos): arpegio continuo sobre una progresión de 4 acordes ---------- */
-function componer(ctx, out, P, pf, dur, mv, R, nz, INS_S){
-  var M = pf.musica, beat = P.beat, bus = ctx.createGain(); bus.gain.value = 1;
-  // reverb larga (impulso de ruido que decae)
-  var cv = ctx.createConvolver(), L = Math.floor(SR * 3.2), imp = ctx.createBuffer(2, L, SR), ch, q;
-  for (ch = 0; ch < 2; ch++) { var d = imp.getChannelData(ch); for (q = 0; q < L; q++) d[q] = (R() * 2 - 1) * Math.pow(1 - q / L, 2.6); }
-  cv.buffer = imp; var wet = ctx.createGain(); wet.gain.value = .5; bus.connect(cv); cv.connect(wet); wet.connect(out);
-  var dry = ctx.createGain(); dry.gain.value = .9; bus.connect(dry); dry.connect(out);
-  // curva general
-  var g0 = ctx.createGain(); g0.gain.value = 1; // (el nivel se controla en cada nota con mv)
-  var f = function(m){ return 440 * Math.pow(2, (m - 69) / 12); };
-  function env(g, t, a, d2, pk, hold){ t = Math.max(0, t); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(.0002, pk * mv), t + a); if (hold) g.gain.setValueAtTime(Math.max(.0002, pk * mv), t + a + hold); g.gain.exponentialRampToValueAtTime(.0001, t + a + (hold || 0) + d2); }
-  function osc(tipo, fr, t, d2){ t = Math.max(0, t); var o2 = ctx.createOscillator(); o2.type = tipo; o2.frequency.value = fr; o2.start(t); o2.stop(t + d2 + .1); return o2; }
-  // muestra grabada: se usa la nota más cercana y se ajusta el tono (igual que hace Tone.js con su Sampler)
-  function muestra(ins, t, m, v, d2, ataque, soltar, dest){
-    var L = INS_S && INS_S[ins]; if (!L) return false; var best = L[0], q2; for (q2 = 1; q2 < L.length; q2++) if (Math.abs(L[q2].m - m) < Math.abs(best.m - m)) best = L[q2];
-    t = Math.max(0, t); var s = ctx.createBufferSource(); s.buffer = best.b; s.playbackRate.value = Math.pow(2, (m - best.m) / 12); var g = ctx.createGain(), at = ataque || .004, fin = Math.min(best.b.duration / s.playbackRate.value - .05, d2 + (soltar || .25));
-    g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(Math.max(.0002, v * mv), t + at); g.gain.setValueAtTime(Math.max(.0002, v * mv), t + Math.max(at, d2)); g.gain.exponentialRampToValueAtTime(.0001, t + Math.max(at + .05, fin));
-    s.connect(g); g.connect(dest || bus); s.start(t); s.stop(t + Math.max(at + .1, fin) + .05); return true;
-  }
-  function pianoSyn(t, m, v, d2){ var g = ctx.createGain(); env(g, t, .006, d2, .17 * v); [[1, 'triangle', 1], [2, 'sine', .45], [3, 'sine', .2], [4, 'sine', .1]].forEach(function(p){ var o2 = osc(p[1], f(m) * p[0], t, d2), gg = ctx.createGain(); gg.gain.value = p[2]; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
-  function piano(t, m, v, d2){ if (!muestra('piano', t, m, .4 * v, d2 + .5, .004, 1.2)) pianoSyn(t, m, v, d2); }
-  function arpaSyn(t, m, v){ var g = ctx.createGain(); env(g, t, .004, 1.3, .15 * v); [[1, 'sine', 1], [2, 'triangle', .35], [3, 'sine', .12]].forEach(function(p){ var o2 = osc(p[1], f(m) * p[0], t, 1.3), gg = ctx.createGain(); gg.gain.value = p[2]; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
-  function arpa(t, m, v){ if (!muestra('harp', t, m, .4 * v, 1.2, .003, .5)) arpaSyn(t, m, v); }
-  function campana(t, m, v){ var g = ctx.createGain(); env(g, t, .003, 1.8, .12 * v); [1, 2.76, 5.4].forEach(function(p, i){ var o2 = osc('sine', f(m + 12) * p, t, 1.8), gg = ctx.createGain(); gg.gain.value = 1 / (1 + i * 1.6); o2.connect(gg); gg.connect(g); }); g.connect(bus); }
-  function cajita(t, m, v){ var g = ctx.createGain(); env(g, t, .002, .9, .13 * v); [1, 4.01].forEach(function(p, i){ var o2 = osc(i ? 'sine' : 'triangle', f(m + 12) * p, t, .9), gg = ctx.createGain(); gg.gain.value = i ? .2 : 1; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
-  function marimbaSyn(t, m, v){ var g = ctx.createGain(); env(g, t, .003, .35, .2 * v); [1, 4].forEach(function(p, i){ var o2 = osc('sine', f(m) * p, t, .35), gg = ctx.createGain(); gg.gain.value = i ? .25 : 1; o2.connect(gg); gg.connect(g); }); g.connect(bus); }
-  function marimba(t, m, v){ if (!muestra('xylophone', t, m + 12, .4 * v, .5, .002, .3)) marimbaSyn(t, m, v); }
-  function pluck(t, m, v){ var g = ctx.createGain(); env(g, t, .004, .28, .13 * v); var o2 = osc('sawtooth', f(m), t, .3), lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(5000, t); lp.frequency.exponentialRampToValueAtTime(500, t + .25); o2.connect(lp); lp.connect(g); g.connect(bus); }
-  function cuerdas(t, notas, d2){ if (INS_S && (INS_S.violin || INS_S.cello)) { notas.forEach(function(m){ var ins = (m < 55 && INS_S.cello) ? 'cello' : (INS_S.violin && m >= 52 ? 'violin' : 'cello'); if (!INS_S[ins] || !muestra(ins, t, m, .3, d2 * .8, Math.min(.7, d2 * .3), d2 * .35)) { } }); return; }
-    notas.forEach(function(m){ [-6, 6].forEach(function(dt){ var g = ctx.createGain(); env(g, t, Math.min(.9, d2 * .4), d2 * .5, .05, d2 * .2); var o2 = osc('sawtooth', f(m), t, d2 * 1.3); o2.detune.value = dt; var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1500; o2.connect(lp); lp.connect(g); g.connect(bus); }); }); }
-  function pad(t, notas, d2){ notas.forEach(function(m){ var g = ctx.createGain(); env(g, t, d2 * .45, d2 * .45, .06, d2 * .1); var o2 = osc('sine', f(m), t, d2 * 1.2); o2.connect(g); g.connect(bus); var o3 = osc('triangle', f(m + 12), t, d2 * 1.2), g3 = ctx.createGain(); g3.gain.value = .25; o3.connect(g3); g3.connect(g); }); }
-  function bajo(t, m, d2, tipo){ var g = ctx.createGain(); env(g, t, .02, d2, .3); var o2 = osc(tipo === 'synth' ? 'sawtooth' : 'sine', f(m), t, d2); var lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = tipo === 'synth' ? 380 : 260; o2.connect(lp); lp.connect(g); g.connect(out); }
-  function ruidoM(t, d2, tipo, fr, pk, rosa){ var s = ctx.createBufferSource(); s.buffer = nz; var fl = ctx.createBiquadFilter(); fl.type = tipo; fl.frequency.value = fr; var g = ctx.createGain(); env(g, t, .002, d2, pk); s.connect(fl); fl.connect(g); g.connect(out); s.start(t, R() * 1.5, d2 + .1); }
-  function bombo(t, v){ var o2 = ctx.createOscillator(); o2.frequency.setValueAtTime(140, t); o2.frequency.exponentialRampToValueAtTime(42, t + .16); var g = ctx.createGain(); env(g, t, .004, .22, .42 * v); o2.connect(g); g.connect(out); o2.start(t); o2.stop(t + .3); }
-  function taiko(t, v){ var o2 = ctx.createOscillator(); o2.frequency.setValueAtTime(110, t); o2.frequency.exponentialRampToValueAtTime(45, t + .35); var g = ctx.createGain(); env(g, t, .004, .5, .55 * v); o2.connect(g); g.connect(out); o2.start(t); o2.stop(t + .6); ruidoM(t, .08, 'lowpass', 1500, .25 * v); }
-  // escala, progresión de 4 acordes al azar y tónica al azar
-  var ESC = M.escala === 'menor' ? [0, 2, 3, 5, 7, 8, 10] : (M.escala === 'pent' ? [0, 2, 4, 7, 9, 12, 14] : [0, 2, 4, 5, 7, 9, 11]);
-  var PROGS = M.escala === 'menor' ? [[0, 5, 2, 6], [0, 3, 5, 4], [0, 5, 6, 4]] : [[0, 4, 5, 3], [0, 5, 3, 4], [0, 3, 4, 3], [5, 3, 0, 4]];
-  var prog = PROGS[Math.floor(R() * PROGS.length)], ton = [57, 60, 62, 55, 59][Math.floor(R() * 5)];
-  function nota(gr){ var oc = Math.floor(gr / 7), i = ((gr % 7) + 7) % 7; return ton + ESC[i] + 12 * oc; }
-  function acorde(gr){ return [nota(gr), nota(gr + 2), nota(gr + 4)]; }
-  var INS = { piano: piano, arpa: arpa, campana: campana, cajita: cajita, marimba: marimba, pluck: pluck, pad: function(t, m, v){ piano(t, m, v * .8, 1.1); } };
-  var act, cut = pf.revelacion ? [P.tAct2 - .55, P.tAct2 - .02] : null;
-  var step = beat / 2, n = Math.ceil(dur / step), bar = 4 * beat, pat = [0, 1, 2, 3, 2, 1, 2, 1];
-  for (q = 0; q < n; q++) {
-    var t = q * step; if (t >= dur - .05) break;
-    var a = t < P.tAct2 - 1e-6 ? 1 : (t < P.tAct3 - 1e-6 ? 2 : 3), a0 = a === 1 ? 0 : (a === 2 ? P.tAct2 : P.tAct3);
-    var ib = Math.floor((t - a0 + 1e-6) / bar), ps = Math.round(((t - a0) % bar) / step), ch2 = prog[((ib % 4) + 4) % 4], ac = acorde(ch2);
-    if (cut && t >= cut[0] && t < cut[1]) continue;
-    var ins = INS[a === 1 ? M.a1 : (a === 2 ? M.a2 : M.a3)];
-    var idx = pat[ps % 8], m = idx === 3 ? ac[0] + 12 : ac[idx], vel = a === 1 ? .7 : (a === 2 ? 1 : .85), humano = (R() - .5) * .012; if (t + humano < 0) humano = 0;
-    var dur2 = a === 3 ? 1.4 : .6;
-    if (a === 3 && ps % 2) { /* arpegio de cierre: un poco más suelto */ }
-    ins(t + humano, m + 12 * (a === 3 ? 0 : 0), vel * (.8 + .2 * (ps % 2 ? 0 : 1)), dur2);
-    if (ps === 0) {
-      if (a === 1 && M.pad) pad(t, acorde(ch2).map(function(x){ return x - 12; }), bar);
-      if (a === 1) bajo(t, ac[0] - 24, bar * .9, 'sub');
-      if (a === 2) {
-        if (M.cuerdas) cuerdas(t, [ac[0] - 12, ac[1] - 12, ac[2] - 12, ac[0]], bar);
-        else pad(t, [ac[0], ac[1], ac[2]], bar);
-        bajo(t, ac[0] - 24, bar * .45, M.bajo);
-      }
-      if (a === 3) { pad(t, [ac[0] - 12, ac[1] - 12, ac[2] - 12], bar * 1.1); bajo(t, ac[0] - 24, bar * .9, 'sub'); }
-    }
-    if (a === 2) {
-      if (ps === 4) bajo(t, ac[0] - 24, bar * .45, M.bajo);
-      if (M.perc === 'baile') { if (ps % 2 === 0) bombo(t, 1); if (ps % 2 === 1) ruidoM(t, .05, 'highpass', 7000, .12); if (ps === 2 || ps === 6) ruidoM(t, .12, 'bandpass', 1800, .2); }
-      else if (M.perc === 'epica') { if (ps === 0 || ps === 4) taiko(t, 1); if (ps === 2 || ps === 6) taiko(t, .55); if (ps % 2) ruidoM(t, .04, 'highpass', 8000, .08); }
-      else if (M.perc === 'suave') { if (ps === 0 || ps === 4) bombo(t, .6); if (ps === 2 || ps === 6) ruidoM(t, .08, 'bandpass', 2400, .07); }
-    }
-  }
-  return bus;
-}
 
 async function mezclar(info, o){
   var INSTS = (o.perfil && o.musicaAuto !== false && !(info && info.buf) && o.instrumentos !== false) ? await cargarInstrumentos(o.instBase) : null;

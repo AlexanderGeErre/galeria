@@ -317,12 +317,12 @@ function montar(el, A){
   A = A || {};
   var aviso = A.aviso || function(t){ alert(t); };
   var st = { clips: [], audio: null, bpm: 120, ini: 0, ocupado: false, cancelar: false, fmt: 'v', titulo: '', subtitulo: '', beatsEsc: 4, cierre: true, efectos: true, volM: 0.9, volE: 0.7, esc: null, fases: {}, tpl: 'tr', n1: '', e1: 'Novia', n2: '', e2: 'Novio', semilla: 1 + Math.floor(Math.random() * 9970), total: 45, alinear: true, marca: marcaGuardada(), cal: 'fhd', t: 0, play: false, caras: {}, mix: null, mixK: '' };
-  st.ev = 'boda'; st.total = 45; st.bpm = 85; st.n2on = false; st.demo = false;
+  st.ev = 'boda'; st.total = 30; st.bpm = 85; st.n2on = false; st.demo = false;
   var ETQ = { boda: ['Novia', 'Novio'], quince: ['Quinceañera', ''], revelacion: ['Mamá', 'Papá'], baby: ['Mamá', 'Papá'], bautizo: ['Bautizo', ''], graduacion: ['Graduada', 'Graduado'] };
   st.e1 = ETQ.boda[0]; st.e2 = ETQ.boda[1];
   function PERFIL(){ return root.Trailer && root.Trailer.PERFILES[st.ev]; }
   var EVS = Object.keys(root.Trailer ? root.Trailer.PERFILES : {}).map(function(k){ return [k, root.Trailer.PERFILES[k].n]; });
-  var DURS = [15, 20, 30, 45, 60, 75, 90];
+  var DURS = [15, 20, 30, 45, 60];
   var h = '<style>.cl-ad[hidden],#cl-mcd[hidden]{display:none!important}.cl-wrap{display:grid;gap:1.2rem;grid-template-columns:minmax(0,1fr);align-items:start}@media(min-width:1100px){.cl-wrap{grid-template-columns:minmax(0,1fr) 20rem}.cl-side{position:sticky;top:4.5rem}}' +
   '.np-tb select.cl-sel{border:0!important;background:none!important;box-shadow:none!important;color:var(--t);font:inherit;font-size:.9rem;padding:.4rem .2rem!important;cursor:pointer;max-width:100%;width:auto!important;font-weight:500;border-radius:0}.cl-tx>div{display:flex;gap:.4rem 1.4rem;flex-wrap:wrap;align-items:center}.cl-tx input{width:11rem!important;padding:.4rem .7rem!important}.cl-tx label{margin:0!important;display:inline!important}.cl-lb{color:var(--s);font-size:.9rem}.cl-g{display:flex;align-items:center;gap:.35rem}.cl-g .pn-s{margin:0}#cl-n2[hidden],#cl-nt[hidden],.cl-tx[hidden]{display:none!important}.np-tb input[type=text].cl-nm{flex:1 1 9rem;min-width:7rem}.cl-more{margin:.6rem 0 0}.cl-more summary{cursor:pointer;color:var(--s);font-size:.9rem}.cl-hd{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}.cl-hd h2{margin:0}.cl-hd .pn-btn{margin-left:auto}.cl-ejem{font-size:.72rem;opacity:.6}</style>' +
   '<h1>Tráilers</h1><p class="pn-s ay">Elige el tipo de evento, la duración y los nombres. El tráiler se arma solo con tus clips, usa todo el material sin repetir y compone la música y los sonidos. Todo se hace en tu computadora: nada se sube a internet.</p>' +
@@ -359,11 +359,11 @@ function montar(el, A){
     q('cl-l').innerHTML = st.clips.length ? '<div class="pn-card" style="padding:0;overflow:auto;margin-top:.6rem"><table class="pn-tb pn-ta"><tr><th>N.º</th><th>Clip</th><th></th></tr>' + st.clips.map(function(c, i){
       return '<tr><td><b>' + String(i + 1).padStart(2, '0') + '</b></td><td>' + esc(c.nombre) + (c.demo ? ' <span class="cl-ejem">(ejemplo)</span>' : '') + '<br><span class="pn-s">' + c.w + '×' + c.h + ' · ' + c.dur.toFixed(1) + ' s</span></td><td><button class="pn-btn sec" type="button" data-qt="' + i + '">Quitar</button></td></tr>';
     }).join('') + '</table></div>' : '';
-    q('cl-l').querySelectorAll('[data-qt]').forEach(function(b){ b.onclick = function(){ var c = st.clips.splice(+b.dataset.qt, 1)[0]; if (!c.demo) { try { URL.revokeObjectURL(c.url); } catch (e) {} } if (!st.clips.length) st.demo = false; st.esc = null; st.mix = null; pintarLista(); vista(); if (!st.clips.length) cargarDemo(); }; });
+    q('cl-l').querySelectorAll('[data-qt]').forEach(function(b){ b.onclick = function(){ var c = st.clips.splice(+b.dataset.qt, 1)[0]; if (!c.demo) { try { URL.revokeObjectURL(c.url); } catch (e) {} } if (!st.clips.length) st.demo = false; st.esc = null; st.mix = null; pintarLista(); vista();  }; });
   }
   function dims(){ var f = FORMATOS.filter(function(x){ return x[0] === st.fmt; })[0] || FORMATOS[0], k = st.cal === '4k' ? 2 : st.cal === 'bor' ? 2 / 3 : 1; return [Math.round(f[2] * k), Math.round(f[3] * k)]; }
   function mmss(t){ t = Math.max(0, Math.round(t)); return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
-  function resumenPlan(){ var P = st.esc && st.esc.plan; var nt = q('cl-nt'); nt.hidden = !(P && P.aviso); nt.textContent = P && P.aviso ? '⚠ ' + P.aviso : ''; q('cl-plan').textContent = P ? 'Duración: ' + Math.round(P.total) + ' s · Acto 1: ' + P.nIntro + ' clips lentos · Ráfaga: ' + P.nRapido + ' cortes de ' + P.u.toFixed(2) + ' s · Acto 3: ' + P.nCalma + ' clips lentos + tarjeta · Versión ' + st.semilla : ''; }
+  function resumenPlan(){ var P = st.esc && st.esc.plan; var nt = q('cl-nt'); nt.hidden = !(P && P.aviso); nt.textContent = P && P.aviso ? '⚠ ' + P.aviso : ''; q('cl-plan').textContent = P ? 'Duración: ' + Math.round(P.total) + ' s · Acto 1: ' + P.nIntro + ' clips lentos · Cuerpo: ' + P.nRapido + ' tomas (la más corta ' + P.u.toFixed(2) + ' s) · Acto 3: ' + P.nCalma + ' clips lentos + tarjeta · Versión ' + st.semilla : ''; }
   function alerta(t){ var a = q('cl-av'); a.hidden = !t; a.textContent = t || ''; }
   function controles(){ var d = st.esc ? st.esc.duracion : duracionTotal(), sk = q('cl-t0'); if (document.activeElement !== sk) sk.value = d ? Math.round(st.t / d * 1000) : 0; q('cl-tm').textContent = mmss(st.t) + ' / ' + mmss(d); q('cl-play').textContent = st.play ? '❚❚' : '▶'; }
   function pintarOpc(){ var d = dims(); q('cl-dev').className = 'np-dev ' + st.fmt; q('cl-res').textContent = d[0] + ' × ' + d[1] + ' px'; el.querySelectorAll('[data-clf]').forEach(function(b){ b.classList.toggle('on', b.dataset.clf === st.fmt); }); el.querySelectorAll('[data-clq]').forEach(function(b){ b.classList.toggle('on', b.dataset.clq === st.cal); }); }
@@ -381,7 +381,17 @@ function montar(el, A){
     await S.detectarCaras([f], null, function(){ return st.cancelar; });
     st.caras[key] = f.caras || []; return st.caras[key];
   }
+  var FUENTES_OK = {};
+  async function cargarFuentes(pf){
+    if (!pf || !pf.fuentes || typeof document === 'undefined' || !document.fonts) return;
+    var fam = pf.fuentes.map(function(x){ return x.f.split(',')[0].replace(/"/g, ''); }).filter(function(f){ return !FUENTES_OK[f]; });
+    if (!fam.length) return;
+    if (!document.getElementById('cl-gf')) { var lk = document.createElement('link'); lk.id = 'cl-gf'; lk.rel = 'stylesheet'; lk.href = 'https://fonts.googleapis.com/css2?' + ['Great+Vibes','Playfair+Display:wght@400;700','Cormorant+Garamond:wght@600;700','Parisienne','Cinzel:wght@500;600','Bebas+Neue','Pacifico','Abril+Fatface','Righteous','Montserrat:wght@900','Fredoka:wght@600','Quicksand:wght@700','Lobster','Sacramento','Dancing+Script:wght@700','Anton','Oswald:wght@700','Archivo+Black','Alfa+Slab+One'].map(function(x){ return 'family=' + x; }).join('&') + '&display=swap'; document.head.appendChild(lk); }
+    try { await Promise.race([Promise.all(pf.fuentes.map(function(x){ return document.fonts.load(x.w + ' 40px ' + x.f.split(',')[0]); })), new Promise(function(r){ setTimeout(r, 5000); })]); } catch (e) {}
+    fam.forEach(function(f){ FUENTES_OK[f] = 1; });
+  }
   async function crear(Wd, Hd, esc){
+    await cargarFuentes(PERFIL());
     if (st.tpl === 'tr' && root.Trailer) { var o2 = opcionesPlan(); o2.W = Wd; o2.H = Hd; o2.etq1 = st.e1; o2.etq2 = st.e2; o2.perfil = PERFIL(); o2.marca = st.marca; o2.color = true; o2.textoAtras = true; o2.detectarCaras = caras; o2.cargarSegmentador = function(){ return cargarSegmentador(estado); }; o2.segmentar = segmentar; return root.Trailer.crearEscena(o2); }
     return crearEscena({ W: Wd, H: Hd, clips: st.clips, bpm: st.bpm, beatsEsc: st.beatsEsc, beatsCierre: 8, cierre: st.cierre, titulo: st.titulo, subtitulo: st.subtitulo });
   }
@@ -558,7 +568,7 @@ function montar(el, A){
     st.ocupado = false; q('cl-gen').disabled = false; q('cl-can').hidden = true; q('cl-pr').hidden = true; st.semilla = 1 + Math.floor(Math.random() * 9970); st.esc = null; vista();
   }
   q('cl-gen').onclick = generar;
-  aplicarTpl(); aplicarEvento(); cargarDemo();
+  aplicarTpl(); aplicarEvento();
   if (/iPhone|iPad|Android/i.test(navigator.userAgent)) { var nt0 = q('cl-av'); nt0.hidden = false; nt0.textContent = 'ℹ Desde el celular puedes ver la vista previa, pero para generar el MP4 usa Chrome o Edge en una computadora.'; }
   return { estado: st, generar: generar, liberar: function(){ parar(); try { ac && ac.close(); } catch (e) {} st.clips.forEach(function(c){ if (!c.demo) { try { URL.revokeObjectURL(c.url); } catch (e) {} } }); } };
 }
