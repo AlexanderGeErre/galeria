@@ -316,11 +316,14 @@ function segmentar(cnv){
 function montar(el, A){
   A = A || {};
   var aviso = A.aviso || function(t){ alert(t); };
-  var st = { clips: [], audio: null, bpm: 120, ini: 0, ocupado: false, cancelar: false, fmt: 'v', titulo: '', subtitulo: '', beatsEsc: 4, cierre: true, efectos: false, volM: 0.9, volE: 0.7, esc: null, fases: {}, tpl: 'tr', n1: '', e1: 'Novia', n2: '', e2: 'Novio', semilla: 1 + Math.floor(Math.random() * 9970), total: 45, alinear: true, marca: marcaGuardada(), cal: 'fhd', t: 0, play: false, caras: {}, mix: null, mixK: '' };
+  var st = { clips: [], audio: null, bpm: 120, ini: 0, ocupado: false, cancelar: false, fmt: 'v', titulo: '', subtitulo: '', beatsEsc: 4, cierre: true, cine: false, frases: '', efectos: false, volM: 0.9, volE: 0.7, esc: null, fases: {}, tpl: 'tr', n1: '', e1: 'Novia', n2: '', e2: 'Novio', semilla: 1 + Math.floor(Math.random() * 9970), total: 45, alinear: true, marca: marcaGuardada(), cal: 'fhd', t: 0, play: false, caras: {}, mix: null, mixK: '' };
   st.ev = 'boda'; st.total = 30; st.bpm = 85; st.n2on = false; st.demo = false;
   var ETQ = { boda: ['Novia', 'Novio'], quince: ['Quinceañera', ''], revelacion: ['Mamá', 'Papá'], baby: ['Mamá', 'Papá'], bautizo: ['Bautizo', ''], graduacion: ['Graduada', 'Graduado'], otro: ['', ''] };
   st.e1 = ETQ.boda[0]; st.e2 = ETQ.boda[1];
-  function PERFIL(){ return root.Trailer && root.Trailer.PERFILES[st.ev]; }
+  function PERFIL(){
+    var b = root.Trailer && root.Trailer.PERFILES[st.ev]; if (!b || !st.cine) return b;
+    return Object.assign({}, b, { cine: true, fuentes: [{ f: '"Syne","Archivo Black",Arial,sans-serif', w: '800' }], cols: [['#ffffff', '#e8e8e8']], filtro: 'contrast(1.18) saturate(.9) brightness(.94)', tinte: 'rgba(255,150,80,.16)', pool: ['barrido', 'flash', 'zoom', 'glitch', 'golpe', 'crash'], ritmo: { lo: 1, hi: 2.1, largo: 3, pL: .08, rafaga: 0 }, leaks: 0 });
+  }
   var EVS = Object.keys(root.Trailer ? root.Trailer.PERFILES : {}).map(function(k){ return [k, root.Trailer.PERFILES[k].n]; });
   var DURS = [15, 20, 30, 45, 60];
   var h = '<style>.cl-ad[hidden],#cl-mcd[hidden]{display:none!important}.cl-wrap{display:grid;gap:1.2rem;grid-template-columns:minmax(0,1fr);align-items:start}@media(min-width:1100px){.cl-wrap{grid-template-columns:minmax(0,1fr) 20rem}.cl-side{position:sticky;top:4.5rem}}' +
@@ -332,6 +335,8 @@ function montar(el, A){
   '<input type="text" id="cl-n2" class="cl-nm" maxlength="16" placeholder="Segundo nombre (opcional)" aria-label="Segundo nombre" hidden>' +
   '<button class="vs-chip" type="button" id="cl-n2b">+ Segundo nombre</button>' +
   '<span class="cl-g"><span class="cl-lb">Evento:</span><select class="cl-sel" id="cl-ev">' + EVS.map(function(e){ return '<option value="' + e[0] + '">' + e[1] + '</option>'; }).join('') + '</select></span>' +
+  '<span class="cl-g"><span class="cl-lb">Estilo:</span><select class="cl-sel" id="cl-es"><option value="0">Clásico</option><option value="1">Cinematográfico</option></select></span>' +
+  '<div id="cl-frw" hidden style="flex-basis:100%;margin-top:.5rem"><input id="cl-fr" class="pn-in" style="width:100%" placeholder="Frases de las tarjetas separadas por | (opcional). Ej: ALGO GRANDE | VIENE EN CAMINO | ¿ESTÁS LISTO?"></div>' +
   '<span class="cl-g"><span class="cl-lb">Duración:</span><select class="cl-sel" id="cl-dtot">' + DURS.map(function(d){ return '<option value="' + d + '">' + d + ' s</option>'; }).join('') + '</select></span>' +
   '<span class="cl-g"><span class="cl-lb">Música:</span><select class="cl-sel" id="cl-mus"><option value="auto">Sin música</option><option value="mia">Subir mi canción…</option></select></span>' +
   '<button class="vs-chip" type="button" id="cl-otra">↻ Otra versión</button></div>' +
@@ -364,12 +369,12 @@ function montar(el, A){
   }
   function dims(){ var f = FORMATOS.filter(function(x){ return x[0] === st.fmt; })[0] || FORMATOS[0], k = st.cal === '4k' ? 2 : st.cal === 'bor' ? 2 / 3 : 1; return [Math.round(f[2] * k), Math.round(f[3] * k)]; }
   function mmss(t){ t = Math.max(0, Math.round(t)); return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0'); }
-  function resumenPlan(){ var P = st.esc && st.esc.plan; var nt = q('cl-nt'); nt.hidden = !(P && P.aviso); nt.textContent = P && P.aviso ? '⚠ ' + P.aviso : ''; q('cl-plan').textContent = P ? 'Duración: ' + Math.round(P.total) + ' s · Acto 1: ' + P.nIntro + ' clips lentos · Cuerpo: ' + P.nRapido + ' tomas (la más corta ' + P.u.toFixed(2) + ' s) · Acto 3: ' + P.nCalma + ' clips lentos + tarjeta · Versión ' + st.semilla : ''; }
+  function resumenPlan(){ var P = st.esc && st.esc.plan; var nt = q('cl-nt'); nt.hidden = !(P && P.aviso); nt.textContent = P && P.aviso ? '⚠ ' + P.aviso : ''; q('cl-plan').textContent = P && st.cine ? 'Duración: ' + Math.round(P.total) + ' s · Cinematográfico: ' + P.segs.filter(function(x){ return x.sec === 'tarjeta'; }).length + ' tarjetas de texto · ' + P.nRapido + ' tomas (la más corta ' + Math.min.apply(null, P.segs.filter(function(x){ return x.sec === 'rapido'; }).map(function(x){ return x.dur; })).toFixed(2) + ' s) · Final con título' : P ? 'Duración: ' + Math.round(P.total) + ' s · Acto 1: ' + P.nIntro + ' clips lentos · Cuerpo: ' + P.nRapido + ' tomas (la más corta ' + P.u.toFixed(2) + ' s) · Acto 3: ' + P.nCalma + ' clips lentos + tarjeta · Versión ' + st.semilla : ''; }
   function alerta(t){ var a = q('cl-av'); a.hidden = !t; a.textContent = t || ''; }
   function controles(){ var d = st.esc ? st.esc.duracion : duracionTotal(), sk = q('cl-t0'); if (document.activeElement !== sk) sk.value = d ? Math.round(st.t / d * 1000) : 0; q('cl-tm').textContent = mmss(st.t) + ' / ' + mmss(d); q('cl-play').textContent = st.play ? '❚❚' : '▶'; }
   function pintarOpc(){ var d = dims(); q('cl-dev').className = 'np-dev ' + st.fmt; q('cl-res').textContent = d[0] + ' × ' + d[1] + ' px'; el.querySelectorAll('[data-clf]').forEach(function(b){ b.classList.toggle('on', b.dataset.clf === st.fmt); }); el.querySelectorAll('[data-clq]').forEach(function(b){ b.classList.toggle('on', b.dataset.clq === st.cal); }); }
   function totalPedido(){ var T = st.total; if (st.audio) T = Math.min(T, Math.max(10, Math.floor(st.audio.dur - 1))); return T; }
-  function opcionesPlan(){ var pf = PERFIL(); return { bpm: st.audio ? st.bpm : (pf ? pf.bpm : st.bpm), clips: st.clips, nombre1: st.n1, nombre2: st.n2on || (pf && pf.nombres2) ? st.n2 : '', cierre: st.cierre, semilla: st.semilla, total: totalPedido(), perfil: pf, musicaAuto: false, pulsos: pulsosPlan(), energia: energiaPlan(), esFuerte: fuertePlan() }; }
+  function opcionesPlan(){ var pf = PERFIL(), pb = root.Trailer && root.Trailer.PERFILES[st.ev], nn = [st.n1, st.n2on || (pb && pb.nombres2) ? st.n2 : ''].filter(Boolean).join(' & '), mk = st.marca || {}; return { cine: !!st.cine, frases: String(st.frases || '').split('|'), finalTop: nn ? (pb ? pb.n : '') : '', finalMain: nn || (pb ? pb.n : ''), finalSub: 'Fotografía y video', finalCreditos: [mk.nombre || 'Alexander Ge Erre'], bpm: st.audio ? st.bpm : (pf ? pf.bpm : st.bpm), clips: st.clips, nombre1: st.n1, nombre2: st.n2on || (pf && pf.nombres2) ? st.n2 : '', cierre: st.cierre, semilla: st.semilla, total: totalPedido(), perfil: pf, musicaAuto: false, pulsos: pulsosPlan(), energia: energiaPlan(), esFuerte: fuertePlan() }; }
   function ini0(){ var R = st.audio && st.audio.ritmo; if (!R || R.beats.length < 8) return null; var b = R.beats.find(function(t){ return t >= .1; }); return b == null ? 0 : b; }
   function pulsosPlan(){ var R = st.audio && st.audio.ritmo, i0 = ini0(); if (i0 == null) return null; return R.beats.filter(function(t){ return t >= i0; }).map(function(t){ return t - i0; }); }
   function energiaPlan(){ var R = st.audio && st.audio.ritmo, i0 = ini0(); if (i0 == null) return null; return function(t){ return root.Ritmo.energiaEn(R, i0 + t); }; }
@@ -391,7 +396,7 @@ function montar(el, A){
     if (!pf || !pf.fuentes || typeof document === 'undefined' || !document.fonts) return;
     var fam = pf.fuentes.map(function(x){ return x.f.split(',')[0].replace(/"/g, ''); }).filter(function(f){ return !FUENTES_OK[f]; });
     if (!fam.length) return;
-    if (!document.getElementById('cl-gf')) { var lk = document.createElement('link'); lk.id = 'cl-gf'; lk.rel = 'stylesheet'; lk.href = 'https://fonts.googleapis.com/css2?' + ['Great+Vibes','Playfair+Display:wght@400;700','Cormorant+Garamond:wght@600;700','Parisienne','Cinzel:wght@500;600','Bebas+Neue','Pacifico','Abril+Fatface','Righteous','Montserrat:wght@900','Fredoka:wght@600','Quicksand:wght@700','Lobster','Sacramento','Dancing+Script:wght@700','Anton','Oswald:wght@700','Archivo+Black','Alfa+Slab+One'].map(function(x){ return 'family=' + x; }).join('&') + '&display=swap'; document.head.appendChild(lk); }
+    if (!document.getElementById('cl-gf')) { var lk = document.createElement('link'); lk.id = 'cl-gf'; lk.rel = 'stylesheet'; lk.href = 'https://fonts.googleapis.com/css2?' + ['Syne:wght@800','Great+Vibes','Playfair+Display:wght@400;700','Cormorant+Garamond:wght@600;700','Parisienne','Cinzel:wght@500;600','Bebas+Neue','Pacifico','Abril+Fatface','Righteous','Montserrat:wght@900','Fredoka:wght@600','Quicksand:wght@700','Lobster','Sacramento','Dancing+Script:wght@700','Anton','Oswald:wght@700','Archivo+Black','Alfa+Slab+One'].map(function(x){ return 'family=' + x; }).join('&') + '&display=swap'; document.head.appendChild(lk); }
     try { await Promise.race([Promise.all(pf.fuentes.map(function(x){ return document.fonts.load(x.w + ' 40px ' + x.f.split(',')[0]); })), new Promise(function(r){ setTimeout(r, 5000); })]); } catch (e) {}
     fam.forEach(function(f){ FUENTES_OK[f] = 1; });
   }
@@ -433,7 +438,7 @@ function montar(el, A){
     st.play = true; controles();
     try {
       var m = medidasVista(); if (!st.esc || st.esc.W !== m[0] || st.esc.H !== m[1]) { estado('Preparando la vista previa…'); st.mix = null; st.esc = await crear(m[0], m[1]); estado(''); }
-      var esc = st.esc, k = JSON.stringify([st.ev, st.tpl, st.semilla, st.total, !!st.audio, st.n1, st.n2, st.bpm, st.ini, st.volM, st.volE, st.efectos, st.cierre, st.alinear, esc.duracion, st.clips.length]);
+      var esc = st.esc, k = JSON.stringify([st.ev, st.tpl, st.semilla, st.total, !!st.audio, st.n1, st.n2, st.bpm, st.ini, st.volM, st.volE, st.efectos, st.cierre, st.alinear, esc.duracion, st.clips.length, st.cine]);
       if (!st.mix || st.mixK !== k) { estado('Preparando el sonido…'); st.mix = await mezcla(esc); st.mixK = k; estado(''); }
       if (!st.play) return;
       if (st.t >= esc.duracion - 0.2) st.t = 0;
@@ -517,6 +522,8 @@ function montar(el, A){
     q('cl-n1').placeholder = st.ev === 'boda' ? 'Nombre de ella (ej: RIYA)' : 'Nombre (ej: RIYA)'; q('cl-n2').placeholder = st.ev === 'boda' ? 'Nombre de él (ej: UDAY)' : 'Segundo nombre (opcional)';
     if (!st.audio && pf) st.bpm = pf.bpm; st.esc = null; st.mix = null;
   }
+  q('cl-es').onchange = function(){ parar(); st.cine = q('cl-es').value === '1'; q('cl-frw').hidden = !st.cine; st.esc = null; st.mix = null; vista(); };
+  q('cl-fr').onchange = function(){ parar(); st.frases = q('cl-fr').value; st.esc = null; st.mix = null; vista(); };
   q('cl-ev').onchange = function(){ parar(); st.ev = q('cl-ev').value; aplicarEvento(); vista(); };
   q('cl-n2b').onclick = function(){ st.n2on = true; aplicarEvento(); q('cl-n2').focus(); };
   q('cl-mus').onchange = function(){ if (q('cl-mus').value === 'mia') { q('cl-mus').value = st.audio ? 'mia' : 'auto'; q('cl-a').click(); } else if (st.audio) q('cl-aq').click(); };
